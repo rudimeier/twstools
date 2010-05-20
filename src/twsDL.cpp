@@ -127,10 +127,10 @@ void Worker::onStart()
 	currentReqId = 0;
 	countNewContracts = 0;
 	
-	if( !initDb() ) {
-		state = QUIT_ERROR;
-		return;
-	}
+// 	if( !initDb() ) {
+// 		state = QUIT_ERROR;
+// 		return;
+// 	}
 	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
@@ -189,7 +189,8 @@ void Worker::finContracts()
 {
 	idleTimer->setInterval( 0 );
 	
-	int inserted = storage2DB();
+// 	int inserted = storage2DB();
+	int inserted = storage2stdout();
 	contractDetailsStorage.clear();
 	if( inserted == -1 ) {
 		state = QUIT_ERROR;
@@ -401,6 +402,43 @@ int Worker::storage2DB()
 		.arg(stopWatch.elapsed());
 	
 	return countInserted;
+}
+
+
+int Worker::storage2stdout()
+{
+	QTime  stopWatch;
+	stopWatch.start();
+	
+	int countReceived = contractDetailsStorage.size();
+	
+	for( int i=0; i<countReceived; i++ ) {
+		
+		IB::ContractDetails *ibContractDetails = &contractDetailsStorage[i];
+		
+		qDebug() << toQString(ibContractDetails->summary.symbol)
+		         << toQString(ibContractDetails->summary.secType)
+		         << toQString(ibContractDetails->summary.expiry)
+		         << ibContractDetails->summary.strike
+		         << toQString(ibContractDetails->summary.right)
+		         << toQString(ibContractDetails->summary.exchange)
+		         << toQString(ibContractDetails->summary.currency)
+		         << toQString(ibContractDetails->summary.localSymbol)
+		         << toQString(ibContractDetails->marketName)
+		         << toQString(ibContractDetails->tradingClass)
+		         << (int)ibContractDetails->summary.conId
+		         << ibContractDetails->minTick
+		         << toQString(ibContractDetails->summary.multiplier)
+		         << (int)ibContractDetails->priceMagnifier
+		         << toQString(ibContractDetails->orderTypes)
+		         << toQString(ibContractDetails->validExchanges);
+		
+	}
+	qDebug() << QString(
+		"Contracts received: %1 (%2ms)")
+		.arg(countReceived).arg(stopWatch.elapsed());
+	
+	return countReceived;
 }
 
 

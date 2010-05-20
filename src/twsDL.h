@@ -80,6 +80,7 @@ class Worker : public QObject
 		
 		/// Returns the count of inserted rows or -1 on error.
 		int storage2DB();
+		int storage2stdout();
 		
 		
 		void onStart();
