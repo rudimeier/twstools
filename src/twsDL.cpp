@@ -112,8 +112,8 @@ void Worker::idleTimeout()
 		case FIN_CONTRACTS:
 			finContracts();
 			break;
-		case DL_DATA:
-			downloadData();
+		case GET_DATA:
+			getData();
 			break;
 		case QUIT_READY:
 				onQuit(0);
@@ -211,7 +211,7 @@ void Worker::finContracts()
 		state = GET_CONTRACTS;
 	} else {
 		if( myProp->downloadData ) {
-			state = DL_DATA;;
+			state = GET_DATA;;
 		} else {
 			state = QUIT_READY;
 		}
@@ -219,7 +219,7 @@ void Worker::finContracts()
 }
 
 
-void Worker::downloadData()
+void Worker::getData()
 {
 	qDebug() << "DOWNLOAD DATA";
 	state = QUIT_READY;
