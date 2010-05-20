@@ -21,29 +21,29 @@
 namespace Test {
 
 
-#define CONTRACT_COUNT 20
+#define CONTRACT_COUNT 2
 /// static work todo
 const QString contractSpecs[CONTRACT_COUNT][3] = {
-	{ "CAC40"  , "IND", "MONEP"    },
-	{ "CAC40"  , "OPT", "MONEP"    },
-	{ "DAX"    , "IND", "DTB"      },
-	{ "DAX"    , "OPT", "DTB"      },
+// 	{ "CAC40"  , "IND", "MONEP"    },
+// 	{ "CAC40"  , "OPT", "MONEP"    },
+// 	{ "DAX"    , "IND", "DTB"      },
+// 	{ "DAX"    , "OPT", "DTB"      },
 	{ "DJX"    , "IND", "CBOE"     },
-	{ "DJX"    , "OPT", "CBOE"     },
-	{ "ESTX50" , "IND", "DTB"      },
-	{ "ESTX50" , "OPT", "DTB"      },
-	{ "K200"   , "IND", "KSE"      },
-	{ "K200"   , "OPT", "KSE"      },
-	{ "NDX"    , "IND", "NASDAQ"   },
-	{ "NDX"    , "OPT", "CBOE"     },
-	{ "RUT"    , "IND", "CBOE"     },
-	{ "RUT"    , "OPT", "CBOE"     },
-	{ "SPX"    , "IND", "CBOE"     },
-	{ "SPX"    , "OPT", "CBOE"     },
-	{ "XEO"    , "IND", "CBOE"     },
-	{ "XEO"    , "OPT", "CBOE"     },
-	{ "Z"      , "IND", "LIFFE"    },
-	{ "Z"      , "OPT", "LIFFE"    }
+	{ "DJX"    , "OPT", "CBOE"     }
+// 	{ "ESTX50" , "IND", "DTB"      },
+// 	{ "ESTX50" , "OPT", "DTB"      },
+// 	{ "K200"   , "IND", "KSE"      },
+// 	{ "K200"   , "OPT", "KSE"      },
+// 	{ "NDX"    , "IND", "NASDAQ"   },
+// 	{ "NDX"    , "OPT", "CBOE"     },
+// 	{ "RUT"    , "IND", "CBOE"     },
+// 	{ "RUT"    , "OPT", "CBOE"     },
+// 	{ "SPX"    , "IND", "CBOE"     },
+// 	{ "SPX"    , "OPT", "CBOE"     },
+// 	{ "XEO"    , "IND", "CBOE"     },
+// 	{ "XEO"    , "OPT", "CBOE"     },
+// 	{ "Z"      , "IND", "LIFFE"    },
+// 	{ "Z"      , "OPT", "LIFFE"    }
 };
 
 
