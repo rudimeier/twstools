@@ -115,6 +115,12 @@ void Worker::idleTimeout()
 		case GET_DATA:
 			getData();
 			break;
+		case WAIT_DATA:
+			waitData();
+			break;
+		case FIN_DATA:
+			finData();
+			break;
 		case QUIT_READY:
 				onQuit(0);
 			break;
@@ -223,6 +229,16 @@ void Worker::getData()
 {
 	qDebug() << "DOWNLOAD DATA";
 	state = QUIT_READY;
+}
+
+
+void Worker::waitData()
+{
+}
+
+
+void Worker::finData()
+{
 }
 
 
