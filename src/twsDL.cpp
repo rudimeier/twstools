@@ -204,6 +204,11 @@ void Worker::finContracts()
 	} else {
 		inserted = storage2stdout();
 	}
+	
+	foreach( IB::ContractDetails cd,  contractDetailsStorage ) {
+		rememberContracts.append( cd.summary );
+	}
+	
 	contractDetailsStorage.clear();
 	if( inserted == -1 ) {
 		state = QUIT_ERROR;

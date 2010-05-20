@@ -17,6 +17,7 @@ class QSqlQuery;
 
 namespace IB {
 	class ContractDetails;
+	class Contract;
 }
 
 
@@ -116,6 +117,7 @@ class Worker : public QObject
 		QSqlQuery *warnQuery;
 		
 		QList<IB::ContractDetails> contractDetailsStorage;
+		QList<IB::Contract> rememberContracts;
 		
 		QTimer *idleTimer;
 		
