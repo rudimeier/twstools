@@ -21,15 +21,15 @@
 namespace Test {
 
 
-#define CONTRACT_COUNT 2
+#define CONTRACT_COUNT 1
 /// static work todo
 const QString contractSpecs[CONTRACT_COUNT][3] = {
 // 	{ "CAC40"  , "IND", "MONEP"    },
 // 	{ "CAC40"  , "OPT", "MONEP"    },
 // 	{ "DAX"    , "IND", "DTB"      },
 // 	{ "DAX"    , "OPT", "DTB"      },
-	{ "DJX"    , "IND", "CBOE"     },
-	{ "DJX"    , "OPT", "CBOE"     }
+	{ "DJX"    , "IND", "CBOE"     }
+// 	{ "DJX"    , "OPT", "CBOE"     },
 // 	{ "ESTX50" , "IND", "DTB"      },
 // 	{ "ESTX50" , "OPT", "DTB"      },
 // 	{ "K200"   , "IND", "KSE"      },
