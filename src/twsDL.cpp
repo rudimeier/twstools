@@ -112,6 +112,9 @@ void Worker::idleTimeout()
 		case FIN_CONTRACTS:
 			finContracts();
 			break;
+		case DL_DATA:
+			downloadData();
+			break;
 		case QUIT_READY:
 				onQuit(0);
 			break;
@@ -207,8 +210,19 @@ void Worker::finContracts()
 	if( currentReqId < CONTRACT_COUNT ) {
 		state = GET_CONTRACTS;
 	} else {
-		state = QUIT_READY;
+		if( myProp->downloadData ) {
+			state = DL_DATA;;
+		} else {
+			state = QUIT_READY;
+		}
 	}
+}
+
+
+void Worker::downloadData()
+{
+	qDebug() << "DOWNLOAD DATA";
+	state = QUIT_READY;
 }
 
 
@@ -486,6 +500,8 @@ void PropTWSTool::initDefaults()
 	
 	conTimeout = 1000;
 	reqTimeout = 20000;
+	
+	downloadData = false;
 }
 
 
@@ -504,6 +520,8 @@ bool PropTWSTool::readProperties()
 	
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);
+	
+	ok = ok & get("downloadData", downloadData);
 	
 	return ok;
 }

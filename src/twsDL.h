@@ -42,6 +42,8 @@ class PropTWSTool : public PropGeneral
 		
 		int conTimeout;
 		int reqTimeout;
+		
+		bool downloadData;
 };
 
 
@@ -58,6 +60,7 @@ class Worker : public QObject
 			GET_CONTRACTS,
 			WAIT_CONTRACTS,
 			FIN_CONTRACTS,
+			DL_DATA,
 			QUIT_READY,
 			QUIT_ERROR
 		};
@@ -89,6 +92,7 @@ class Worker : public QObject
 		void getContracts();
 		void waitContracts();
 		void finContracts();
+		void downloadData();
 		void onQuit( int ret );
 		
 		State state;
