@@ -433,9 +433,9 @@ int Worker::storage2stdout()
 		         << (int)ibContractDetails->summary.conId
 		         << ibContractDetails->minTick
 		         << toQString(ibContractDetails->summary.multiplier)
-		         << (int)ibContractDetails->priceMagnifier
-		         << toQString(ibContractDetails->orderTypes)
-		         << toQString(ibContractDetails->validExchanges);
+		         << (int)ibContractDetails->priceMagnifier;
+// 		         << toQString(ibContractDetails->orderTypes)
+// 		         << toQString(ibContractDetails->validExchanges);
 		
 	}
 	qDebug() << QString(
