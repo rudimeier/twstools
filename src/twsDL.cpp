@@ -127,10 +127,10 @@ void Worker::onStart()
 	currentReqId = 0;
 	countNewContracts = 0;
 	
-// 	if( !initDb() ) {
-// 		state = QUIT_ERROR;
-// 		return;
-// 	}
+	if( myProp->useDB && !initDb() ) {
+		state = QUIT_ERROR;
+		return;
+	}
 	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
@@ -189,8 +189,12 @@ void Worker::finContracts()
 {
 	idleTimer->setInterval( 0 );
 	
-// 	int inserted = storage2DB();
-	int inserted = storage2stdout();
+	int inserted;
+	if( myProp->useDB ) {
+		inserted = storage2DB();
+	} else {
+		inserted = storage2stdout();
+	}
 	contractDetailsStorage.clear();
 	if( inserted == -1 ) {
 		state = QUIT_ERROR;
@@ -468,6 +472,7 @@ void PropTWSTool::initDefaults()
 	twsHost  = "localhost";
 	twsPort  = 6666;
 	clientId = 66;
+	useDB = false;
 	ibSymbolTable   = "someTable";
 	symbolQueryStrg = QString()
 		+"INSERT INTO "
@@ -494,6 +499,7 @@ bool PropTWSTool::readProperties()
 	ok = ok & get("twsHost",       twsHost);
 	ok = ok & get("twsPort",       twsPort);
 	ok = ok & get("clientId",      clientId);
+	ok = ok & get("useDB",         useDB);
 	ok = ok & get("ibSymbolTable", ibSymbolTable);
 	
 	ok &= get("conTimeout", conTimeout);

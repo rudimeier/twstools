@@ -36,6 +36,7 @@ class PropTWSTool : public PropGeneral
 		quint16 twsPort;
 		int     clientId;
 		
+		bool useDB;
 		QString ibSymbolTable;
 		QString symbolQueryStrg; // %1 = ibSymbolTable
 		
