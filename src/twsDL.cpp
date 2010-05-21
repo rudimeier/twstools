@@ -235,7 +235,7 @@ void Worker::getData()
 	qDebug() << "DOWNLOAD DATA";
 	
 	// whyever we can't use that contract directly
-	IB::Contract cF = rememberContracts.first();
+	IB::Contract cF = rememberContracts[currentReqId/*TODO*/];
 	IB::Contract c;
 	qDebug() << ibToString(cF);
 	c.symbol = cF.symbol/*"DJX"*/;
@@ -246,7 +246,7 @@ void Worker::getData()
 	c.strike = cF.strike /*75.0*/;
 	c.expiry = cF.expiry /*"20100520"*/;
 	
-	twsClient->reqHistoricalData( 1234,
+	twsClient->reqHistoricalData( currentReqId,
 	                              c,
 	                              QString("20100512 22:15:00"),
 	                              QString("1 W"),
@@ -278,7 +278,13 @@ void Worker::waitData()
 void Worker::finData()
 {
 	idleTimer->setInterval( 0 );
-	state = QUIT_READY;
+	
+	currentReqId++;
+	if( currentReqId < 4 /*TODO*/ ) {
+		state = GET_DATA;
+	} else {
+		state = QUIT_READY;
+	}
 }
 
 
@@ -420,6 +426,11 @@ void Worker::contractDetailsEnd( int reqId )
 void Worker::historicalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
+	if( currentReqId != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentReqId;
+		Q_ASSERT( false );
+	}
+	
 	if( date.startsWith("finished") ) {
 		idleTimer->setInterval( 0 );
 		finishedReq = true;
