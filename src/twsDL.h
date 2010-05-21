@@ -72,6 +72,7 @@ class Worker : public QObject
 			FIN_CONTRACTS,
 			GET_DATA,
 			WAIT_DATA,
+			PAUSE_DATA,
 			FIN_DATA,
 			QUIT_READY,
 			QUIT_ERROR
@@ -106,6 +107,7 @@ class Worker : public QObject
 		void finContracts();
 		void getData();
 		void waitData();
+		void pauseData();
 		void finData();
 		void onQuit( int ret );
 		

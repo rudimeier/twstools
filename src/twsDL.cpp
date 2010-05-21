@@ -118,6 +118,9 @@ void Worker::idleTimeout()
 		case WAIT_DATA:
 			waitData();
 			break;
+		case PAUSE_DATA:
+			pauseData();
+			break;
 		case FIN_DATA:
 			finData();
 			break;
@@ -279,6 +282,14 @@ void Worker::waitData()
 }
 
 
+void Worker::pauseData()
+{
+	idleTimer->setInterval( 240000 );
+	qDebug() << "PAUSE" << 240000;
+	state = GET_DATA;
+}
+
+
 void Worker::finData()
 {
 	idleTimer->setInterval( 0 );
@@ -406,6 +417,13 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 {
 	if( id == currentReqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
+		if( state == WAIT_DATA ) {
+			if( errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
+				idleTimer->setInterval( 0 );
+				currentReqId++;
+				state = PAUSE_DATA;
+			}
+		}
 		// TODO, handle:
 		// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
 		// 200 "No security definition has been found for the request"
