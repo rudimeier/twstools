@@ -128,6 +128,8 @@ class Worker : public QObject
 		void contractDetails2Storage( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void contractDetailsEnd( int reqId );
+		void historicalData( int reqId, const QString &date, double open, double high, double low,
+			double close, int volume, int count, double WAP, bool hasGaps );
 };
 
 

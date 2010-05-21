@@ -327,6 +327,10 @@ void Worker::initTwsClient()
 		 this,SLOT(contractDetails2Storage(int, IB::ContractDetails)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(contractDetailsEnd(int)),
 		 this,SLOT(contractDetailsEnd(int)), Qt::QueuedConnection );
+	connect ( twsClient, SIGNAL(historicalData(int, const QString&, double, double, double,
+			double, int, int, double, bool )),
+		 this,SLOT(historicalData(int, const QString&, double, double, double,
+			double, int, int, double, bool )), Qt::QueuedConnection );
 }
 
 
@@ -407,6 +411,13 @@ void Worker::contractDetailsEnd( int reqId )
 	
 	idleTimer->setInterval( 0 );
 	finishedReq = true;
+}
+
+
+void Worker::historicalData( int reqId, const QString &date, double open, double high, double low,
+			double close, int volume, int count, double WAP, bool hasGaps )
+{
+	qDebug() << "FUCK";
 }
 
 
