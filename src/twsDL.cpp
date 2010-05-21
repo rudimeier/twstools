@@ -490,6 +490,7 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 		printf("%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 	           c_str.toUtf8().constData(),
 		       date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
+		fflush(stdout);
 	}
 }
 
