@@ -440,10 +440,17 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 	if( date.startsWith("finished") ) {
 		idleTimer->setInterval( 0 );
 		finishedReq = true;
-		qDebug() << "READY" << reqId;
+		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
-		printf("%d: %d\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-	           curReqContractIndex, reqId, date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
+		const IB::Contract &c = rememberContracts.at(curReqContractIndex);
+		QString c_str = QString("%1\t%2\t%3\t%4")
+			.arg(toQString(c.symbol))
+			.arg(toQString(c.expiry))
+			.arg(c.strike)
+			.arg(toQString(c.right));
+		printf("%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+	           c_str.toUtf8().constData(),
+		       date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
 	}
 }
 
