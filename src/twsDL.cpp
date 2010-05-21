@@ -406,6 +406,10 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 {
 	if( id == currentReqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
+		// TODO, handle:
+		// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
+		// 200 "No security definition has been found for the request"
+		// 162 "Historical Market Data Service error message:Historical data request pacing violation"
 	} else {
 		Q_ASSERT( id == -1 );
 	}
