@@ -233,8 +233,26 @@ void Worker::finContracts()
 void Worker::getData()
 {
 	qDebug() << "DOWNLOAD DATA";
-	/*TODO request Data*/
-	qDebug() << toQString(rememberContracts.first().symbol);
+
+// 	IB::Contract c = rememberContracts.first();
+	IB::Contract c;
+
+	c.symbol = "DJX";
+	c.secType = "OPT";
+	c.exchange = "CBOE";
+	c.currency = "USD";
+	c.right = "P";
+	c.strike = 75.0;
+	c.expiry = "20100520";
+	
+	twsClient->reqHistoricalData( 1234,
+	                              c,
+	                              QString("20100512 22:15:00"),
+	                              QString("1 W"),
+	                              QString("1 hour"),
+	                              QString("ASK"),
+	                              0,
+	                              1 );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
 	finishedReq = false;
