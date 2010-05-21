@@ -336,6 +336,9 @@ void Worker::initTwsClient()
 	TWSWrapper::disconnectHistoricalData(twsClient, twsWrapper);
 	
 	// connecting some TWS signals to this
+	connect(twsClient, SIGNAL(error(int, int, const QString &)),
+		this, SLOT(error(int, int, const QString &)), Qt::QueuedConnection );
+	
 	connect ( twsClient, SIGNAL(connected(bool)),
 		 this,SLOT(twsConnected(bool)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(contractDetails(int, IB::ContractDetails)),
@@ -396,6 +399,16 @@ void Worker::removeDb()
 	}
 	QSqlDatabase::removeDatabase("symbolData");
 	
+}
+
+
+void Worker::error(int id, int errorCode, const QString &errorMsg)
+{
+	if( id == currentReqId ) {
+		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
+	} else {
+		Q_ASSERT( id == -1 );
+	}
 }
 
 

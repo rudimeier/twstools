@@ -135,6 +135,8 @@ class Worker : public QObject
 	private slots:
 		void idleTimeout();
 		
+		void error(int, int, const QString &);
+		
 		void twsConnected( bool connected );
 		void contractDetails2Storage( int reqId,
 			const IB::ContractDetails &ibContractDetails );
