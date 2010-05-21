@@ -422,6 +422,10 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 				idleTimer->setInterval( 0 );
 				currentReqId++;
 				state = PAUSE_DATA;
+			} else if( errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
+				idleTimer->setInterval( 0 );
+				finishedReq = true;
+				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
 			}
 		}
 		// TODO, handle:
