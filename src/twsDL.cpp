@@ -171,6 +171,8 @@ void Worker::getContracts()
 	ibContract.symbol = toIBString(contractSpecs[i][0]);
 	ibContract.secType = toIBString(contractSpecs[i][1]);
 	ibContract.exchange= toIBString(contractSpecs[i][2]);
+	// optional filter for a single expiry
+	ibContract.expiry = toIBString(myProp->reqExpiry);
 	
 	twsClient->reqContractDetails( currentReqId, ibContract );
 	
@@ -587,6 +589,8 @@ void PropTWSTool::initDefaults()
 	conTimeout = 1000;
 	reqTimeout = 20000;
 	
+	reqExpiry = "";
+	
 	downloadData = false;
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
@@ -612,6 +616,8 @@ bool PropTWSTool::readProperties()
 	
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);
+	
+	ok &= get("reqExpiry", reqExpiry);
 	
 	ok = ok & get("downloadData", downloadData);
 	ok = ok & get("endDateTime", endDateTime);

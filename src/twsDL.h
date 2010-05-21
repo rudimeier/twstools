@@ -44,6 +44,8 @@ class PropTWSTool : public PropGeneral
 		int conTimeout;
 		int reqTimeout;
 		
+		QString reqExpiry;
+		
 		bool downloadData;
 		QString endDateTime;
 		QString durationStr;
