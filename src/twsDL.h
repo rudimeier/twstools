@@ -120,6 +120,8 @@ class Worker : public QObject
 		bool finishedReq;
 		int countNewContracts;
 		
+		int curReqContractIndex;
+		
 		QSqlDatabase *db;
 		QSqlQuery *symbolQuery;
 		QSqlQuery *warnQuery;

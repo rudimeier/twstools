@@ -135,6 +135,7 @@ void Worker::onStart()
 {
 	currentReqId = 0;
 	countNewContracts = 0;
+	curReqContractIndex = 0;
 	
 	if( myProp->useDB && !initDb() ) {
 		state = QUIT_ERROR;
@@ -235,9 +236,10 @@ void Worker::finContracts()
 void Worker::getData()
 {
 	qDebug() << "DOWNLOAD DATA";
+	Q_ASSERT( curReqContractIndex < rememberContracts.size() );
 	
 	// whyever we can't use that contract directly
-	IB::Contract cF = rememberContracts[currentReqId/*TODO*/];
+	IB::Contract cF = rememberContracts.at( curReqContractIndex );
 	IB::Contract c;
 	qDebug() << ibToString(cF);
 	c.symbol = cF.symbol/*"DJX"*/;
@@ -282,7 +284,8 @@ void Worker::finData()
 	idleTimer->setInterval( 0 );
 	
 	currentReqId++;
-	if( currentReqId < 4 /*TODO*/ ) {
+	curReqContractIndex ++;
+	if( curReqContractIndex < rememberContracts.size() /*TODO*/ ) {
 		state = GET_DATA;
 	} else {
 		state = QUIT_READY;
@@ -438,8 +441,8 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 		finishedReq = true;
 		qDebug() << "READY" << reqId;
 	} else {
-		printf("%d\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-	           reqId, date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
+		printf("%d: %d\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+	           curReqContractIndex, reqId, date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
 	}
 }
 
