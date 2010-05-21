@@ -28,8 +28,8 @@ const QString contractSpecs[CONTRACT_COUNT][3] = {
 // 	{ "CAC40"  , "OPT", "MONEP"    },
 // 	{ "DAX"    , "IND", "DTB"      },
 // 	{ "DAX"    , "OPT", "DTB"      },
-	{ "DJX"    , "IND", "CBOE"     }
-// 	{ "DJX"    , "OPT", "CBOE"     },
+// 	{ "DJX"    , "IND", "CBOE"     },
+	{ "DJX"    , "OPT", "CBOE"     }
 // 	{ "ESTX50" , "IND", "DTB"      },
 // 	{ "ESTX50" , "OPT", "DTB"      },
 // 	{ "K200"   , "IND", "KSE"      },
@@ -233,17 +233,18 @@ void Worker::finContracts()
 void Worker::getData()
 {
 	qDebug() << "DOWNLOAD DATA";
-
-// 	IB::Contract c = rememberContracts.first();
+	
+	// whyever we can't use that contract directly
+	IB::Contract cF = rememberContracts.first();
 	IB::Contract c;
-
-	c.symbol = "DJX";
-	c.secType = "OPT";
-	c.exchange = "CBOE";
-	c.currency = "USD";
-	c.right = "P";
-	c.strike = 75.0;
-	c.expiry = "20100520";
+	qDebug() << cF.strike;
+	c.symbol = cF.symbol/*"DJX"*/;
+	c.secType = cF.secType /*"OPT"*/;
+	c.exchange = cF.exchange /*"CBOE"*/;
+	c.currency = cF.currency /*"USD"*/;
+	c.right = cF.right /*"P"*/;
+	c.strike = cF.strike /*75.0*/;
+	c.expiry = cF.expiry /*"20100520"*/;
 	
 	twsClient->reqHistoricalData( 1234,
 	                              c,
