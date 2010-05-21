@@ -277,6 +277,8 @@ void Worker::waitData()
 
 void Worker::finData()
 {
+	idleTimer->setInterval( 0 );
+	state = QUIT_READY;
 }
 
 
@@ -319,6 +321,7 @@ void Worker::initTwsClient()
 	TWSWrapper::connectAllSignals(twsClient, twsWrapper);
 	TWSWrapper::disconnectContractDetails(twsClient, twsWrapper);
 	TWSWrapper::disconnectContractDetailsEnd(twsClient, twsWrapper);
+	TWSWrapper::disconnectHistoricalData(twsClient, twsWrapper);
 	
 	// connecting some TWS signals to this
 	connect ( twsClient, SIGNAL(connected(bool)),
@@ -417,7 +420,14 @@ void Worker::contractDetailsEnd( int reqId )
 void Worker::historicalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
-	qDebug() << "FUCK";
+	if( date.startsWith("finished") ) {
+		idleTimer->setInterval( 0 );
+		finishedReq = true;
+		qDebug() << "READY" << reqId;
+	} else {
+		printf("%d\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+	           reqId, date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
+	}
 }
 
 
