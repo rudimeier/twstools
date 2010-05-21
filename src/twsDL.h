@@ -47,6 +47,7 @@ class PropTWSTool : public PropGeneral
 		QString reqExpiry;
 		
 		bool downloadData;
+		int reqMaxContracts;
 		QString endDateTime;
 		QString durationStr;
 		QString barSizeSetting;

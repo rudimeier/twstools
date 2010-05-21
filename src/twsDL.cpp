@@ -285,7 +285,8 @@ void Worker::finData()
 	
 	currentReqId++;
 	curReqContractIndex ++;
-	if( curReqContractIndex < rememberContracts.size() /*TODO*/ ) {
+	if( curReqContractIndex < rememberContracts.size() &&
+	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
 		state = GET_DATA;
 	} else {
 		state = QUIT_READY;
@@ -595,6 +596,7 @@ void PropTWSTool::initDefaults()
 	reqExpiry = "";
 	
 	downloadData = false;
+	reqMaxContracts = -1;
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
 	barSizeSetting = "1 hour";
@@ -623,6 +625,7 @@ bool PropTWSTool::readProperties()
 	ok &= get("reqExpiry", reqExpiry);
 	
 	ok = ok & get("downloadData", downloadData);
+	ok = ok & get("reqMaxContracts", reqMaxContracts);
 	ok = ok & get("endDateTime", endDateTime);
 	ok = ok & get("durationStr", durationStr);
 	ok = ok & get("barSizeSetting", barSizeSetting);
