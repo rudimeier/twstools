@@ -237,7 +237,7 @@ void Worker::getData()
 	// whyever we can't use that contract directly
 	IB::Contract cF = rememberContracts.first();
 	IB::Contract c;
-	qDebug() << cF.strike;
+	qDebug() << ibToString(cF);
 	c.symbol = cF.symbol/*"DJX"*/;
 	c.secType = cF.secType /*"OPT"*/;
 	c.exchange = cF.exchange /*"CBOE"*/;
