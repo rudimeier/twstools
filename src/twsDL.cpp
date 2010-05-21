@@ -238,13 +238,14 @@ void Worker::finContracts()
 
 void Worker::getData()
 {
-	qDebug() << "DOWNLOAD DATA";
 	Q_ASSERT( curReqContractIndex < rememberContracts.size() );
 	
 	// whyever we can't use that contract directly
 	IB::Contract cF = rememberContracts.at( curReqContractIndex );
 	IB::Contract c;
-	qDebug() << ibToString(cF);
+	
+	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentReqId << ibToString(cF);
+	
 	c.symbol = cF.symbol/*"DJX"*/;
 	c.secType = cF.secType /*"OPT"*/;
 	c.exchange = cF.exchange /*"CBOE"*/;
