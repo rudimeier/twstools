@@ -45,6 +45,12 @@ class PropTWSTool : public PropGeneral
 		int reqTimeout;
 		
 		bool downloadData;
+		QString endDateTime;
+		QString durationStr;
+		QString barSizeSetting;
+		QString whatToShow;
+		int useRTH;
+		int formatDate;
 };
 
 

@@ -248,12 +248,12 @@ void Worker::getData()
 	
 	twsClient->reqHistoricalData( currentReqId,
 	                              c,
-	                              QString("20100512 22:15:00"),
-	                              QString("1 W"),
-	                              QString("1 hour"),
-	                              QString("ASK"),
-	                              0,
-	                              1 );
+	                              myProp->endDateTime,
+	                              myProp->durationStr,
+	                              myProp->barSizeSetting,
+	                              myProp->whatToShow,
+	                              myProp->useRTH,
+	                              myProp->formatDate );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
 	finishedReq = false;
@@ -588,6 +588,12 @@ void PropTWSTool::initDefaults()
 	reqTimeout = 20000;
 	
 	downloadData = false;
+	endDateTime = "20100514 22:15:00 GMT";
+	durationStr = "1 W";
+	barSizeSetting = "1 hour";
+	whatToShow = "TRADES";
+	useRTH = 1;
+	formatDate = 1;
 }
 
 
@@ -608,6 +614,12 @@ bool PropTWSTool::readProperties()
 	ok &= get("reqTimeout", reqTimeout);
 	
 	ok = ok & get("downloadData", downloadData);
+	ok = ok & get("endDateTime", endDateTime);
+	ok = ok & get("durationStr", durationStr);
+	ok = ok & get("barSizeSetting", barSizeSetting);
+	ok = ok & get("whatToShow", whatToShow);
+	ok = ok & get("useRTH", useRTH);
+	ok = ok & get("formatDate", formatDate);
 	
 	return ok;
 }
