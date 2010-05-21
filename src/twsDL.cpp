@@ -233,12 +233,26 @@ void Worker::finContracts()
 void Worker::getData()
 {
 	qDebug() << "DOWNLOAD DATA";
-	state = QUIT_READY;
+	/*TODO request Data*/
+	qDebug() << toQString(rememberContracts.first().symbol);
+	
+	idleTimer->setInterval( myProp->reqTimeout );
+	finishedReq = false;
+	state = WAIT_DATA;
 }
 
 
 void Worker::waitData()
 {
+	idleTimer->setInterval( 0 );
+	
+	if( finishedReq ) {
+		state = FIN_DATA;
+		return;
+	} else {
+		qDebug() << "Timeout waiting for data.";
+		state = QUIT_ERROR;
+	}
 }
 
 
