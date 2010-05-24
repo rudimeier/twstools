@@ -425,7 +425,9 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 				idleTimer->setInterval( 0 );
 				finishedReq = true;
 				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
-			} else if( errorCode == 162 && errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ) {
+			} else if( errorCode == 162 &&
+			           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
+			            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
 				idleTimer->setInterval( 0 );
 				if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
 					finishedReq = true;
