@@ -427,7 +427,7 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
 			} else if( errorCode == 162 && errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
-				if( myProp->reqMaxContractsPerSpec == 1 /*TODO we shoud skip this work for all such specs*/) {
+				if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
 					finishedReq = true;
 				} // else will cause error
 				qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curReqContractIndex << id;;
@@ -436,6 +436,7 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 		// TODO, handle:
 		// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
 		// 162 "Historical Market Data Service error message:No historical market data for CAC40/IND@MONEP Bid 1800"
+		// 162 "Historical Market Data Service error message:No data of type EODChart is available for the exchange 'IDEAL' and the security type 'Forex' and '1 y' and '1 day'"
 		// 200 "No security definition has been found for the request"
 		// 162 "Historical Market Data Service error message:Historical data request pacing violation"
 	} else {
@@ -658,6 +659,7 @@ void PropTWSTool::initDefaults()
 	downloadData = false;
 	reqMaxContracts = -1;
 	reqMaxContractsPerSpec = -1;
+	ignoreNotAvailable = true;
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
 	barSizeSetting = "1 hour";
@@ -690,6 +692,7 @@ bool PropTWSTool::readProperties()
 	ok = ok & get("downloadData", downloadData);
 	ok = ok & get("reqMaxContracts", reqMaxContracts);
 	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
+	ok = ok & get("ignoreNotAvailable", ignoreNotAvailable);
 	ok = ok & get("endDateTime", endDateTime);
 	ok = ok & get("durationStr", durationStr);
 	ok = ok & get("barSizeSetting", barSizeSetting);
