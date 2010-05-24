@@ -284,14 +284,14 @@ void Worker::pauseData()
 
 void Worker::finData()
 {
-	idleTimer->setInterval( 0 );
-	
 	currentReqId++;
 	curReqContractIndex ++;
 	if( curReqContractIndex < histRequests.size() &&
 	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
+		idleTimer->setInterval( myProp->pacingTime );
 		state = GET_DATA;
 	} else {
+		idleTimer->setInterval( 0 );
 		state = QUIT_READY;
 	}
 }
@@ -637,6 +637,7 @@ void PropTWSTool::initDefaults()
 	
 	conTimeout = 1000;
 	reqTimeout = 20000;
+	pacingTime = 10300;
 	
 	reqExpiry = "";
 	
@@ -666,6 +667,7 @@ bool PropTWSTool::readProperties()
 	
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);
+	ok &= get("pacingTime", pacingTime);
 	
 	ok &= get("reqExpiry", reqExpiry);
 	
