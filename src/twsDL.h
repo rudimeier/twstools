@@ -54,6 +54,8 @@ class PropTWSTool : public PropGeneral
 		QString whatToShow;
 		int useRTH;
 		int formatDate;
+		
+		QList< QList<QString> > contractSpecs;
 };
 
 
@@ -129,7 +131,6 @@ class Worker : public QObject
 		QSqlQuery *symbolQuery;
 		QSqlQuery *warnQuery;
 		
-		QList< QList<QString> > contractSpecs;
 		QList<IB::ContractDetails> contractDetailsStorage;
 		QList<IB::Contract> rememberContracts;
 		

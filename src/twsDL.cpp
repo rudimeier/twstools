@@ -10,6 +10,8 @@
 
 #include <QtCore/QTimer>
 #include <QtCore/QVariant>
+#include <QtCore/QRegExp>
+#include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -33,30 +35,6 @@ Worker::Worker() :
 	warnQuery(NULL),
 	idleTimer(NULL)
 {
-	// static work todo
-	contractSpecs = QList< QList<QString> >()
-// 		<< (QList<QString>() << "CAC40"  << "IND" << "MONEP")
-// 		<< (QList<QString>() << "CAC40"  << "OPT" << "MONEP")
-// 		<< (QList<QString>() << "DAX"    << "IND" << "DTB")
-// 		<< (QList<QString>() << "DAX"    << "OPT" << "DTB" )
-// 		<< (QList<QString>() << "DJX"    << "IND" << "CBOE")
-		<< (QList<QString>() << "DJX"    << "OPT" << "CBOE")
-// 		<< (QList<QString>() << "ESTX50" << "IND" << "DTB")
-// 		<< (QList<QString>() << "ESTX50" << "OPT" << "DTB")
-// 		<< (QList<QString>() << "K200"   << "IND" << "KSE")
-// 		<< (QList<QString>() << "K200"   << "OPT" << "KSE" )
-// 		<< (QList<QString>() << "NDX"    << "IND" << "NASDAQ")
-// 		<< (QList<QString>() << "NDX"    << "OPT" << "CBOE")
-// 		<< (QList<QString>() << "RUT"    << "IND" << "CBOE")
-// 		<< (QList<QString>() << "RUT"    << "OPT" << "CBOE")
-// 		<< (QList<QString>() << "SPX"    << "IND" << "CBOE")
-// 		<< (QList<QString>() << "SPX"    << "OPT" << "CBOE")
-// 		<< (QList<QString>() << "XEO"    << "IND" << "CBOE")
-// 		<< (QList<QString>() << "XEO"    << "OPT" << "CBOE")
-// 		<< (QList<QString>() << "Z"      << "IND" << "LIFFE")
-// 		<< (QList<QString>() << "Z"      << "OPT" << "LIFFE")
-		;
-	
 	initProperties();
 	initTwsClient();
 	initIdleTimer();
@@ -172,9 +150,9 @@ void Worker::getContracts()
 	int i = currentReqId;
 	
 	IB::Contract ibContract;
-	ibContract.symbol = toIBString(contractSpecs[i][0]);
-	ibContract.secType = toIBString(contractSpecs[i][1]);
-	ibContract.exchange= toIBString(contractSpecs[i][2]);
+	ibContract.symbol = toIBString(myProp->contractSpecs[i][0]);
+	ibContract.secType = toIBString(myProp->contractSpecs[i][1]);
+	ibContract.exchange= toIBString(myProp->contractSpecs[i][2]);
 	// optional filter for a single expiry
 	ibContract.expiry = toIBString(myProp->reqExpiry);
 	
@@ -224,7 +202,7 @@ void Worker::finContracts()
 	
 	
 	currentReqId++;
-	if( currentReqId < contractSpecs.size() ) {
+	if( currentReqId < myProp->contractSpecs.size() ) {
 		state = GET_CONTRACTS;
 	} else {
 		if( myProp->downloadData ) {
@@ -681,6 +659,15 @@ bool PropTWSTool::readProperties()
 	ok = ok & get("whatToShow", whatToShow);
 	ok = ok & get("useRTH", useRTH);
 	ok = ok & get("formatDate", formatDate);
+	
+	contractSpecs.clear();
+	QVector<QString> tmp;
+	ok = ok & get("contractSpecs", tmp);
+	foreach( QString s, tmp ) {
+		QList<QString> l = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
+		Q_ASSERT( l.size() == 3 || l.size() == 4 ); // TODO handle that
+		contractSpecs.append( l );
+	}
 	
 	return ok;
 }
