@@ -425,6 +425,12 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 				idleTimer->setInterval( 0 );
 				finishedReq = true;
 				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
+			} else if( errorCode == 162 && errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ) {
+				idleTimer->setInterval( 0 );
+				if( myProp->reqMaxContractsPerSpec == 1 /*TODO we shoud skip this work for all such specs*/) {
+					finishedReq = true;
+				} // else will cause error
+				qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curReqContractIndex << id;;
 			}
 		}
 		// TODO, handle:
