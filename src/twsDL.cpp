@@ -462,8 +462,11 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
 		const IB::Contract &c = rememberContracts.at(curReqContractIndex);
-		QString c_str = QString("%1\t%2\t%3\t%4")
+		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
+			.arg(toQString(c.secType))
+			.arg(toQString(c.exchange))
+			.arg(toQString(c.currency))
 			.arg(toQString(c.expiry))
 			.arg(c.strike)
 			.arg(toQString(c.right));
