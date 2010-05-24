@@ -199,8 +199,10 @@ void Worker::finContracts()
 	}
 	
 	foreach( IB::ContractDetails cd,  contractDetailsStorage ) {
-		HistRequest hR = { cd.summary, myProp->whatToShow };
-		histRequests.append( hR );
+		foreach( QString wts, myProp->whatToShow ) {
+			HistRequest hR = { cd.summary, wts };
+			histRequests.append( hR );
+		}
 	}
 	
 	contractDetailsStorage.clear();
@@ -473,6 +475,7 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
 		const IB::Contract &c = histRequests.at(curReqContractIndex).ibContract;
+		const QString &wts = histRequests.at(curReqContractIndex).whatToShow;
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))
@@ -481,8 +484,9 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 			.arg(toQString(c.expiry))
 			.arg(c.strike)
 			.arg(toQString(c.right));
-		printf("%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-	           c_str.toUtf8().constData(),
+		printf("%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+		       wts.toUtf8().constData(),
+		       c_str.toUtf8().constData(),
 		       date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
 		fflush(stdout);
 	}
@@ -641,7 +645,7 @@ void PropTWSTool::initDefaults()
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
 	barSizeSetting = "1 hour";
-	whatToShow = "TRADES";
+	whatToShow = QList<QString>() << "TRADES";
 	useRTH = 1;
 	formatDate = 1;
 }
@@ -670,7 +674,11 @@ bool PropTWSTool::readProperties()
 	ok = ok & get("endDateTime", endDateTime);
 	ok = ok & get("durationStr", durationStr);
 	ok = ok & get("barSizeSetting", barSizeSetting);
-	ok = ok & get("whatToShow", whatToShow);
+	
+	QString wtsStr;
+	ok = ok & get("whatToShow", wtsStr);
+	whatToShow = wtsStr.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
+	
 	ok = ok & get("useRTH", useRTH);
 	ok = ok & get("formatDate", formatDate);
 	

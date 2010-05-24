@@ -56,7 +56,7 @@ class PropTWSTool : public PropGeneral
 		QString endDateTime;
 		QString durationStr;
 		QString barSizeSetting;
-		QString whatToShow;
+		QList<QString> whatToShow;
 		int useRTH;
 		int formatDate;
 		
