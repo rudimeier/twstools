@@ -21,30 +21,29 @@
 namespace Test {
 
 
-#define CONTRACT_COUNT 1
 /// static work todo
-const QString contractSpecs[CONTRACT_COUNT][3] = {
-// 	{ "CAC40"  , "IND", "MONEP"    },
-// 	{ "CAC40"  , "OPT", "MONEP"    },
-// 	{ "DAX"    , "IND", "DTB"      },
-// 	{ "DAX"    , "OPT", "DTB"      },
-// 	{ "DJX"    , "IND", "CBOE"     },
-	{ "DJX"    , "OPT", "CBOE"     }
-// 	{ "ESTX50" , "IND", "DTB"      },
-// 	{ "ESTX50" , "OPT", "DTB"      },
-// 	{ "K200"   , "IND", "KSE"      },
-// 	{ "K200"   , "OPT", "KSE"      },
-// 	{ "NDX"    , "IND", "NASDAQ"   },
-// 	{ "NDX"    , "OPT", "CBOE"     },
-// 	{ "RUT"    , "IND", "CBOE"     },
-// 	{ "RUT"    , "OPT", "CBOE"     },
-// 	{ "SPX"    , "IND", "CBOE"     },
-// 	{ "SPX"    , "OPT", "CBOE"     },
-// 	{ "XEO"    , "IND", "CBOE"     },
-// 	{ "XEO"    , "OPT", "CBOE"     },
-// 	{ "Z"      , "IND", "LIFFE"    },
-// 	{ "Z"      , "OPT", "LIFFE"    }
-};
+const QList< QList<QString> > contractSpecs = QList< QList<QString> >()
+// 	<< (QList<QString>() << "CAC40"  << "IND" << "MONEP")
+// 	<< (QList<QString>() << "CAC40"  << "OPT" << "MONEP")
+// 	<< (QList<QString>() << "DAX"    << "IND" << "DTB")
+// 	<< (QList<QString>() << "DAX"    << "OPT" << "DTB" )
+// 	<< (QList<QString>() << "DJX"    << "IND" << "CBOE")
+	<< (QList<QString>() << "DJX"    << "OPT" << "CBOE")
+// 	<< (QList<QString>() << "ESTX50" << "IND" << "DTB")
+// 	<< (QList<QString>() << "ESTX50" << "OPT" << "DTB")
+// 	<< (QList<QString>() << "K200"   << "IND" << "KSE")
+// 	<< (QList<QString>() << "K200"   << "OPT" << "KSE" )
+// 	<< (QList<QString>() << "NDX"    << "IND" << "NASDAQ")
+// 	<< (QList<QString>() << "NDX"    << "OPT" << "CBOE")
+// 	<< (QList<QString>() << "RUT"    << "IND" << "CBOE")
+// 	<< (QList<QString>() << "RUT"    << "OPT" << "CBOE")
+// 	<< (QList<QString>() << "SPX"    << "IND" << "CBOE")
+// 	<< (QList<QString>() << "SPX"    << "OPT" << "CBOE")
+// 	<< (QList<QString>() << "XEO"    << "IND" << "CBOE")
+// 	<< (QList<QString>() << "XEO"    << "OPT" << "CBOE")
+// 	<< (QList<QString>() << "Z"      << "IND" << "LIFFE")
+// 	<< (QList<QString>() << "Z"      << "OPT" << "LIFFE")
+	;
 
 
 Worker::Worker() :
@@ -224,7 +223,7 @@ void Worker::finContracts()
 	
 	
 	currentReqId++;
-	if( currentReqId < CONTRACT_COUNT ) {
+	if( currentReqId < contractSpecs.size() ) {
 		state = GET_CONTRACTS;
 	} else {
 		if( myProp->downloadData ) {
@@ -431,6 +430,7 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 		}
 		// TODO, handle:
 		// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
+		// 162 "Historical Market Data Service error message:No historical market data for CAC40/IND@MONEP Bid 1800"
 		// 200 "No security definition has been found for the request"
 		// 162 "Historical Market Data Service error message:Historical data request pacing violation"
 	} else {
