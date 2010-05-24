@@ -198,7 +198,13 @@ void Worker::finContracts()
 		inserted = storage2stdout();
 	}
 	
-	foreach( IB::ContractDetails cd,  contractDetailsStorage ) {
+	for( int i = 0; i<contractDetailsStorage.size(); i++ ) {
+		const IB::ContractDetails &cd = contractDetailsStorage.at(i);
+		
+		if( myProp->reqMaxContractsPerSpec > 0 && myProp->reqMaxContractsPerSpec <= i ) {
+			break;
+		}
+		
 		foreach( QString wts, myProp->whatToShow ) {
 			HistRequest hR = { cd.summary, wts };
 			histRequests.append( hR );
@@ -644,6 +650,7 @@ void PropTWSTool::initDefaults()
 	
 	downloadData = false;
 	reqMaxContracts = -1;
+	reqMaxContractsPerSpec = -1;
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
 	barSizeSetting = "1 hour";
@@ -675,6 +682,7 @@ bool PropTWSTool::readProperties()
 	
 	ok = ok & get("downloadData", downloadData);
 	ok = ok & get("reqMaxContracts", reqMaxContracts);
+	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	ok = ok & get("endDateTime", endDateTime);
 	ok = ok & get("durationStr", durationStr);
 	ok = ok & get("barSizeSetting", barSizeSetting);
