@@ -25,6 +25,15 @@ namespace Test {
 
 
 
+struct HistRequest
+{
+	IB::Contract ibContract;
+	QString whatToShow;
+};
+
+
+
+
 Worker::Worker() :
 	state(START),
 	myProp(NULL),
@@ -190,7 +199,8 @@ void Worker::finContracts()
 	}
 	
 	foreach( IB::ContractDetails cd,  contractDetailsStorage ) {
-		rememberContracts.append( cd.summary );
+		HistRequest hR = { cd.summary, myProp->whatToShow };
+		histRequests.append( hR );
 	}
 	
 	contractDetailsStorage.clear();
@@ -216,10 +226,11 @@ void Worker::finContracts()
 
 void Worker::getData()
 {
-	Q_ASSERT( curReqContractIndex < rememberContracts.size() );
+	Q_ASSERT( curReqContractIndex < histRequests.size() );
 	
 	// whyever we can't use that contract directly
-	IB::Contract cF = rememberContracts.at( curReqContractIndex );
+	const HistRequest &hR = histRequests.at( curReqContractIndex );
+	IB::Contract cF = hR.ibContract;
 	IB::Contract c;
 	
 	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentReqId << ibToString(cF);
@@ -237,7 +248,7 @@ void Worker::getData()
 	                              myProp->endDateTime,
 	                              myProp->durationStr,
 	                              myProp->barSizeSetting,
-	                              myProp->whatToShow,
+	                              hR.whatToShow,
 	                              myProp->useRTH,
 	                              myProp->formatDate );
 	
@@ -275,7 +286,7 @@ void Worker::finData()
 	
 	currentReqId++;
 	curReqContractIndex ++;
-	if( curReqContractIndex < rememberContracts.size() &&
+	if( curReqContractIndex < histRequests.size() &&
 	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
 		state = GET_DATA;
 	} else {
@@ -461,7 +472,7 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 		finishedReq = true;
 		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
-		const IB::Contract &c = rememberContracts.at(curReqContractIndex);
+		const IB::Contract &c = histRequests.at(curReqContractIndex).ibContract;
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))

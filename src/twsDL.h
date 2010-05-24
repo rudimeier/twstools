@@ -24,6 +24,11 @@ namespace IB {
 namespace Test {
 
 
+
+
+struct HistRequest;
+
+
 class PropTWSTool : public PropGeneral
 {
 	public:
@@ -132,7 +137,7 @@ class Worker : public QObject
 		QSqlQuery *warnQuery;
 		
 		QList<IB::ContractDetails> contractDetailsStorage;
-		QList<IB::Contract> rememberContracts;
+		QList<HistRequest> histRequests;
 		
 		QTimer *idleTimer;
 		
