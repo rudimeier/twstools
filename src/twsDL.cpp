@@ -163,7 +163,7 @@ void Worker::getContracts()
 	ibContract.secType = toIBString(myProp->contractSpecs[i][1]);
 	ibContract.exchange= toIBString(myProp->contractSpecs[i][2]);
 	// optional filter for a single expiry
-	QString e = myProp->contractSpecs.size() > 3 ? myProp->contractSpecs[i][3] : "";
+	QString e = myProp->contractSpecs[i].size() > 3 ? myProp->contractSpecs[i][3] : "";
 	ibContract.expiry = toIBString( e );
 	
 	twsClient->reqContractDetails( currentReqId, ibContract );
