@@ -276,8 +276,8 @@ void Worker::waitData()
 
 void Worker::pauseData()
 {
-	idleTimer->setInterval( 240000 );
-	qDebug() << "PAUSE" << 240000;
+	idleTimer->setInterval( myProp->violationPause );
+	qDebug() << "PAUSE" << myProp->violationPause;
 	state = GET_DATA;
 }
 
@@ -638,6 +638,7 @@ void PropTWSTool::initDefaults()
 	conTimeout = 1000;
 	reqTimeout = 20000;
 	pacingTime = 10300;
+	violationPause = 60000;
 	
 	reqExpiry = "";
 	
@@ -668,6 +669,7 @@ bool PropTWSTool::readProperties()
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);
 	ok &= get("pacingTime", pacingTime);
+	ok &= get("violationPause", violationPause);
 	
 	ok &= get("reqExpiry", reqExpiry);
 	

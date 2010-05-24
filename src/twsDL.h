@@ -49,6 +49,7 @@ class PropTWSTool : public PropGeneral
 		int conTimeout;
 		int reqTimeout;
 		int pacingTime;
+		int violationPause;
 		
 		QString reqExpiry;
 		
