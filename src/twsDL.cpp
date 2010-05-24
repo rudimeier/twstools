@@ -21,29 +21,6 @@
 namespace Test {
 
 
-/// static work todo
-const QList< QList<QString> > contractSpecs = QList< QList<QString> >()
-// 	<< (QList<QString>() << "CAC40"  << "IND" << "MONEP")
-// 	<< (QList<QString>() << "CAC40"  << "OPT" << "MONEP")
-// 	<< (QList<QString>() << "DAX"    << "IND" << "DTB")
-// 	<< (QList<QString>() << "DAX"    << "OPT" << "DTB" )
-// 	<< (QList<QString>() << "DJX"    << "IND" << "CBOE")
-	<< (QList<QString>() << "DJX"    << "OPT" << "CBOE")
-// 	<< (QList<QString>() << "ESTX50" << "IND" << "DTB")
-// 	<< (QList<QString>() << "ESTX50" << "OPT" << "DTB")
-// 	<< (QList<QString>() << "K200"   << "IND" << "KSE")
-// 	<< (QList<QString>() << "K200"   << "OPT" << "KSE" )
-// 	<< (QList<QString>() << "NDX"    << "IND" << "NASDAQ")
-// 	<< (QList<QString>() << "NDX"    << "OPT" << "CBOE")
-// 	<< (QList<QString>() << "RUT"    << "IND" << "CBOE")
-// 	<< (QList<QString>() << "RUT"    << "OPT" << "CBOE")
-// 	<< (QList<QString>() << "SPX"    << "IND" << "CBOE")
-// 	<< (QList<QString>() << "SPX"    << "OPT" << "CBOE")
-// 	<< (QList<QString>() << "XEO"    << "IND" << "CBOE")
-// 	<< (QList<QString>() << "XEO"    << "OPT" << "CBOE")
-// 	<< (QList<QString>() << "Z"      << "IND" << "LIFFE")
-// 	<< (QList<QString>() << "Z"      << "OPT" << "LIFFE")
-	;
 
 
 Worker::Worker() :
@@ -56,6 +33,30 @@ Worker::Worker() :
 	warnQuery(NULL),
 	idleTimer(NULL)
 {
+	// static work todo
+	contractSpecs = QList< QList<QString> >()
+// 		<< (QList<QString>() << "CAC40"  << "IND" << "MONEP")
+// 		<< (QList<QString>() << "CAC40"  << "OPT" << "MONEP")
+// 		<< (QList<QString>() << "DAX"    << "IND" << "DTB")
+// 		<< (QList<QString>() << "DAX"    << "OPT" << "DTB" )
+// 		<< (QList<QString>() << "DJX"    << "IND" << "CBOE")
+		<< (QList<QString>() << "DJX"    << "OPT" << "CBOE")
+// 		<< (QList<QString>() << "ESTX50" << "IND" << "DTB")
+// 		<< (QList<QString>() << "ESTX50" << "OPT" << "DTB")
+// 		<< (QList<QString>() << "K200"   << "IND" << "KSE")
+// 		<< (QList<QString>() << "K200"   << "OPT" << "KSE" )
+// 		<< (QList<QString>() << "NDX"    << "IND" << "NASDAQ")
+// 		<< (QList<QString>() << "NDX"    << "OPT" << "CBOE")
+// 		<< (QList<QString>() << "RUT"    << "IND" << "CBOE")
+// 		<< (QList<QString>() << "RUT"    << "OPT" << "CBOE")
+// 		<< (QList<QString>() << "SPX"    << "IND" << "CBOE")
+// 		<< (QList<QString>() << "SPX"    << "OPT" << "CBOE")
+// 		<< (QList<QString>() << "XEO"    << "IND" << "CBOE")
+// 		<< (QList<QString>() << "XEO"    << "OPT" << "CBOE")
+// 		<< (QList<QString>() << "Z"      << "IND" << "LIFFE")
+// 		<< (QList<QString>() << "Z"      << "OPT" << "LIFFE")
+		;
+	
 	initProperties();
 	initTwsClient();
 	initIdleTimer();

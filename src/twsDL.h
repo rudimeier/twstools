@@ -129,6 +129,7 @@ class Worker : public QObject
 		QSqlQuery *symbolQuery;
 		QSqlQuery *warnQuery;
 		
+		QList< QList<QString> > contractSpecs;
 		QList<IB::ContractDetails> contractDetailsStorage;
 		QList<IB::Contract> rememberContracts;
 		
