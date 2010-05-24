@@ -417,11 +417,11 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 	if( id == currentReqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
 		if( state == WAIT_DATA ) {
-			if( errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
+			if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
 				currentReqId++;
 				state = PAUSE_DATA;
-			} else if( errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
+			} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
 				finishedReq = true;
 				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
