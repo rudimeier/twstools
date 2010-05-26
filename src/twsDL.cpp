@@ -498,6 +498,33 @@ void Worker::contractDetailsEnd( int reqId )
 }
 
 
+/// stupid static helper
+QString ibDate2ISO( const QString &ibDate )
+{
+	QDateTime dt;
+	
+	dt = QDateTime::fromString( ibDate, "yyyyMMdd  hh:mm:ss");
+	if( dt.isValid() ) {
+		return dt.toString("yyyy-MM-dd hh:mm:ss");
+	}
+	
+	dt.setDate( QDate::fromString( ibDate, "yyyyMMdd") );
+	if( dt.isValid() ) {
+		return dt.toString("yyyy-MM-dd");
+	}
+	
+	bool ok = false;
+	uint t = ibDate.toUInt( &ok );
+	if( ok ) {
+		dt.setTime_t( t );
+		return dt.toString("yyyy-MM-dd hh:mm:ss");
+	}
+	
+	return QString();
+}
+
+
+
 void Worker::historicalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
@@ -519,13 +546,10 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 			if( expiry.isEmpty() ) {
 				expiry = "0000-00-00";
 			} else {
-				const QDate e = QDate::fromString( expiry, "yyyyMMdd" );
-				expiry = e.toString("yyyy-MM-dd");
-				Q_ASSERT( e.isValid() );
+				expiry = ibDate2ISO( toQString(c.expiry) );
 			}
-			const QDateTime dt = QDateTime::fromString( dateTime, "yyyyMMdd  hh:mm:ss" );
-			dateTime = dt.toString("yyyy-MM-dd hh:mm:ss");
-			Q_ASSERT( dt.isValid() );
+			dateTime = ibDate2ISO(date);
+			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
 		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
