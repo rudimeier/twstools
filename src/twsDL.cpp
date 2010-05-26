@@ -513,18 +513,32 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 	} else {
 		const IB::Contract &c = histRequests.at(curReqContractIndex).ibContract;
 		const QString &wts = histRequests.at(curReqContractIndex).whatToShow;
+		QString expiry = toQString(c.expiry);
+		QString dateTime = date;
+		if( myProp->printFormatDates ) {
+			if( expiry.isEmpty() ) {
+				expiry = "0000-00-00";
+			} else {
+				const QDate e = QDate::fromString( expiry, "yyyyMMdd" );
+				expiry = e.toString("yyyy-MM-dd");
+				Q_ASSERT( e.isValid() );
+			}
+			const QDateTime dt = QDateTime::fromString( dateTime, "yyyyMMdd  hh:mm:ss" );
+			dateTime = dt.toString("yyyy-MM-dd hh:mm:ss");
+			Q_ASSERT( dt.isValid() );
+		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))
 			.arg(toQString(c.exchange))
 			.arg(toQString(c.currency))
-			.arg(toQString(c.expiry))
+			.arg(expiry)
 			.arg(c.strike)
 			.arg(toQString(c.right));
 		printf("%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       short_wts.value( wts, "NNN" ),
 		       c_str.toUtf8().constData(),
-		       date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
+		       dateTime.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
 		fflush(stdout);
 	}
 }
