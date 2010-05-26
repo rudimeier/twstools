@@ -51,6 +51,24 @@ QHash<QString, const char*> init_short_wts()
 static const QHash<QString, const char*> short_wts = init_short_wts();
 
 
+QHash<QString, const char*> init_short_bar_size()
+{
+	QHash<QString, const char*> ht;
+	ht.insert("secs", "s");
+	ht.insert("min", "m");
+	ht.insert("mins", "m");
+	ht.insert("hour", "h");
+	ht.insert("day", "d");
+	ht.insert("week", "w");
+	ht.insert("month", "x");
+	ht.insert("months", "x");
+	ht.insert("year", "y");
+	return ht;
+}
+
+static const QHash<QString, const char*> short_bar_size = init_short_bar_size();
+
+
 
 
 
