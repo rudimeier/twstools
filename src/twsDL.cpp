@@ -54,15 +54,22 @@ static const QHash<QString, const char*> short_wts = init_short_wts();
 QHash<QString, const char*> init_short_bar_size()
 {
 	QHash<QString, const char*> ht;
-	ht.insert("secs", "s");
-	ht.insert("min", "m");
-	ht.insert("mins", "m");
-	ht.insert("hour", "h");
-	ht.insert("day", "d");
-	ht.insert("week", "w");
-	ht.insert("month", "x");
-	ht.insert("months", "x");
-	ht.insert("year", "y");
+	ht.insert("1 secs",   "01s");
+	ht.insert("5 secs",   "05s");
+	ht.insert("15 secs",  "15s");
+	ht.insert("30 secs",  "30s");
+	ht.insert("1 min",    "01m");
+	ht.insert("2 mins",   "02m");
+	ht.insert("3 mins",   "03m");
+	ht.insert("5 mins",   "05m");
+	ht.insert("15 mins",  "15m");
+	ht.insert("30 mins",  "30m");
+	ht.insert("1 hour",   "01h");
+	ht.insert("1 day",    "01d");
+	ht.insert("1 week",   "01w");
+	ht.insert("1 month",  "01x");
+	ht.insert("3 months", "03x");
+	ht.insert("1 year",   "01y");
 	return ht;
 }
 
@@ -577,8 +584,9 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 			.arg(expiry)
 			.arg(c.strike)
 			.arg(toQString(c.right));
-		printf("%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       short_wts.value( wts, "NNN" ),
+		       short_bar_size.value( myProp->barSizeSetting, "00N" ),
 		       c_str.toUtf8().constData(),
 		       dateTime.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
 		fflush(stdout);
