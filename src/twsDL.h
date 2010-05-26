@@ -58,6 +58,8 @@ class PropTWSTool : public PropGeneral
 		int reqMaxContractsPerSpec;
 		bool ignoreNotAvailable;
 		
+		bool printFormatDates;
+		
 		QString endDateTime;
 		QString durationStr;
 		QString barSizeSetting;

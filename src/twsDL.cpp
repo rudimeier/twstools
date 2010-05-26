@@ -683,6 +683,9 @@ void PropTWSTool::initDefaults()
 	reqMaxContracts = -1;
 	reqMaxContractsPerSpec = -1;
 	ignoreNotAvailable = true;
+	
+	printFormatDates = true;
+	
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
 	barSizeSetting = "1 hour";
@@ -716,6 +719,9 @@ bool PropTWSTool::readProperties()
 	ok = ok & get("reqMaxContracts", reqMaxContracts);
 	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	ok = ok & get("ignoreNotAvailable", ignoreNotAvailable);
+	
+	ok = ok & get("printFormatDates", printFormatDates);
+	
 	ok = ok & get("endDateTime", endDateTime);
 	ok = ok & get("durationStr", durationStr);
 	ok = ok & get("barSizeSetting", barSizeSetting);
