@@ -34,6 +34,26 @@ struct HistRequest
 
 
 
+QHash<QString, const char*> init_short_wts()
+{
+	QHash<QString, const char*> ht;
+	ht.insert("TRADES", "T");
+	ht.insert("MIDPOINT", "M");
+	ht.insert("BID", "B");
+	ht.insert("ASK", "A");
+	ht.insert("BID_ASK", "BA");
+	ht.insert("HISTORICAL_VOLATILITY", "HV");
+	ht.insert("OPTION_IMPLIED_VOLATILITY", "OIV");
+	ht.insert("OPTION_VOLUME", "OV");
+	return ht;
+}
+
+static const QHash<QString, const char*> short_wts = init_short_wts();
+
+
+
+
+
 Worker::Worker( const QString& confFile ) :
 	state(START),
 	confFile(confFile),
@@ -502,7 +522,7 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 			.arg(c.strike)
 			.arg(toQString(c.right));
 		printf("%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-		       wts.toUtf8().constData(),
+		       short_wts.value( wts, "NNN" ),
 		       c_str.toUtf8().constData(),
 		       date.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
 		fflush(stdout);
