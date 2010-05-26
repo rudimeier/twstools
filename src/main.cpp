@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
 	QCoreApplication app( argc, argv );
-	Test::Worker worker;
+	Test::Worker worker("twsDL.cfg");
 	QObject::connect( &worker, SIGNAL(finished()), &app, SLOT(quit()) );
 	worker.start();
 	int ret = app.exec();

@@ -90,7 +90,7 @@ class Worker : public QObject
 			QUIT_ERROR
 		};
 		
-		Worker();
+		Worker( const QString& confFile );
 		~Worker();
 		
 		void start();
@@ -125,7 +125,7 @@ class Worker : public QObject
 		
 		State state;
 		
-		//tws settings
+		QString confFile;
 		PropTWSTool *myProp;
 		
 		TWSClient  *twsClient;

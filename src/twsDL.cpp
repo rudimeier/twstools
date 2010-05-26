@@ -34,8 +34,9 @@ struct HistRequest
 
 
 
-Worker::Worker() :
+Worker::Worker( const QString& confFile ) :
 	state(START),
+	confFile(confFile),
 	myProp(NULL),
 	twsClient(NULL),
 	twsWrapper(NULL),
@@ -315,7 +316,7 @@ void Worker::onQuit( int /*ret*/ )
 void Worker::initProperties()
 {
 	Properties prop;
-	prop.readConfigFile("twsDL.cfg");
+	prop.readConfigFile(confFile);
 	
 	myProp = new PropTWSTool(prop);
 	myProp->readProperties();
