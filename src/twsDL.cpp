@@ -54,22 +54,22 @@ static const QHash<QString, const char*> short_wts = init_short_wts();
 QHash<QString, const char*> init_short_bar_size()
 {
 	QHash<QString, const char*> ht;
-	ht.insert("1 secs",   "01s");
-	ht.insert("5 secs",   "05s");
-	ht.insert("15 secs",  "15s");
-	ht.insert("30 secs",  "30s");
-	ht.insert("1 min",    "01m");
-	ht.insert("2 mins",   "02m");
-	ht.insert("3 mins",   "03m");
-	ht.insert("5 mins",   "05m");
-	ht.insert("15 mins",  "15m");
-	ht.insert("30 mins",  "30m");
-	ht.insert("1 hour",   "01h");
-	ht.insert("1 day",    "01d");
-	ht.insert("1 week",   "01w");
-	ht.insert("1 month",  "01x");
-	ht.insert("3 months", "03x");
-	ht.insert("1 year",   "01y");
+	ht.insert("1 secs",   "s01");
+	ht.insert("5 secs",   "s05");
+	ht.insert("15 secs",  "s15");
+	ht.insert("30 secs",  "s30");
+	ht.insert("1 min",    "m01");
+	ht.insert("2 mins",   "m02");
+	ht.insert("3 mins",   "m03");
+	ht.insert("5 mins",   "m05");
+	ht.insert("15 mins",  "m15");
+	ht.insert("30 mins",  "m30");
+	ht.insert("1 hour",   "h01");
+	ht.insert("1 day",    "eod");
+	ht.insert("1 week",   "w01");
+	ht.insert("1 month",  "x01");
+	ht.insert("3 months", "x03");
+	ht.insert("1 year",   "y01");
 	return ht;
 }
 
