@@ -2,14 +2,19 @@
 #include "utilities/debug.h"
 
 #include <QtCore/QCoreApplication>
-
+#include <stdio.h>
 
 
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication app( argc, argv );
-	Test::Worker worker("twsDL.cfg");
+	
+	if( argc > 2 ) {
+		fprintf( stderr, "Usage: %s [configuration file]\n", argv[0] );
+		return 2;
+	}
+	Test::Worker worker( argc == 2 ? argv[1] : "twsDL.cfg" );
 	QObject::connect( &worker, SIGNAL(finished()), &app, SLOT(quit()) );
 	worker.start();
 	int ret = app.exec();
