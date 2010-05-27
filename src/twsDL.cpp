@@ -28,11 +28,36 @@ namespace Test {
 class HistRequest
 {
 	public:
+		bool fromString( const QString& );
 		QString toString() const;
+		void clear();
 		
 		IB::Contract ibContract;
 		QString whatToShow;
 };
+
+
+bool HistRequest::fromString( const QString& s )
+{
+	bool ok = false;
+	QStringList sl = s.split('\t');
+	
+	if( sl.size() < 8 ) {
+		return ok;
+	}
+	
+	whatToShow = sl.at(0);
+	
+	ibContract.symbol = toIBString(sl.at(1));
+	ibContract.secType = toIBString(sl.at(2));
+	ibContract.exchange = toIBString(sl.at(3));
+	ibContract.currency = toIBString(sl.at(4));
+	ibContract.expiry = toIBString(sl.at(5));
+	ibContract.strike = sl.at(6).toDouble( &ok );
+	ibContract.right = toIBString(sl.at(7));
+	
+	return ok;
+}
 
 
 QString HistRequest::toString() const
@@ -52,6 +77,17 @@ QString HistRequest::toString() const
 	
 	return retVal;
 }
+
+
+void HistRequest::clear()
+{
+	ibContract = IB::Contract();
+	whatToShow.clear();
+}
+
+
+
+
 
 
 
