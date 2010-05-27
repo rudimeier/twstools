@@ -113,6 +113,8 @@ class Worker : public QObject
 		int storage2DB();
 		int storage2stdout();
 		
+		void dumpWorkUnit( const HistRequest& ) const;
+		void dumpWorkTodo() const;
 		
 		void onStart();
 		void waitTwsCon();

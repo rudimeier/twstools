@@ -708,6 +708,32 @@ int Worker::storage2stdout()
 }
 
 
+void Worker::dumpWorkUnit( const HistRequest& hR ) const
+{
+	const IB::Contract &c = hR.ibContract;
+	
+	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
+		.arg(toQString(c.symbol))
+		.arg(toQString(c.secType))
+		.arg(toQString(c.exchange))
+		.arg(toQString(c.currency))
+		.arg(toQString(c.expiry))
+		.arg(c.strike)
+		.arg(toQString(c.right));
+	printf("%s\t%s\n",
+	       hR.whatToShow.toUtf8().constData(),
+	       c_str.toUtf8().constData() );
+}
+
+
+void Worker::dumpWorkTodo() const
+{
+	for(int i=0; i<histRequests.size(); i++ ) {
+		dumpWorkUnit( histRequests.at(i) );
+	}
+}
+
+
 Worker::State Worker::currentState() const
 {
 	return state;
