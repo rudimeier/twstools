@@ -328,6 +328,7 @@ void Worker::finContracts()
 	if( currentReqId < myProp->contractSpecs.size() ) {
 		state = GET_CONTRACTS;
 	} else {
+		dumpWorkTodo();
 		if( myProp->downloadData ) {
 			state = GET_DATA;;
 		} else {
@@ -769,7 +770,9 @@ int Worker::storage2stdout()
 void Worker::dumpWorkTodo() const
 {
 	for(int i=0; i<histRequests.size(); i++ ) {
-		printf("%s\n", histRequests.at(i).toString().toUtf8().constData() );
+		fprintf( stderr, "[%d]\t%s\n",
+		        i,
+		        histRequests.at(i).toString().toUtf8().constData() );
 	}
 }
 
