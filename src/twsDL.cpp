@@ -25,11 +25,33 @@ namespace Test {
 
 
 
-struct HistRequest
+class HistRequest
 {
-	IB::Contract ibContract;
-	QString whatToShow;
+	public:
+		QString toString() const;
+		
+		IB::Contract ibContract;
+		QString whatToShow;
 };
+
+
+QString HistRequest::toString() const
+{
+	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
+		.arg(toQString(ibContract.symbol))
+		.arg(toQString(ibContract.secType))
+		.arg(toQString(ibContract.exchange))
+		.arg(toQString(ibContract.currency))
+		.arg(toQString(ibContract.expiry))
+		.arg(ibContract.strike)
+		.arg(toQString(ibContract.right));
+	
+	QString retVal = QString("%1\t%2")
+		.arg(whatToShow)
+		.arg(c_str);
+	
+	return retVal;
+}
 
 
 
@@ -708,28 +730,10 @@ int Worker::storage2stdout()
 }
 
 
-void Worker::dumpWorkUnit( const HistRequest& hR ) const
-{
-	const IB::Contract &c = hR.ibContract;
-	
-	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(toQString(c.symbol))
-		.arg(toQString(c.secType))
-		.arg(toQString(c.exchange))
-		.arg(toQString(c.currency))
-		.arg(toQString(c.expiry))
-		.arg(c.strike)
-		.arg(toQString(c.right));
-	printf("%s\t%s\n",
-	       hR.whatToShow.toUtf8().constData(),
-	       c_str.toUtf8().constData() );
-}
-
-
 void Worker::dumpWorkTodo() const
 {
 	for(int i=0; i<histRequests.size(); i++ ) {
-		dumpWorkUnit( histRequests.at(i) );
+		printf("%s\n", histRequests.at(i).toString().toUtf8().constData() );
 	}
 }
 
