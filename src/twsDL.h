@@ -146,7 +146,6 @@ class Worker : public QObject
 		QSqlQuery *warnQuery;
 		
 		QList<IB::ContractDetails> contractDetailsStorage;
-		QList<HistRequest> histRequests;
 		WorkTodo *workTodo;
 		
 		QTimer *idleTimer;

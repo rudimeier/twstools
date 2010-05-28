@@ -94,6 +94,8 @@ void HistRequest::clear()
 
 class WorkTodo
 {
+	public:
+		QList<HistRequest> histRequests;
 };
 
 
@@ -326,7 +328,7 @@ void Worker::finContracts()
 		
 		foreach( QString wts, myProp->whatToShow ) {
 			HistRequest hR = { cd.summary, wts };
-			histRequests.append( hR );
+			workTodo->histRequests.append( hR );
 		}
 	}
 	
@@ -354,10 +356,10 @@ void Worker::finContracts()
 
 void Worker::getData()
 {
-	Q_ASSERT( curReqContractIndex < histRequests.size() );
+	Q_ASSERT( curReqContractIndex < workTodo->histRequests.size() );
 	
 	// whyever we can't use that contract directly
-	const HistRequest &hR = histRequests.at( curReqContractIndex );
+	const HistRequest &hR = workTodo->histRequests.at( curReqContractIndex );
 	IB::Contract cF = hR.ibContract;
 	IB::Contract c;
 	
@@ -412,7 +414,7 @@ void Worker::finData()
 {
 	currentReqId++;
 	curReqContractIndex ++;
-	if( curReqContractIndex < histRequests.size() &&
+	if( curReqContractIndex < workTodo->histRequests.size() &&
 	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
 		idleTimer->setInterval( myProp->pacingTime );
 		state = GET_DATA;
@@ -646,8 +648,8 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 		finishedReq = true;
 		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
-		const IB::Contract &c = histRequests.at(curReqContractIndex).ibContract;
-		const QString &wts = histRequests.at(curReqContractIndex).whatToShow;
+		const IB::Contract &c = workTodo->histRequests.at(curReqContractIndex).ibContract;
+		const QString &wts = workTodo->histRequests.at(curReqContractIndex).whatToShow;
 		QString expiry = toQString(c.expiry);
 		QString dateTime = date;
 		if( myProp->printFormatDates ) {
@@ -783,10 +785,10 @@ int Worker::storage2stdout()
 
 void Worker::dumpWorkTodo() const
 {
-	for(int i=0; i<histRequests.size(); i++ ) {
+	for(int i=0; i < workTodo->histRequests.size(); i++ ) {
 		fprintf( stderr, "[%d]\t%s\n",
 		        i,
-		        histRequests.at(i).toString().toUtf8().constData() );
+		        workTodo->histRequests.at(i).toString().toUtf8().constData() );
 	}
 }
 
