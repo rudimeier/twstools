@@ -95,8 +95,21 @@ void HistRequest::clear()
 class WorkTodo
 {
 	public:
+		void dump( FILE *stream ) const;
+		
 		QList<HistRequest> histRequests;
 };
+
+
+void WorkTodo::dump( FILE *stream ) const
+{
+	for(int i=0; i < histRequests.size(); i++ ) {
+		fprintf( stream, "[%d]\t%s\n",
+		         i,
+		         histRequests.at(i).toString().toUtf8().constData() );
+	}
+}
+
 
 
 
@@ -785,11 +798,7 @@ int Worker::storage2stdout()
 
 void Worker::dumpWorkTodo() const
 {
-	for(int i=0; i < workTodo->histRequests.size(); i++ ) {
-		fprintf( stderr, "[%d]\t%s\n",
-		        i,
-		        workTodo->histRequests.at(i).toString().toUtf8().constData() );
-	}
+	workTodo->dump( stderr );
 }
 
 
