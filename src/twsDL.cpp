@@ -111,7 +111,7 @@ int WorkTodo::read_file( const QString & fileName, QList<QByteArray> *list ) con
 		retVal = 0;
 		while (!f.atEnd()) {
 			QByteArray line = f.readLine();
-			line = line.trimmed();
+			line.chop(1); //remove line feed
 			if( line.startsWith('#') || line.isEmpty() ) {
 				continue;
 			}
