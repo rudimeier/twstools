@@ -96,11 +96,39 @@ void HistRequest::clear()
 class WorkTodo
 {
 	public:
-		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
+		int fromFile( const QString & fileName );
 		void dump( FILE *stream ) const;
 		
 		QList<HistRequest> histRequests;
+		
+	private:
+		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
 };
+
+
+int WorkTodo::fromFile( const QString & fileName )
+{
+	histRequests.clear();
+	
+	QList<QByteArray> rows;
+	int retVal = read_file( fileName, &rows );
+	if( retVal == -1) {
+		return retVal;
+	}
+	foreach( QByteArray row, rows ) {
+		if( row.startsWith('[') ) {
+			int firstTab = row.indexOf('\t');
+			Q_ASSERT( row.size() > firstTab );
+			Q_ASSERT( firstTab >= 0 ); //TODO
+			row.remove(0, firstTab+1 );
+		}
+		HistRequest hR;
+		bool ok = hR.fromString( row );
+		Q_ASSERT(ok); //TODO
+		histRequests.append( hR );
+	}
+	return retVal;
+}
 
 
 int WorkTodo::read_file( const QString & fileName, QList<QByteArray> *list ) const
