@@ -92,6 +92,16 @@ void HistRequest::clear()
 
 
 
+class WorkTodo
+{
+};
+
+
+
+
+
+
+
 QHash<QString, const char*> init_short_wts()
 {
 	QHash<QString, const char*> ht;
@@ -146,6 +156,7 @@ Worker::Worker( const QString& confFile ) :
 	db(NULL),
 	symbolQuery(NULL),
 	warnQuery(NULL),
+	workTodo( new WorkTodo() ),
 	idleTimer(NULL)
 {
 	initProperties();
@@ -166,6 +177,9 @@ Worker::~Worker()
 	}
 	if( myProp  != NULL ) {
 		delete myProp;
+	}
+	if( workTodo != NULL ) {
+		delete workTodo;
 	}
 	if( idleTimer != NULL ) {
 		delete idleTimer;

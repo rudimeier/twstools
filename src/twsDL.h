@@ -26,7 +26,8 @@ namespace Test {
 
 
 
-struct HistRequest;
+class HistRequest;
+class WorkTodo;
 
 
 class PropTWSTool : public PropGeneral
@@ -146,6 +147,7 @@ class Worker : public QObject
 		
 		QList<IB::ContractDetails> contractDetailsStorage;
 		QList<HistRequest> histRequests;
+		WorkTodo *workTodo;
 		
 		QTimer *idleTimer;
 		
