@@ -12,6 +12,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
+#include <QtCore/QFile>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -95,10 +96,33 @@ void HistRequest::clear()
 class WorkTodo
 {
 	public:
+		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
 		void dump( FILE *stream ) const;
 		
 		QList<HistRequest> histRequests;
 };
+
+
+int WorkTodo::read_file( const QString & fileName, QList<QByteArray> *list ) const
+{
+	int retVal = -1;
+	QFile f( fileName );
+	if (f.open(QFile::ReadOnly)) {
+		retVal = 0;
+		while (!f.atEnd()) {
+			QByteArray line = f.readLine();
+			line = line.trimmed();
+			if( line.startsWith('#') || line.isEmpty() ) {
+				continue;
+			}
+			list->append(line);
+			retVal++;
+		}
+	} else {
+// 		_lastError = QString("can't read file '%1'").arg(fileName);
+	}
+	return retVal;
+}
 
 
 void WorkTodo::dump( FILE *stream ) const
