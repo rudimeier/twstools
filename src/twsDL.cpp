@@ -851,10 +851,6 @@ int Worker::storage2stdout()
 void Worker::dumpWorkTodo() const
 {
 	workTodo->dump( stderr );
-	int i = workTodo->fromFile("work");
-	Q_ASSERT( i>=0 );
-	qDebug() << "read from file" << i;
-	workTodo->dump( stderr );
 }
 
 
