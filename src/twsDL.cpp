@@ -214,7 +214,7 @@ static const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 
 
 
-Worker::Worker( const QString& confFile ) :
+Worker::Worker( const QString& confFile, const QString& workFile ) :
 	state(START),
 	confFile(confFile),
 	myProp(NULL),

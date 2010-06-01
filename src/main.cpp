@@ -10,11 +10,15 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication app( argc, argv );
 	
-	if( argc > 2 ) {
-		fprintf( stderr, "Usage: %s [configuration file]\n", argv[0] );
+	if( argc > 3 ) {
+		fprintf( stderr, "Usage: %s [configuration file] [worktodo file]\n", argv[0] );
 		return 2;
 	}
-	Test::Worker worker( argc == 2 ? argv[1] : "twsDL.cfg" );
+	QString workfile;
+	if( argc == 2 ) {
+		workfile = argv[2];
+	}
+	Test::Worker worker( argc == 2 ? argv[1] : "twsDL.cfg", workfile );
 	QObject::connect( &worker, SIGNAL(finished()), &app, SLOT(quit()) );
 	worker.start();
 	int ret = app.exec();

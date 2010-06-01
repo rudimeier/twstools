@@ -93,7 +93,7 @@ class Worker : public QObject
 			QUIT_ERROR
 		};
 		
-		Worker( const QString& confFile );
+		Worker( const QString& confFile, const QString& workFile );
 		~Worker();
 		
 		void start();
