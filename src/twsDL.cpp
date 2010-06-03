@@ -217,6 +217,7 @@ static const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	state(START),
 	confFile(confFile),
+	workFile(workFile),
 	myProp(NULL),
 	twsClient(NULL),
 	twsWrapper(NULL),
@@ -331,7 +332,7 @@ void TwsDL::waitTwsCon()
 	
 	if( twsClient->isConnected() ) {
 		qDebug() << "We are connected to TWS.";
-		state = GET_CONTRACTS;
+		startWork();
 	} else {
 		qDebug() << "Timeout connecting TWS.";
 		state = QUIT_ERROR;
@@ -845,6 +846,25 @@ int TwsDL::storage2stdout()
 		.arg(countReceived).arg(stopWatch.elapsed());
 	
 	return countReceived;
+}
+
+
+void TwsDL::startWork()
+{
+	if( workFile.isEmpty() ) {
+		qDebug() << "getting contracts from TWS";
+		state = GET_CONTRACTS;
+	} else {
+		if( myProp->downloadData ) {
+			qDebug() << "read work from file";
+			int i = workTodo->fromFile("work");
+			Q_ASSERT( i>=0 );
+			workTodo->dump( stderr );
+			state = GET_DATA;;
+		} else {
+			state = QUIT_READY;
+		}
+	}
 }
 
 

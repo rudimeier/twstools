@@ -127,9 +127,12 @@ class TwsDL : public QObject
 		void finData();
 		void onQuit( int ret );
 		
+		void startWork();
+		
 		State state;
 		
 		QString confFile;
+		QString workFile;
 		PropTWSTool *myProp;
 		
 		TWSClient  *twsClient;
