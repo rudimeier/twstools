@@ -214,7 +214,7 @@ static const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 
 
 
-Worker::Worker( const QString& confFile, const QString& workFile ) :
+TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	state(START),
 	confFile(confFile),
 	myProp(NULL),
@@ -232,7 +232,7 @@ Worker::Worker( const QString& confFile, const QString& workFile ) :
 }
 
 
-Worker::~Worker()
+TwsDL::~TwsDL()
 {
 	removeDb();
 	
@@ -254,7 +254,7 @@ Worker::~Worker()
 }
 
 
-void Worker::start()
+void TwsDL::start()
 {
 	Q_ASSERT( !idleTimer->isActive() );
 	Q_ASSERT( (state == START) ||
@@ -266,7 +266,7 @@ void Worker::start()
 }
 
 
-void Worker::idleTimeout()
+void TwsDL::idleTimeout()
 {
 	switch( state ) {
 		case START:
@@ -306,7 +306,7 @@ void Worker::idleTimeout()
 }
 
 
-void Worker::onStart()
+void TwsDL::onStart()
 {
 	currentReqId = 0;
 	countNewContracts = 0;
@@ -325,7 +325,7 @@ void Worker::onStart()
 }
 
 
-void Worker::waitTwsCon()
+void TwsDL::waitTwsCon()
 {
 	idleTimer->setInterval( 0 );
 	
@@ -339,7 +339,7 @@ void Worker::waitTwsCon()
 }
 
 
-void Worker::getContracts()
+void TwsDL::getContracts()
 {
 	int i = currentReqId;
 	
@@ -359,7 +359,7 @@ void Worker::getContracts()
 }
 
 
-void Worker::waitContracts()
+void TwsDL::waitContracts()
 {
 	idleTimer->setInterval( 0 );
 	
@@ -373,7 +373,7 @@ void Worker::waitContracts()
 }
 
 
-void Worker::finContracts()
+void TwsDL::finContracts()
 {
 	idleTimer->setInterval( 0 );
 	
@@ -419,7 +419,7 @@ void Worker::finContracts()
 }
 
 
-void Worker::getData()
+void TwsDL::getData()
 {
 	Q_ASSERT( curReqContractIndex < workTodo->histRequests.size() );
 	
@@ -453,7 +453,7 @@ void Worker::getData()
 }
 
 
-void Worker::waitData()
+void TwsDL::waitData()
 {
 	idleTimer->setInterval( 0 );
 	
@@ -467,7 +467,7 @@ void Worker::waitData()
 }
 
 
-void Worker::pauseData()
+void TwsDL::pauseData()
 {
 	idleTimer->setInterval( myProp->violationPause );
 	qDebug() << "PAUSE" << myProp->violationPause;
@@ -475,7 +475,7 @@ void Worker::pauseData()
 }
 
 
-void Worker::finData()
+void TwsDL::finData()
 {
 	currentReqId++;
 	curReqContractIndex ++;
@@ -490,7 +490,7 @@ void Worker::finData()
 }
 
 
-void Worker::onQuit( int /*ret*/ )
+void TwsDL::onQuit( int /*ret*/ )
 {
 	qDebug() << "Today we got" << countNewContracts << "new contracts from IB";
 	idleTimer->stop();
@@ -498,7 +498,7 @@ void Worker::onQuit( int /*ret*/ )
 }
 
 
-void Worker::initProperties()
+void TwsDL::initProperties()
 {
 	Properties prop;
 	prop.readConfigFile(confFile);
@@ -508,7 +508,7 @@ void Worker::initProperties()
 }
 
 
-void Worker::initIdleTimer()
+void TwsDL::initIdleTimer()
 {
 	Q_ASSERT( idleTimer == NULL );
 	
@@ -518,7 +518,7 @@ void Worker::initIdleTimer()
 }
 
 
-void Worker::initTwsClient()
+void TwsDL::initTwsClient()
 {
 	Q_ASSERT( (twsClient == NULL) && (twsWrapper == NULL) );
 	
@@ -548,7 +548,7 @@ void Worker::initTwsClient()
 }
 
 
-bool Worker::initDb()
+bool TwsDL::initDb()
 {
 	Q_ASSERT( (db == NULL) && (symbolQuery == NULL) && (warnQuery == NULL) );
 	
@@ -582,7 +582,7 @@ bool Worker::initDb()
 }
 
 
-void Worker::removeDb()
+void TwsDL::removeDb()
 {
 	if( symbolQuery != NULL ) {
 		delete symbolQuery;
@@ -598,7 +598,7 @@ void Worker::removeDb()
 }
 
 
-void Worker::error(int id, int errorCode, const QString &errorMsg)
+void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 {
 	if( id == currentReqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
@@ -643,13 +643,13 @@ void Worker::error(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void Worker::twsConnected( bool /*connected*/ )
+void TwsDL::twsConnected( bool /*connected*/ )
 {
 	idleTimer->setInterval( 0 );
 }
 
 
-void Worker::contractDetails2Storage( int reqId, const IB::ContractDetails &ibContractDetails )
+void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibContractDetails )
 {
 	
 	if( currentReqId != reqId ) {
@@ -661,7 +661,7 @@ void Worker::contractDetails2Storage( int reqId, const IB::ContractDetails &ibCo
 }
 
 
-void Worker::contractDetailsEnd( int reqId )
+void TwsDL::contractDetailsEnd( int reqId )
 {
 	if( currentReqId != reqId ) {
 		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentReqId;
@@ -700,7 +700,7 @@ QString ibDate2ISO( const QString &ibDate )
 
 
 
-void Worker::historicalData( int reqId, const QString &date, double open, double high, double low,
+void TwsDL::historicalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
 	if( currentReqId != reqId ) {
@@ -744,7 +744,7 @@ void Worker::historicalData( int reqId, const QString &date, double open, double
 }
 
 
-int Worker::storage2DB()
+int TwsDL::storage2DB()
 {
 	QTime  stopWatch;
 	stopWatch.start();
@@ -811,7 +811,7 @@ int Worker::storage2DB()
 }
 
 
-int Worker::storage2stdout()
+int TwsDL::storage2stdout()
 {
 	QTime  stopWatch;
 	stopWatch.start();
@@ -848,13 +848,13 @@ int Worker::storage2stdout()
 }
 
 
-void Worker::dumpWorkTodo() const
+void TwsDL::dumpWorkTodo() const
 {
 	workTodo->dump( stderr );
 }
 
 
-Worker::State Worker::currentState() const
+TwsDL::State TwsDL::currentState() const
 {
 	return state;
 }

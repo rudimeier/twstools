@@ -1,5 +1,5 @@
-#ifndef WORKER_H
-#define WORKER_H
+#ifndef TWS_DL_H
+#define TWS_DL_H
 
 #include "core/properties.h"
 
@@ -74,7 +74,7 @@ class PropTWSTool : public PropGeneral
 
 
 
-class Worker : public QObject
+class TwsDL : public QObject
 {
 	Q_OBJECT
 	
@@ -93,8 +93,8 @@ class Worker : public QObject
 			QUIT_ERROR
 		};
 		
-		Worker( const QString& confFile, const QString& workFile );
-		~Worker();
+		TwsDL( const QString& confFile, const QString& workFile );
+		~TwsDL();
 		
 		void start();
 		
