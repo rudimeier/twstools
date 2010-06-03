@@ -861,7 +861,7 @@ void TwsDL::startWork()
 	} else {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
-			int i = workTodo->fromFile("work");
+			int i = workTodo->fromFile(workFile);
 			Q_ASSERT( i>=0 );
 			workTodo->dump( stderr );
 			state = GET_DATA;;
