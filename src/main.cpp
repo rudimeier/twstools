@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 	QString workfile;
-	if( argc == 2 ) {
+	if( argc == 3 ) {
 		workfile = argv[2];
 	}
 	Test::TwsDL twsDL( argc == 2 ? argv[1] : "twsDL.cfg", workfile );
