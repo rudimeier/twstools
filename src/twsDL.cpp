@@ -47,15 +47,16 @@ bool HistRequest::fromString( const QString& s )
 		return ok;
 	}
 	
-	whatToShow = sl.at(0);
+	int i = 0;
+	whatToShow = sl.at(i++);
 	
-	ibContract.symbol = toIBString(sl.at(1));
-	ibContract.secType = toIBString(sl.at(2));
-	ibContract.exchange = toIBString(sl.at(3));
-	ibContract.currency = toIBString(sl.at(4));
-	ibContract.expiry = toIBString(sl.at(5));
-	ibContract.strike = sl.at(6).toDouble( &ok );
-	ibContract.right = toIBString(sl.at(7));
+	ibContract.symbol = toIBString(sl.at(i++));
+	ibContract.secType = toIBString(sl.at(i++));
+	ibContract.exchange = toIBString(sl.at(i++));
+	ibContract.currency = toIBString(sl.at(i++));
+	ibContract.expiry = toIBString(sl.at(i++));
+	ibContract.strike = sl.at(i++).toDouble( &ok );
+	ibContract.right = toIBString(sl.at(i++));
 	
 	return ok;
 }
