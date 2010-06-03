@@ -34,6 +34,7 @@ class HistRequest
 		void clear();
 		
 		IB::Contract ibContract;
+		QString endDateTime;
 		QString whatToShow;
 };
 
@@ -43,11 +44,12 @@ bool HistRequest::fromString( const QString& s )
 	bool ok = false;
 	QStringList sl = s.split('\t');
 	
-	if( sl.size() < 8 ) {
+	if( sl.size() < 9 ) {
 		return ok;
 	}
 	
 	int i = 0;
+	endDateTime = sl.at(i++);
 	whatToShow = sl.at(i++);
 	
 	ibContract.symbol = toIBString(sl.at(i++));
@@ -73,7 +75,8 @@ QString HistRequest::toString() const
 		.arg(ibContract.strike)
 		.arg(toQString(ibContract.right));
 	
-	QString retVal = QString("%1\t%2")
+	QString retVal = QString("%1\t%2\t%3")
+		.arg(endDateTime)
 		.arg(whatToShow)
 		.arg(c_str);
 	
@@ -394,7 +397,7 @@ void TwsDL::finContracts()
 		}
 		
 		foreach( QString wts, myProp->whatToShow ) {
-			HistRequest hR = { cd.summary, wts };
+			HistRequest hR = { cd.summary, myProp->endDateTime, wts };
 			workTodo->histRequests.append( hR );
 		}
 	}
@@ -442,7 +445,7 @@ void TwsDL::getData()
 	
 	twsClient->reqHistoricalData( currentReqId,
 	                              c,
-	                              myProp->endDateTime,
+	                              hR.endDateTime,
 	                              myProp->durationStr,
 	                              myProp->barSizeSetting,
 	                              hR.whatToShow,
