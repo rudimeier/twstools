@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	if( argc == 3 ) {
 		workfile = argv[2];
 	}
-	Test::TwsDL twsDL( argc == 2 ? argv[1] : "twsDL.cfg", workfile );
+	Test::TwsDL twsDL( argc >= 2 ? argv[1] : "twsDL.cfg", workfile );
 	QObject::connect( &twsDL, SIGNAL(finished()), &app, SLOT(quit()) );
 	twsDL.start();
 	int ret = app.exec();
