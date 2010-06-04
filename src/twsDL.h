@@ -28,7 +28,7 @@ class HistRequest;
 class WorkTodo;
 
 
-class PropTWSTool : public PropGeneral
+class PropTWSTool : public PropSub
 {
 	public:
 		PropTWSTool( const Properties& prop, const QString& cName = "" );

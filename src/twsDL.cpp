@@ -754,7 +754,7 @@ TwsDL::State TwsDL::currentState() const
 ///////////////////////////////////////////////////////////////////////////////
 // PropTWSTool
 PropTWSTool::PropTWSTool( const Properties& prop, const QString& cName ) :
-	PropGeneral(prop,cName)
+	PropSub(prop,cName)
 {
 	PROP_DEBUG( 2, "INITIALIZING" );
 	//initializing fields
@@ -764,8 +764,6 @@ PropTWSTool::PropTWSTool( const Properties& prop, const QString& cName ) :
 
 void PropTWSTool::initDefaults()
 {
-	PropGeneral::initDefaults();
-	
 	twsHost  = "localhost";
 	twsPort  = 6666;
 	clientId = 66;
@@ -797,8 +795,6 @@ bool PropTWSTool::readProperties()
 {
 	PROP_DEBUG( 2, "READ CONFIG" );
 	bool ok = true;
-	
-	ok = ok & PropGeneral::readProperties();
 	
 	ok = ok & get("twsHost",       twsHost);
 	ok = ok & get("twsPort",       twsPort);
