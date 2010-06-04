@@ -2,9 +2,6 @@ TEMPLATE = app
 
 include( ../../src/src.pri )
 
-QT += \
- sql
-
 SOURCES += \
   main.cpp \
   twsDL.cpp
