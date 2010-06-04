@@ -490,7 +490,7 @@ void TwsDL::initProperties()
 	Properties prop;
 	prop.readConfigFile(confFile);
 	
-	myProp = new PropTWSTool(prop);
+	myProp = new PropTwsDL(prop);
 	myProp->readProperties();
 }
 
@@ -752,8 +752,8 @@ TwsDL::State TwsDL::currentState() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// PropTWSTool
-PropTWSTool::PropTWSTool( const Properties& prop, const QString& cName ) :
+// PropTwsDL
+PropTwsDL::PropTwsDL( const Properties& prop, const QString& cName ) :
 	PropSub(prop,cName)
 {
 	PROP_DEBUG( 2, "INITIALIZING" );
@@ -762,7 +762,7 @@ PropTWSTool::PropTWSTool( const Properties& prop, const QString& cName ) :
 }
 
 
-void PropTWSTool::initDefaults()
+void PropTwsDL::initDefaults()
 {
 	twsHost  = "localhost";
 	twsPort  = 6666;
@@ -791,7 +791,7 @@ void PropTWSTool::initDefaults()
 }
 
 
-bool PropTWSTool::readProperties()
+bool PropTwsDL::readProperties()
 {
 	PROP_DEBUG( 2, "READ CONFIG" );
 	bool ok = true;

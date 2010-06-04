@@ -28,10 +28,10 @@ class HistRequest;
 class WorkTodo;
 
 
-class PropTWSTool : public PropSub
+class PropTwsDL : public PropSub
 {
 	public:
-		PropTWSTool( const Properties& prop, const QString& cName = "" );
+		PropTwsDL( const Properties& prop, const QString& cName = "" );
 		
 		void initDefaults();
 		bool readProperties();
@@ -124,7 +124,7 @@ class TwsDL : public QObject
 		
 		QString confFile;
 		QString workFile;
-		PropTWSTool *myProp;
+		PropTwsDL *myProp;
 		
 		TWSClient  *twsClient;
 		TWSWrapper *twsWrapper;
