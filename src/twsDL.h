@@ -12,8 +12,6 @@
 class TWSClient;
 class TWSWrapper;
 class QTimer;
-class QSqlDatabase;
-class QSqlQuery;
 
 namespace IB {
 	class ContractDetails;
@@ -42,10 +40,6 @@ class PropTWSTool : public PropGeneral
 		QString twsHost;
 		quint16 twsPort;
 		int     clientId;
-		
-		bool useDB;
-		QString ibSymbolTable;
-		QString symbolQueryStrg; // %1 = ibSymbolTable
 		
 		int conTimeout;
 		int reqTimeout;
@@ -107,11 +101,8 @@ class TwsDL : public QObject
 		void initProperties();
 		void initTwsClient();
 		void initIdleTimer();
-		bool initDb();
-		void removeDb();
 		
 		/// Returns the count of inserted rows or -1 on error.
-		int storage2DB();
 		int storage2stdout();
 		
 		void dumpWorkTodo() const;
@@ -143,10 +134,6 @@ class TwsDL : public QObject
 		int countNewContracts;
 		
 		int curReqContractIndex;
-		
-		QSqlDatabase *db;
-		QSqlQuery *symbolQuery;
-		QSqlQuery *warnQuery;
 		
 		QList<IB::ContractDetails> contractDetailsStorage;
 		WorkTodo *workTodo;

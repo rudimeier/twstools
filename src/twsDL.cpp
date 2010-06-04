@@ -13,10 +13,6 @@
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlRecord>
-#include <QtSql/QSqlError>
 
 
 
@@ -225,9 +221,6 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	myProp(NULL),
 	twsClient(NULL),
 	twsWrapper(NULL),
-	db(NULL),
-	symbolQuery(NULL),
-	warnQuery(NULL),
 	workTodo( new WorkTodo() ),
 	idleTimer(NULL)
 {
@@ -239,8 +232,6 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 
 TwsDL::~TwsDL()
 {
-	removeDb();
-	
 	if( twsClient != NULL ) {
 		delete twsClient;
 	}
@@ -317,11 +308,6 @@ void TwsDL::onStart()
 	countNewContracts = 0;
 	curReqContractIndex = 0;
 	
-	if( myProp->useDB && !initDb() ) {
-		state = QUIT_ERROR;
-		return;
-	}
-	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
 	
@@ -383,11 +369,7 @@ void TwsDL::finContracts()
 	idleTimer->setInterval( 0 );
 	
 	int inserted;
-	if( myProp->useDB ) {
-		inserted = storage2DB();
-	} else {
-		inserted = storage2stdout();
-	}
+	inserted = storage2stdout();
 	
 	for( int i = 0; i<contractDetailsStorage.size(); i++ ) {
 		const IB::ContractDetails &cd = contractDetailsStorage.at(i);
@@ -553,56 +535,6 @@ void TwsDL::initTwsClient()
 }
 
 
-bool TwsDL::initDb()
-{
-	Q_ASSERT( (db == NULL) && (symbolQuery == NULL) && (warnQuery == NULL) );
-	
-	db = new QSqlDatabase();
-	*db = QSqlDatabase::addDatabase ( "QMYSQL","symbolData" );
-	Q_ASSERT( !db->isOpen() );
-	
-	db->setHostName( myProp->dbHost );
-	if( myProp->dbPort>=0) {
-		db->setPort( myProp->dbPort );
-	}
-	db->setDatabaseName( myProp->staticDB );
-	db->setUserName( myProp->dbUser );
-	db->setPassword( myProp->dbPwd );
-	
-	if( !db->open() ) {
-		qDebug() << db->lastError();
-		return false;
-	}
-	
-#if 0
-	//TODO "SHOW WARNINGS" does not work anymore!
-	warnQuery   = new QSqlQuery( *db );
-#endif
-	symbolQuery = new QSqlQuery( *db );
-	if( !symbolQuery->prepare(myProp->symbolQueryStrg.arg(myProp->ibSymbolTable)) ) {
-		qDebug() << symbolQuery->lastError();
-		return false;
-	}
-	return true;
-}
-
-
-void TwsDL::removeDb()
-{
-	if( symbolQuery != NULL ) {
-		delete symbolQuery;
-	}
-	if( warnQuery != NULL ) {
-		delete warnQuery;
-	}
-	if( db != NULL ) {
-		delete db;
-	}
-	QSqlDatabase::removeDatabase("symbolData");
-	
-}
-
-
 void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 {
 	if( id == currentReqId ) {
@@ -749,73 +681,6 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 }
 
 
-int TwsDL::storage2DB()
-{
-	QTime  stopWatch;
-	stopWatch.start();
-	
-	int countInserted = 0;
-	int countUpdated  = 0;
-	int countReceived = contractDetailsStorage.size();
-	
-	for( int i=0; i<countReceived; i++ ) {
-		
-		IB::ContractDetails *ibContractDetails = &contractDetailsStorage[i];
-		
-		symbolQuery->bindValue(":symbol"         , toQString(ibContractDetails->summary.symbol));
-		symbolQuery->bindValue(":secType"        , toQString(ibContractDetails->summary.secType));
-		symbolQuery->bindValue(":expiry"         , toQString(ibContractDetails->summary.expiry));
-		symbolQuery->bindValue(":strike"         , ibContractDetails->summary.strike);
-		symbolQuery->bindValue(":pc"             , toQString(ibContractDetails->summary.right));
-		symbolQuery->bindValue(":exchange"       , toQString(ibContractDetails->summary.exchange));
-		symbolQuery->bindValue(":currency"       , toQString(ibContractDetails->summary.currency));
-		symbolQuery->bindValue(":localSymbol"    , toQString(ibContractDetails->summary.localSymbol));
-		symbolQuery->bindValue(":marketName"     , toQString(ibContractDetails->marketName));
-		symbolQuery->bindValue(":tradingClass"   , toQString(ibContractDetails->tradingClass));
-		symbolQuery->bindValue(":conid"          , (int)ibContractDetails->summary.conId);
-		symbolQuery->bindValue(":minTick"        , ibContractDetails->minTick);
-		symbolQuery->bindValue(":multiplier"     , toQString(ibContractDetails->summary.multiplier));
-		symbolQuery->bindValue(":priceMagnifier" , (int)ibContractDetails->priceMagnifier);
-		symbolQuery->bindValue(":orderTypes"     , toQString(ibContractDetails->orderTypes));
-		symbolQuery->bindValue(":validExchanges" , toQString(ibContractDetails->validExchanges));
-		
-		if( !symbolQuery->exec() ) {
-			qDebug() << symbolQuery->lastError();
-			return -1;
-		} else {
-			if( symbolQuery->numRowsAffected() == 1 ) {
-				countInserted++;
-			}
-			if( symbolQuery->numRowsAffected() == 2 ) {
-				countUpdated++;
-			}
-		}
-		
-//TODO "SHOW WARNINGS" does not work anymore!
-#if 0
-		if( !warnQuery->exec() ) {
-			qDebug() << "warnQuery false" << warnQuery->lastError();
-		} else {
-			if( warnQuery->size() > 0 ) {
-				qDebug() << toQString(ibContractDetails->validExchanges);
-				qDebug() << toQString(ibContractDetails->orderTypes);
-				qDebug() << "SQL warnings:" <<  warnQuery-> size();
-				while (warnQuery->next()) {
-					qDebug() << warnQuery->value(0).toString() << warnQuery->value(1).toString() << warnQuery->value(2).toString();
-				}
-			}
-		}
-#endif
-	}
-	qDebug() << QString(
-		"Contracts received: %1, updated: %2, inserted: %3 (%4ms)")
-		.arg(countReceived).arg(countUpdated).arg(countInserted)
-		.arg(stopWatch.elapsed());
-	
-	return countInserted;
-}
-
-
 int TwsDL::storage2stdout()
 {
 	QTime  stopWatch;
@@ -904,17 +769,6 @@ void PropTWSTool::initDefaults()
 	twsHost  = "localhost";
 	twsPort  = 6666;
 	clientId = 66;
-	useDB = false;
-	ibSymbolTable   = "someTable";
-	symbolQueryStrg = QString()
-		+"INSERT INTO "
-		+"`%1`(symbol, secType, expiry, strike, pc, exchange, currency, localSymbol, marketName, "
-		+"tradingClass, conid, minTick, multiplier, priceMagnifier, orderTypes, validExchanges, "
-		+"firstSeen, lastSeen) "
-		+"VALUES(:symbol, :secType, :expiry, :strike, :pc, :exchange, :currency, :localSymbol, :marketName, "
-		+":tradingClass, :conid, :minTick, :multiplier, :priceMagnifier, :orderTypes, :validExchanges, "
-		+"CURRENT_DATE(), CURRENT_DATE()) "
-		+"ON DUPLICATE KEY UPDATE lastSeen=CURRENT_DATE()";
 	
 	conTimeout = 1000;
 	reqTimeout = 20000;
@@ -949,8 +803,6 @@ bool PropTWSTool::readProperties()
 	ok = ok & get("twsHost",       twsHost);
 	ok = ok & get("twsPort",       twsPort);
 	ok = ok & get("clientId",      clientId);
-	ok = ok & get("useDB",         useDB);
-	ok = ok & get("ibSymbolTable", ibSymbolTable);
 	
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);
