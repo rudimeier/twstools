@@ -275,29 +275,11 @@ void TwsDL::getData()
 {
 	Q_ASSERT( curReqContractIndex < workTodo->histRequests.size() );
 	
-	// whyever we can't use that contract directly
 	const HistRequest &hR = workTodo->histRequests.at( curReqContractIndex );
-	IB::Contract cF = hR.ibContract;
-	IB::Contract c;
 	
-	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentReqId << ibToString(cF);
+	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentReqId << ibToString(hR.ibContract);
 	
-	c.symbol = cF.symbol/*"DJX"*/;
-	c.secType = cF.secType /*"OPT"*/;
-	c.exchange = cF.exchange /*"CBOE"*/;
-	c.currency = cF.currency /*"USD"*/;
-	c.right = cF.right /*"P"*/;
-	c.strike = cF.strike /*75.0*/;
-	c.expiry = cF.expiry /*"20100520"*/;
-	
-	twsClient->reqHistoricalData( currentReqId,
-	                              c,
-	                              hR.endDateTime,
-	                              myProp->durationStr,
-	                              myProp->barSizeSetting,
-	                              hR.whatToShow,
-	                              myProp->useRTH,
-	                              myProp->formatDate );
+	reqHistoricalData( hR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
 	finishedReq = false;
@@ -614,6 +596,17 @@ TwsDL::State TwsDL::currentState() const
 }
 
 
+void TwsDL::reqHistoricalData( const HistRequest& hR )
+{
+	twsClient->reqHistoricalData( currentReqId,
+	                              hR.ibContract,
+	                              hR.endDateTime,
+	                              hR.durationStr,
+	                              hR.barSizeSetting,
+	                              hR.whatToShow,
+	                              hR.useRTH,
+	                              hR.formatDate );
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

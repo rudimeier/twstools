@@ -120,6 +120,8 @@ class TwsDL : public QObject
 		
 		void startWork();
 		
+		void reqHistoricalData( const HistRequest& );
+		
 		State state;
 		
 		QString confFile;
