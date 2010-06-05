@@ -4,10 +4,12 @@ include( ../../src/src.pri )
 
 SOURCES += \
   main.cpp \
-  twsDL.cpp
+  twsDL.cpp \
+  tws_meta.cpp
 
 HEADERS += \
-  twsDL.h
+  twsDL.h \
+  tws_meta.h
 
 INCLUDEPATH += \
   $${ibtws_include_dir}
