@@ -139,7 +139,7 @@ void GenericRequest::nextRequest( ReqType t )
 
 
 
-int WorkTodo::fromFile( const QString & fileName )
+int HistTodo::fromFile( const QString & fileName )
 {
 	histRequests.clear();
 	
@@ -164,7 +164,7 @@ int WorkTodo::fromFile( const QString & fileName )
 }
 
 
-int WorkTodo::read_file( const QString & fileName, QList<QByteArray> *list ) const
+int HistTodo::read_file( const QString & fileName, QList<QByteArray> *list ) const
 {
 	int retVal = -1;
 	QFile f( fileName );
@@ -186,7 +186,7 @@ int WorkTodo::read_file( const QString & fileName, QList<QByteArray> *list ) con
 }
 
 
-void WorkTodo::dump( FILE *stream ) const
+void HistTodo::dump( FILE *stream ) const
 {
 	for(int i=0; i < histRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",

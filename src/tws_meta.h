@@ -84,7 +84,7 @@ class GenericRequest
 
 
 
-class WorkTodo
+class HistTodo
 {
 	public:
 		int fromFile( const QString & fileName );

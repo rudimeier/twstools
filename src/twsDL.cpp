@@ -85,7 +85,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	twsClient(NULL),
 	twsWrapper(NULL),
 	currentRequest(  *(new GenericRequest()) ),
-	workTodo( new WorkTodo() ),
+	histTodo( new HistTodo() ),
 	idleTimer(NULL)
 {
 	initProperties();
@@ -107,8 +107,8 @@ TwsDL::~TwsDL()
 	if( myProp  != NULL ) {
 		delete myProp;
 	}
-	if( workTodo != NULL ) {
-		delete workTodo;
+	if( histTodo != NULL ) {
+		delete histTodo;
 	}
 	if( idleTimer != NULL ) {
 		delete idleTimer;
@@ -250,7 +250,7 @@ void TwsDL::finContracts()
 			HistRequest hR;
 			hR.initialize( cd.summary, myProp->endDateTime, myProp->durationStr,
 			               myProp->barSizeSetting, wts, myProp->useRTH, myProp->formatDate );
-			workTodo->histRequests.append( hR );
+			histTodo->histRequests.append( hR );
 		}
 	}
 	
@@ -280,9 +280,9 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( curReqContractIndex < workTodo->histRequests.size() );
+	Q_ASSERT( curReqContractIndex < histTodo->histRequests.size() );
 	
-	const HistRequest &hR = workTodo->histRequests.at( curReqContractIndex );
+	const HistRequest &hR = histTodo->histRequests.at( curReqContractIndex );
 	
 	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentRequest.reqId << ibToString(hR.ibContract);
 	
@@ -320,7 +320,7 @@ void TwsDL::finData()
 {
 	curReqContractIndex ++;
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	if( curReqContractIndex < workTodo->histRequests.size() &&
+	if( curReqContractIndex < histTodo->histRequests.size() &&
 	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
 		idleTimer->setInterval( myProp->pacingTime );
 		state = GET_DATA;
@@ -504,8 +504,8 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 		currentRequest.reqState = GenericRequest::FINISHED;
 		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
-		const IB::Contract &c = workTodo->histRequests.at(curReqContractIndex).ibContract;
-		const QString &wts = workTodo->histRequests.at(curReqContractIndex).whatToShow;
+		const IB::Contract &c = histTodo->histRequests.at(curReqContractIndex).ibContract;
+		const QString &wts = histTodo->histRequests.at(curReqContractIndex).whatToShow;
 		QString expiry = toQString(c.expiry);
 		QString dateTime = date;
 		if( myProp->printFormatDates ) {
@@ -580,9 +580,9 @@ void TwsDL::startWork()
 	} else {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
-			int i = workTodo->fromFile(workFile);
+			int i = histTodo->fromFile(workFile);
 			Q_ASSERT( i>=0 );
-			workTodo->dump( stderr );
+			histTodo->dump( stderr );
 			state = GET_DATA;;
 		} else {
 			state = QUIT_READY;
@@ -593,7 +593,7 @@ void TwsDL::startWork()
 
 void TwsDL::dumpWorkTodo() const
 {
-	workTodo->dump( stderr );
+	histTodo->dump( stderr );
 }
 
 
