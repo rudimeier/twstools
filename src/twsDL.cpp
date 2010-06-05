@@ -242,7 +242,9 @@ void TwsDL::finContracts()
 		}
 		
 		foreach( QString wts, myProp->whatToShow ) {
-			HistRequest hR = { cd.summary, myProp->endDateTime, wts };
+			HistRequest hR;
+			hR.initialize( cd.summary, myProp->endDateTime, myProp->durationStr,
+			               myProp->barSizeSetting, wts, myProp->useRTH, myProp->formatDate );
 			workTodo->histRequests.append( hR );
 		}
 	}

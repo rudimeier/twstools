@@ -13,18 +13,43 @@ namespace Test {
 
 
 
+bool HistRequest::initialize( const IB::Contract& c, const QString &e,
+	const QString &d, const QString &b,
+	const QString &w, int u, int f )
+{
+	ibContract = c;
+	endDateTime = e;
+	durationStr = d;
+	barSizeSetting = b;
+	whatToShow = w;
+	useRTH = u;
+	formatDate = f;
+	return true;
+}
+
+
 bool HistRequest::fromString( const QString& s )
 {
 	bool ok = false;
 	QStringList sl = s.split('\t');
 	
-	if( sl.size() < 9 ) {
+	if( sl.size() < 13 ) {
 		return ok;
 	}
 	
 	int i = 0;
 	endDateTime = sl.at(i++);
+	durationStr = sl.at(i++);
+	barSizeSetting = sl.at(i++);
 	whatToShow = sl.at(i++);
+	useRTH = sl.at(i++).toInt( &ok );
+	if( !ok ) {
+		return false;
+	}
+	formatDate = sl.at(i++).toInt( &ok );
+	if( !ok ) {
+		return false;
+	}
 	
 	ibContract.symbol = toIBString(sl.at(i++));
 	ibContract.secType = toIBString(sl.at(i++));
@@ -32,6 +57,9 @@ bool HistRequest::fromString( const QString& s )
 	ibContract.currency = toIBString(sl.at(i++));
 	ibContract.expiry = toIBString(sl.at(i++));
 	ibContract.strike = sl.at(i++).toDouble( &ok );
+	if( !ok ) {
+		return false;
+	}
 	ibContract.right = toIBString(sl.at(i++));
 	
 	return ok;
@@ -49,9 +77,13 @@ QString HistRequest::toString() const
 		.arg(ibContract.strike)
 		.arg(toQString(ibContract.right));
 	
-	QString retVal = QString("%1\t%2\t%3")
+	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 		.arg(endDateTime)
+		.arg(durationStr)
 		.arg(whatToShow)
+		.arg(whatToShow)
+		.arg(useRTH)
+		.arg(formatDate)
 		.arg(c_str);
 	
 	return retVal;
