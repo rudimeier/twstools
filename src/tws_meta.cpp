@@ -123,6 +123,13 @@ GenericRequest::GenericRequest() :
 }
 
 
+void GenericRequest::nextRequest( ReqType t )
+{
+	reqType = t;
+	reqId++;
+}
+
+
 
 
 

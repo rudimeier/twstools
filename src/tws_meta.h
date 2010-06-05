@@ -65,6 +65,8 @@ class GenericRequest
 		
 		GenericRequest();
 		
+		void nextRequest( ReqType );
+		
 		ReqType reqType;
 		int reqId;
 };

@@ -170,7 +170,6 @@ void TwsDL::idleTimeout()
 
 void TwsDL::onStart()
 {
-	currentReqId = 0;
 	countNewContracts = 0;
 	curReqContractIndex = 0;
 	
@@ -198,7 +197,7 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::getContracts()
 {
-	int i = currentReqId;
+	int i = currentRequest.reqId;
 	
 	IB::Contract ibContract;
 	ibContract.symbol = toIBString(myProp->contractSpecs[i][0]);
@@ -262,12 +261,13 @@ void TwsDL::finContracts()
 	countNewContracts += inserted;
 	
 	
-	currentReqId++;
-	if( currentReqId < myProp->contractSpecs.size() ) {
+	if( (currentRequest.reqId + 1) < myProp->contractSpecs.size() ) {
+		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST);
 		state = GET_CONTRACTS;
 	} else {
 		dumpWorkTodo();
 		if( myProp->downloadData ) {
+			currentRequest.nextRequest( GenericRequest::HIST_REQUEST);
 			state = GET_DATA;;
 		} else {
 			state = QUIT_READY;
@@ -282,7 +282,7 @@ void TwsDL::getData()
 	
 	const HistRequest &hR = workTodo->histRequests.at( curReqContractIndex );
 	
-	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentReqId << ibToString(hR.ibContract);
+	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentRequest.reqId << ibToString(hR.ibContract);
 	
 	reqHistoricalData( hR );
 	
@@ -316,7 +316,7 @@ void TwsDL::pauseData()
 
 void TwsDL::finData()
 {
-	currentReqId++;
+	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	curReqContractIndex ++;
 	if( curReqContractIndex < workTodo->histRequests.size() &&
 	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
@@ -389,12 +389,12 @@ void TwsDL::initTwsClient()
 
 void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 {
-	if( id == currentReqId ) {
+	if( id == currentRequest.reqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
 		if( state == WAIT_DATA ) {
 			if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
-				currentReqId++;
+				currentRequest.nextRequest(GenericRequest::HIST_REQUEST);
 				state = PAUSE_DATA;
 			} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
@@ -441,8 +441,8 @@ void TwsDL::twsConnected( bool /*connected*/ )
 void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibContractDetails )
 {
 	
-	if( currentReqId != reqId ) {
-		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentReqId;
+	if( currentRequest.reqId != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
 		Q_ASSERT( false );
 	}
 	
@@ -452,8 +452,8 @@ void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibCon
 
 void TwsDL::contractDetailsEnd( int reqId )
 {
-	if( currentReqId != reqId ) {
-		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentReqId;
+	if( currentRequest.reqId != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
 		Q_ASSERT( false );
 	}
 	
@@ -492,8 +492,8 @@ QString ibDate2ISO( const QString &ibDate )
 void TwsDL::historicalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
-	if( currentReqId != reqId ) {
-		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentReqId;
+	if( currentRequest.reqId != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
 		Q_ASSERT( false );
 	}
 	
@@ -603,13 +603,13 @@ TwsDL::State TwsDL::currentState() const
 
 void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 {
-	twsClient->reqContractDetails( currentReqId, cdR.ibContract );
+	twsClient->reqContractDetails( currentRequest.reqId, cdR.ibContract );
 }
 
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
-	twsClient->reqHistoricalData( currentReqId,
+	twsClient->reqHistoricalData( currentRequest.reqId,
 	                              hR.ibContract,
 	                              hR.endDateTime,
 	                              hR.durationStr,

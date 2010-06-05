@@ -135,7 +135,6 @@ class TwsDL : public QObject
 		TWSWrapper *twsWrapper;
 		
 		GenericRequest &currentRequest;
-		int currentReqId;
 		bool finishedReq;
 		int countNewContracts;
 		
