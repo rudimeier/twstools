@@ -174,7 +174,6 @@ void TwsDL::idleTimeout()
 
 void TwsDL::onStart()
 {
-	countNewContracts = 0;
 	curReqSpecIndex = 0;
 	curReqContractIndex = 0;
 	
@@ -253,7 +252,6 @@ void TwsDL::finContracts()
 		state = QUIT_ERROR;
 		return;
 	}
-	countNewContracts += inserted;
 	
 	curReqSpecIndex++;
 	if( curReqSpecIndex < contractDetailsTodo->contractDetailsRequests.size() ) {
@@ -326,7 +324,6 @@ void TwsDL::finData()
 
 void TwsDL::onQuit( int /*ret*/ )
 {
-	qDebug() << "Today we got" << countNewContracts << "new contracts from IB";
 	idleTimer->stop();
 	emit finished();
 }

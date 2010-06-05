@@ -134,7 +134,6 @@ class TwsDL : public QObject
 		TWSWrapper *twsWrapper;
 		
 		GenericRequest &currentRequest;
-		int countNewContracts;
 		
 		int curReqSpecIndex;
 		int curReqContractIndex;
