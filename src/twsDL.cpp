@@ -84,6 +84,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	myProp(NULL),
 	twsClient(NULL),
 	twsWrapper(NULL),
+	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
 	idleTimer(NULL)
 {
@@ -95,6 +96,8 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 
 TwsDL::~TwsDL()
 {
+	delete &currentRequest;
+	
 	if( twsClient != NULL ) {
 		delete twsClient;
 	}

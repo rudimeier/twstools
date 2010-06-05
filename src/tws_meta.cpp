@@ -116,6 +116,19 @@ void HistRequest::clear()
 
 
 
+GenericRequest::GenericRequest() :
+	reqType(NONE),
+	reqId(0)
+{
+}
+
+
+
+
+
+
+
+
 int WorkTodo::fromFile( const QString & fileName )
 {
 	histRequests.clear();

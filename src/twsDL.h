@@ -26,6 +26,7 @@ namespace Test {
 
 class ContractDetailsRequest;
 class HistRequest;
+class GenericRequest;
 class WorkTodo;
 
 
@@ -133,6 +134,7 @@ class TwsDL : public QObject
 		TWSClient  *twsClient;
 		TWSWrapper *twsWrapper;
 		
+		GenericRequest &currentRequest;
 		int currentReqId;
 		bool finishedReq;
 		int countNewContracts;

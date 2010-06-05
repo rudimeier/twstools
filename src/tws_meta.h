@@ -54,6 +54,27 @@ class HistRequest
 
 
 
+class GenericRequest
+{
+	public:
+		enum ReqType {
+			NONE,
+			CONTRACT_DETAILS_REQUEST,
+			HIST_REQUEST
+		};
+		
+		GenericRequest();
+		
+		ReqType reqType;
+		int reqId;
+};
+
+
+
+
+
+
+
 
 class WorkTodo
 {
