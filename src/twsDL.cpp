@@ -255,9 +255,8 @@ void TwsDL::finContracts()
 	}
 	countNewContracts += inserted;
 	
-	
-	if( (currentRequest.reqId + 1) < myProp->contractSpecs.size() ) {
-		curReqSpecIndex++;
+	curReqSpecIndex++;
+	if( curReqSpecIndex < contractDetailsTodo->contractDetailsRequests.size() ) {
 		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 		state = GET_CONTRACTS;
 	} else {
