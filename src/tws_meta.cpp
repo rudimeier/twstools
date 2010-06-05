@@ -20,6 +20,18 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 }
 
 
+bool ContractDetailsRequest::fromStringList( const QList<QString>& sl )
+{
+	ibContract.symbol = toIBString( sl[0] );
+	ibContract.secType = toIBString( sl[1]);
+	ibContract.exchange= toIBString( sl[2] );
+	// optional filter for a single expiry
+	QString e = sl.size() > 3 ? sl[3] : "";
+	ibContract.expiry = toIBString( e );
+	return true;
+}
+
+
 
 
 
@@ -193,6 +205,25 @@ void HistTodo::dump( FILE *stream ) const
 		         i,
 		         histRequests.at(i).toString().toUtf8().constData() );
 	}
+}
+
+
+
+
+
+
+
+
+int ContractDetailsTodo::fromConfig( const QList< QList<QString> > &contractSpecs )
+{
+	int retVal = contractSpecs.size();
+	foreach( const QList<QString> &sl, contractSpecs ) {
+		ContractDetailsRequest cdR;
+		bool ok = cdR.fromStringList( sl );
+		Q_ASSERT(ok); //TODO
+		contractDetailsRequests.append( cdR );
+	}
+	return retVal;
 }
 
 

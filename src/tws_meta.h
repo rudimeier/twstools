@@ -18,6 +18,7 @@ class ContractDetailsRequest
 {
 	public:
 		bool initialize( const IB::Contract& );
+		bool fromStringList( const QList<QString>& );
 		
 		IB::Contract ibContract;
 };
@@ -106,6 +107,8 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
+		int fromConfig( const QList< QList<QString> > &contractSpecs );
+		
 		QList<ContractDetailsRequest> contractDetailsRequests;
 };
 

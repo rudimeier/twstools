@@ -202,18 +202,8 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::getContracts()
 {
-	int i = currentRequest.reqId;
-	
-	IB::Contract ibContract;
-	ibContract.symbol = toIBString(myProp->contractSpecs[i][0]);
-	ibContract.secType = toIBString(myProp->contractSpecs[i][1]);
-	ibContract.exchange= toIBString(myProp->contractSpecs[i][2]);
-	// optional filter for a single expiry
-	QString e = myProp->contractSpecs[i].size() > 3 ? myProp->contractSpecs[i][3] : "";
-	ibContract.expiry = toIBString( e );
-	
-	ContractDetailsRequest cdR;
-	cdR.initialize( ibContract );
+	const ContractDetailsRequest &cdR =
+		contractDetailsTodo->contractDetailsRequests.at( curReqSpecIndex );
 	reqContractDetails( cdR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
@@ -580,6 +570,8 @@ void TwsDL::startWork()
 {
 	if( workFile.isEmpty() ) {
 		qDebug() << "getting contracts from TWS";
+		int i = contractDetailsTodo->fromConfig( myProp->contractSpecs );
+		Q_ASSERT( i>=0 );
 		state = GET_CONTRACTS;
 	} else {
 		if( myProp->downloadData ) {
