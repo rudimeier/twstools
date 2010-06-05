@@ -24,6 +24,7 @@ namespace Test {
 
 
 
+class ContractDetailsRequest;
 class HistRequest;
 class WorkTodo;
 
@@ -120,6 +121,7 @@ class TwsDL : public QObject
 		
 		void startWork();
 		
+		void reqContractDetails( const ContractDetailsRequest& );
 		void reqHistoricalData( const HistRequest& );
 		
 		State state;

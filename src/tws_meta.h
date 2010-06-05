@@ -14,6 +14,21 @@ namespace Test {
 
 
 
+class ContractDetailsRequest
+{
+	public:
+		bool initialize( const IB::Contract& );
+		
+		IB::Contract ibContract;
+};
+
+
+
+
+
+
+
+
 class HistRequest
 {
 	public:

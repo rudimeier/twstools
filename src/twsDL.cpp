@@ -205,7 +205,9 @@ void TwsDL::getContracts()
 	QString e = myProp->contractSpecs[i].size() > 3 ? myProp->contractSpecs[i][3] : "";
 	ibContract.expiry = toIBString( e );
 	
-	twsClient->reqContractDetails( currentReqId, ibContract );
+	ContractDetailsRequest cdR;
+	cdR.initialize( ibContract );
+	reqContractDetails( cdR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
 	finishedReq = false;
@@ -593,6 +595,12 @@ void TwsDL::dumpWorkTodo() const
 TwsDL::State TwsDL::currentState() const
 {
 	return state;
+}
+
+
+void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
+{
+	twsClient->reqContractDetails( currentReqId, cdR.ibContract );
 }
 
 

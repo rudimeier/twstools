@@ -13,6 +13,19 @@ namespace Test {
 
 
 
+bool ContractDetailsRequest::initialize( const IB::Contract& c )
+{
+	ibContract = c;
+	return true;
+}
+
+
+
+
+
+
+
+
 bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 	const QString &d, const QString &b,
 	const QString &w, int u, int f )
