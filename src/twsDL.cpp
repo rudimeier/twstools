@@ -85,6 +85,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	twsClient(NULL),
 	twsWrapper(NULL),
 	currentRequest(  *(new GenericRequest()) ),
+	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	idleTimer(NULL)
 {
@@ -109,6 +110,9 @@ TwsDL::~TwsDL()
 	}
 	if( histTodo != NULL ) {
 		delete histTodo;
+	}
+	if( contractDetailsTodo != NULL ) {
+		delete contractDetailsTodo;
 	}
 	if( idleTimer != NULL ) {
 		delete idleTimer;

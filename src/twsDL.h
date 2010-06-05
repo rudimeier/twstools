@@ -27,6 +27,7 @@ namespace Test {
 class ContractDetailsRequest;
 class HistRequest;
 class GenericRequest;
+class ContractDetailsTodo;
 class HistTodo;
 
 
@@ -139,6 +140,7 @@ class TwsDL : public QObject
 		int curReqContractIndex;
 		
 		QList<IB::ContractDetails> contractDetailsStorage;
+		ContractDetailsTodo *contractDetailsTodo;
 		HistTodo *histTodo;
 		
 		QTimer *idleTimer;

@@ -99,5 +99,18 @@ class HistTodo
 
 
 
+
+
+
+
+class ContractDetailsTodo
+{
+	public:
+		QList<ContractDetailsRequest> contractDetailsRequests;
+};
+
+
+
+
 } // namespace Test
 #endif
