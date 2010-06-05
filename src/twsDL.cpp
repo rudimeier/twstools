@@ -644,8 +644,6 @@ void PropTwsDL::initDefaults()
 	pacingTime = 10300;
 	violationPause = 60000;
 	
-	reqExpiry = "";
-	
 	downloadData = false;
 	reqMaxContracts = -1;
 	reqMaxContractsPerSpec = -1;
@@ -675,8 +673,6 @@ bool PropTwsDL::readProperties()
 	ok &= get("reqTimeout", reqTimeout);
 	ok &= get("pacingTime", pacingTime);
 	ok &= get("violationPause", violationPause);
-	
-	ok &= get("reqExpiry", reqExpiry);
 	
 	ok = ok & get("downloadData", downloadData);
 	ok = ok & get("reqMaxContracts", reqMaxContracts);

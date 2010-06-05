@@ -48,8 +48,6 @@ class PropTwsDL : public PropSub
 		int pacingTime;
 		int violationPause;
 		
-		QString reqExpiry;
-		
 		bool downloadData;
 		int reqMaxContracts;
 		int reqMaxContractsPerSpec;
