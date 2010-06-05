@@ -137,6 +137,7 @@ class TwsDL : public QObject
 		GenericRequest &currentRequest;
 		int countNewContracts;
 		
+		int curReqSpecIndex;
 		int curReqContractIndex;
 		
 		QList<IB::ContractDetails> contractDetailsStorage;

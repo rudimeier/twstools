@@ -70,11 +70,12 @@ class GenericRequest
 		
 		GenericRequest();
 		
-		void nextRequest( ReqType );
+		void nextRequest( ReqType, int todoIndex );
 		
 		ReqType reqType;
 		ReqState reqState;
 		int reqId;
+		int todoIndex;
 };
 
 
