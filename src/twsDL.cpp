@@ -264,12 +264,12 @@ void TwsDL::finContracts()
 	
 	if( (currentRequest.reqId + 1) < myProp->contractSpecs.size() ) {
 		curReqSpecIndex++;
-		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST, curReqSpecIndex );
+		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 		state = GET_CONTRACTS;
 	} else {
 		dumpWorkTodo();
 		if( myProp->downloadData ) {
-			currentRequest.nextRequest( GenericRequest::HIST_REQUEST, 0);
+			currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 			state = GET_DATA;;
 		} else {
 			state = QUIT_READY;
@@ -319,7 +319,7 @@ void TwsDL::pauseData()
 void TwsDL::finData()
 {
 	curReqContractIndex ++;
-	currentRequest.nextRequest( GenericRequest::HIST_REQUEST, curReqContractIndex );
+	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	if( curReqContractIndex < workTodo->histRequests.size() &&
 	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
 		idleTimer->setInterval( myProp->pacingTime );
@@ -396,7 +396,7 @@ void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 		if( state == WAIT_DATA ) {
 			if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
-				currentRequest.nextRequest(GenericRequest::HIST_REQUEST, curReqContractIndex);
+				currentRequest.nextRequest(GenericRequest::HIST_REQUEST );
 				state = PAUSE_DATA;
 			} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );

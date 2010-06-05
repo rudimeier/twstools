@@ -124,13 +124,12 @@ GenericRequest::GenericRequest() :
 }
 
 
-void GenericRequest::nextRequest( ReqType t, int todoIndex )
+void GenericRequest::nextRequest( ReqType t )
 {
 	Q_ASSERT( reqState == FINISHED );
 	reqType = t;
 	reqState = PENDING;
 	reqId++;
-	this->todoIndex = todoIndex;
 }
 
 
