@@ -63,11 +63,17 @@ class GenericRequest
 			HIST_REQUEST
 		};
 		
+		enum ReqState {
+			PENDING,
+			FINISHED
+		};
+		
 		GenericRequest();
 		
 		void nextRequest( ReqType );
 		
 		ReqType reqType;
+		ReqState reqState;
 		int reqId;
 };
 

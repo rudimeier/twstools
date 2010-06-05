@@ -212,7 +212,7 @@ void TwsDL::getContracts()
 	reqContractDetails( cdR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
-	finishedReq = false;
+	currentRequest.reqState = GenericRequest::PENDING;
 	state = WAIT_CONTRACTS;
 }
 
@@ -221,7 +221,7 @@ void TwsDL::waitContracts()
 {
 	idleTimer->setInterval( 0 );
 	
-	if( finishedReq ) {
+	if( currentRequest.reqState == GenericRequest::FINISHED ) {
 		state = FIN_CONTRACTS;
 		return;
 	} else {
@@ -287,7 +287,7 @@ void TwsDL::getData()
 	reqHistoricalData( hR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
-	finishedReq = false;
+	currentRequest.reqState = GenericRequest::PENDING;
 	state = WAIT_DATA;
 }
 
@@ -296,7 +296,7 @@ void TwsDL::waitData()
 {
 	idleTimer->setInterval( 0 );
 	
-	if( finishedReq ) {
+	if( currentRequest.reqState == GenericRequest::FINISHED ) {
 		state = FIN_DATA;
 		return;
 	} else {
@@ -398,14 +398,14 @@ void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 				state = PAUSE_DATA;
 			} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
-				finishedReq = true;
+				currentRequest.reqState = GenericRequest::FINISHED;
 				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
 			} else if( errorCode == 162 &&
 			           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
 			            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
 				idleTimer->setInterval( 0 );
 				if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
-					finishedReq = true;
+					currentRequest.reqState = GenericRequest::FINISHED;
 				} // else will cause error
 				qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curReqContractIndex << id;;
 			} else if( errorCode == 165 &&
@@ -458,7 +458,7 @@ void TwsDL::contractDetailsEnd( int reqId )
 	}
 	
 	idleTimer->setInterval( 0 );
-	finishedReq = true;
+	currentRequest.reqState = GenericRequest::FINISHED;
 }
 
 
@@ -499,7 +499,7 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 	
 	if( date.startsWith("finished") ) {
 		idleTimer->setInterval( 0 );
-		finishedReq = true;
+		currentRequest.reqState = GenericRequest::FINISHED;
 		qDebug() << "READY" << curReqContractIndex << reqId;;
 	} else {
 		const IB::Contract &c = workTodo->histRequests.at(curReqContractIndex).ibContract;

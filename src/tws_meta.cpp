@@ -118,6 +118,7 @@ void HistRequest::clear()
 
 GenericRequest::GenericRequest() :
 	reqType(NONE),
+	reqState(FINISHED),
 	reqId(0)
 {
 }
@@ -125,7 +126,9 @@ GenericRequest::GenericRequest() :
 
 void GenericRequest::nextRequest( ReqType t )
 {
+	Q_ASSERT( reqState == FINISHED );
 	reqType = t;
+	reqState = PENDING;
 	reqId++;
 }
 
