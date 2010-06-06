@@ -382,7 +382,7 @@ void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 		if( state == WAIT_DATA ) {
 			if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
-				currentRequest.nextRequest(GenericRequest::HIST_REQUEST );
+				currentRequest.reqState = GenericRequest::FINISHED;
 				state = PAUSE_DATA;
 			} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 				idleTimer->setInterval( 0 );
