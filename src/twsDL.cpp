@@ -85,6 +85,8 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	twsClient(NULL),
 	twsWrapper(NULL),
 	currentRequest(  *(new GenericRequest()) ),
+	curReqSpecIndex(0),
+	curReqContractIndex(0),
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	idleTimer(NULL)
@@ -159,9 +161,6 @@ void TwsDL::idleTimeout()
 
 void TwsDL::onStart()
 {
-	curReqSpecIndex = 0;
-	curReqContractIndex = 0;
-	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
 	
