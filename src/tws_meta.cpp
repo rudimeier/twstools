@@ -219,6 +219,14 @@ void GenericRequest::nextRequest( ReqType t )
 }
 
 
+void GenericRequest::close()
+{
+	Q_ASSERT( reqState == FINISHED );
+	reqType = NONE;
+}
+
+
+
 
 
 

@@ -86,6 +86,7 @@ class GenericRequest
 		GenericRequest();
 		
 		void nextRequest( ReqType );
+		void close();
 		
 		ReqType reqType;
 		ReqState reqState;

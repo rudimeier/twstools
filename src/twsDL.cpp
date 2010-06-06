@@ -137,6 +137,8 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
+	Q_ASSERT(currentRequest.reqType == GenericRequest::NONE);
+	
 	if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
 		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 		getContracts();
@@ -207,6 +209,7 @@ void TwsDL::finContracts()
 	}
 	
 	curIndexTodoContractDetails++;
+	currentRequest.close();
 	state = IDLE;
 }
 
@@ -267,6 +270,7 @@ void TwsDL::finData()
 	p_histData.clear();
 	
 	curIndexTodoHistData++;
+	currentRequest.close();
 	state = IDLE;
 }
 
