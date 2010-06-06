@@ -115,5 +115,18 @@ class ContractDetailsTodo
 
 
 
+
+
+
+
+class PacketContractDetails
+{
+	public:
+		QList<IB::ContractDetails> cdList;
+};
+
+
+
+
 } // namespace Test
 #endif

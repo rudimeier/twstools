@@ -29,6 +29,7 @@ class HistRequest;
 class GenericRequest;
 class ContractDetailsTodo;
 class HistTodo;
+class PacketContractDetails;
 
 
 class PropTwsDL : public PropSub
@@ -134,9 +135,10 @@ class TwsDL : public QObject
 		int curReqSpecIndex;
 		int curReqContractIndex;
 		
-		QList<IB::ContractDetails> contractDetailsStorage;
 		ContractDetailsTodo *contractDetailsTodo;
 		HistTodo *histTodo;
+		
+		PacketContractDetails &p_contractDetails;
 		
 		QTimer *idleTimer;
 		

@@ -89,6 +89,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	curReqContractIndex(0),
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
+	p_contractDetails( *(new PacketContractDetails()) ),
 	idleTimer(NULL)
 {
 	initProperties();
@@ -117,6 +118,7 @@ TwsDL::~TwsDL()
 	if( contractDetailsTodo != NULL ) {
 		delete contractDetailsTodo;
 	}
+	delete &p_contractDetails;
 	if( idleTimer != NULL ) {
 		delete idleTimer;
 	}
@@ -235,8 +237,8 @@ void TwsDL::finContracts()
 	int inserted;
 	inserted = storage2stdout();
 	
-	for( int i = 0; i<contractDetailsStorage.size(); i++ ) {
-		const IB::ContractDetails &cd = contractDetailsStorage.at(i);
+	for( int i = 0; i<p_contractDetails.cdList.size(); i++ ) {
+		const IB::ContractDetails &cd = p_contractDetails.cdList.at(i);
 		
 		if( myProp->reqMaxContractsPerSpec > 0 && myProp->reqMaxContractsPerSpec <= i ) {
 			break;
@@ -250,7 +252,7 @@ void TwsDL::finContracts()
 		}
 	}
 	
-	contractDetailsStorage.clear();
+	p_contractDetails.cdList.clear();
 	if( inserted == -1 ) {
 		state = QUIT_ERROR;
 		return;
@@ -439,7 +441,7 @@ void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibCon
 		Q_ASSERT( false );
 	}
 	
-	contractDetailsStorage.append(ibContractDetails);
+	p_contractDetails.cdList.append(ibContractDetails);
 }
 
 
@@ -531,11 +533,11 @@ int TwsDL::storage2stdout()
 	QTime  stopWatch;
 	stopWatch.start();
 	
-	int countReceived = contractDetailsStorage.size();
+	int countReceived = p_contractDetails.cdList.size();
 	
 	for( int i=0; i<countReceived; i++ ) {
 		
-		IB::ContractDetails *ibContractDetails = &contractDetailsStorage[i];
+		IB::ContractDetails *ibContractDetails = &p_contractDetails.cdList[i];
 		
 		qDebug() << toQString(ibContractDetails->summary.symbol)
 		         << toQString(ibContractDetails->summary.secType)
