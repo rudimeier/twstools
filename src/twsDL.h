@@ -150,13 +150,13 @@ class TwsDL : public QObject
 	private slots:
 		void idleTimeout();
 		
-		void error(int, int, const QString &);
+		void twsError(int, int, const QString &);
 		
 		void twsConnected( bool connected );
-		void contractDetails2Storage( int reqId,
+		void twsContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
-		void contractDetailsEnd( int reqId );
-		void historicalData( int reqId, const QString &date, double open, double high, double low,
+		void twsContractDetailsEnd( int reqId );
+		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps );
 };
 

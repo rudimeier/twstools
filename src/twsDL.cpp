@@ -317,22 +317,22 @@ void TwsDL::initTwsClient()
 	
 	// connecting some TWS signals to this
 	connect(twsClient, SIGNAL(error(int, int, const QString &)),
-		this, SLOT(error(int, int, const QString &)), Qt::QueuedConnection );
+		this, SLOT(twsError(int, int, const QString &)), Qt::QueuedConnection );
 	
 	connect ( twsClient, SIGNAL(connected(bool)),
 		 this,SLOT(twsConnected(bool)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(contractDetails(int, IB::ContractDetails)),
-		 this,SLOT(contractDetails2Storage(int, IB::ContractDetails)), Qt::QueuedConnection );
+		 this,SLOT(twsContractDetails(int, IB::ContractDetails)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(contractDetailsEnd(int)),
-		 this,SLOT(contractDetailsEnd(int)), Qt::QueuedConnection );
+		 this,SLOT(twsContractDetailsEnd(int)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(historicalData(int, const QString&, double, double, double,
 			double, int, int, double, bool )),
-		 this,SLOT(historicalData(int, const QString&, double, double, double,
+		 this,SLOT(twsHistoricalData(int, const QString&, double, double, double,
 			double, int, int, double, bool )), Qt::QueuedConnection );
 }
 
 
-void TwsDL::error(int id, int errorCode, const QString &errorMsg)
+void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 {
 	if( id == currentRequest.reqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
@@ -414,7 +414,7 @@ void TwsDL::twsConnected( bool connected )
 }
 
 
-void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibContractDetails )
+void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
 	
 	if( currentRequest.reqId != reqId ) {
@@ -426,7 +426,7 @@ void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibCon
 }
 
 
-void TwsDL::contractDetailsEnd( int reqId )
+void TwsDL::twsContractDetailsEnd( int reqId )
 {
 	if( currentRequest.reqId != reqId ) {
 		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
@@ -439,7 +439,7 @@ void TwsDL::contractDetailsEnd( int reqId )
 }
 
 
-void TwsDL::historicalData( int reqId, const QString &date, double open, double high, double low,
+void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
 	if( currentRequest.reqId != reqId ) {
