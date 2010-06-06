@@ -136,7 +136,12 @@ class ContractDetailsTodo
 class PacketContractDetails
 {
 	public:
+		PacketContractDetails();
+		
 		QList<IB::ContractDetails> cdList;
+		
+	private:
+		int reqId;
 };
 
 
@@ -149,6 +154,8 @@ class PacketContractDetails
 class PacketHistData
 {
 	public:
+		PacketHistData();
+		
 		bool isFinished() const;
 		void clear();
 		void append( int reqId, const QString &date,
