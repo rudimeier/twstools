@@ -179,7 +179,8 @@ void TwsDL::waitTwsCon()
 		state = IDLE;
 	} else {
 		qDebug() << "Timeout connecting TWS.";
-		state = QUIT_ERROR;
+		idleTimer->setInterval( 10000 );
+		state = CONNECT;
 	}
 }
 
@@ -417,9 +418,16 @@ void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::twsConnected( bool /*connected*/ )
+void TwsDL::twsConnected( bool connected )
 {
-	idleTimer->setInterval( 0 );
+	if( connected ) {
+		Q_ASSERT( state == WAIT_TWS_CON );
+		idleTimer->setInterval( 0 );
+	} else {
+		// TODO check current state
+		state = CONNECT;
+		idleTimer->setInterval( 10000 );
+	}
 }
 
 
