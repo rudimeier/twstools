@@ -5,11 +5,25 @@
 
 #include <QtCore/QString>
 #include <QtCore/QList>
+#include <QtCore/QHash>
 
 
 
 
 namespace Test {
+
+
+
+
+/// stupid static helper
+QString ibDate2ISO( const QString &ibDate );
+
+extern const QHash<QString, const char*> short_wts;
+extern const QHash<QString, const char*> short_bar_size;
+
+
+
+
 
 
 

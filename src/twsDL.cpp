@@ -23,60 +23,6 @@ namespace Test {
 
 
 
-
-
-
-
-
-
-
-
-
-QHash<QString, const char*> init_short_wts()
-{
-	QHash<QString, const char*> ht;
-	ht.insert("TRADES", "T");
-	ht.insert("MIDPOINT", "M");
-	ht.insert("BID", "B");
-	ht.insert("ASK", "A");
-	ht.insert("BID_ASK", "BA");
-	ht.insert("HISTORICAL_VOLATILITY", "HV");
-	ht.insert("OPTION_IMPLIED_VOLATILITY", "OIV");
-	ht.insert("OPTION_VOLUME", "OV");
-	return ht;
-}
-
-static const QHash<QString, const char*> short_wts = init_short_wts();
-
-
-QHash<QString, const char*> init_short_bar_size()
-{
-	QHash<QString, const char*> ht;
-	ht.insert("1 secs",   "s01");
-	ht.insert("5 secs",   "s05");
-	ht.insert("15 secs",  "s15");
-	ht.insert("30 secs",  "s30");
-	ht.insert("1 min",    "m01");
-	ht.insert("2 mins",   "m02");
-	ht.insert("3 mins",   "m03");
-	ht.insert("5 mins",   "m05");
-	ht.insert("15 mins",  "m15");
-	ht.insert("30 mins",  "m30");
-	ht.insert("1 hour",   "h01");
-	ht.insert("1 day",    "eod");
-	ht.insert("1 week",   "w01");
-	ht.insert("1 month",  "x01");
-	ht.insert("3 months", "x03");
-	ht.insert("1 year",   "y01");
-	return ht;
-}
-
-static const QHash<QString, const char*> short_bar_size = init_short_bar_size();
-
-
-
-
-
 TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	state(CONNECT),
 	confFile(confFile),
@@ -457,33 +403,6 @@ void TwsDL::contractDetailsEnd( int reqId )
 	idleTimer->setInterval( 0 );
 	currentRequest.reqState = GenericRequest::FINISHED;
 }
-
-
-/// stupid static helper
-QString ibDate2ISO( const QString &ibDate )
-{
-	QDateTime dt;
-	
-	dt = QDateTime::fromString( ibDate, "yyyyMMdd  hh:mm:ss");
-	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
-	}
-	
-	dt.setDate( QDate::fromString( ibDate, "yyyyMMdd") );
-	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd");
-	}
-	
-	bool ok = false;
-	uint t = ibDate.toUInt( &ok );
-	if( ok ) {
-		dt.setTime_t( t );
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
-	}
-	
-	return QString();
-}
-
 
 
 void TwsDL::historicalData( int reqId, const QString &date, double open, double high, double low,
