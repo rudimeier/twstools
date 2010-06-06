@@ -147,7 +147,7 @@ void TwsDL::idle()
 	
 	// TODO we want to dump histTodo when contractDetailsTodo is finished but
 	// this way it might be dumped twice
-	if( curIndexTodoHistData == 0 ) {
+	if( curIndexTodoHistData == 0 && curIndexTodoContractDetails > 0) {
 		dumpWorkTodo();
 	}
 	
@@ -501,7 +501,7 @@ void TwsDL::initWork()
 			qDebug() << "read work from file";
 			int i = histTodo->fromFile(workFile);
 			Q_ASSERT( i>=0 );
-			histTodo->dump( stderr );
+			dumpWorkTodo();
 // 			state = IDLE;;
 		} else {
 // 			state = QUIT_READY;
