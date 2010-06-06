@@ -307,10 +307,25 @@ int ContractDetailsTodo::fromConfig( const QList< QList<QString> > &contractSpec
 
 
 
+void PacketHistData::Row::clear()
+{
+	date = "";
+	open = 0.0;
+	high = 0.0;
+	low = 0.0;
+	close = 0.0;
+	volume = 0;
+	count = 0;
+	WAP = 0.0;
+	hasGaps = false;
+}
+
+
 void PacketHistData::clear()
 {
 	reqId = -1;
 	rows.clear();
+	finishRow.clear();
 }
 
 

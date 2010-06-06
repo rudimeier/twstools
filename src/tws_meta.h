@@ -152,6 +152,8 @@ class PacketHistData
 		class Row
 		{
 			public:
+				void clear();
+				
 				QString date;
 				double open;
 				double high;
