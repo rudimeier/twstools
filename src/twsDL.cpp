@@ -94,6 +94,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	initProperties();
 	initTwsClient();
 	initIdleTimer();
+	initWork();
 }
 
 
@@ -175,7 +176,7 @@ void TwsDL::waitTwsCon()
 	
 	if( twsClient->isConnected() ) {
 		qDebug() << "We are connected to TWS.";
-		startWork();
+		state = IDLE;
 	} else {
 		qDebug() << "Timeout connecting TWS.";
 		state = QUIT_ERROR;
@@ -554,22 +555,22 @@ int TwsDL::storage2stdout()
 }
 
 
-void TwsDL::startWork()
+void TwsDL::initWork()
 {
 	if( workFile.isEmpty() ) {
 		qDebug() << "getting contracts from TWS";
 		int i = contractDetailsTodo->fromConfig( myProp->contractSpecs );
 		Q_ASSERT( i>=0 );
-		state = IDLE;
+// 		state = IDLE;
 	} else {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
 			int i = histTodo->fromFile(workFile);
 			Q_ASSERT( i>=0 );
 			histTodo->dump( stderr );
-			state = IDLE;;
+// 			state = IDLE;;
 		} else {
-			state = QUIT_READY;
+// 			state = QUIT_READY;
 		}
 	}
 }
