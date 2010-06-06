@@ -144,6 +144,13 @@ void TwsDL::idle()
 		getContracts();
 		return;
 	}
+	
+	// TODO we want to dump histTodo when contractDetailsTodo is finished but
+	// this way it might be dumped twice
+	if( curIndexTodoHistData == 0 ) {
+		dumpWorkTodo();
+	}
+	
 	if( myProp->downloadData  && curIndexTodoHistData < histTodo->histRequests.size()
 	    && ( myProp->reqMaxContracts <= 0 || curIndexTodoHistData < myProp->reqMaxContracts ) ) {
 		currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
