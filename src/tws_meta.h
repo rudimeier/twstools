@@ -149,10 +149,12 @@ class PacketHistData
 				bool hasGaps;
 		};
 		
+		void clear();
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
 		
+	private:
 		int reqId;
 		QList<Row> rows;
 };

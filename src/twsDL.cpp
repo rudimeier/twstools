@@ -494,10 +494,14 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 		Q_ASSERT( false );
 	}
 	
+	p_histData.append( reqId, date, open, high, low,
+		close, volume, count, WAP, hasGaps );
+	
 	if( date.startsWith("finished") ) {
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
-		qDebug() << "READY" << curReqContractIndex << reqId;;
+		qDebug() << "READY" << curReqContractIndex << reqId;
+		p_histData.clear();
 	} else {
 		const IB::Contract &c = histTodo->histRequests.at(curReqContractIndex).ibContract;
 		const QString &wts = histTodo->histRequests.at(curReqContractIndex).whatToShow;

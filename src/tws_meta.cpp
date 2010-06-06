@@ -233,6 +233,13 @@ int ContractDetailsTodo::fromConfig( const QList< QList<QString> > &contractSpec
 
 
 
+void PacketHistData::clear()
+{
+	reqId = -1;
+	rows.clear();
+}
+
+
 void PacketHistData::append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
