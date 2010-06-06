@@ -424,7 +424,7 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 		p_histData.dump(
 			histTodo->histRequests.at(curReqContractIndex).ibContract,
 			histTodo->histRequests.at(curReqContractIndex).whatToShow,
-			myProp->barSizeSetting,
+			histTodo->histRequests.at(curReqContractIndex).barSizeSetting,
 			myProp->printFormatDates
 		);
 		p_histData.clear();
