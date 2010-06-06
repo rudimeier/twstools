@@ -166,20 +166,6 @@ void TwsDL::getContracts()
 }
 
 
-void TwsDL::waitContracts()
-{
-	idleTimer->setInterval( 0 );
-	
-	if( currentRequest.reqState == GenericRequest::FINISHED ) {
-		finContracts();
-		return;
-	} else {
-		qDebug() << "Timeout waiting for data.";
-		state = QUIT_ERROR;
-	}
-}
-
-
 void TwsDL::finContracts()
 {
 	idleTimer->setInterval( 0 );

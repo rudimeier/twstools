@@ -109,7 +109,6 @@ class TwsDL : public QObject
 		void waitTwsCon();
 		void idle();
 		void getContracts();
-		void waitContracts();
 		void finContracts();
 		void getData();
 		void waitData();
