@@ -31,8 +31,8 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	twsClient(NULL),
 	twsWrapper(NULL),
 	currentRequest(  *(new GenericRequest()) ),
-	curReqSpecIndex(0),
-	curReqContractIndex(0),
+	curIndexTodoContractDetails(0),
+	curIndexTodoHistData(0),
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
@@ -137,13 +137,13 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
-	if( curReqSpecIndex < contractDetailsTodo->contractDetailsRequests.size() ) {
+	if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
 		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 		getContracts();
 		return;
 	}
-	if( myProp->downloadData  && curReqContractIndex < histTodo->histRequests.size()
-	    && ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
+	if( myProp->downloadData  && curIndexTodoHistData < histTodo->histRequests.size()
+	    && ( myProp->reqMaxContracts <= 0 || curIndexTodoHistData < myProp->reqMaxContracts ) ) {
 		currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 		getData();
 	} else {
@@ -155,7 +155,7 @@ void TwsDL::idle()
 void TwsDL::getContracts()
 {
 	const ContractDetailsRequest &cdR =
-		contractDetailsTodo->contractDetailsRequests.at( curReqSpecIndex );
+		contractDetailsTodo->contractDetailsRequests.at( curIndexTodoContractDetails );
 	reqContractDetails( cdR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
@@ -206,18 +206,18 @@ void TwsDL::finContracts()
 		return;
 	}
 	
-	curReqSpecIndex++;
+	curIndexTodoContractDetails++;
 	state = IDLE;
 }
 
 
 void TwsDL::getData()
 {
-	Q_ASSERT( curReqContractIndex < histTodo->histRequests.size() );
+	Q_ASSERT( curIndexTodoHistData < histTodo->histRequests.size() );
 	
-	const HistRequest &hR = histTodo->histRequests.at( curReqContractIndex );
+	const HistRequest &hR = histTodo->histRequests.at( curIndexTodoHistData );
 	
-	qDebug() << "DOWNLOAD DATA" << curReqContractIndex << currentRequest.reqId << ibToString(hR.ibContract);
+	qDebug() << "DOWNLOAD DATA" << curIndexTodoHistData << currentRequest.reqId << ibToString(hR.ibContract);
 	
 	reqHistoricalData( hR );
 	
@@ -261,7 +261,7 @@ void TwsDL::pauseData()
 void TwsDL::finData()
 {
 	idleTimer->setInterval( myProp->pacingTime );
-	curReqContractIndex ++;
+	curIndexTodoHistData++;
 	state = IDLE;
 }
 
@@ -363,7 +363,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
-		qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
+		qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;;
 	} else if( errorCode == 162 &&
 	           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
 	            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
@@ -371,7 +371,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
 			currentRequest.reqState = GenericRequest::FINISHED;
 		} // else will cause error
-		qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curReqContractIndex << id;;
+		qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;;
 	} else if( errorCode == 165 &&
 	           errorMsg.contains("HMDS server disconnect occurred.  Attempting reconnection") ) {
 		idleTimer->setInterval( myProp->reqTimeout );
@@ -445,8 +445,8 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 	if( p_histData.isFinished() ) {
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
-		qDebug() << "READY" << curReqContractIndex << reqId;
-		p_histData.dump( histTodo->histRequests.at(curReqContractIndex),
+		qDebug() << "READY" << curIndexTodoHistData << reqId;
+		p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
 		                 myProp->printFormatDates );
 		p_histData.clear();
 	}
