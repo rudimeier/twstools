@@ -141,6 +141,9 @@ void TwsDL::idleTimeout()
 		case WAIT_TWS_CON:
 			waitTwsCon();
 			break;
+		case IDLE:
+			idle();
+			break;
 		case GET_CONTRACTS:
 			getContracts();
 			break;
@@ -189,6 +192,26 @@ void TwsDL::waitTwsCon()
 	} else {
 		qDebug() << "Timeout connecting TWS.";
 		state = QUIT_ERROR;
+	}
+}
+
+
+void TwsDL::idle()
+{
+	if( curReqSpecIndex < contractDetailsTodo->contractDetailsRequests.size() ) {
+		idleTimer->setInterval( 0 );
+		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
+		state = GET_CONTRACTS;
+		return;
+	}
+	if( myProp->downloadData  && curReqContractIndex < histTodo->histRequests.size()
+	    && ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
+		idleTimer->setInterval( myProp->pacingTime );
+		currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
+		state = GET_DATA;;
+	} else {
+		idleTimer->setInterval( 0 );
+		state = QUIT_READY;
 	}
 }
 
@@ -248,18 +271,7 @@ void TwsDL::finContracts()
 	}
 	
 	curReqSpecIndex++;
-	if( curReqSpecIndex < contractDetailsTodo->contractDetailsRequests.size() ) {
-		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
-		state = GET_CONTRACTS;
-	} else {
-		dumpWorkTodo();
-		if( myProp->downloadData ) {
-			currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-			state = GET_DATA;;
-		} else {
-			state = QUIT_READY;
-		}
-	}
+	state = IDLE;
 }
 
 
@@ -304,15 +316,7 @@ void TwsDL::pauseData()
 void TwsDL::finData()
 {
 	curReqContractIndex ++;
-	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	if( curReqContractIndex < histTodo->histRequests.size() &&
-	    ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
-		idleTimer->setInterval( myProp->pacingTime );
-		state = GET_DATA;
-	} else {
-		idleTimer->setInterval( 0 );
-		state = QUIT_READY;
-	}
+	state = IDLE;
 }
 
 
