@@ -128,5 +128,37 @@ class PacketContractDetails
 
 
 
+
+
+
+
+class PacketHistData
+{
+	public:
+		class Row
+		{
+			public:
+				QString date;
+				double open;
+				double high;
+				double low;
+				double close;
+				int volume;
+				int count;
+				double WAP;
+				bool hasGaps;
+		};
+		
+		void append( int reqId, const QString &date,
+			double open, double high, double low, double close,
+			int volume, int count, double WAP, bool hasGaps );
+		
+		int reqId;
+		QList<Row> rows;
+};
+
+
+
+
 } // namespace Test
 #endif

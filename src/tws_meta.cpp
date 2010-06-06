@@ -229,4 +229,26 @@ int ContractDetailsTodo::fromConfig( const QList< QList<QString> > &contractSpec
 
 
 
+
+
+
+
+void PacketHistData::append( int reqId, const QString &date,
+			double open, double high, double low, double close,
+			int volume, int count, double WAP, bool hasGaps )
+{
+	if( rows.isEmpty() ) {
+		this->reqId = reqId;
+	}
+	Q_ASSERT( this->reqId == reqId );
+	
+	Row row = { date, open, high, low, close,
+		volume, count, WAP, hasGaps };
+	
+	rows.append( row );
+}
+
+
+
+
 } // namespace Test
