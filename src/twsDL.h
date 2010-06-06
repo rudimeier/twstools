@@ -30,6 +30,7 @@ class GenericRequest;
 class ContractDetailsTodo;
 class HistTodo;
 class PacketContractDetails;
+class PacketHistData;
 
 
 class PropTwsDL : public PropSub
@@ -139,6 +140,7 @@ class TwsDL : public QObject
 		HistTodo *histTodo;
 		
 		PacketContractDetails &p_contractDetails;
+		PacketHistData &p_histData;
 		
 		QTimer *idleTimer;
 		

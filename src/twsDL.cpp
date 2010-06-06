@@ -90,6 +90,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
+	p_histData( *(new PacketHistData()) ),
 	idleTimer(NULL)
 {
 	initProperties();
@@ -119,6 +120,7 @@ TwsDL::~TwsDL()
 		delete contractDetailsTodo;
 	}
 	delete &p_contractDetails;
+	delete &p_histData;
 	if( idleTimer != NULL ) {
 		delete idleTimer;
 	}
