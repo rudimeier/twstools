@@ -75,7 +75,7 @@ class TwsDL : public QObject
 	
 	public:
 		enum State {
-			START,
+			CONNECT,
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
@@ -103,7 +103,7 @@ class TwsDL : public QObject
 		
 		void dumpWorkTodo() const;
 		
-		void onStart();
+		void connectTws();
 		void waitTwsCon();
 		void idle();
 		void getContracts();

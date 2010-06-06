@@ -78,7 +78,7 @@ static const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 
 
 TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
-	state(START),
+	state(CONNECT),
 	confFile(confFile),
 	workFile(workFile),
 	myProp(NULL),
@@ -126,10 +126,10 @@ TwsDL::~TwsDL()
 void TwsDL::start()
 {
 	Q_ASSERT( !idleTimer->isActive() );
-	Q_ASSERT( (state == START) ||
+	Q_ASSERT( (state == CONNECT) ||
 		(state == QUIT_READY) || (state == QUIT_ERROR) );
 	
-	state = START;
+	state = CONNECT;
 	idleTimer->setInterval(0);
 	idleTimer->start();
 }
@@ -138,8 +138,8 @@ void TwsDL::start()
 void TwsDL::idleTimeout()
 {
 	switch( state ) {
-		case START:
-			onStart();
+		case CONNECT:
+			connectTws();
 			break;
 		case WAIT_TWS_CON:
 			waitTwsCon();
@@ -160,7 +160,7 @@ void TwsDL::idleTimeout()
 }
 
 
-void TwsDL::onStart()
+void TwsDL::connectTws()
 {
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
