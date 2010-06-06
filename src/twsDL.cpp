@@ -401,6 +401,7 @@ void TwsDL::contractDetailsEnd( int reqId )
 	}
 	
 	idleTimer->setInterval( 0 );
+	p_contractDetails.setFinished();
 	currentRequest.reqState = GenericRequest::FINISHED;
 }
 

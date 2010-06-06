@@ -139,10 +139,13 @@ class PacketContractDetails
 		PacketContractDetails();
 		
 		const QList<IB::ContractDetails>& constList() const;
+		void setFinished();
+		bool isFinished() const;
 		void clear();
 		void append( int reqId, const IB::ContractDetails& );
 		
 	private:
+		bool complete;
 		int reqId;
 		QList<IB::ContractDetails> cdList;
 };

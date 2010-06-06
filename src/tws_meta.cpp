@@ -309,6 +309,7 @@ int ContractDetailsTodo::fromConfig( const QList< QList<QString> > &contractSpec
 
 PacketContractDetails::PacketContractDetails()
 {
+	complete = false;
 	reqId = -1;
 }
 
@@ -318,9 +319,22 @@ const QList<IB::ContractDetails>& PacketContractDetails::constList() const
 	return cdList;
 }
 
+void PacketContractDetails::setFinished()
+{
+	Q_ASSERT( !complete );
+	complete = true;
+}
+
+
+bool PacketContractDetails::isFinished() const
+{
+	return complete;
+}
+
 
 void PacketContractDetails::clear()
 {
+	complete = false;
 	reqId = -1;
 	cdList.clear();
 }
@@ -328,6 +342,12 @@ void PacketContractDetails::clear()
 
 void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 {
+	if( cdList.isEmpty() ) {
+		this->reqId = reqId;
+	}
+	Q_ASSERT( this->reqId == reqId );
+	Q_ASSERT( !complete );
+	
 	cdList.append(c);
 }
 
