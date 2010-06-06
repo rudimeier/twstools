@@ -420,35 +420,13 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
 		qDebug() << "READY" << curReqContractIndex << reqId;
+		p_histData.dump(
+			histTodo->histRequests.at(curReqContractIndex).ibContract,
+			histTodo->histRequests.at(curReqContractIndex).whatToShow,
+			myProp->barSizeSetting,
+			myProp->printFormatDates
+		);
 		p_histData.clear();
-	} else {
-		const IB::Contract &c = histTodo->histRequests.at(curReqContractIndex).ibContract;
-		const QString &wts = histTodo->histRequests.at(curReqContractIndex).whatToShow;
-		QString expiry = toQString(c.expiry);
-		QString dateTime = date;
-		if( myProp->printFormatDates ) {
-			if( expiry.isEmpty() ) {
-				expiry = "0000-00-00";
-			} else {
-				expiry = ibDate2ISO( toQString(c.expiry) );
-			}
-			dateTime = ibDate2ISO(date);
-			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
-		}
-		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-			.arg(toQString(c.symbol))
-			.arg(toQString(c.secType))
-			.arg(toQString(c.exchange))
-			.arg(toQString(c.currency))
-			.arg(expiry)
-			.arg(c.strike)
-			.arg(toQString(c.right));
-		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-		       short_wts.value( wts, "NNN" ),
-		       short_bar_size.value( myProp->barSizeSetting, "00N" ),
-		       c_str.toUtf8().constData(),
-		       dateTime.toUtf8().constData(), open, high, low, close, volume, count, WAP, hasGaps);
-		fflush(stdout);
 	}
 }
 
