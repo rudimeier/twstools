@@ -79,7 +79,6 @@ class TwsDL : public QObject
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
-			PAUSE_DATA,
 			QUIT_READY,
 			QUIT_ERROR
 		};
