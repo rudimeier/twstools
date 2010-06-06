@@ -144,14 +144,8 @@ void TwsDL::idleTimeout()
 		case IDLE:
 			idle();
 			break;
-		case GET_CONTRACTS:
-			getContracts();
-			break;
 		case WAIT_CONTRACTS:
 			waitContracts();
-			break;
-		case GET_DATA:
-			getData();
 			break;
 		case WAIT_DATA:
 			waitData();
@@ -199,18 +193,15 @@ void TwsDL::waitTwsCon()
 void TwsDL::idle()
 {
 	if( curReqSpecIndex < contractDetailsTodo->contractDetailsRequests.size() ) {
-		idleTimer->setInterval( 0 );
 		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
-		state = GET_CONTRACTS;
+		getContracts();
 		return;
 	}
 	if( myProp->downloadData  && curReqContractIndex < histTodo->histRequests.size()
 	    && ( myProp->reqMaxContracts <= 0 || curReqContractIndex < myProp->reqMaxContracts ) ) {
-		idleTimer->setInterval( myProp->pacingTime );
 		currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-		state = GET_DATA;;
+		getData();
 	} else {
-		idleTimer->setInterval( 0 );
 		state = QUIT_READY;
 	}
 }
@@ -309,12 +300,13 @@ void TwsDL::pauseData()
 {
 	idleTimer->setInterval( myProp->violationPause );
 	qDebug() << "PAUSE" << myProp->violationPause;
-	state = GET_DATA;
+	state = IDLE;
 }
 
 
 void TwsDL::finData()
 {
+	idleTimer->setInterval( myProp->pacingTime );
 	curReqContractIndex ++;
 	state = IDLE;
 }
@@ -566,14 +558,14 @@ void TwsDL::startWork()
 		qDebug() << "getting contracts from TWS";
 		int i = contractDetailsTodo->fromConfig( myProp->contractSpecs );
 		Q_ASSERT( i>=0 );
-		state = GET_CONTRACTS;
+		state = IDLE;
 	} else {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
 			int i = histTodo->fromFile(workFile);
 			Q_ASSERT( i>=0 );
 			histTodo->dump( stderr );
-			state = GET_DATA;;
+			state = IDLE;;
 		} else {
 			state = QUIT_READY;
 		}
