@@ -421,12 +421,8 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
 		qDebug() << "READY" << curReqContractIndex << reqId;
-		p_histData.dump(
-			histTodo->histRequests.at(curReqContractIndex).ibContract,
-			histTodo->histRequests.at(curReqContractIndex).whatToShow,
-			histTodo->histRequests.at(curReqContractIndex).barSizeSetting,
-			myProp->printFormatDates
-		);
+		p_histData.dump( histTodo->histRequests.at(curReqContractIndex),
+		                 myProp->printFormatDates );
 		p_histData.clear();
 	}
 }

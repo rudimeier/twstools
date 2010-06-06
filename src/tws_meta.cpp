@@ -355,9 +355,12 @@ void PacketHistData::append( int reqId, const QString &date,
 }
 
 
-void PacketHistData::dump(const IB::Contract &c, const QString &wts,
-	const QString &barSizeSetting, bool printFormatDates )
+void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 {
+	const IB::Contract &c = hR.ibContract;
+	const QString &wts = hR.whatToShow;
+	const QString &barSizeSetting = hR.barSizeSetting;
+	
 	foreach( Row r, rows ) {
 		QString expiry = toQString(c.expiry);
 		QString dateTime = r.date;
