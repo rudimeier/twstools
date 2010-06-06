@@ -122,6 +122,9 @@ class TwsDL : public QObject
 		void reqContractDetails( const ContractDetailsRequest& );
 		void reqHistoricalData( const HistRequest& );
 		
+		void errorContracts(int, int, const QString &);
+		void errorHistData(int, int, const QString &);
+		
 		State state;
 		
 		QString confFile;

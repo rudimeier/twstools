@@ -328,43 +328,67 @@ void TwsDL::error(int id, int errorCode, const QString &errorMsg)
 	if( id == currentRequest.reqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
 		if( state == WAIT_DATA ) {
-			if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
-				idleTimer->setInterval( 0 );
-				currentRequest.reqState = GenericRequest::FINISHED;
-				pauseData();
-			} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
-				idleTimer->setInterval( 0 );
-				currentRequest.reqState = GenericRequest::FINISHED;
-				qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
-			} else if( errorCode == 162 &&
-			           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
-			            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
-				idleTimer->setInterval( 0 );
-				if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
-					currentRequest.reqState = GenericRequest::FINISHED;
-				} // else will cause error
-				qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curReqContractIndex << id;;
-			} else if( errorCode == 165 &&
-			           errorMsg.contains("HMDS server disconnect occurred.  Attempting reconnection") ) {
-				idleTimer->setInterval( myProp->reqTimeout );
-			} else if( errorCode == 165 &&
-			           errorMsg.contains("HMDS connection attempt failed.  Connection will be re-attempted") ) {
-				idleTimer->setInterval( myProp->reqTimeout );
+			switch( currentRequest.reqType ) {
+			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+				errorContracts( id, errorCode, errorMsg );
+				break;
+			case GenericRequest::HIST_REQUEST:
+				errorHistData( id, errorCode, errorMsg );
+				break;
+			case GenericRequest::NONE:
+				Q_ASSERT( false );
+				break;
 			}
+		} else {
+			// TODO
 		}
-		// TODO, handle:
-		// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
-		// 162 "Historical Market Data Service error message:No historical market data for CAC40/IND@MONEP Bid 1800"
-		// 162 "Historical Market Data Service error message:No data of type EODChart is available for the exchange 'IDEAL' and the security type 'Forex' and '1 y' and '1 day'"
-		// 200 "No security definition has been found for the request"
-		// 162 "Historical Market Data Service error message:Historical data request pacing violation"
-		// Maybe this comes only once?:
-		// 165 "Historical Market Data Service query message:HMDS server disconnect occurred.  Attempting reconnection..."
-		// This might come several times:
-		// 165 "Historical Market Data Service query message:HMDS connection attempt failed.  Connection will be re-attempted..."
 	} else {
 		Q_ASSERT( id == -1 );
 	}
+}
+
+
+void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
+{
+	// TODO
+}
+
+
+void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
+{
+	if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
+		idleTimer->setInterval( 0 );
+		currentRequest.reqState = GenericRequest::FINISHED;
+		pauseData();
+	} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
+		idleTimer->setInterval( 0 );
+		currentRequest.reqState = GenericRequest::FINISHED;
+		qDebug() << "READY - NO DATA" << curReqContractIndex << id;;
+	} else if( errorCode == 162 &&
+	           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
+	            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
+		idleTimer->setInterval( 0 );
+		if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
+			currentRequest.reqState = GenericRequest::FINISHED;
+		} // else will cause error
+		qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curReqContractIndex << id;;
+	} else if( errorCode == 165 &&
+	           errorMsg.contains("HMDS server disconnect occurred.  Attempting reconnection") ) {
+		idleTimer->setInterval( myProp->reqTimeout );
+	} else if( errorCode == 165 &&
+	           errorMsg.contains("HMDS connection attempt failed.  Connection will be re-attempted") ) {
+		idleTimer->setInterval( myProp->reqTimeout );
+	}
+	// TODO, handle:
+	// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
+	// 162 "Historical Market Data Service error message:No historical market data for CAC40/IND@MONEP Bid 1800"
+	// 162 "Historical Market Data Service error message:No data of type EODChart is available for the exchange 'IDEAL' and the security type 'Forex' and '1 y' and '1 day'"
+	// 200 "No security definition has been found for the request"
+	// 162 "Historical Market Data Service error message:Historical data request pacing violation"
+	// Maybe this comes only once?:
+	// 165 "Historical Market Data Service query message:HMDS server disconnect occurred.  Attempting reconnection..."
+	// This might come several times:
+	// 165 "Historical Market Data Service query message:HMDS connection attempt failed.  Connection will be re-attempted..."
 }
 
 
