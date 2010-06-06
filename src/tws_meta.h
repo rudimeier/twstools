@@ -173,6 +173,7 @@ class PacketHistData
 	private:
 		int reqId;
 		QList<Row> rows;
+		Row finishRow;
 };
 
 

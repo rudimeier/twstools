@@ -326,7 +326,11 @@ void PacketHistData::append( int reqId, const QString &date,
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
-	rows.append( row );
+	if( date.startsWith("finished") ) {
+		finishRow = row;
+	} else {
+		rows.append( row );
+	}
 }
 
 
