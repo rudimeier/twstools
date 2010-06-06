@@ -179,7 +179,7 @@ QString HistRequest::toString() const
 	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 		.arg(endDateTime)
 		.arg(durationStr)
-		.arg(whatToShow)
+		.arg(barSizeSetting)
 		.arg(whatToShow)
 		.arg(useRTH)
 		.arg(formatDate)
