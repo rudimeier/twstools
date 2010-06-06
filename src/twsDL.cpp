@@ -261,6 +261,11 @@ void TwsDL::pauseData()
 void TwsDL::finData()
 {
 	idleTimer->setInterval( myProp->pacingTime );
+	
+	p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
+	                 myProp->printFormatDates );
+	p_histData.clear();
+	
 	curIndexTodoHistData++;
 	state = IDLE;
 }
@@ -446,9 +451,6 @@ void TwsDL::historicalData( int reqId, const QString &date, double open, double 
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
 		qDebug() << "READY" << curIndexTodoHistData << reqId;
-		p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
-		                 myProp->printFormatDates );
-		p_histData.clear();
 	}
 }
 
