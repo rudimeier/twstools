@@ -330,6 +330,41 @@ void PacketHistData::append( int reqId, const QString &date,
 }
 
 
+void PacketHistData::dump(const IB::Contract &c, const QString &wts,
+	const QString &barSizeSetting, bool printFormatDates )
+{
+	foreach( Row r, rows ) {
+		QString expiry = toQString(c.expiry);
+		QString dateTime = r.date;
+		if( printFormatDates ) {
+			if( expiry.isEmpty() ) {
+				expiry = "0000-00-00";
+			} else {
+				expiry = ibDate2ISO( toQString(c.expiry) );
+			}
+			dateTime = ibDate2ISO(r.date);
+			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
+		}
+		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
+			.arg(toQString(c.symbol))
+			.arg(toQString(c.secType))
+			.arg(toQString(c.exchange))
+			.arg(toQString(c.currency))
+			.arg(expiry)
+			.arg(c.strike)
+			.arg(toQString(c.right));
+		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+		       short_wts.value( wts, "NNN" ),
+		       short_bar_size.value( barSizeSetting, "00N" ),
+		       c_str.toUtf8().constData(),
+		       dateTime.toUtf8().constData(),
+		       r.open, r.high, r.low, r.close,
+		       r.volume, r.count, r.WAP, r.hasGaps);
+		fflush(stdout);
+	}
+}
+
+
 
 
 } // namespace Test

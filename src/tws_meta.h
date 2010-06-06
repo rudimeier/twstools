@@ -167,6 +167,8 @@ class PacketHistData
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
+		void dump( const IB::Contract&, const QString &wts,
+			const QString &barSizeSetting, bool printFormatDates );
 		
 	private:
 		int reqId;
