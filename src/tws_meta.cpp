@@ -313,6 +313,25 @@ PacketContractDetails::PacketContractDetails()
 }
 
 
+const QList<IB::ContractDetails>& PacketContractDetails::constList() const
+{
+	return cdList;
+}
+
+
+void PacketContractDetails::clear()
+{
+	reqId = -1;
+	cdList.clear();
+}
+
+
+void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
+{
+	cdList.append(c);
+}
+
+
 
 
 

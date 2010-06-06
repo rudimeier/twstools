@@ -185,8 +185,8 @@ void TwsDL::finContracts()
 	int inserted;
 	inserted = storage2stdout();
 	
-	for( int i = 0; i<p_contractDetails.cdList.size(); i++ ) {
-		const IB::ContractDetails &cd = p_contractDetails.cdList.at(i);
+	for( int i = 0; i<p_contractDetails.constList().size(); i++ ) {
+		const IB::ContractDetails &cd = p_contractDetails.constList().at(i);
 		
 		if( myProp->reqMaxContractsPerSpec > 0 && myProp->reqMaxContractsPerSpec <= i ) {
 			break;
@@ -200,7 +200,7 @@ void TwsDL::finContracts()
 		}
 	}
 	
-	p_contractDetails.cdList.clear();
+	p_contractDetails.clear();
 	if( inserted == -1 ) {
 		state = QUIT_ERROR;
 		return;
@@ -389,7 +389,7 @@ void TwsDL::contractDetails2Storage( int reqId, const IB::ContractDetails &ibCon
 		Q_ASSERT( false );
 	}
 	
-	p_contractDetails.cdList.append(ibContractDetails);
+	p_contractDetails.append(reqId, ibContractDetails);
 }
 
 
@@ -433,11 +433,11 @@ int TwsDL::storage2stdout()
 	QTime  stopWatch;
 	stopWatch.start();
 	
-	int countReceived = p_contractDetails.cdList.size();
+	int countReceived = p_contractDetails.constList().size();
 	
 	for( int i=0; i<countReceived; i++ ) {
 		
-		IB::ContractDetails *ibContractDetails = &p_contractDetails.cdList[i];
+		const IB::ContractDetails *ibContractDetails = &p_contractDetails.constList()[i];
 		
 		qDebug() << toQString(ibContractDetails->summary.symbol)
 		         << toQString(ibContractDetails->summary.secType)
