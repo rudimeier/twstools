@@ -79,11 +79,9 @@ class TwsDL : public QObject
 			WAIT_TWS_CON,
 			GET_CONTRACTS,
 			WAIT_CONTRACTS,
-			FIN_CONTRACTS,
 			GET_DATA,
 			WAIT_DATA,
 			PAUSE_DATA,
-			FIN_DATA,
 			QUIT_READY,
 			QUIT_ERROR
 		};

@@ -147,9 +147,6 @@ void TwsDL::idleTimeout()
 		case WAIT_CONTRACTS:
 			waitContracts();
 			break;
-		case FIN_CONTRACTS:
-			finContracts();
-			break;
 		case GET_DATA:
 			getData();
 			break;
@@ -158,9 +155,6 @@ void TwsDL::idleTimeout()
 			break;
 		case PAUSE_DATA:
 			pauseData();
-			break;
-		case FIN_DATA:
-			finData();
 			break;
 		case QUIT_READY:
 				onQuit(0);
@@ -216,7 +210,7 @@ void TwsDL::waitContracts()
 	idleTimer->setInterval( 0 );
 	
 	if( currentRequest.reqState == GenericRequest::FINISHED ) {
-		state = FIN_CONTRACTS;
+		finContracts();
 		return;
 	} else {
 		qDebug() << "Timeout waiting for data.";
@@ -290,7 +284,7 @@ void TwsDL::waitData()
 	idleTimer->setInterval( 0 );
 	
 	if( currentRequest.reqState == GenericRequest::FINISHED ) {
-		state = FIN_DATA;
+		finData();
 		return;
 	} else {
 		qDebug() << "Timeout waiting for data.";
