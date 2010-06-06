@@ -321,6 +321,12 @@ void PacketHistData::Row::clear()
 }
 
 
+bool PacketHistData::isFinished() const
+{
+	return !finishRow.date.isEmpty();
+}
+
+
 void PacketHistData::clear()
 {
 	reqId = -1;

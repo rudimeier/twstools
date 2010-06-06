@@ -165,6 +165,7 @@ class PacketHistData
 				bool hasGaps;
 		};
 		
+		bool isFinished() const;
 		void clear();
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
