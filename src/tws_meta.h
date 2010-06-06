@@ -149,6 +149,14 @@ class PacketContractDetails
 class PacketHistData
 {
 	public:
+		bool isFinished() const;
+		void clear();
+		void append( int reqId, const QString &date,
+			double open, double high, double low, double close,
+			int volume, int count, double WAP, bool hasGaps );
+		void dump( const HistRequest&, bool printFormatDates );
+		
+	private:
 		class Row
 		{
 			public:
@@ -165,14 +173,6 @@ class PacketHistData
 				bool hasGaps;
 		};
 		
-		bool isFinished() const;
-		void clear();
-		void append( int reqId, const QString &date,
-			double open, double high, double low, double close,
-			int volume, int count, double WAP, bool hasGaps );
-		void dump( const HistRequest&, bool printFormatDates );
-		
-	private:
 		int reqId;
 		QList<Row> rows;
 		Row finishRow;
