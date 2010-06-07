@@ -354,21 +354,20 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 {
 	if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 		currentRequest.reqState = GenericRequest::FINISHED;
-		idleTimer->setInterval( myProp->violationPause );
-		qDebug() << "PAUSE" << myProp->violationPause;
-		currentRequest.close();
-		state = IDLE;
+		p_histData.closeError( true );
+		idleTimer->setInterval( 0 ); // TODO reimplement violationPause
 	} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
-		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;
+		p_histData.closeError( false );
+		idleTimer->setInterval( 0 );
 		qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;;
 	} else if( errorCode == 162 &&
 	           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
 	            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
+		/*TODO we should skip all similar work intelligently*/
+		currentRequest.reqState = GenericRequest::FINISHED;
+		p_histData.closeError( false );
 		idleTimer->setInterval( 0 );
-		if( myProp->ignoreNotAvailable /*TODO we should skip all similar work intelligently*/) {
-			currentRequest.reqState = GenericRequest::FINISHED;
-		} // else will cause error
 		qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;;
 	} else if( errorCode == 165 &&
 	           errorMsg.contains("HMDS server disconnect occurred.  Attempting reconnection") ) {
@@ -569,7 +568,6 @@ void PropTwsDL::initDefaults()
 	downloadData = false;
 	reqMaxContracts = -1;
 	reqMaxContractsPerSpec = -1;
-	ignoreNotAvailable = true;
 	
 	printFormatDates = true;
 	
@@ -599,7 +597,6 @@ bool PropTwsDL::readProperties()
 	ok = ok & get("downloadData", downloadData);
 	ok = ok & get("reqMaxContracts", reqMaxContracts);
 	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
-	ok = ok & get("ignoreNotAvailable", ignoreNotAvailable);
 	
 	ok = ok & get("printFormatDates", printFormatDates);
 	

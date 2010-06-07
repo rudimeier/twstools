@@ -54,7 +54,6 @@ class PropTwsDL : public PropSub
 		bool downloadData;
 		int reqMaxContracts;
 		int reqMaxContractsPerSpec;
-		bool ignoreNotAvailable;
 		
 		bool printFormatDates;
 		
