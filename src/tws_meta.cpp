@@ -5,6 +5,7 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
+#include <QtCore/QDebug>
 
 
 
@@ -382,21 +383,31 @@ void PacketHistData::Row::clear()
 
 PacketHistData::PacketHistData()
 {
+	mode = CLEAN;
 	reqId = -1;
 }
 
 
 bool PacketHistData::isFinished() const
 {
-	return !finishRow.date.isEmpty();
+	return (mode == CLOSED_SUCC) || (mode == CLOSED_ERR) ;
 }
 
 
 void PacketHistData::clear()
 {
+	mode = CLEAN;
 	reqId = -1;
 	rows.clear();
 	finishRow.clear();
+}
+
+
+void PacketHistData::record( int reqId )
+{
+	Q_ASSERT( mode == CLEAN );
+	mode = RECORD;
+	this->reqId = reqId;
 }
 
 
@@ -404,15 +415,14 @@ void PacketHistData::append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
-	if( rows.isEmpty() ) {
-		this->reqId = reqId;
-	}
+	Q_ASSERT( mode == RECORD);
 	Q_ASSERT( this->reqId == reqId );
 	
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
 	if( date.startsWith("finished") ) {
+		mode = CLOSED_SUCC;
 		finishRow = row;
 	} else {
 		rows.append( row );
@@ -422,6 +432,7 @@ void PacketHistData::append( int reqId, const QString &date,
 
 void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 {
+	Q_ASSERT( mode == CLOSED_SUCC );
 	const IB::Contract &c = hR.ibContract;
 	const QString &wts = hR.whatToShow;
 	const QString &barSizeSetting = hR.barSizeSetting;

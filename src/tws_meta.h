@@ -161,10 +161,13 @@ class PacketContractDetails
 class PacketHistData
 {
 	public:
+		enum Mode { CLEAN, RECORD, CLOSED_SUCC, CLOSED_ERR };
+		
 		PacketHistData();
 		
 		bool isFinished() const;
 		void clear();
+		void record( int reqId );
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
@@ -186,6 +189,8 @@ class PacketHistData
 				double WAP;
 				bool hasGaps;
 		};
+		
+		Mode mode;
 		
 		int reqId;
 		QList<Row> rows;

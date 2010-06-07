@@ -536,6 +536,7 @@ void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
+	p_histData.record( currentRequest.reqId );
 	twsClient->reqHistoricalData( currentRequest.reqId,
 	                              hR.ibContract,
 	                              hR.endDateTime,
