@@ -246,15 +246,6 @@ void TwsDL::waitData()
 }
 
 
-void TwsDL::pauseData()
-{
-	idleTimer->setInterval( myProp->violationPause );
-	qDebug() << "PAUSE" << myProp->violationPause;
-	currentRequest.close();
-	state = IDLE;
-}
-
-
 void TwsDL::finData()
 {
 	idleTimer->setInterval( myProp->pacingTime );
@@ -361,7 +352,10 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 {
 	if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 		currentRequest.reqState = GenericRequest::FINISHED;
-		pauseData();
+		idleTimer->setInterval( myProp->violationPause );
+		qDebug() << "PAUSE" << myProp->violationPause;
+		currentRequest.close();
+		state = IDLE;
 	} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 		idleTimer->setInterval( 0 );
 		currentRequest.reqState = GenericRequest::FINISHED;

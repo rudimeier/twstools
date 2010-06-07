@@ -112,7 +112,6 @@ class TwsDL : public QObject
 		void finContracts();
 		void getData();
 		void waitData();
-		void pauseData();
 		void finData();
 		void onQuit( int ret );
 		
