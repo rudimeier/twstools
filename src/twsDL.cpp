@@ -391,6 +391,10 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	// 165 "Historical Market Data Service query message:HMDS server disconnect occurred.  Attempting reconnection..."
 	// This might come several times:
 	// 165 "Historical Market Data Service query message:HMDS connection attempt failed.  Connection will be re-attempted..."
+	// 165 "Historical Market Data Service query message:HMDS server connection was successful."
+	//
+	// -1 1100 "Connectivity between IB and TWS has been lost."
+	// -1 1102 "Connectivity between IB and TWS has been restored - data maintained."
 }
 
 
