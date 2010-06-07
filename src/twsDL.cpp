@@ -255,6 +255,9 @@ void TwsDL::finData()
 		p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
 		                 myProp->printFormatDates );
 		curIndexTodoHistData++;
+	} else {
+		// TODO do better
+		idleTimer->setInterval( myProp->violationPause );
 	}
 	p_histData.clear();
 	currentRequest.close();
@@ -355,7 +358,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
 		currentRequest.reqState = GenericRequest::FINISHED;
 		p_histData.closeError( true );
-		idleTimer->setInterval( 0 ); // TODO reimplement violationPause
+		idleTimer->setInterval( 0 );
 	} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
 		currentRequest.reqState = GenericRequest::FINISHED;
 		p_histData.closeError( false );
