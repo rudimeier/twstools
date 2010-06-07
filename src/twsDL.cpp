@@ -322,6 +322,9 @@ void TwsDL::initTwsClient()
 }
 
 
+#define ERR_MATCH( _strg_  ) \
+	errorMsg.contains( QString(_strg_), Qt::CaseInsensitive )
+
 void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 {
 	if( id == currentRequest.reqId ) {
@@ -341,8 +344,36 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		} else {
 			// TODO
 		}
-	} else {
-		Q_ASSERT( id == -1 );
+		return;
+	}
+	
+	Q_ASSERT( id == -1 );
+	
+	// TODO do better
+	switch( errorCode ) {
+		case 1100:
+			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been lost."));
+			idleTimer->setInterval( myProp->reqTimeout );
+			break;
+		case 1101:
+			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
+			if( currentRequest.reqType == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+				currentRequest.reqState = GenericRequest::FINISHED;
+				p_histData.closeError( true );
+				idleTimer->setInterval( 0 );
+			}
+			break;
+		case 1102:
+			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
+			if( currentRequest.reqType == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+				currentRequest.reqState = GenericRequest::FINISHED;
+				p_histData.closeError( true );
+				idleTimer->setInterval( 0 );
+			}
+			break;
+		case 1300:
+			Q_ASSERT(ERR_MATCH("TWS socket port has been reset and this connection is being dropped."));
+			break;
 	}
 }
 
@@ -355,45 +386,51 @@ void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 
 void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 {
-	if( errorCode == 162 && errorMsg.contains("pacing violation", Qt::CaseInsensitive) ) {
-		currentRequest.reqState = GenericRequest::FINISHED;
-		p_histData.closeError( true );
-		idleTimer->setInterval( 0 );
-	} else if( errorCode == 162 && errorMsg.contains("HMDS query returned no data", Qt::CaseInsensitive) ) {
-		currentRequest.reqState = GenericRequest::FINISHED;
-		p_histData.closeError( false );
-		idleTimer->setInterval( 0 );
-		qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;;
-	} else if( errorCode == 162 &&
-	           (errorMsg.contains("No historical market data for", Qt::CaseInsensitive) ||
-	            errorMsg.contains("No data of type EODChart is available", Qt::CaseInsensitive) ) ) {
-		/*TODO we should skip all similar work intelligently*/
-		currentRequest.reqState = GenericRequest::FINISHED;
-		p_histData.closeError( false );
-		idleTimer->setInterval( 0 );
-		qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;;
-	} else if( errorCode == 165 &&
-	           errorMsg.contains("HMDS server disconnect occurred.  Attempting reconnection") ) {
-		idleTimer->setInterval( myProp->reqTimeout );
-	} else if( errorCode == 165 &&
-	           errorMsg.contains("HMDS connection attempt failed.  Connection will be re-attempted") ) {
-		idleTimer->setInterval( myProp->reqTimeout );
+	switch( errorCode ) {
+	//Historical Market Data Service error message:
+	case 162:
+		if( ERR_MATCH("Historical data request pacing violation") ) {
+			currentRequest.reqState = GenericRequest::FINISHED;
+			p_histData.closeError( true );
+			idleTimer->setInterval( 0 );
+		} else if( ERR_MATCH("HMDS query returned no data:") ) {
+			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;
+			currentRequest.reqState = GenericRequest::FINISHED;
+			p_histData.closeError( false );
+			idleTimer->setInterval( 0 );
+		} else if( ERR_MATCH("No historical market data for") ||
+		           ERR_MATCH("No data of type EODChart is available") ) {
+			/*TODO we should skip all similar work intelligently*/
+			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;
+			currentRequest.reqState = GenericRequest::FINISHED;
+			p_histData.closeError( false );
+			idleTimer->setInterval( 0 );
+		} else {
+			// nothing
+		}
+		break;
+	//Historical Market Data Service query message:
+	case 165:
+		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
+		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ||
+			ERR_MATCH("HMDS server connection was successful") ) {
+			idleTimer->setInterval( myProp->reqTimeout );
+		} else {
+			// nothing
+		}
+		break;
+	default:
+		// nothing
+		break;
 	}
 	// TODO, handle:
-	// 162 "Historical Market Data Service error message:HMDS query returned no data: DJX   100522C00155000@CBOE Bid"
-	// 162 "Historical Market Data Service error message:No historical market data for CAC40/IND@MONEP Bid 1800"
-	// 162 "Historical Market Data Service error message:No data of type EODChart is available for the exchange 'IDEAL' and the security type 'Forex' and '1 y' and '1 day'"
 	// 200 "No security definition has been found for the request"
-	// 162 "Historical Market Data Service error message:Historical data request pacing violation"
-	// Maybe this comes only once?:
-	// 165 "Historical Market Data Service query message:HMDS server disconnect occurred.  Attempting reconnection..."
-	// This might come several times:
-	// 165 "Historical Market Data Service query message:HMDS connection attempt failed.  Connection will be re-attempted..."
-	// 165 "Historical Market Data Service query message:HMDS server connection was successful."
 	//
 	// -1 1100 "Connectivity between IB and TWS has been lost."
 	// -1 1102 "Connectivity between IB and TWS has been restored - data maintained."
 }
+
+#undef ERR_MATCH
 
 
 void TwsDL::twsConnected( bool connected )
