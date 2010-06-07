@@ -250,11 +250,13 @@ void TwsDL::finData()
 {
 	idleTimer->setInterval( myProp->pacingTime );
 	
-	p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
-	                 myProp->printFormatDates );
+	Q_ASSERT( p_histData.isFinished() );
+	if( !p_histData.needRepeat() ) {
+		p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
+		                 myProp->printFormatDates );
+		curIndexTodoHistData++;
+	}
 	p_histData.clear();
-	
-	curIndexTodoHistData++;
 	currentRequest.close();
 	state = IDLE;
 }

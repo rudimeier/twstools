@@ -385,6 +385,7 @@ PacketHistData::PacketHistData()
 {
 	mode = CLEAN;
 	reqId = -1;
+	repeat = false;
 }
 
 
@@ -394,10 +395,17 @@ bool PacketHistData::isFinished() const
 }
 
 
+bool PacketHistData::needRepeat() const
+{
+	return repeat;
+}
+
+
 void PacketHistData::clear()
 {
 	mode = CLEAN;
 	reqId = -1;
+	repeat = false;
 	rows.clear();
 	finishRow.clear();
 }
@@ -430,9 +438,17 @@ void PacketHistData::append( int reqId, const QString &date,
 }
 
 
+void PacketHistData::closeError( bool repeat )
+{
+	Q_ASSERT( mode == RECORD);
+	mode = CLOSED_ERR;
+	this->repeat = false;
+}
+
+
 void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 {
-	Q_ASSERT( mode == CLOSED_SUCC );
+	Q_ASSERT( mode == CLOSED_SUCC || ( mode == CLOSED_ERR && !repeat ) );
 	const IB::Contract &c = hR.ibContract;
 	const QString &wts = hR.whatToShow;
 	const QString &barSizeSetting = hR.barSizeSetting;

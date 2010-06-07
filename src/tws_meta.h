@@ -166,11 +166,13 @@ class PacketHistData
 		PacketHistData();
 		
 		bool isFinished() const;
+		bool needRepeat() const;
 		void clear();
 		void record( int reqId );
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
+		void closeError( bool repeat );
 		void dump( const HistRequest&, bool printFormatDates );
 		
 	private:
@@ -191,6 +193,7 @@ class PacketHistData
 		};
 		
 		Mode mode;
+		bool repeat;
 		
 		int reqId;
 		QList<Row> rows;
