@@ -442,7 +442,7 @@ void PacketHistData::closeError( bool repeat )
 {
 	Q_ASSERT( mode == RECORD);
 	mode = CLOSED_ERR;
-	this->repeat = false;
+	this->repeat = repeat;
 }
 
 
