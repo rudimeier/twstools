@@ -42,6 +42,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 {
 	initProperties();
 	pacingControl.setPacingTime( myProp->pacingTime );
+	pacingControl.setViolationPause( myProp->violationPause );
 	initTwsClient();
 	initIdleTimer();
 	initWork();
@@ -214,11 +215,15 @@ void TwsDL::getData()
 	Q_ASSERT( curIndexTodoHistData < histTodo->histRequests.size() );
 	
 	int wait = pacingControl.goodTime();
-	qDebug() << "wait" << wait;
 	if( wait > 0 ) {
-		idleTimer->setInterval( wait );
+		idleTimer->setInterval( qMin( 1000, wait ) );
 		return;
 	}
+	if( wait < -1 ) {
+		// just debug timer resolution
+		qDebug() << "late timeout:" << wait;
+	}
+	
 	pacingControl.addRequest();
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
@@ -266,10 +271,8 @@ void TwsDL::finData()
 		p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
 		                 myProp->printFormatDates );
 		curIndexTodoHistData++;
-	} else {
-		// TODO do better
-		idleTimer->setInterval( myProp->violationPause );
 	}
+	
 	p_histData.clear();
 	currentRequest.close();
 	state = IDLE;
@@ -403,6 +406,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			currentRequest.reqState = GenericRequest::FINISHED;
 			p_histData.closeError( true );
+			pacingControl.setViolation();
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;

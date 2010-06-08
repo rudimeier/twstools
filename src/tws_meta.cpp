@@ -513,6 +513,12 @@ void PacingControl::setPacingTime( int avg )
 }
 
 
+void PacingControl::setViolationPause( int vP )
+{
+	violationPause = vP;
+}
+
+
 void PacingControl::addRequest()
 {
 	const quint64 now_t = nowInMsecs();
@@ -536,7 +542,10 @@ int PacingControl::goodTime() const
 		return INT_MIN;
 	}
 	
-	return (dateTimes.last() + avgPacingTime - now);
+	int waitAvg =  dateTimes.last() + avgPacingTime - now;
+	int waitViol = violations.last() ?
+		(dateTimes.last() + violationPause - now) : INT_MIN;
+	return qMax( waitAvg, waitViol );
 }
 
 

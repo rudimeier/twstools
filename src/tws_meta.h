@@ -214,6 +214,7 @@ class PacingControl
 		PacingControl();
 		
 		void setPacingTime( int avg );
+		void setViolationPause( int avg );
 		
 		void addRequest();
 		void setViolation();
@@ -226,6 +227,7 @@ class PacingControl
 		QList<bool> violations;
 		
 		int avgPacingTime;
+		int violationPause;
 };
 
 
