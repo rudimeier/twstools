@@ -7,6 +7,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
 
+#include <limits.h>
+
 
 
 
@@ -521,6 +523,7 @@ void PacingControl::addRequest()
 
 void PacingControl::setViolation()
 {
+	Q_ASSERT( !violations.isEmpty() );
 	violations.last() = true;
 }
 
@@ -528,6 +531,10 @@ void PacingControl::setViolation()
 int PacingControl::goodTime() const
 {
 	const quint64 now = nowInMsecs();
+	
+	if( dateTimes.isEmpty() ) {
+		return INT_MIN;
+	}
 	
 	return (dateTimes.last() + avgPacingTime - now);
 }
