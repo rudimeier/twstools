@@ -156,7 +156,6 @@ void TwsDL::idle()
 	
 	if( myProp->downloadData  && curIndexTodoHistData < histTodo->histRequests.size()
 	    && ( myProp->reqMaxContracts <= 0 || curIndexTodoHistData < myProp->reqMaxContracts ) ) {
-		currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 		getData();
 	} else {
 		state = QUIT_READY;
@@ -214,6 +213,15 @@ void TwsDL::getData()
 {
 	Q_ASSERT( curIndexTodoHistData < histTodo->histRequests.size() );
 	
+	int wait = pacingControl.goodTime();
+	qDebug() << "wait" << wait;
+	if( wait > 0 ) {
+		idleTimer->setInterval( wait );
+		return;
+	}
+	pacingControl.addRequest();
+	
+	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	const HistRequest &hR = histTodo->histRequests.at( curIndexTodoHistData );
 	
 	qDebug() << "DOWNLOAD DATA" << curIndexTodoHistData << currentRequest.reqId << ibToString(hR.ibContract);
@@ -251,7 +259,7 @@ void TwsDL::waitData()
 
 void TwsDL::finData()
 {
-	idleTimer->setInterval( myProp->pacingTime );
+	idleTimer->setInterval( 0 );
 	
 	Q_ASSERT( p_histData.isFinished() );
 	if( !p_histData.needRepeat() ) {
