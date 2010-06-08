@@ -6,6 +6,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QHash>
+#include <QtCore/QDateTime>
 
 
 
@@ -198,6 +199,33 @@ class PacketHistData
 		int reqId;
 		QList<Row> rows;
 		Row finishRow;
+};
+
+
+
+
+
+
+
+
+class PacingControl
+{
+	public:
+		PacingControl();
+		
+		void setPacingTime( int avg );
+		
+		void addRequest();
+		void setViolation();
+		int goodTime() const;
+		
+	private:
+		static quint64 nowInMsecs();
+		
+		QList<quint64> dateTimes;
+		QList<bool> violations;
+		
+		int avgPacingTime;
 };
 
 

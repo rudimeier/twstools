@@ -487,4 +487,52 @@ void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 
 
 
+
+
+
+
+quint64 PacingControl::nowInMsecs()
+{
+	const QDateTime now = QDateTime::currentDateTime();
+	const quint64 now_t = (now.toTime_t() * 1000) + now.time().msec();
+	return now_t;
+}
+
+
+PacingControl::PacingControl() :
+	avgPacingTime( 10000 )
+{
+}
+
+
+void PacingControl::setPacingTime( int avg )
+{
+	avgPacingTime = avg;
+}
+
+
+void PacingControl::addRequest()
+{
+	const quint64 now_t = nowInMsecs();
+	dateTimes.append( now_t );
+	violations.append( false );
+}
+
+
+void PacingControl::setViolation()
+{
+	violations.last() = true;
+}
+
+
+int PacingControl::goodTime() const
+{
+	const quint64 now = nowInMsecs();
+	
+	return (dateTimes.last() + avgPacingTime - now);
+}
+
+
+
+
 } // namespace Test
