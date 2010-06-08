@@ -357,7 +357,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 			break;
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
-			if( currentRequest.reqType == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+			if( currentRequest.reqType == GenericRequest::HIST_REQUEST ) {
 				currentRequest.reqState = GenericRequest::FINISHED;
 				p_histData.closeError( true );
 				idleTimer->setInterval( 0 );
@@ -365,7 +365,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 			break;
 		case 1102:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
-			if( currentRequest.reqType == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+			if( currentRequest.reqType == GenericRequest::HIST_REQUEST ) {
 				currentRequest.reqState = GenericRequest::FINISHED;
 				p_histData.closeError( true );
 				idleTimer->setInterval( 0 );
