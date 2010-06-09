@@ -1,11 +1,11 @@
 #include "tws_meta.h"
 
 #include "twsapi/twsUtil.h"
+#include "utilities/debug.h"
 
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
-#include <QtCore/QDebug>
 
 #include <limits.h>
 
@@ -536,29 +536,47 @@ void PacingControl::setViolation()
 }
 
 
+#define SWAP_MAX( _waitX_, _dbg_ ) \
+	if( retVal < _waitX_ ) { \
+		retVal = _waitX_; \
+		dbg = _dbg_ ; \
+	}
+
 int PacingControl::goodTime() const
 {
 	const quint64 now = nowInMsecs();
+	const int maxCountPerInterval = checkInterval / avgPacingTime;
+	const char* dbg = "don't wait";
+	int retVal = INT_MIN;
 	
 	if( dateTimes.isEmpty() ) {
-		return INT_MIN;
+		return retVal;
 	}
 	
-	int maxCountPerInterval = checkInterval / avgPacingTime;
 	
-	int waitAvg =  dateTimes.last() + avgPacingTime - now;
+	int waitMin = dateTimes.last() + minPacingTime - now;
+	SWAP_MAX( waitMin, "wait min" );
+	
+// 	int waitAvg =  dateTimes.last() + avgPacingTime - now;
+// 	SWAP_MAX( waitAvg, "wait avg" );
+	
 	int waitViol = violations.last() ?
 		(dateTimes.last() + violationPause - now) : INT_MIN;
+	SWAP_MAX( waitViol, "wait violation" );
 	
-	int waitGaga = INT_MIN;
+	int waitBurst = INT_MIN;
 	int p_index = dateTimes.size() - maxCountPerInterval;
 	if( p_index >= 0 ) {
 		quint64 p_time = dateTimes.at( p_index );
-		waitGaga = p_time + checkInterval - now;
+		waitBurst = p_time + checkInterval - now;
 	}
-
-	return qMax( waitGaga, qMax(waitAvg, waitViol) );
+	SWAP_MAX( waitBurst, "wait burst" );
+	
+	qDebug() << dbg << retVal;
+	return retVal;
 }
+
+#undef SWAP
 
 
 
