@@ -502,6 +502,8 @@ quint64 PacingControl::nowInMsecs()
 
 
 PacingControl::PacingControl() :
+	checkInterval( 600000 ),
+	minPacingTime( 1500 ),
 	avgPacingTime( 10000 )
 {
 }
@@ -542,15 +544,17 @@ int PacingControl::goodTime() const
 		return INT_MIN;
 	}
 	
+	int maxCountPerInterval = checkInterval / avgPacingTime;
+	
 	int waitAvg =  dateTimes.last() + avgPacingTime - now;
 	int waitViol = violations.last() ?
 		(dateTimes.last() + violationPause - now) : INT_MIN;
 	
 	int waitGaga = INT_MIN;
-	int p_index = dateTimes.size() - 60;
+	int p_index = dateTimes.size() - maxCountPerInterval;
 	if( p_index >= 0 ) {
 		quint64 p_time = dateTimes.at( p_index );
-		waitGaga = p_time + 600000 - now;
+		waitGaga = p_time + checkInterval - now;
 	}
 
 	return qMax( waitGaga, qMax(waitAvg, waitViol) );

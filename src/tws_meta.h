@@ -226,6 +226,8 @@ class PacingControl
 		QList<quint64> dateTimes;
 		QList<bool> violations;
 		
+		int checkInterval;
+		int minPacingTime;
 		int avgPacingTime;
 		int violationPause;
 };
