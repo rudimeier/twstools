@@ -509,8 +509,9 @@ PacingControl::PacingControl() :
 }
 
 
-void PacingControl::setPacingTime( int avg )
+void PacingControl::setPacingTime( int min, int avg )
 {
+	minPacingTime = min;
 	avgPacingTime = avg;
 }
 

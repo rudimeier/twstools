@@ -213,7 +213,7 @@ class PacingControl
 	public:
 		PacingControl();
 		
-		void setPacingTime( int avg );
+		void setPacingTime( int min, int avg );
 		void setViolationPause( int avg );
 		
 		void addRequest();

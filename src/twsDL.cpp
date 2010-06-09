@@ -41,7 +41,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	idleTimer(NULL)
 {
 	initProperties();
-	pacingControl.setPacingTime( myProp->pacingTime );
+	pacingControl.setPacingTime( myProp->minPacingTime, myProp->avgPacingTime );
 	pacingControl.setViolationPause( myProp->violationPause );
 	initTwsClient();
 	initIdleTimer();
@@ -617,7 +617,8 @@ void PropTwsDL::initDefaults()
 	
 	conTimeout = 1000;
 	reqTimeout = 20000;
-	pacingTime = 10300;
+	minPacingTime = 1500;
+	avgPacingTime = 10300;
 	violationPause = 60000;
 	
 	downloadData = false;
@@ -646,7 +647,8 @@ bool PropTwsDL::readProperties()
 	
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);
-	ok &= get("pacingTime", pacingTime);
+	ok &= get("minPacingTime", minPacingTime);
+	ok &= get("avgPacingTime", avgPacingTime);
 	ok &= get("violationPause", violationPause);
 	
 	ok = ok & get("downloadData", downloadData);
