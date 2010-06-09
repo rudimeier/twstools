@@ -522,6 +522,13 @@ void PacingControl::setViolationPause( int vP )
 }
 
 
+void PacingControl::clear()
+{
+	dateTimes.clear();
+	violations.clear();
+}
+
+
 void PacingControl::addRequest()
 {
 	const quint64 now_t = nowInMsecs();

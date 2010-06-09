@@ -216,6 +216,7 @@ class PacingControl
 		void setPacingTime( int min, int avg );
 		void setViolationPause( int avg );
 		
+		void clear();
 		void addRequest();
 		void setViolation();
 		int goodTime() const;
