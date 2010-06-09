@@ -456,7 +456,7 @@ void TwsDL::twsConnected( bool connected )
 {
 	if( connected ) {
 		Q_ASSERT( state == WAIT_TWS_CON );
-		idleTimer->setInterval( 0 );
+		idleTimer->setInterval( 1000 ); //TODO wait for first tws messages
 	} else {
 		// TODO check current state
 		state = CONNECT; // TODO dont change state within tws slots
