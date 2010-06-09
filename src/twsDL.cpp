@@ -455,7 +455,7 @@ void TwsDL::twsConnected( bool connected )
 		idleTimer->setInterval( 0 );
 	} else {
 		// TODO check current state
-		state = CONNECT;
+		state = CONNECT; // TODO dont change state within tws slots
 		currentRequest.reqState = GenericRequest::FINISHED; // because stupid assert in close()
 		currentRequest.close(); //maybe too hard because could be finished already
 		idleTimer->setInterval( 10000 );
