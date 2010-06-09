@@ -545,7 +545,15 @@ int PacingControl::goodTime() const
 	int waitAvg =  dateTimes.last() + avgPacingTime - now;
 	int waitViol = violations.last() ?
 		(dateTimes.last() + violationPause - now) : INT_MIN;
-	return qMax( waitAvg, waitViol );
+	
+	int waitGaga = INT_MIN;
+	int p_index = dateTimes.size() - 60;
+	if( p_index >= 0 ) {
+		quint64 p_time = dateTimes.at( p_index );
+		waitGaga = p_time + 600000 - now;
+	}
+
+	return qMax( waitGaga, qMax(waitAvg, waitViol) );
 }
 
 
