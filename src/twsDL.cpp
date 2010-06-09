@@ -171,7 +171,6 @@ void TwsDL::getContracts()
 	reqContractDetails( cdR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
-	currentRequest.reqState = GenericRequest::PENDING;
 	state = WAIT_DATA;
 }
 
@@ -234,7 +233,6 @@ void TwsDL::getData()
 	reqHistoricalData( hR );
 	
 	idleTimer->setInterval( myProp->reqTimeout );
-	currentRequest.reqState = GenericRequest::PENDING;
 	state = WAIT_DATA;
 }
 
@@ -243,22 +241,24 @@ void TwsDL::waitData()
 {
 	idleTimer->setInterval( 0 );
 	
-	if( currentRequest.reqState == GenericRequest::FINISHED ) {
-		switch( currentRequest.reqType ) {
-		case GenericRequest::CONTRACT_DETAILS_REQUEST:
+	switch( currentRequest.reqType ) {
+	case GenericRequest::CONTRACT_DETAILS_REQUEST:
+		if( p_contractDetails.isFinished() ) {
 			finContracts();
-			break;
-		case GenericRequest::HIST_REQUEST:
-			finData();
-			break;
-		case GenericRequest::NONE:
-			Q_ASSERT( false );
-			break;
 		}
-	} else {
-		qDebug() << "Timeout waiting for data.";
-		state = QUIT_ERROR;
+		return;
+	case GenericRequest::HIST_REQUEST:
+		if( p_histData.isFinished() ) {
+			finData();
+		}
+		return;
+	case GenericRequest::NONE:
+		Q_ASSERT( false );
+		break;
 	}
+	
+	qDebug() << "Timeout waiting for data.";
+	state = QUIT_ERROR;
 }
 
 
@@ -372,7 +372,6 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			if( currentRequest.reqType == GenericRequest::HIST_REQUEST ) {
-				currentRequest.reqState = GenericRequest::FINISHED;
 				p_histData.closeError( true );
 				idleTimer->setInterval( 0 );
 			}
@@ -380,7 +379,6 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		case 1102:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			if( currentRequest.reqType == GenericRequest::HIST_REQUEST ) {
-				currentRequest.reqState = GenericRequest::FINISHED;
 				p_histData.closeError( true );
 				idleTimer->setInterval( 0 );
 			}
@@ -408,20 +406,17 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	//Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
-			currentRequest.reqState = GenericRequest::FINISHED;
 			p_histData.closeError( true );
 			pacingControl.setViolation();
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;
-			currentRequest.reqState = GenericRequest::FINISHED;
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
 			/*TODO we should skip all similar work intelligently*/
 			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;
-			currentRequest.reqState = GenericRequest::FINISHED;
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else {
@@ -460,7 +455,6 @@ void TwsDL::twsConnected( bool connected )
 	} else {
 		// TODO check current state
 		state = CONNECT; // TODO dont change state within tws slots
-		currentRequest.reqState = GenericRequest::FINISHED; // because stupid assert in close()
 		currentRequest.close(); //maybe too hard because could be finished already
 		idleTimer->setInterval( 10000 );
 	}
@@ -488,7 +482,6 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 	
 	idleTimer->setInterval( 0 );
 	p_contractDetails.setFinished();
-	currentRequest.reqState = GenericRequest::FINISHED;
 }
 
 
@@ -506,7 +499,6 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	
 	if( p_histData.isFinished() ) {
 		idleTimer->setInterval( 0 );
-		currentRequest.reqState = GenericRequest::FINISHED;
 		qDebug() << "READY" << curIndexTodoHistData << reqId;
 	}
 }
