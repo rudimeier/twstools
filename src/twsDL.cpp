@@ -453,9 +453,27 @@ void TwsDL::twsConnected( bool connected )
 		Q_ASSERT( state == WAIT_TWS_CON );
 		idleTimer->setInterval( 1000 ); //TODO wait for first tws messages
 	} else {
-		// TODO check current state
-		state = CONNECT; // TODO dont change state within tws slots
-		currentRequest.close(); //maybe too hard because could be finished already
+		// TODO should we check current state here?
+		switch( currentRequest.reqType ) {
+		case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			if( !p_contractDetails.isFinished() ) {
+				Q_ASSERT(false); // TODO repeat
+			}
+			finContracts();
+			break;
+		case GenericRequest::HIST_REQUEST:
+			if( !p_histData.isFinished() ) {
+				p_histData.closeError( true );
+			}
+			finData();
+			break;
+		case GenericRequest::NONE:
+			qDebug() << "NONE";
+			break;
+		}
+// 		Q_ASSERT( state == IDLE || state == CONNECT );
+		Q_ASSERT( currentRequest.reqType == GenericRequest::NONE );
+		state = CONNECT;
 		idleTimer->setInterval( 10000 );
 	}
 }
