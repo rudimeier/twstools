@@ -37,7 +37,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
 	p_histData( *(new PacketHistData()) ),
-	pacingControl( *(new PacingControl()) ),
+	pacingControl( *(new PacingGod()) ),
 	dataFarms( *(new DataFarmStates()) ),
 	idleTimer(NULL)
 {
@@ -215,7 +215,9 @@ void TwsDL::getData()
 {
 	Q_ASSERT( curIndexTodoHistData < histTodo->histRequests.size() );
 	
-	int wait = pacingControl.goodTime();
+	int wait = pacingControl.goodTime(
+		histTodo->histRequests.at(curIndexTodoHistData).ibContract,
+		dataFarms );
 	if( wait > 0 ) {
 		idleTimer->setInterval( qMin( 1000, wait ) );
 		return;
@@ -225,7 +227,9 @@ void TwsDL::getData()
 		qDebug() << "late timeout:" << wait;
 	}
 	
-	pacingControl.addRequest();
+	pacingControl.addRequest(
+		histTodo->histRequests.at(curIndexTodoHistData).ibContract,
+		dataFarms );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	const HistRequest &hR = histTodo->histRequests.at( curIndexTodoHistData );
@@ -395,6 +399,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		case 2107:
 		case 2108:
 			dataFarms.notify( errorCode, errorMsg );
+			pacingControl.clear( dataFarms );
 			break;
 	}
 }
@@ -413,7 +418,9 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( true );
-			pacingControl.setViolation();
+			pacingControl.setViolation(
+				histTodo->histRequests.at(curIndexTodoHistData).ibContract,
+				dataFarms );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;
