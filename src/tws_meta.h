@@ -229,6 +229,37 @@ class PacingControl
 
 
 
+class DataFarmStates;
+
+class PacingGod
+{
+	public:
+		PacingGod();
+		~PacingGod();
+		
+		void setPacingTime( int min, int avg );
+		void setViolationPause( int avg );
+		
+		void clear( const DataFarmStates& );
+		void addRequest( const IB::Contract&, const DataFarmStates& );
+		void setViolation( const IB::Contract&, const DataFarmStates& );
+		int goodTime( const IB::Contract&, const DataFarmStates &dfs ) const;
+	
+	private:
+		void checkAdd( const IB::Contract&, const DataFarmStates&,
+			QString *lazyContract, QString *farm );
+		
+		PacingControl &controlGlobal;
+		QHash<const QString, PacingControl*> controlHmds;
+		QHash<const QString, PacingControl*> controlLazy;
+		
+		int checkInterval;
+		int minPacingTime;
+		int avgPacingTime;
+		int violationPause;
+};
+
+
 
 
 
@@ -238,6 +269,10 @@ class DataFarmStates
 {
 	public:
 		enum State { UNKNOWN, BROKEN, INACTIVE, OK };
+		
+		QStringList getInactives() const;
+		QString getMarketFarm( const IB::Contract& ) const;
+		QString getHmdsFarm( const IB::Contract& ) const;
 		
 		void notify(int errorCode, const QString &msg);
 		void learnMarket( const IB::Contract& );

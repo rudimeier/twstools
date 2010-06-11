@@ -589,6 +589,155 @@ int PacingControl::goodTime() const
 
 
 
+PacingGod::PacingGod() :
+	controlGlobal( *(new PacingControl()) ),
+	checkInterval( 600000 ),
+	minPacingTime( 1500 ),
+	avgPacingTime( 10000 )
+{
+}
+
+
+PacingGod::~PacingGod()
+{
+	delete &controlGlobal;
+}
+
+
+void PacingGod::setPacingTime( int min, int avg )
+{
+	minPacingTime = min;
+	avgPacingTime = avg;
+	controlGlobal.setPacingTime( min, avg );
+	foreach( PacingControl *pC, controlHmds ) {
+		pC->setPacingTime( min, avg );
+	}
+}
+
+
+void PacingGod::setViolationPause( int vP )
+{
+	violationPause = vP;
+	controlGlobal.setViolationPause( vP );
+	foreach( PacingControl *pC, controlHmds ) {
+		pC->setViolationPause( vP );
+	}
+}
+
+
+void PacingGod::clear( const DataFarmStates &dfs )
+{
+	qDebug() << "say clear";
+	foreach( QString farm, dfs.getInactives() ) {
+		if( controlHmds.contains(farm) ) {
+			qDebug() << "clear pacing control" << farm;
+			controlHmds.value(farm)->clear();
+		}
+	}
+	//don't clear the global or lazy ones
+}
+
+
+void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
+{
+	QString farm;
+	QString lazyC;
+	checkAdd( c, dfs, &lazyC, &farm );
+	Q_ASSERT( farm.isEmpty() || controlHmds.contains(farm) );
+	Q_ASSERT( !farm.isEmpty() || controlLazy.contains(lazyC) );
+	Q_ASSERT(  controlHmds.contains(farm) ^ controlLazy.contains(lazyC) );
+	
+	controlGlobal.addRequest();
+	
+	if( farm.isEmpty() ) {
+		qDebug() << "add request lazy";
+		controlLazy[lazyC]->addRequest();
+	} else {
+		qDebug() << "add request" << farm;
+		controlHmds[farm]->addRequest();
+	}
+}
+
+
+void PacingGod::setViolation( const IB::Contract& c, const DataFarmStates &dfs )
+{
+	const QString &f = dfs.getHmdsFarm(c);
+	if( f.isEmpty() ) {
+		qDebug() << "set violation global";
+		//TODO remember lazyContract
+	} else {
+		if( controlHmds.contains(f) ) {
+			qDebug() << "set violation" << f;
+			controlHmds[f]->addRequest();
+		} else {
+			//TODO remember lazyContract
+		}
+	}
+	controlGlobal.setViolation();
+}
+
+
+int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs ) const
+{
+	const QString &f = dfs.getHmdsFarm(c);
+	if( f.isEmpty() ) {
+		qDebug() << "get good time from global";
+		return controlGlobal.goodTime();
+	} else {
+		if( controlHmds.contains(f) ) {
+			qDebug() << "get good time from" << f ;
+			return controlHmds.value(f)->goodTime();
+		} else {
+			qDebug() << "WARNING, know Farm but ...";
+			return controlGlobal.goodTime();
+		}
+	}
+}
+
+
+void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
+	QString *lazyC, QString *farm )
+{
+	*lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	*farm = dfs.getHmdsFarm(c);
+	
+	if( !farm->isEmpty() ) {
+		if( !controlHmds.contains(*farm) ) {
+			PacingControl *pC;
+			if( controlLazy.contains(*lazyC) ) {
+				pC = controlLazy.take(*lazyC);
+			} else {
+				pC = new PacingControl();
+				pC->setPacingTime( minPacingTime, avgPacingTime );
+				pC->setViolationPause( violationPause );
+			}
+			controlHmds.insert( *farm, pC );
+		} else {
+			if( !controlLazy.contains(*lazyC) ) {
+				// fine - no history about that
+			} else {
+				//TODO merge controlLazy and controlFarm
+				Q_ASSERT(false);
+			}
+		}
+		return;
+	}
+	
+	if( !controlLazy.contains(*lazyC) ) {
+		PacingControl *pC = new PacingControl();
+		pC->setPacingTime( minPacingTime, avgPacingTime );
+		pC->setViolationPause( violationPause );
+		controlLazy.insert( *lazyC, pC );
+	}
+}
+
+
+
+
+
+
+
+
 void DataFarmStates::notify(int errorCode, const QString &msg)
 {
 	QString farm;
@@ -639,6 +788,7 @@ void DataFarmStates::notify(int errorCode, const QString &msg)
 	}
 	
 	pHash->insert( farm, state );
+	qDebug() << *pHash;
 }
 
 
@@ -686,6 +836,34 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 			qDebug() << "HMDS farm ambiguous:" << lazyC << sl;
 		}
 	}
+}
+
+
+QStringList DataFarmStates::getInactives() const
+{
+	QStringList sl;
+	QHash<const QString, State>::const_iterator it = hStates.constBegin();
+	while( it != hStates.constEnd() ) {
+		if( *it == INACTIVE || *it == BROKEN ) {
+			sl.append( it.key() );
+		}
+		it++;
+	}
+	return sl;
+}
+
+
+QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
+{
+	QString lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	return mLearn[lazyC];
+}
+
+
+QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
+{
+	QString lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	return hLearn[lazyC];
 }
 
 
