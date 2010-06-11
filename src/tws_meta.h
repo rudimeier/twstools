@@ -230,5 +230,24 @@ class PacingControl
 
 
 
+
+
+
+
+class DataFarmStates
+{
+	public:
+		enum State { UNKNOWN, BROKEN, INACTIVE, OK };
+		
+		void notify(int errorCode, const QString &msg);
+		
+	private:
+		QHash<const QString, State> mStates;
+		QHash<const QString, State> hStates;
+};
+
+
+
+
 } // namespace Test
 #endif

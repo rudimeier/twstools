@@ -585,4 +585,43 @@ int PacingControl::goodTime() const
 
 
 
+
+
+
+
+void DataFarmStates::notify(int errorCode, const QString &msg)
+{
+	switch( errorCode ) {
+	case 2103:
+		//API docu: "A market data farm is disconnected."
+		//log: "Market data farm connection is broken:eurofarm"
+		break;
+	case 2104:
+		//API docu: "A market data farm is connected."
+		//log: "Market data farm connection is OK:eurofarm"
+		break;
+	case 2105:
+		//API docu: "A historical data farm is disconnected."
+		//log: "HMDS data farm connection is broken:ushmds2a"
+		break;
+	case 2106:
+		//API docu: "A historical data farm is connected."
+		//log: "HMDS data farm connection is OK:ushmds2a"
+		break;
+	case 2107:
+		//API docu: "A historical data farm connection has become inactive but should be available upon demand."
+		//log: "HMDS data farm connection is inactive but should be available upon demand.ushmds2a"
+		break;
+	case 2108:
+		//API docu: "A market data farm connection has become inactive but should be available upon demand."
+		//log: never seen
+		break;
+	default:
+		return;
+	}
+}
+
+
+
+
 } // namespace Test
