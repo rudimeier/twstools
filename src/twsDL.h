@@ -32,6 +32,7 @@ class HistTodo;
 class PacketContractDetails;
 class PacketHistData;
 class PacingControl;
+class DataFarmStates;
 
 
 class PropTwsDL : public PropSub
@@ -145,6 +146,7 @@ class TwsDL : public QObject
 		PacketHistData &p_histData;
 		
 		PacingControl &pacingControl;
+		DataFarmStates &dataFarms;
 		
 		QTimer *idleTimer;
 		

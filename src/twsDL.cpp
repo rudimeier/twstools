@@ -38,6 +38,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	p_contractDetails( *(new PacketContractDetails()) ),
 	p_histData( *(new PacketHistData()) ),
 	pacingControl( *(new PacingControl()) ),
+	dataFarms( *(new DataFarmStates()) ),
 	idleTimer(NULL)
 {
 	initProperties();
@@ -71,6 +72,7 @@ TwsDL::~TwsDL()
 	delete &p_contractDetails;
 	delete &p_histData;
 	delete &pacingControl;
+	delete &dataFarms;
 	if( idleTimer != NULL ) {
 		delete idleTimer;
 	}
