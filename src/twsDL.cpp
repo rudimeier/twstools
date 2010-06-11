@@ -417,12 +417,14 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;
+			dataFarms.learnHmds( histTodo->histRequests.at(curIndexTodoHistData).ibContract );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
 			/*TODO we should skip all similar work intelligently*/
 			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;
+			dataFarms.learnHmds( histTodo->histRequests.at(curIndexTodoHistData).ibContract );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else {
@@ -516,6 +518,9 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
 		Q_ASSERT( false );
 	}
+	
+	// TODO we shouldn't do this each row
+	dataFarms.learnHmds( histTodo->histRequests.at(curIndexTodoHistData).ibContract );
 	
 	Q_ASSERT( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,
