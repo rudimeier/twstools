@@ -388,9 +388,13 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		case 1300:
 			Q_ASSERT(ERR_MATCH("TWS socket port has been reset and this connection is being dropped."));
 			break;
+		case 2103:
+		case 2104:
+		case 2105:
+		case 2106:
 		case 2107:
-			Q_ASSERT(ERR_MATCH("HMDS data farm connection is inactive but should be available upon demand."));
-			pacingControl.clear(); // TODO distinguish between that farms
+		case 2108:
+			dataFarms.notify( errorCode, errorMsg );
 			break;
 	}
 }
