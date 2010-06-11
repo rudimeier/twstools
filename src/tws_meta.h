@@ -215,6 +215,8 @@ class PacingControl
 		void setViolation();
 		int goodTime() const;
 		
+		void merge( const PacingControl& );
+		
 	private:
 		static quint64 nowInMsecs();
 		

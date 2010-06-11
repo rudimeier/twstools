@@ -583,6 +583,40 @@ int PacingControl::goodTime() const
 #undef SWAP
 
 
+void PacingControl::merge( const PacingControl& other )
+{
+	qDebug() << dateTimes;
+	qDebug() << other.dateTimes;
+	QList<quint64>::iterator t_d = dateTimes.begin();
+	QList<bool>::iterator t_v = violations.begin();
+	QList<quint64>::const_iterator o_d = other.dateTimes.constBegin();
+	QList<bool>::const_iterator o_v = other.violations.constBegin();
+	
+	while( t_d != dateTimes.end() && o_d != other.dateTimes.constEnd() ) {
+		if( *o_d < *t_d ) {
+			t_d = dateTimes.insert( t_d, *o_d );
+			t_v = violations.insert( t_v, *o_v );
+			o_d++;
+			o_v++;
+		} else {
+			t_d++;
+			t_v++;
+		}
+	}
+	while( o_d != other.dateTimes.constEnd() ) {
+		Q_ASSERT( t_d == dateTimes.end() );
+		t_d = dateTimes.insert( t_d, *o_d );
+		t_v = violations.insert( t_v, *o_v );
+		t_d++;
+		t_v++;
+		o_d++;
+		o_v++;
+	}
+	qDebug() << dateTimes;
+}
+
+
+
 
 
 
@@ -716,7 +750,7 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 			if( !controlLazy.contains(*lazyC) ) {
 				// fine - no history about that
 			} else {
-				//TODO merge controlLazy and controlFarm
+				controlHmds.value(*farm)->merge(*controlLazy.take(*lazyC));
 				Q_ASSERT(false);
 			}
 		}
