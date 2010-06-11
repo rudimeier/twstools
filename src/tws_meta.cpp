@@ -591,34 +591,63 @@ int PacingControl::goodTime() const
 
 void DataFarmStates::notify(int errorCode, const QString &msg)
 {
+	QString farm;
+	State state;
+	QHash<const QString, State> *pHash = NULL;
+	
+	// prefixes used for getFarm() are taken from past logs
 	switch( errorCode ) {
 	case 2103:
 		//API docu: "A market data farm is disconnected."
-		//log: "Market data farm connection is broken:eurofarm"
+		pHash = &mStates;
+		state = BROKEN;
+		farm = getFarm("Market data farm connection is broken:", msg);
 		break;
 	case 2104:
 		//API docu: "A market data farm is connected."
-		//log: "Market data farm connection is OK:eurofarm"
+		pHash = &mStates;
+		state = OK;
+		farm = getFarm("Market data farm connection is OK:", msg);
 		break;
 	case 2105:
 		//API docu: "A historical data farm is disconnected."
-		//log: "HMDS data farm connection is broken:ushmds2a"
+		pHash = &hStates;
+		state = BROKEN;
+		farm = getFarm("HMDS data farm connection is broken:", msg);
 		break;
 	case 2106:
 		//API docu: "A historical data farm is connected."
-		//log: "HMDS data farm connection is OK:ushmds2a"
+		pHash = &hStates;
+		state = OK;
+		farm = getFarm("HMDS data farm connection is OK:", msg);
 		break;
 	case 2107:
 		//API docu: "A historical data farm connection has become inactive but should be available upon demand."
-		//log: "HMDS data farm connection is inactive but should be available upon demand.ushmds2a"
+		pHash = &hStates;
+		state = INACTIVE;
+		farm = getFarm("HMDS data farm connection is inactive but should be available upon demand.", msg);
 		break;
 	case 2108:
 		//API docu: "A market data farm connection has become inactive but should be available upon demand."
-		//log: never seen
+		pHash = &mStates;
+		state = INACTIVE;
+		farm = getFarm("never seen", msg); // will cause assert
 		break;
 	default:
+		Q_ASSERT(false);
 		return;
 	}
+	
+	pHash->insert( farm, state );
+}
+
+
+/// static member
+QString DataFarmStates::getFarm( const QString prefix, const QString& msg )
+{
+	Q_ASSERT( msg.startsWith(prefix, Qt::CaseInsensitive) );
+	
+	return msg.right( msg.size() - prefix.size() );
 }
 
 

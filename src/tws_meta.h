@@ -242,6 +242,8 @@ class DataFarmStates
 		void notify(int errorCode, const QString &msg);
 		
 	private:
+		static QString getFarm( const QString prefix, const QString& msg );
+		
 		QHash<const QString, State> mStates;
 		QHash<const QString, State> hStates;
 };
