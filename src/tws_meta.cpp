@@ -651,6 +651,44 @@ QString DataFarmStates::getFarm( const QString prefix, const QString& msg )
 }
 
 
+void DataFarmStates::learnMarket( const IB::Contract& )
+{
+	Q_ASSERT( false ); //not implemented
+}
+
+
+void DataFarmStates::learnHmds( const IB::Contract& c )
+{
+	QString lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	
+	QStringList sl;
+	QHash<const QString, State>::const_iterator it = hStates.constBegin();
+	while( it != hStates.constEnd() ) {
+		if( *it == OK ) {
+			sl.append( it.key() );
+		}
+		it++;
+	}
+	if( sl.size() <= 0 ) {
+		Q_ASSERT(false); // assuming at least one farm must be active
+	} else if( sl.size() == 1 ) {
+		if( hLearn.contains(lazyC) ) {
+			Q_ASSERT( hLearn.value( lazyC ) == sl.first() );
+		} else {
+			hLearn.insert( lazyC, sl.first() );
+			qDebug() << "HMDS farm unique:" << lazyC << sl.first();
+		}
+	} else {
+		if( hLearn.contains(lazyC) ) {
+			Q_ASSERT( sl.contains(hLearn.value(lazyC)) );
+		} else {
+			//but doing nothing
+			qDebug() << "HMDS farm ambiguous:" << lazyC << sl;
+		}
+	}
+}
+
+
 
 
 } // namespace Test

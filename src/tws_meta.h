@@ -240,12 +240,17 @@ class DataFarmStates
 		enum State { UNKNOWN, BROKEN, INACTIVE, OK };
 		
 		void notify(int errorCode, const QString &msg);
+		void learnMarket( const IB::Contract& );
+		void learnHmds( const IB::Contract& );
 		
 	private:
 		static QString getFarm( const QString prefix, const QString& msg );
 		
 		QHash<const QString, State> mStates;
 		QHash<const QString, State> hStates;
+		
+		QHash<const QString, QString> mLearn;
+		QHash<const QString, QString> hLearn;
 };
 
 
