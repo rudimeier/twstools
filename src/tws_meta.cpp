@@ -743,17 +743,18 @@ void PacingGod::setViolation( const IB::Contract& c, const DataFarmStates &dfs )
 int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs ) const
 {
 	const QString &f = dfs.getHmdsFarm(c);
-	if( f.isEmpty() ) {
-		qDebug() << "get good time from global";
+	
+	if( !controlLazy.isEmpty() || !controlHmds.contains(f) ) {
+		if( f.isEmpty() ) {
+			qDebug() << "get good time global";
+		} else {
+			qDebug() << "get good time global, although farm is" << f;
+		}
 		return controlGlobal.goodTime();
 	} else {
-		if( controlHmds.contains(f) ) {
-			qDebug() << "get good time from" << f ;
-			return controlHmds.value(f)->goodTime();
-		} else {
-			qDebug() << "WARNING, know Farm but ...";
-			return controlGlobal.goodTime();
-		}
+		Q_ASSERT( controlHmds.contains(f) );
+		qDebug() << "get good time farm" << f ;
+		return controlHmds.value(f)->goodTime();
 	}
 }
 
