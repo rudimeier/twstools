@@ -743,13 +743,14 @@ int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs )
 	QString lazyC;
 	checkAdd( c, dfs, &lazyC, &farm );
 	
-	if( farm.isEmpty() ) {
+	if( farm.isEmpty() || !controlLazy.isEmpty() ) {
+		// we have to use controlGlobal if any contract's farm is ambiguous
 		qDebug() << "get good time global";
 		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		return controlGlobal.goodTime();
 	} else {
 		qDebug() << "get good time farm" << farm ;
-		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		Q_ASSERT( controlHmds.contains(farm) && controlLazy.isEmpty() );
 		return controlHmds.value(farm)->goodTime();
 	}
 }
