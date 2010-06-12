@@ -205,10 +205,10 @@ class PacketHistData
 class PacingControl
 {
 	public:
-		PacingControl();
+		PacingControl( int min, int avg, int violationPause );
 		
 		void setPacingTime( int min, int avg );
-		void setViolationPause( int avg );
+		void setViolationPause( int violationPause );
 		
 		void clear();
 		void addRequest();
@@ -251,14 +251,14 @@ class PacingGod
 		void checkAdd( const IB::Contract&, const DataFarmStates&,
 			QString *lazyContract, QString *farm );
 		
-		PacingControl &controlGlobal;
-		QHash<const QString, PacingControl*> controlHmds;
-		QHash<const QString, PacingControl*> controlLazy;
-		
 		int checkInterval;
 		int minPacingTime;
 		int avgPacingTime;
 		int violationPause;
+		
+		PacingControl &controlGlobal;
+		QHash<const QString, PacingControl*> controlHmds;
+		QHash<const QString, PacingControl*> controlLazy;
 };
 
 

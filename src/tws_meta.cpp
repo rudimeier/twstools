@@ -497,10 +497,11 @@ quint64 PacingControl::nowInMsecs()
 }
 
 
-PacingControl::PacingControl() :
+PacingControl::PacingControl( int min, int avg, int viol ) :
 	checkInterval( 600000 ),
-	minPacingTime( 1500 ),
-	avgPacingTime( 10000 )
+	minPacingTime( min ),
+	avgPacingTime( avg ),
+	violationPause( viol )
 {
 }
 
@@ -624,10 +625,12 @@ void PacingControl::merge( const PacingControl& other )
 
 
 PacingGod::PacingGod() :
-	controlGlobal( *(new PacingControl()) ),
 	checkInterval( 600000 ),
 	minPacingTime( 1500 ),
-	avgPacingTime( 10000 )
+	avgPacingTime( 10000 ),
+	violationPause( 60000 ),
+	controlGlobal( *(new PacingControl(
+		minPacingTime, avgPacingTime, violationPause)) )
 {
 }
 
@@ -658,6 +661,9 @@ void PacingGod::setPacingTime( int min, int avg )
 	foreach( PacingControl *pC, controlHmds ) {
 		pC->setPacingTime( min, avg );
 	}
+	foreach( PacingControl *pC, controlLazy ) {
+		pC->setPacingTime( min, avg );
+	}
 }
 
 
@@ -666,6 +672,9 @@ void PacingGod::setViolationPause( int vP )
 	violationPause = vP;
 	controlGlobal.setViolationPause( vP );
 	foreach( PacingControl *pC, controlHmds ) {
+		pC->setViolationPause( vP );
+	}
+	foreach( PacingControl *pC, controlLazy ) {
 		pC->setViolationPause( vP );
 	}
 }
@@ -753,9 +762,8 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 			if( controlLazy.contains(*lazyC) ) {
 				pC = controlLazy.take(*lazyC);
 			} else {
-				pC = new PacingControl();
-				pC->setPacingTime( minPacingTime, avgPacingTime );
-				pC->setViolationPause( violationPause );
+				pC = new PacingControl(
+					minPacingTime, avgPacingTime, violationPause);
 			}
 			controlHmds.insert( *farm, pC );
 		} else {
@@ -770,9 +778,8 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 	}
 	
 	if( !controlLazy.contains(*lazyC) ) {
-		PacingControl *pC = new PacingControl();
-		pC->setPacingTime( minPacingTime, avgPacingTime );
-		pC->setViolationPause( violationPause );
+		PacingControl *pC = new PacingControl(
+			minPacingTime, avgPacingTime, violationPause);
 		controlLazy.insert( *lazyC, pC );
 	}
 }
