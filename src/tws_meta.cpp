@@ -751,9 +751,9 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 				// fine - no history about that
 			} else {
 				controlHmds.value(*farm)->merge(*controlLazy.take(*lazyC));
-				Q_ASSERT(false);
 			}
 		}
+		Q_ASSERT( !controlLazy.contains(*lazyC) );
 		return;
 	}
 	
