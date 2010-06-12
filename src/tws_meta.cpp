@@ -719,42 +719,38 @@ void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
 
 void PacingGod::setViolation( const IB::Contract& c, const DataFarmStates &dfs )
 {
-	const QString f = dfs.getHmdsFarm(c);
-	QString lazyC = LAZY_CONTRACT_STR(c);
+	QString farm;
+	QString lazyC;
+	checkAdd( c, dfs, &lazyC, &farm );
 	
-	if( f.isEmpty() ) {
+	controlGlobal.setViolation();
+	
+	if( farm.isEmpty() ) {
 		qDebug() << "set violation lazy";
-		Q_ASSERT( controlLazy.contains(lazyC) );
+		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->setViolation();
 	} else {
-		if( controlLazy.contains(lazyC) ) {
-			qDebug() << "set violation lazy, although farm is" << f;
-			controlLazy[lazyC]->setViolation();
-		} else {
-			qDebug() << "set violation farm" << f;
-			Q_ASSERT( controlHmds.contains(f) );
-			controlHmds[f]->setViolation();
-		}
+		qDebug() << "set violation farm" << farm;
+		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		controlHmds[farm]->setViolation();
 	}
-	controlGlobal.setViolation();
 }
 
 
-int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs ) const
+int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs )
 {
-	const QString &f = dfs.getHmdsFarm(c);
+	QString farm;
+	QString lazyC;
+	checkAdd( c, dfs, &lazyC, &farm );
 	
-	if( !controlLazy.isEmpty() || !controlHmds.contains(f) ) {
-		if( f.isEmpty() ) {
-			qDebug() << "get good time global";
-		} else {
-			qDebug() << "get good time global, although farm is" << f;
-		}
+	if( farm.isEmpty() ) {
+		qDebug() << "get good time global";
+		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		return controlGlobal.goodTime();
 	} else {
-		Q_ASSERT( controlHmds.contains(f) );
-		qDebug() << "get good time farm" << f ;
-		return controlHmds.value(f)->goodTime();
+		qDebug() << "get good time farm" << farm ;
+		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		return controlHmds.value(farm)->goodTime();
 	}
 }
 

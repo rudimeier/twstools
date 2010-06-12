@@ -245,7 +245,7 @@ class PacingGod
 		void clear( const DataFarmStates& );
 		void addRequest( const IB::Contract&, const DataFarmStates& );
 		void setViolation( const IB::Contract&, const DataFarmStates& );
-		int goodTime( const IB::Contract&, const DataFarmStates &dfs ) const;
+		int goodTime( const IB::Contract&, const DataFarmStates &dfs );
 	
 	private:
 		void checkAdd( const IB::Contract&, const DataFarmStates&,
