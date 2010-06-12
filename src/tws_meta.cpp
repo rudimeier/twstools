@@ -702,17 +702,16 @@ void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
 	QString farm;
 	QString lazyC;
 	checkAdd( c, dfs, &lazyC, &farm );
-	Q_ASSERT( farm.isEmpty() || controlHmds.contains(farm) );
-	Q_ASSERT( !farm.isEmpty() || controlLazy.contains(lazyC) );
-	Q_ASSERT(  controlHmds.contains(farm) ^ controlLazy.contains(lazyC) );
 	
 	controlGlobal.addRequest();
 	
 	if( farm.isEmpty() ) {
 		qDebug() << "add request lazy";
+		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->addRequest();
 	} else {
 		qDebug() << "add request farm" << farm;
+		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->addRequest();
 	}
 }
@@ -783,6 +782,7 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 				controlHmds.value(*farm)->merge(*controlLazy.take(*lazyC));
 			}
 		}
+		Q_ASSERT( controlHmds.contains(*farm) );
 		Q_ASSERT( !controlLazy.contains(*lazyC) );
 		return;
 	}
@@ -792,6 +792,9 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 			maxRequests, checkInterval, minPacingTime, violationPause);
 		controlLazy.insert( *lazyC, pC );
 	}
+	
+	Q_ASSERT( !controlHmds.contains(*farm) );
+	Q_ASSERT( controlLazy.contains(*lazyC) );
 }
 
 
