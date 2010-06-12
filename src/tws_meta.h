@@ -205,9 +205,9 @@ class PacketHistData
 class PacingControl
 {
 	public:
-		PacingControl( int min, int avg, int violationPause );
+		PacingControl( int packets, int interval, int min, int vPause );
 		
-		void setPacingTime( int min, int avg );
+		void setPacingTime( int packets, int interval, int min );
 		void setViolationPause( int violationPause );
 		
 		void clear();
@@ -223,9 +223,9 @@ class PacingControl
 		QList<quint64> dateTimes;
 		QList<bool> violations;
 		
+		int maxRequests;
 		int checkInterval;
 		int minPacingTime;
-		int avgPacingTime;
 		int violationPause;
 };
 
@@ -239,8 +239,8 @@ class PacingGod
 		PacingGod();
 		~PacingGod();
 		
-		void setPacingTime( int min, int avg );
-		void setViolationPause( int avg );
+		void setPacingTime( int packets, int interval, int min );
+		void setViolationPause( int pause );
 		
 		void clear( const DataFarmStates& );
 		void addRequest( const IB::Contract&, const DataFarmStates& );
@@ -251,9 +251,9 @@ class PacingGod
 		void checkAdd( const IB::Contract&, const DataFarmStates&,
 			QString *lazyContract, QString *farm );
 		
+		int maxRequests;
 		int checkInterval;
 		int minPacingTime;
-		int avgPacingTime;
 		int violationPause;
 		
 		PacingControl &controlGlobal;

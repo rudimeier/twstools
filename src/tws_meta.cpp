@@ -497,19 +497,20 @@ quint64 PacingControl::nowInMsecs()
 }
 
 
-PacingControl::PacingControl( int min, int avg, int viol ) :
-	checkInterval( 600000 ),
-	minPacingTime( min ),
-	avgPacingTime( avg ),
-	violationPause( viol )
+PacingControl::PacingControl( int r, int i, int m, int v ) :
+	maxRequests( r ),
+	checkInterval( i ),
+	minPacingTime( m ),
+	violationPause( v )
 {
 }
 
 
-void PacingControl::setPacingTime( int min, int avg )
+void PacingControl::setPacingTime( int r, int i, int m )
 {
-	minPacingTime = min;
-	avgPacingTime = avg;
+	maxRequests = r;
+	checkInterval = i;
+	minPacingTime = m;
 }
 
 
@@ -550,7 +551,6 @@ void PacingControl::setViolation()
 int PacingControl::goodTime() const
 {
 	const quint64 now = nowInMsecs();
-	const int maxCountPerInterval = checkInterval / avgPacingTime;
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
@@ -570,7 +570,7 @@ int PacingControl::goodTime() const
 	SWAP_MAX( waitViol, "wait violation" );
 	
 	int waitBurst = INT_MIN;
-	int p_index = dateTimes.size() - maxCountPerInterval;
+	int p_index = dateTimes.size() - maxRequests;
 	if( p_index >= 0 ) {
 		quint64 p_time = dateTimes.at( p_index );
 		waitBurst = p_time + checkInterval - now;
@@ -628,12 +628,12 @@ void PacingControl::merge( const PacingControl& other )
 
 
 PacingGod::PacingGod() :
-	checkInterval( 600000 ),
+	maxRequests( 60 ),
+	checkInterval( 601000 ),
 	minPacingTime( 1500 ),
-	avgPacingTime( 10000 ),
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
-		minPacingTime, avgPacingTime, violationPause)) )
+		maxRequests, checkInterval, minPacingTime, violationPause)) )
 {
 }
 
@@ -656,16 +656,17 @@ PacingGod::~PacingGod()
 }
 
 
-void PacingGod::setPacingTime( int min, int avg )
+void PacingGod::setPacingTime( int r, int i, int m )
 {
-	minPacingTime = min;
-	avgPacingTime = avg;
-	controlGlobal.setPacingTime( min, avg );
+	maxRequests = r;
+	checkInterval = i;
+	minPacingTime = m;
+	controlGlobal.setPacingTime( r, i, m );
 	foreach( PacingControl *pC, controlHmds ) {
-		pC->setPacingTime( min, avg );
+		pC->setPacingTime( r, i, m );
 	}
 	foreach( PacingControl *pC, controlLazy ) {
-		pC->setPacingTime( min, avg );
+		pC->setPacingTime( r, i, m  );
 	}
 }
 
@@ -772,7 +773,7 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 				pC = controlLazy.take(*lazyC);
 			} else {
 				pC = new PacingControl(
-					minPacingTime, avgPacingTime, violationPause);
+					maxRequests, checkInterval, minPacingTime, violationPause);
 			}
 			controlHmds.insert( *farm, pC );
 		} else {
@@ -788,7 +789,7 @@ void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 	
 	if( !controlLazy.contains(*lazyC) ) {
 		PacingControl *pC = new PacingControl(
-			minPacingTime, avgPacingTime, violationPause);
+			maxRequests, checkInterval, minPacingTime, violationPause);
 		controlLazy.insert( *lazyC, pC );
 	}
 }

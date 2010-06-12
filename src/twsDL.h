@@ -50,8 +50,9 @@ class PropTwsDL : public PropSub
 		
 		int conTimeout;
 		int reqTimeout;
+		int maxRequests;
+		int pacingInterval;
 		int minPacingTime;
-		int avgPacingTime;
 		int violationPause;
 		
 		bool downloadData;
