@@ -535,7 +535,7 @@ void PacingControl::addRequest()
 }
 
 
-void PacingControl::setViolation()
+void PacingControl::notifyViolation()
 {
 	Q_ASSERT( !violations.isEmpty() );
 	violations.last() = true;
@@ -717,22 +717,22 @@ void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
 }
 
 
-void PacingGod::setViolation( const IB::Contract& c, const DataFarmStates &dfs )
+void PacingGod::notifyViolation( const IB::Contract& c, const DataFarmStates &dfs )
 {
 	QString farm;
 	QString lazyC;
 	checkAdd( c, dfs, &lazyC, &farm );
 	
-	controlGlobal.setViolation();
+	controlGlobal.notifyViolation();
 	
 	if( farm.isEmpty() ) {
 		qDebug() << "set violation lazy";
 		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
-		controlLazy[lazyC]->setViolation();
+		controlLazy[lazyC]->notifyViolation();
 	} else {
 		qDebug() << "set violation farm" << farm;
 		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
-		controlHmds[farm]->setViolation();
+		controlHmds[farm]->notifyViolation();
 	}
 }
 

@@ -419,7 +419,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( true );
-			pacingControl.setViolation(
+			pacingControl.notifyViolation(
 				histTodo->histRequests.at(curIndexTodoHistData).ibContract,
 				dataFarms );
 			idleTimer->setInterval( 0 );
