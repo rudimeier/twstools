@@ -275,6 +275,7 @@ class DataFarmStates
 		enum State { BROKEN, INACTIVE, OK };
 		
 		QStringList getInactives() const;
+		QStringList getActives() const;
 		QString getMarketFarm( const IB::Contract& ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;
 		

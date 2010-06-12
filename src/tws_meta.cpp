@@ -917,6 +917,20 @@ QStringList DataFarmStates::getInactives() const
 }
 
 
+QStringList DataFarmStates::getActives() const
+{
+	QStringList sl;
+	QHash<const QString, State>::const_iterator it = hStates.constBegin();
+	while( it != hStates.constEnd() ) {
+		if( *it == OK ) {
+			sl.append( it.key() );
+		}
+		it++;
+	}
+	return sl;
+}
+
+
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
