@@ -711,7 +711,7 @@ void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
 		qDebug() << "add request lazy";
 		controlLazy[lazyC]->addRequest();
 	} else {
-		qDebug() << "add request" << farm;
+		qDebug() << "add request farm" << farm;
 		controlHmds[farm]->addRequest();
 	}
 }
@@ -719,16 +719,21 @@ void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
 
 void PacingGod::setViolation( const IB::Contract& c, const DataFarmStates &dfs )
 {
-	const QString &f = dfs.getHmdsFarm(c);
+	const QString f = dfs.getHmdsFarm(c);
+	QString lazyC = LAZY_CONTRACT_STR(c);
+	
 	if( f.isEmpty() ) {
-		qDebug() << "set violation global";
-		//TODO remember lazyContract
+		qDebug() << "set violation lazy";
+		Q_ASSERT( controlLazy.contains(lazyC) );
+		controlLazy[lazyC]->setViolation();
 	} else {
-		if( controlHmds.contains(f) ) {
-			qDebug() << "set violation" << f;
-			controlHmds[f]->addRequest();
+		if( controlLazy.contains(lazyC) ) {
+			qDebug() << "set violation lazy, although farm is" << f;
+			controlLazy[lazyC]->setViolation();
 		} else {
-			//TODO remember lazyContract
+			qDebug() << "set violation farm" << f;
+			Q_ASSERT( controlHmds.contains(f) );
+			controlHmds[f]->setViolation();
 		}
 	}
 	controlGlobal.setViolation();
