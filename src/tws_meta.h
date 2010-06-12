@@ -272,7 +272,7 @@ class PacingGod
 class DataFarmStates
 {
 	public:
-		enum State { UNKNOWN, BROKEN, INACTIVE, OK };
+		enum State { BROKEN, INACTIVE, OK };
 		
 		QStringList getInactives() const;
 		QString getMarketFarm( const IB::Contract& ) const;
