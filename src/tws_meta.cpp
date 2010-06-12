@@ -623,6 +623,9 @@ void PacingControl::merge( const PacingControl& other )
 
 
 
+#define LAZY_CONTRACT_STR( _c_ ) \
+	toQString(_c_.exchange) + QString("\t") + toQString(_c_.secType);
+
 
 PacingGod::PacingGod() :
 	checkInterval( 600000 ),
@@ -753,7 +756,7 @@ int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs ) cons
 void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
 	QString *lazyC, QString *farm )
 {
-	*lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	*lazyC = LAZY_CONTRACT_STR(c);
 	*farm = dfs.getHmdsFarm(c);
 	
 	if( !farm->isEmpty() ) {
@@ -862,7 +865,7 @@ void DataFarmStates::learnMarket( const IB::Contract& )
 
 void DataFarmStates::learnHmds( const IB::Contract& c )
 {
-	QString lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	QString lazyC = LAZY_CONTRACT_STR(c);
 	
 	QStringList sl;
 	QHash<const QString, State>::const_iterator it = hStates.constBegin();
@@ -908,16 +911,19 @@ QStringList DataFarmStates::getInactives() const
 
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
-	QString lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	QString lazyC = LAZY_CONTRACT_STR(c);
 	return mLearn[lazyC];
 }
 
 
 QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
-	QString lazyC = toQString(c.exchange) + QString("\t") + toQString(c.secType);
+	QString lazyC = LAZY_CONTRACT_STR(c);
 	return hLearn[lazyC];
 }
+
+
+#undef LAZY_CONTRACT_STR
 
 
 
