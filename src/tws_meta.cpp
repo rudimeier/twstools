@@ -627,7 +627,8 @@ void PacingControl::merge( const PacingControl& other )
 	toQString(_c_.exchange) + QString("\t") + toQString(_c_.secType);
 
 
-PacingGod::PacingGod() :
+PacingGod::PacingGod( const DataFarmStates &dfs ) :
+	dataFarms( dfs ),
 	maxRequests( 60 ),
 	checkInterval( 601000 ),
 	minPacingTime( 1500 ),
@@ -684,10 +685,10 @@ void PacingGod::setViolationPause( int vP )
 }
 
 
-void PacingGod::clear( const DataFarmStates &dfs )
+void PacingGod::clear()
 {
 	qDebug() << "say clear";
-	foreach( QString farm, dfs.getInactives() ) {
+	foreach( QString farm, dataFarms.getInactives() ) {
 		if( controlHmds.contains(farm) ) {
 			qDebug() << "clear pacing control" << farm;
 			controlHmds.value(farm)->clear();
@@ -697,11 +698,11 @@ void PacingGod::clear( const DataFarmStates &dfs )
 }
 
 
-void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
+void PacingGod::addRequest( const IB::Contract& c )
 {
 	QString farm;
 	QString lazyC;
-	checkAdd( c, dfs, &lazyC, &farm );
+	checkAdd( c, &lazyC, &farm );
 	
 	controlGlobal.addRequest();
 	
@@ -717,11 +718,11 @@ void PacingGod::addRequest( const IB::Contract& c, const DataFarmStates &dfs )
 }
 
 
-void PacingGod::notifyViolation( const IB::Contract& c, const DataFarmStates &dfs )
+void PacingGod::notifyViolation( const IB::Contract& c )
 {
 	QString farm;
 	QString lazyC;
-	checkAdd( c, dfs, &lazyC, &farm );
+	checkAdd( c, &lazyC, &farm );
 	
 	controlGlobal.notifyViolation();
 	
@@ -737,11 +738,11 @@ void PacingGod::notifyViolation( const IB::Contract& c, const DataFarmStates &df
 }
 
 
-int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs )
+int PacingGod::goodTime( const IB::Contract& c )
 {
 	QString farm;
 	QString lazyC;
-	checkAdd( c, dfs, &lazyC, &farm );
+	checkAdd( c, &lazyC, &farm );
 	
 	if( farm.isEmpty() || !controlLazy.isEmpty() ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
@@ -756,11 +757,11 @@ int PacingGod::goodTime( const IB::Contract& c, const DataFarmStates &dfs )
 }
 
 
-void PacingGod::checkAdd( const IB::Contract& c, const DataFarmStates& dfs,
+void PacingGod::checkAdd( const IB::Contract& c,
 	QString *lazyC, QString *farm )
 {
 	*lazyC = LAZY_CONTRACT_STR(c);
-	*farm = dfs.getHmdsFarm(c);
+	*farm = dataFarms.getHmdsFarm(c);
 	
 	if( !farm->isEmpty() ) {
 		if( !controlHmds.contains(*farm) ) {

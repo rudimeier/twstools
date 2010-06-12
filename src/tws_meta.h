@@ -236,20 +236,22 @@ class DataFarmStates;
 class PacingGod
 {
 	public:
-		PacingGod();
+		PacingGod( const DataFarmStates& );
 		~PacingGod();
 		
 		void setPacingTime( int packets, int interval, int min );
 		void setViolationPause( int pause );
 		
-		void clear( const DataFarmStates& );
-		void addRequest( const IB::Contract&, const DataFarmStates& );
-		void notifyViolation( const IB::Contract&, const DataFarmStates& );
-		int goodTime( const IB::Contract&, const DataFarmStates &dfs );
+		void clear();
+		void addRequest( const IB::Contract& );
+		void notifyViolation( const IB::Contract& );
+		int goodTime( const IB::Contract& );
 	
 	private:
-		void checkAdd( const IB::Contract&, const DataFarmStates&,
+		void checkAdd( const IB::Contract&,
 			QString *lazyContract, QString *farm );
+		
+		const DataFarmStates& dataFarms;
 		
 		int maxRequests;
 		int checkInterval;

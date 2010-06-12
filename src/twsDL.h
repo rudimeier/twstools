@@ -146,8 +146,8 @@ class TwsDL : public QObject
 		PacketContractDetails &p_contractDetails;
 		PacketHistData &p_histData;
 		
-		PacingGod &pacingControl;
 		DataFarmStates &dataFarms;
+		PacingGod &pacingControl;
 		
 		QTimer *idleTimer;
 		
