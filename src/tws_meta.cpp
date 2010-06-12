@@ -635,6 +635,18 @@ PacingGod::PacingGod() :
 PacingGod::~PacingGod()
 {
 	delete &controlGlobal;
+	
+	QHash<const QString, PacingControl*>::iterator it;
+	it = controlHmds.begin();
+	while( it != controlHmds.end() ) {
+		delete *it;
+		it = controlHmds.erase(it);
+	}
+	it = controlLazy.begin();
+	while( it != controlLazy.end() ) {
+		delete *it;
+		it = controlLazy.erase(it);
+	}
 }
 
 
