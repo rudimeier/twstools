@@ -687,14 +687,25 @@ void PacingGod::setViolationPause( int vP )
 
 void PacingGod::clear()
 {
-	qDebug() << "say clear";
-	foreach( QString farm, dataFarms.getInactives() ) {
-		if( controlHmds.contains(farm) ) {
-			qDebug() << "clear pacing control" << farm;
-			controlHmds.value(farm)->clear();
+	if( dataFarms.getActives().isEmpty() ) {
+		// clear all PacingControls
+		qDebug() << "clear all pacing controls";
+		controlGlobal.clear();
+		foreach( PacingControl *pC, controlHmds ) {
+			pC->clear();
+		}
+		foreach( PacingControl *pC, controlLazy ) {
+			pC->clear();
+		}
+	} else {
+		// clear only PacingControls of inactive farms
+		foreach( QString farm, dataFarms.getInactives() ) {
+			if( controlHmds.contains(farm) ) {
+				qDebug() << "clear pacing control of inactive farm" << farm;
+				controlHmds.value(farm)->clear();
+			}
 		}
 	}
-	//don't clear the global or lazy ones
 }
 
 
