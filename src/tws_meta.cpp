@@ -949,14 +949,16 @@ int PacingGod::countLeft( const IB::Contract& c )
 	
 	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		qDebug() << "get count left global";
 		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
 			|| !laziesCleared );
-		return controlGlobal.countLeft();
+		int left = controlGlobal.countLeft();
+		qDebug() << "get count left global" << left;
+		return left;
 	} else {
-		qDebug() << "get count left farm" << farm ;
 		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
+		int left = controlHmds.value(farm)->countLeft();
+		qDebug() << "get count left farm" << farm << left;
 		return controlHmds.value(farm)->countLeft();
 	}
 }
