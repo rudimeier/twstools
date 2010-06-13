@@ -276,6 +276,11 @@ void TwsDL::finData()
 		                 myProp->printFormatDates );
 		histTodo->tellDone();
 	}
+	if( histTodo->countLeft() > 0 ) {
+		qDebug() << "      optimize          ";
+		histTodo->optimize(&pacingControl, &dataFarms);
+		dumpWorkTodo();
+	}
 	
 	p_histData.clear();
 	currentRequest.close();
