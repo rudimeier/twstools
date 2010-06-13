@@ -158,7 +158,7 @@ void TwsDL::idle()
 		dumpWorkTodo();
 	}
 	
-	if( myProp->downloadData  && curIndexTodoHistData < histTodo->histRequests.size()
+	if( myProp->downloadData  && curIndexTodoHistData < histTodo->list().size()
 	    && ( myProp->reqMaxContracts <= 0 || curIndexTodoHistData < myProp->reqMaxContracts ) ) {
 		getData();
 	} else {
@@ -196,7 +196,7 @@ void TwsDL::finContracts()
 			HistRequest hR;
 			hR.initialize( cd.summary, myProp->endDateTime, myProp->durationStr,
 			               myProp->barSizeSetting, wts, myProp->useRTH, myProp->formatDate );
-			histTodo->histRequests.append( hR );
+			histTodo->add( hR );
 		}
 	}
 	
@@ -214,10 +214,10 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( curIndexTodoHistData < histTodo->histRequests.size() );
+	Q_ASSERT( curIndexTodoHistData < histTodo->list().size() );
 	
 	int wait = pacingControl.goodTime(
-		histTodo->histRequests.at(curIndexTodoHistData).ibContract );
+		histTodo->list().at(curIndexTodoHistData).ibContract );
 	if( wait > 0 ) {
 		idleTimer->setInterval( qMin( 1000, wait ) );
 		return;
@@ -228,10 +228,10 @@ void TwsDL::getData()
 	}
 	
 	pacingControl.addRequest(
-		histTodo->histRequests.at(curIndexTodoHistData).ibContract );
+		histTodo->list().at(curIndexTodoHistData).ibContract );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	const HistRequest &hR = histTodo->histRequests.at( curIndexTodoHistData );
+	const HistRequest &hR = histTodo->list().at( curIndexTodoHistData );
 	
 	qDebug() << "DOWNLOAD DATA" << curIndexTodoHistData << currentRequest.reqId << ibToString(hR.ibContract);
 	
@@ -273,7 +273,7 @@ void TwsDL::finData()
 	
 	Q_ASSERT( p_histData.isFinished() );
 	if( !p_histData.needRepeat() ) {
-		p_histData.dump( histTodo->histRequests.at(curIndexTodoHistData),
+		p_histData.dump( histTodo->list().at(curIndexTodoHistData),
 		                 myProp->printFormatDates );
 		curIndexTodoHistData++;
 	}
@@ -418,18 +418,18 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( true );
 			pacingControl.notifyViolation(
-				histTodo->histRequests.at(curIndexTodoHistData).ibContract );
+				histTodo->list().at(curIndexTodoHistData).ibContract );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;
-			dataFarms.learnHmds( histTodo->histRequests.at(curIndexTodoHistData).ibContract );
+			dataFarms.learnHmds( histTodo->list().at(curIndexTodoHistData).ibContract );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
 			/*TODO we should skip all similar work intelligently*/
 			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;
-			dataFarms.learnHmds( histTodo->histRequests.at(curIndexTodoHistData).ibContract );
+			dataFarms.learnHmds( histTodo->list().at(curIndexTodoHistData).ibContract );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else {
@@ -525,7 +525,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	}
 	
 	// TODO we shouldn't do this each row
-	dataFarms.learnHmds( histTodo->histRequests.at(curIndexTodoHistData).ibContract );
+	dataFarms.learnHmds( histTodo->list().at(curIndexTodoHistData).ibContract );
 	
 	Q_ASSERT( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,

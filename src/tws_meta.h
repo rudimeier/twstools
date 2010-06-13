@@ -101,10 +101,13 @@ class HistTodo
 		int fromFile( const QString & fileName );
 		void dump( FILE *stream ) const;
 		
-		QList<HistRequest> histRequests;
+		void add( const HistRequest& );
+		const QList<HistRequest>& list() const;
 		
 	private:
 		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
+		
+		QList<HistRequest> histRequests;
 };
 
 

@@ -289,6 +289,18 @@ void HistTodo::dump( FILE *stream ) const
 }
 
 
+void HistTodo::add( const HistRequest& hR )
+{
+	histRequests.append(hR);
+}
+
+
+const QList<HistRequest>& HistTodo::list() const
+{
+	return histRequests;
+}
+
+
 
 
 
