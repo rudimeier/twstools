@@ -363,6 +363,46 @@ void HistTodo::add( const HistRequest& hR )
 }
 
 
+void HistTodo::optimize(const PacingGod *pG, const DataFarmStates *dfs)
+{
+	Q_ASSERT( curIndexTodoHistData > -1);
+	QList<int> tmp;
+	QHash< QString, QList<int> > h;
+	foreach( int i ,leftRequests ) {
+		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract);
+		if( !h.contains(farm) ) {
+			h.insert(farm, QList<int>());
+		}
+		h[farm].append(i);
+	}
+	
+	QStringList farms = h.keys();
+	
+	while( !h.isEmpty() ) {
+		foreach( QString farm, farms ) {
+			int i = 0;
+			if( !h.contains(farm) ) {
+				continue;
+			}
+			QList<int> &l = h[farm];
+			int count = qMin( 50, l.size() );
+			while( i < count) {
+				qDebug() << "add farm" << i << farm;
+				tmp.append(l.takeFirst());
+				i++;
+			}
+			if( l.isEmpty() ) {
+				h.remove( farm );
+			}
+		}
+	}
+	qDebug() << tmp.size() << leftRequests.size();
+	Q_ASSERT( tmp.size() == leftRequests.size() );
+	leftRequests = tmp;
+	curIndexTodoHistData = leftRequests.first();
+}
+
+
 
 
 

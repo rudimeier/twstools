@@ -95,6 +95,9 @@ class GenericRequest
 
 
 
+class PacingGod;
+class DataFarmStates;
+
 class HistTodo
 {
 	public:
@@ -111,6 +114,7 @@ class HistTodo
 		const HistRequest& current() const;
 		void tellDone();
 		void add( const HistRequest& );
+		void optimize(const PacingGod*, const DataFarmStates*);
 		
 	private:
 		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
@@ -245,7 +249,6 @@ class PacingControl
 
 
 
-class DataFarmStates;
 
 class PacingGod
 {
