@@ -107,7 +107,7 @@ class HistTodo
 		int countDone() const;
 		int countLeft() const;
 		int currentIndex() const;
-		const HistRequest& current();
+		const HistRequest& current() const;
 		void tellDone();
 		void add( const HistRequest& );
 		

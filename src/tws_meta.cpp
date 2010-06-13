@@ -323,7 +323,7 @@ int HistTodo::currentIndex() const
 }
 
 
-const HistRequest& HistTodo::current()
+const HistRequest& HistTodo::current() const
 {
 	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
 	return *histRequests[curIndexTodoHistData];
