@@ -597,7 +597,7 @@ void TwsDL::initWork()
 
 void TwsDL::dumpWorkTodo() const
 {
-	histTodo->dump( stderr );
+	histTodo->dumpLeft( stderr );
 }
 
 
