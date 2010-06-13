@@ -116,8 +116,8 @@ class HistTodo
 		
 		int curIndexTodoHistData;
 		QList<HistRequest*> histRequests;
-		QList<const HistRequest*> doneRequests;
-		QList<const HistRequest*> leftRequests;
+		QList<int> doneRequests;
+		QList<int> leftRequests;
 };
 
 

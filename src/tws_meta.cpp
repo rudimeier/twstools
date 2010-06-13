@@ -325,16 +325,16 @@ int HistTodo::currentIndex() const
 
 const HistRequest& HistTodo::current()
 {
+	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
 	return *histRequests[curIndexTodoHistData];
 }
 
 
 void HistTodo::tellDone()
 {
-	const HistRequest *p = histRequests[curIndexTodoHistData];
-	int removed = leftRequests.removeAll(p);
-	Q_ASSERT( removed == 1 );
-	doneRequests.append(p);
+	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
+	leftRequests.removeFirst();
+	doneRequests.append(curIndexTodoHistData);
 	curIndexTodoHistData++;
 }
 
@@ -343,7 +343,7 @@ void HistTodo::add( const HistRequest& hR )
 {
 	HistRequest *p = new HistRequest(hR);
 	histRequests.append(p);
-	leftRequests.append(p);
+	leftRequests.append(histRequests.size() - 1);
 }
 
 
