@@ -277,9 +277,8 @@ void TwsDL::finData()
 		histTodo->tellDone();
 	}
 	if( histTodo->countLeft() > 0 ) {
-		qDebug() << "      optimize          ";
+		qDebug() << "optimize queue";
 		histTodo->optimize(&pacingControl, &dataFarms);
-		dumpWorkTodo();
 	}
 	
 	p_histData.clear();

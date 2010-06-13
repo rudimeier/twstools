@@ -390,7 +390,6 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 		const IB::Contract& c = histRequests.at(l.first())->ibContract;
 		int count = qMin( pG->countLeft( c ), l.size() );
 		while( i < count) {
-			qDebug() << "add farm" << i << farm;
 			tmp.append(l.takeFirst());
 			i++;
 		}
@@ -400,7 +399,6 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 		Q_ASSERT( h.contains(farm) );
 		QList<int> &l = h[farm];
 		while( i < l.size() ) {
-			qDebug() << "add rest" << i << farm;
 			tmp.append(l.at(i));
 			i++;
 		}
