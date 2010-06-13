@@ -153,12 +153,12 @@ void TwsDL::idle()
 	
 	// TODO we want to dump histTodo when contractDetailsTodo is finished but
 	// this way it might be dumped twice
-	if( histTodo->currentIndex() == 0 && curIndexTodoContractDetails > 0) {
+	if( histTodo->countDone() == 0 && curIndexTodoContractDetails > 0) {
 		dumpWorkTodo();
 	}
 	
-	if( myProp->downloadData  && histTodo->currentIndex() < histTodo->list().size()
-	    && ( myProp->reqMaxContracts <= 0 || histTodo->currentIndex() < myProp->reqMaxContracts ) ) {
+	if( myProp->downloadData  && histTodo->countLeft() > 0
+	    && ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
 		getData();
 	} else {
 		state = QUIT_READY;
@@ -213,7 +213,7 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( histTodo->currentIndex() < histTodo->list().size() );
+	Q_ASSERT( histTodo->countLeft() > 0 );
 	
 	int wait = pacingControl.goodTime(
 		histTodo->current().ibContract );

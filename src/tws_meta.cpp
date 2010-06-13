@@ -304,8 +304,21 @@ void HistTodo::dump( FILE *stream ) const
 }
 
 
+int HistTodo::countDone() const
+{
+	return doneRequests.size();
+}
+
+
+int HistTodo::countLeft() const
+{
+	return leftRequests.size();
+}
+
+
 int HistTodo::currentIndex() const
 {
+	Q_ASSERT( countDone() == curIndexTodoHistData );
 	return curIndexTodoHistData;
 }
 
@@ -331,12 +344,6 @@ void HistTodo::add( const HistRequest& hR )
 	HistRequest *p = new HistRequest(hR);
 	histRequests.append(p);
 	leftRequests.append(p);
-}
-
-
-const QList<HistRequest*>& HistTodo::list() const
-{
-	return histRequests;
 }
 
 
