@@ -378,7 +378,7 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 	
 	QStringList farms = h.keys();
 	if( farms.removeOne("") ) {
-		farms.append("");
+		farms.prepend("");
 	}
 	
 	foreach( QString farm, farms ) {
