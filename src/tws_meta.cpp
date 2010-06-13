@@ -304,6 +304,16 @@ void HistTodo::dump( FILE *stream ) const
 }
 
 
+void HistTodo::dumpLeft( FILE *stream ) const
+{
+	for(int i=0; i < leftRequests.size(); i++ ) {
+		fprintf( stream, "[%d]\t%s\n",
+		         leftRequests[i],
+		         histRequests.at(leftRequests[i])->toString().toUtf8().constData() );
+	}
+}
+
+
 int HistTodo::countDone() const
 {
 	return doneRequests.size();

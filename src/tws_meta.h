@@ -103,6 +103,7 @@ class HistTodo
 		
 		int fromFile( const QString & fileName );
 		void dump( FILE *stream ) const;
+		void dumpLeft( FILE *stream ) const;
 		
 		int countDone() const;
 		int countLeft() const;
