@@ -274,6 +274,8 @@ class PacingGod
 		PacingControl &controlGlobal;
 		QHash<const QString, PacingControl*> controlHmds;
 		QHash<const QString, PacingControl*> controlLazy;
+		
+		bool laziesAreCleared;
 };
 
 
