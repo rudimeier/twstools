@@ -232,6 +232,13 @@ void GenericRequest::close()
 
 
 
+
+HistTodo::HistTodo() :
+	curIndexTodoHistData(0)
+{
+}
+
+
 int HistTodo::fromFile( const QString & fileName )
 {
 	histRequests.clear();
@@ -286,6 +293,24 @@ void HistTodo::dump( FILE *stream ) const
 		         i,
 		         histRequests.at(i).toString().toUtf8().constData() );
 	}
+}
+
+
+int HistTodo::currentIndex() const
+{
+	return curIndexTodoHistData;
+}
+
+
+const HistRequest& HistTodo::current()
+{
+	return histRequests[curIndexTodoHistData];
+}
+
+
+void HistTodo::tellDone()
+{
+	curIndexTodoHistData++;
 }
 
 

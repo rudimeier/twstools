@@ -138,7 +138,6 @@ class TwsDL : public QObject
 		GenericRequest &currentRequest;
 		
 		int curIndexTodoContractDetails;
-		int curIndexTodoHistData;
 		
 		ContractDetailsTodo *contractDetailsTodo;
 		HistTodo *histTodo;

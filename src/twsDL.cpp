@@ -32,7 +32,6 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	twsWrapper(NULL),
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
-	curIndexTodoHistData(0),
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
@@ -154,12 +153,12 @@ void TwsDL::idle()
 	
 	// TODO we want to dump histTodo when contractDetailsTodo is finished but
 	// this way it might be dumped twice
-	if( curIndexTodoHistData == 0 && curIndexTodoContractDetails > 0) {
+	if( histTodo->currentIndex() == 0 && curIndexTodoContractDetails > 0) {
 		dumpWorkTodo();
 	}
 	
-	if( myProp->downloadData  && curIndexTodoHistData < histTodo->list().size()
-	    && ( myProp->reqMaxContracts <= 0 || curIndexTodoHistData < myProp->reqMaxContracts ) ) {
+	if( myProp->downloadData  && histTodo->currentIndex() < histTodo->list().size()
+	    && ( myProp->reqMaxContracts <= 0 || histTodo->currentIndex() < myProp->reqMaxContracts ) ) {
 		getData();
 	} else {
 		state = QUIT_READY;
@@ -214,10 +213,10 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( curIndexTodoHistData < histTodo->list().size() );
+	Q_ASSERT( histTodo->currentIndex() < histTodo->list().size() );
 	
 	int wait = pacingControl.goodTime(
-		histTodo->list().at(curIndexTodoHistData).ibContract );
+		histTodo->current().ibContract );
 	if( wait > 0 ) {
 		idleTimer->setInterval( qMin( 1000, wait ) );
 		return;
@@ -228,12 +227,12 @@ void TwsDL::getData()
 	}
 	
 	pacingControl.addRequest(
-		histTodo->list().at(curIndexTodoHistData).ibContract );
+		histTodo->current().ibContract );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	const HistRequest &hR = histTodo->list().at( curIndexTodoHistData );
+	const HistRequest &hR = histTodo->current();
 	
-	qDebug() << "DOWNLOAD DATA" << curIndexTodoHistData << currentRequest.reqId << ibToString(hR.ibContract);
+	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex() << currentRequest.reqId << ibToString(hR.ibContract);
 	
 	reqHistoricalData( hR );
 	
@@ -273,9 +272,9 @@ void TwsDL::finData()
 	
 	Q_ASSERT( p_histData.isFinished() );
 	if( !p_histData.needRepeat() ) {
-		p_histData.dump( histTodo->list().at(curIndexTodoHistData),
+		p_histData.dump( histTodo->current(),
 		                 myProp->printFormatDates );
-		curIndexTodoHistData++;
+		histTodo->tellDone();
 	}
 	
 	p_histData.clear();
@@ -418,18 +417,18 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( true );
 			pacingControl.notifyViolation(
-				histTodo->list().at(curIndexTodoHistData).ibContract );
+				histTodo->current().ibContract );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
-			qDebug() << "READY - NO DATA" << curIndexTodoHistData << id;
-			dataFarms.learnHmds( histTodo->list().at(curIndexTodoHistData).ibContract );
+			qDebug() << "READY - NO DATA" << histTodo->currentIndex() << id;
+			dataFarms.learnHmds( histTodo->current().ibContract );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
 			/*TODO we should skip all similar work intelligently*/
-			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << curIndexTodoHistData << id;
-			dataFarms.learnHmds( histTodo->list().at(curIndexTodoHistData).ibContract );
+			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << histTodo->currentIndex() << id;
+			dataFarms.learnHmds( histTodo->current().ibContract );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else {
@@ -525,7 +524,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	}
 	
 	// TODO we shouldn't do this each row
-	dataFarms.learnHmds( histTodo->list().at(curIndexTodoHistData).ibContract );
+	dataFarms.learnHmds( histTodo->current().ibContract );
 	
 	Q_ASSERT( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,
@@ -533,7 +532,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	
 	if( p_histData.isFinished() ) {
 		idleTimer->setInterval( 0 );
-		qDebug() << "READY" << curIndexTodoHistData << reqId;
+		qDebug() << "READY" << histTodo->currentIndex() << reqId;
 	}
 }
 
