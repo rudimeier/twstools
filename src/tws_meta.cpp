@@ -363,7 +363,7 @@ void HistTodo::add( const HistRequest& hR )
 }
 
 
-void HistTodo::optimize(const PacingGod *pG, const DataFarmStates *dfs)
+void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 {
 	Q_ASSERT( curIndexTodoHistData > -1);
 	QList<int> tmp;
@@ -377,25 +377,36 @@ void HistTodo::optimize(const PacingGod *pG, const DataFarmStates *dfs)
 	}
 	
 	QStringList farms = h.keys();
+	if( farms.removeOne("") ) {
+		farms.append("");
+	}
 	
-	while( !h.isEmpty() ) {
-		foreach( QString farm, farms ) {
-			int i = 0;
-			if( !h.contains(farm) ) {
-				continue;
-			}
-			QList<int> &l = h[farm];
-			int count = qMin( 50, l.size() );
-			while( i < count) {
-				qDebug() << "add farm" << i << farm;
-				tmp.append(l.takeFirst());
-				i++;
-			}
-			if( l.isEmpty() ) {
-				h.remove( farm );
-			}
+	foreach( QString farm, farms ) {
+		int i = 0;
+		Q_ASSERT( h.contains(farm) );
+		QList<int> &l = h[farm];
+		Q_ASSERT( l.size() > 0 );
+		Q_ASSERT( histRequests.size() > l.first() );
+		const IB::Contract& c = histRequests.at(l.first())->ibContract;
+		int count = qMin( pG->countLeft( c ), l.size() );
+		while( i < count) {
+			qDebug() << "add farm" << i << farm;
+			tmp.append(l.takeFirst());
+			i++;
 		}
 	}
+	foreach( QString farm, farms ) {
+		int i = 0;
+		Q_ASSERT( h.contains(farm) );
+		QList<int> &l = h[farm];
+		while( i < l.size() ) {
+			qDebug() << "add rest" << i << farm;
+			tmp.append(l.at(i));
+			i++;
+		}
+	}
+	
+	
 	qDebug() << tmp.size() << leftRequests.size();
 	Q_ASSERT( tmp.size() == leftRequests.size() );
 	leftRequests = tmp;
@@ -716,6 +727,12 @@ int PacingControl::goodTime() const
 #undef SWAP
 
 
+int PacingControl::countLeft() const
+{
+	return 50;
+}
+
+
 void PacingControl::merge( const PacingControl& other )
 {
 	qDebug() << dateTimes;
@@ -901,6 +918,29 @@ int PacingGod::goodTime( const IB::Contract& c )
 		return controlHmds.value(farm)->goodTime();
 	}
 }
+
+
+int PacingGod::countLeft( const IB::Contract& c )
+{
+	QString farm;
+	QString lazyC;
+	checkAdd( c, &lazyC, &farm );
+	bool laziesCleared = laziesAreCleared();
+	
+	if( farm.isEmpty() || !laziesCleared ) {
+		// we have to use controlGlobal if any contract's farm is ambiguous
+		qDebug() << "get count left global";
+		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+			|| !laziesCleared );
+		return controlGlobal.countLeft();
+	} else {
+		qDebug() << "get count left farm" << farm ;
+		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
+			|| laziesCleared );
+		return controlHmds.value(farm)->countLeft();
+	}
+}
+
 
 
 void PacingGod::checkAdd( const IB::Contract& c,

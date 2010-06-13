@@ -114,7 +114,7 @@ class HistTodo
 		const HistRequest& current() const;
 		void tellDone();
 		void add( const HistRequest& );
-		void optimize(const PacingGod*, const DataFarmStates*);
+		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
 		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
@@ -233,6 +233,7 @@ class PacingControl
 		void addRequest();
 		void notifyViolation();
 		int goodTime() const;
+		int countLeft() const;
 		
 		void merge( const PacingControl& );
 		
@@ -264,6 +265,7 @@ class PacingGod
 		void addRequest( const IB::Contract& );
 		void notifyViolation( const IB::Contract& );
 		int goodTime( const IB::Contract& );
+		int countLeft( const IB::Contract& c );
 	
 	private:
 		void checkAdd( const IB::Contract&,
