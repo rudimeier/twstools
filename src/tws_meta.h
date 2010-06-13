@@ -228,6 +228,7 @@ class PacingControl
 		void setPacingTime( int packets, int interval, int min );
 		void setViolationPause( int violationPause );
 		
+		bool isEmpty() const;
 		void clear();
 		void addRequest();
 		void notifyViolation();
@@ -267,6 +268,7 @@ class PacingGod
 	private:
 		void checkAdd( const IB::Contract&,
 			QString *lazyContract, QString *farm );
+		bool laziesAreCleared() const;
 		
 		const DataFarmStates& dataFarms;
 		
@@ -278,8 +280,6 @@ class PacingGod
 		PacingControl &controlGlobal;
 		QHash<const QString, PacingControl*> controlHmds;
 		QHash<const QString, PacingControl*> controlLazy;
-		
-		bool laziesAreCleared;
 };
 
 

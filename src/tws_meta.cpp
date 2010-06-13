@@ -634,6 +634,12 @@ void PacingControl::setViolationPause( int vP )
 }
 
 
+bool PacingControl::isEmpty() const
+{
+	return dateTimes.isEmpty();
+}
+
+
 void PacingControl::clear()
 {
 	if( !dateTimes.isEmpty() ) {
@@ -760,8 +766,7 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 	minPacingTime( 1500 ),
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
-		maxRequests, checkInterval, minPacingTime, violationPause)) ),
-	laziesAreCleared(true)
+		maxRequests, checkInterval, minPacingTime, violationPause)) )
 {
 }
 
@@ -823,7 +828,6 @@ void PacingGod::clear()
 		}
 		foreach( PacingControl *pC, controlLazy ) {
 			pC->clear();
-			laziesAreCleared = true;
 		}
 	} else {
 		// clear only PacingControls of inactive farms
@@ -849,7 +853,6 @@ void PacingGod::addRequest( const IB::Contract& c )
 		qDebug() << "add request lazy";
 		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->addRequest();
-		laziesAreCleared = false;
 	} else {
 		qDebug() << "add request farm" << farm;
 		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
@@ -883,17 +886,18 @@ int PacingGod::goodTime( const IB::Contract& c )
 	QString farm;
 	QString lazyC;
 	checkAdd( c, &lazyC, &farm );
+	bool laziesCleared = laziesAreCleared();
 	
-	if( farm.isEmpty() || !laziesAreCleared ) {
+	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
 		qDebug() << "get good time global";
 		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
-			|| !laziesAreCleared );
+			|| !laziesCleared );
 		return controlGlobal.goodTime();
 	} else {
 		qDebug() << "get good time farm" << farm ;
 		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
-			|| laziesAreCleared );
+			|| laziesCleared );
 		return controlHmds.value(farm)->goodTime();
 	}
 }
@@ -935,6 +939,17 @@ void PacingGod::checkAdd( const IB::Contract& c,
 	
 	Q_ASSERT( !controlHmds.contains(*farm) );
 	Q_ASSERT( controlLazy.contains(*lazyC) );
+}
+
+
+bool PacingGod::laziesAreCleared() const
+{
+	
+	bool retVal = true;
+	foreach( PacingControl *pC, controlLazy ) {
+		retVal &=  pC->isEmpty();
+	}
+	return retVal;
 }
 
 
