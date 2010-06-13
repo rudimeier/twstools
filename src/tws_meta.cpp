@@ -729,7 +729,27 @@ int PacingControl::goodTime() const
 
 int PacingControl::countLeft() const
 {
-	return 50;
+	const quint64 now = nowInMsecs();
+	
+	if( (dateTimes.size() > 0) && violations.last() ) {
+		int waitViol = dateTimes.last() + violationPause - now;
+		if( waitViol > 0 ) {
+			return 0;
+		}
+	}
+	
+	int retVal = maxRequests;
+	QList<quint64>::const_iterator it = dateTimes.constEnd();
+	while( it != dateTimes.constBegin() ) {
+		it--;
+		int waitBurst = *it + checkInterval - now;
+		if( waitBurst > 0 ) {
+			retVal--;
+		} else {
+			break;
+		}
+	}
+	return retVal;
 }
 
 
