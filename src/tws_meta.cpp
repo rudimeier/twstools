@@ -239,6 +239,14 @@ HistTodo::HistTodo() :
 }
 
 
+HistTodo::~HistTodo()
+{
+	foreach( HistRequest *hR, histRequests ) {
+		delete hR;
+	}
+}
+
+
 int HistTodo::fromFile( const QString & fileName )
 {
 	histRequests.clear();
@@ -258,7 +266,7 @@ int HistTodo::fromFile( const QString & fileName )
 		HistRequest hR;
 		bool ok = hR.fromString( row );
 		Q_ASSERT(ok); //TODO
-		histRequests.append( hR );
+		add( hR );
 	}
 	return retVal;
 }
@@ -291,7 +299,7 @@ void HistTodo::dump( FILE *stream ) const
 	for(int i=0; i < histRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         i,
-		         histRequests.at(i).toString().toUtf8().constData() );
+		         histRequests.at(i)->toString().toUtf8().constData() );
 	}
 }
 
@@ -304,23 +312,29 @@ int HistTodo::currentIndex() const
 
 const HistRequest& HistTodo::current()
 {
-	return histRequests[curIndexTodoHistData];
+	return *histRequests[curIndexTodoHistData];
 }
 
 
 void HistTodo::tellDone()
 {
+	const HistRequest *p = histRequests[curIndexTodoHistData];
+	int removed = leftRequests.removeAll(p);
+	Q_ASSERT( removed == 1 );
+	doneRequests.append(p);
 	curIndexTodoHistData++;
 }
 
 
 void HistTodo::add( const HistRequest& hR )
 {
-	histRequests.append(hR);
+	HistRequest *p = new HistRequest(hR);
+	histRequests.append(p);
+	leftRequests.append(p);
 }
 
 
-const QList<HistRequest>& HistTodo::list() const
+const QList<HistRequest*>& HistTodo::list() const
 {
 	return histRequests;
 }

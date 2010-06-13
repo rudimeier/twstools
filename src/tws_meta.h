@@ -99,6 +99,7 @@ class HistTodo
 {
 	public:
 		HistTodo();
+		~HistTodo();
 		
 		int fromFile( const QString & fileName );
 		void dump( FILE *stream ) const;
@@ -107,13 +108,15 @@ class HistTodo
 		const HistRequest& current();
 		void tellDone();
 		void add( const HistRequest& );
-		const QList<HistRequest>& list() const;
+		const QList<HistRequest*>& list() const;
 		
 	private:
 		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
 		
 		int curIndexTodoHistData;
-		QList<HistRequest> histRequests;
+		QList<HistRequest*> histRequests;
+		QList<const HistRequest*> doneRequests;
+		QList<const HistRequest*> leftRequests;
 };
 
 
