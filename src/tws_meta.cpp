@@ -522,8 +522,20 @@ void PacingControl::setViolationPause( int vP )
 
 void PacingControl::clear()
 {
-	dateTimes.clear();
-	violations.clear();
+	if( !dateTimes.isEmpty() ) {
+		quint64 now = nowInMsecs();
+		if( now - dateTimes.last() < 5000  ) {
+			// HACK race condition might cause assert in notifyViolation(),
+			// to avoid this we would need to ack each request
+			qDebug() << "Warning, keep last pacing date time "
+				"because it looks too new.";
+			dateTimes.erase( dateTimes.begin(), --(dateTimes.end()) );
+			violations.erase( violations.begin(), --(violations.end()) );
+		} else {
+			dateTimes.clear();
+			violations.clear();
+		}
+	}
 }
 
 
