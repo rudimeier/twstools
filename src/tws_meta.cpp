@@ -328,13 +328,14 @@ int HistTodo::countLeft() const
 
 int HistTodo::currentIndex() const
 {
-	Q_ASSERT( countDone() == curIndexTodoHistData );
+	Q_ASSERT( curIndexTodoHistData > -1);
 	return curIndexTodoHistData;
 }
 
 
 const HistRequest& HistTodo::current() const
 {
+	Q_ASSERT( curIndexTodoHistData > -1);
 	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
 	return *histRequests[curIndexTodoHistData];
 }
@@ -342,10 +343,15 @@ const HistRequest& HistTodo::current() const
 
 void HistTodo::tellDone()
 {
+	Q_ASSERT( curIndexTodoHistData > -1);
 	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
 	leftRequests.removeFirst();
 	doneRequests.append(curIndexTodoHistData);
-	curIndexTodoHistData++;
+	if( leftRequests.size() > 0 ) {
+		curIndexTodoHistData = leftRequests.first();
+	} else {
+		curIndexTodoHistData = -1;
+	}
 }
 
 
