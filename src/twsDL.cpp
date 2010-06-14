@@ -30,6 +30,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	myProp(NULL),
 	twsClient(NULL),
 	twsWrapper(NULL),
+	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
 	contractDetailsTodo( new ContractDetailsTodo() ),
@@ -349,6 +350,8 @@ void TwsDL::initTwsClient()
 
 void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 {
+	msgCounter++;
+	
 	if( id == currentRequest.reqId ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
 		if( state == WAIT_DATA ) {
@@ -400,7 +403,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		case 2106:
 		case 2107:
 		case 2108:
-			dataFarms.notify( errorCode, errorMsg );
+			dataFarms.notify( msgCounter, errorCode, errorMsg );
 			pacingControl.clear();
 			break;
 	}
@@ -442,9 +445,10 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	//Historical Market Data Service query message:
 	case 165:
 		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
-		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ||
-			ERR_MATCH("HMDS server connection was successful") ) {
+		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
 			idleTimer->setInterval( myProp->reqTimeout );
+		} else if( ERR_MATCH("HMDS server connection was successful") ) {
+			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract );
 		} else {
 			// nothing
 		}

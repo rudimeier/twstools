@@ -1023,8 +1023,15 @@ bool PacingGod::laziesAreCleared() const
 
 
 
-void DataFarmStates::notify(int errorCode, const QString &msg)
+DataFarmStates::DataFarmStates() :
+	lastChanged(INT_MIN)
 {
+}
+
+
+void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
+{
+	lastMsgNumber = msgNumber;
 	QString farm;
 	State state;
 	QHash<const QString, State> *pHash = NULL;
@@ -1072,6 +1079,7 @@ void DataFarmStates::notify(int errorCode, const QString &msg)
 		return;
 	}
 	
+	lastChanged = farm;
 	pHash->insert( farm, state );
 	qDebug() << *pHash;
 }
@@ -1111,14 +1119,29 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 			Q_ASSERT( hLearn.value( lazyC ) == sl.first() );
 		} else {
 			hLearn.insert( lazyC, sl.first() );
-			qDebug() << "HMDS farm unique:" << lazyC << sl.first();
+			qDebug() << "learn HMDS farm (unique):" << lazyC << sl.first();
 		}
 	} else {
 		if( hLearn.contains(lazyC) ) {
 			Q_ASSERT( sl.contains(hLearn.value(lazyC)) );
 		} else {
 			//but doing nothing
-			qDebug() << "HMDS farm ambiguous:" << lazyC << sl;
+			qDebug() << "learn HMDS farm (ambiguous):" << lazyC << sl;
+		}
+	}
+}
+
+
+void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
+{
+	Q_ASSERT( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
+	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
+		QString lazyC = LAZY_CONTRACT_STR(c);
+		if( hLearn.contains(lazyC) ) {
+			Q_ASSERT( hLearn.value( lazyC ) == lastChanged );
+		} else {
+			hLearn.insert( lazyC, lastChanged );
+			qDebug() << "learn HMDS farm (last ok):" << lazyC << lastChanged;
 		}
 	}
 }

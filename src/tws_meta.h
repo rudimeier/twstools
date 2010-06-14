@@ -295,14 +295,17 @@ class DataFarmStates
 	public:
 		enum State { BROKEN, INACTIVE, OK };
 		
+		DataFarmStates();
+		
 		QStringList getInactives() const;
 		QStringList getActives() const;
 		QString getMarketFarm( const IB::Contract& ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
-		void notify(int errorCode, const QString &msg);
+		void notify(int msgNumber, int errorCode, const QString &msg);
 		void learnMarket( const IB::Contract& );
 		void learnHmds( const IB::Contract& );
+		void learnHmdsLastOk(int msgNumber, const IB::Contract& );
 		
 	private:
 		static QString getFarm( const QString prefix, const QString& msg );
@@ -312,6 +315,9 @@ class DataFarmStates
 		
 		QHash<const QString, QString> mLearn;
 		QHash<const QString, QString> hLearn;
+		
+		int lastMsgNumber;
+		QString lastChanged;
 };
 
 

@@ -135,6 +135,7 @@ class TwsDL : public QObject
 		TWSClient  *twsClient;
 		TWSWrapper *twsWrapper;
 		
+		int msgCounter;
 		GenericRequest &currentRequest;
 		
 		int curIndexTodoContractDetails;
