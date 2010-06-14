@@ -689,13 +689,14 @@ void PacingControl::notifyViolation()
 		dbg = _dbg_ ; \
 	}
 
-int PacingControl::goodTime() const
+int PacingControl::goodTime(const char** ddd) const
 {
 	const quint64 now = nowInMsecs();
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
 	if( dateTimes.isEmpty() ) {
+		*ddd = dbg;
 		return retVal;
 	}
 	
@@ -718,7 +719,7 @@ int PacingControl::goodTime() const
 	}
 	SWAP_MAX( waitBurst, "wait burst" );
 	
-	qDebug() << dbg << retVal;
+	*ddd = dbg;
 	return retVal;
 }
 
@@ -918,6 +919,7 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 
 int PacingGod::goodTime( const IB::Contract& c )
 {
+	const char* dbg;
 	QString farm;
 	QString lazyC;
 	checkAdd( c, &lazyC, &farm );
@@ -925,15 +927,18 @@ int PacingGod::goodTime( const IB::Contract& c )
 	
 	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		qDebug() << "get good time global";
 		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
 			|| !laziesCleared );
-		return controlGlobal.goodTime();
+		int t = controlGlobal.goodTime(&dbg);
+		qDebug() << "get good time global" << dbg << t;
+		return t;
 	} else {
 		qDebug() << "get good time farm" << farm ;
 		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
-		return controlHmds.value(farm)->goodTime();
+		int t = controlHmds.value(farm)->goodTime(&dbg);
+		qDebug() << "get good time farm" << farm << dbg << t;
+		return t;
 	}
 }
 

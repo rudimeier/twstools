@@ -232,7 +232,7 @@ class PacingControl
 		void clear();
 		void addRequest();
 		void notifyViolation();
-		int goodTime() const;
+		int goodTime( const char** dbg ) const;
 		int countLeft() const;
 		
 		void merge( const PacingControl& );
