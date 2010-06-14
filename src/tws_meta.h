@@ -110,6 +110,8 @@ class HistTodo
 		
 		int countDone() const;
 		int countLeft() const;
+		void checkout();
+		void cancelCurrent();
 		int currentIndex() const;
 		const HistRequest& current() const;
 		void tellDone();
@@ -119,10 +121,10 @@ class HistTodo
 	private:
 		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
 		
-		int curIndexTodoHistData;
 		QList<HistRequest*> histRequests;
 		QList<int> doneRequests;
 		QList<int> leftRequests;
+		QList<int> checkedOutRequests;
 };
 
 

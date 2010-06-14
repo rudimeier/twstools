@@ -233,8 +233,7 @@ void GenericRequest::close()
 
 
 
-HistTodo::HistTodo() :
-	curIndexTodoHistData(0)
+HistTodo::HistTodo()
 {
 }
 
@@ -326,32 +325,40 @@ int HistTodo::countLeft() const
 }
 
 
+void HistTodo::checkout()
+{
+	Q_ASSERT( checkedOutRequests.isEmpty() );
+	int id = leftRequests.takeFirst();
+	checkedOutRequests.append(id);
+}
+
+void HistTodo::cancelCurrent()
+{
+	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	int id = checkedOutRequests.takeFirst();
+	leftRequests.append(id);
+}
+
+
 int HistTodo::currentIndex() const
 {
-	Q_ASSERT( curIndexTodoHistData > -1);
-	return curIndexTodoHistData;
+	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	return checkedOutRequests.first();
 }
 
 
 const HistRequest& HistTodo::current() const
 {
-	Q_ASSERT( curIndexTodoHistData > -1);
-	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
-	return *histRequests[curIndexTodoHistData];
+	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	return *histRequests[checkedOutRequests.first()];
 }
 
 
 void HistTodo::tellDone()
 {
-	Q_ASSERT( curIndexTodoHistData > -1);
-	Q_ASSERT( curIndexTodoHistData == leftRequests.first() );
-	leftRequests.removeFirst();
-	doneRequests.append(curIndexTodoHistData);
-	if( leftRequests.size() > 0 ) {
-		curIndexTodoHistData = leftRequests.first();
-	} else {
-		curIndexTodoHistData = -1;
-	}
+	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	int doneId = checkedOutRequests.takeFirst();
+	doneRequests.append(doneId);
 }
 
 
@@ -365,7 +372,8 @@ void HistTodo::add( const HistRequest& hR )
 
 void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 {
-	Q_ASSERT( curIndexTodoHistData > -1);
+	Q_ASSERT( checkedOutRequests.isEmpty() );
+	
 	QList<int> tmp;
 	QHash< QString, QList<int> > h;
 	foreach( int i ,leftRequests ) {
@@ -408,7 +416,6 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 	qDebug() << tmp.size() << leftRequests.size();
 	Q_ASSERT( tmp.size() == leftRequests.size() );
 	leftRequests = tmp;
-	curIndexTodoHistData = leftRequests.first();
 }
 
 

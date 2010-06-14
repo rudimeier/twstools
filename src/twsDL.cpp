@@ -216,10 +216,13 @@ void TwsDL::getData()
 {
 	Q_ASSERT( histTodo->countLeft() > 0 );
 	
-	int wait = pacingControl.goodTime(
-		histTodo->current().ibContract );
+	histTodo->checkout();
+	const HistRequest &hR = histTodo->current();
+	
+	int wait = pacingControl.goodTime( hR.ibContract );
 	if( wait > 0 ) {
 		idleTimer->setInterval( qMin( 1000, wait ) );
+		histTodo->cancelCurrent();
 		return;
 	}
 	if( wait < -1 ) {
@@ -227,11 +230,9 @@ void TwsDL::getData()
 		qDebug() << "late timeout:" << wait;
 	}
 	
-	pacingControl.addRequest(
-		histTodo->current().ibContract );
+	pacingControl.addRequest( hR.ibContract );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	const HistRequest &hR = histTodo->current();
 	
 	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex() << currentRequest.reqId << ibToString(hR.ibContract);
 	
