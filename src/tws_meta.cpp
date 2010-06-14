@@ -975,41 +975,60 @@ int PacingGod::countLeft( const IB::Contract& c )
 
 
 void PacingGod::checkAdd( const IB::Contract& c,
-	QString *lazyC, QString *farm )
+	QString *lazyC_, QString *farm_ )
 {
-	*lazyC = LAZY_CONTRACT_STR(c);
-	*farm = dataFarms.getHmdsFarm(c);
+	*lazyC_ = LAZY_CONTRACT_STR(c);
+	*farm_ = dataFarms.getHmdsFarm(c);
 	
-	if( !farm->isEmpty() ) {
-		if( !controlHmds.contains(*farm) ) {
+	// controlLazy.keys() does not work for QHash<const QString, PacingControl*>
+	QStringList lazies;
+	QHash<const QString, PacingControl*>::const_iterator it =
+		controlLazy.constBegin();
+	while( it != controlLazy.constEnd() ) {
+		lazies.append( it.key() );
+		it++;
+	}
+	if( !lazies.contains(*lazyC_) ) {
+		lazies.append(*lazyC_);
+	}
+	
+	foreach( QString lazyC, lazies ) {
+	QString farm = dataFarms.getHmdsFarm(lazyC);
+	if( !farm.isEmpty() ) {
+		if( !controlHmds.contains(farm) ) {
 			PacingControl *pC;
-			if( controlLazy.contains(*lazyC) ) {
-				pC = controlLazy.take(*lazyC);
+			if( controlLazy.contains(lazyC) ) {
+				qDebug() << "move pacing control lazy to farm"
+					<< lazyC << farm;
+				pC = controlLazy.take(lazyC);
 			} else {
+				qDebug() << "create pacing control for farm" << farm;
 				pC = new PacingControl(
 					maxRequests, checkInterval, minPacingTime, violationPause);
 			}
-			controlHmds.insert( *farm, pC );
+			controlHmds.insert( farm, pC );
 		} else {
-			if( !controlLazy.contains(*lazyC) ) {
+			if( !controlLazy.contains(lazyC) ) {
 				// fine - no history about that
 			} else {
-				controlHmds.value(*farm)->merge(*controlLazy.take(*lazyC));
+				qDebug() << "merge pacing control lazy into farm"
+					<< lazyC << farm;
+				controlHmds.value(farm)->merge(*controlLazy.take(lazyC));
 			}
 		}
-		Q_ASSERT( controlHmds.contains(*farm) );
-		Q_ASSERT( !controlLazy.contains(*lazyC) );
-		return;
+		Q_ASSERT( controlHmds.contains(farm) );
+		Q_ASSERT( !controlLazy.contains(lazyC) );
+		
+	} else if( !controlLazy.contains(lazyC) ) {
+			qDebug() << "create pacing control for lazy" << lazyC;
+			PacingControl *pC = new PacingControl(
+				maxRequests, checkInterval, minPacingTime, violationPause);
+			controlLazy.insert( lazyC, pC );
+			
+			Q_ASSERT( !controlHmds.contains(farm) );
+			Q_ASSERT( controlLazy.contains(lazyC) );
 	}
-	
-	if( !controlLazy.contains(*lazyC) ) {
-		PacingControl *pC = new PacingControl(
-			maxRequests, checkInterval, minPacingTime, violationPause);
-		controlLazy.insert( *lazyC, pC );
 	}
-	
-	Q_ASSERT( !controlHmds.contains(*farm) );
-	Q_ASSERT( controlLazy.contains(*lazyC) );
 }
 
 
