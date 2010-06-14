@@ -302,6 +302,7 @@ class DataFarmStates
 		QStringList getInactives() const;
 		QStringList getActives() const;
 		QString getMarketFarm( const IB::Contract& ) const;
+		QString getHmdsFarm( const QString& lazyC ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
 		void notify(int msgNumber, int errorCode, const QString &msg);

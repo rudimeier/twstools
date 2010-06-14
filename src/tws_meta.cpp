@@ -1196,6 +1196,12 @@ QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 }
 
 
+QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
+{
+	return hLearn[lazyC];
+}
+
+
 #undef LAZY_CONTRACT_STR
 
 
