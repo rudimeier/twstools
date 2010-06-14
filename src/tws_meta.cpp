@@ -332,6 +332,49 @@ void HistTodo::checkout()
 	checkedOutRequests.append(id);
 }
 
+
+void HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
+{
+	Q_ASSERT( checkedOutRequests.isEmpty() );
+	
+	QHash< QString, QList<int> > hashByFarm;
+	foreach( int i ,leftRequests ) {
+		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract);
+		if( !hashByFarm.contains(farm) ) {
+			hashByFarm.insert(farm, QList<int>());
+		}
+		hashByFarm[farm].append(i);
+	}
+	
+	QStringList farms = hashByFarm.keys();
+	
+	int todoId = leftRequests.first();
+	int countTodo = 0;
+	foreach( QString farm, farms ) {
+		Q_ASSERT( hashByFarm.contains(farm) );
+		QList<int> &l = hashByFarm[farm];
+		Q_ASSERT( l.size() > 0 );
+		Q_ASSERT( histRequests.size() > l.first() );
+		const IB::Contract& c = histRequests.at(l.first())->ibContract;
+		if( pG->countLeft( c ) > 0 ) {
+			if( farm.isEmpty() ) {
+				// 1. the unknown ones to learn farm quickly
+				todoId = l.first();
+				break;
+			} else if( countTodo < l.size() ) {
+				// 2. get from them biggest list
+				todoId = l.first();
+				countTodo = l.size();
+			}
+		}
+	}
+	
+	bool ok = leftRequests.removeOne( todoId );
+	Q_ASSERT(ok);
+	checkedOutRequests.append(todoId);
+}
+
+
 void HistTodo::cancelCurrent()
 {
 	Q_ASSERT( !checkedOutRequests.isEmpty() );
