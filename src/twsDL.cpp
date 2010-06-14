@@ -216,7 +216,7 @@ void TwsDL::getData()
 {
 	Q_ASSERT( histTodo->countLeft() > 0 );
 	
-	histTodo->checkout();
+	histTodo->checkoutOpt( &pacingControl, &dataFarms );
 	const HistRequest &hR = histTodo->current();
 	
 	int wait = pacingControl.goodTime( hR.ibContract );
