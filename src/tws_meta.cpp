@@ -933,7 +933,6 @@ int PacingGod::goodTime( const IB::Contract& c )
 		qDebug() << "get good time global" << dbg << t;
 		return t;
 	} else {
-		qDebug() << "get good time farm" << farm ;
 		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
 		int t = controlHmds.value(farm)->goodTime(&dbg);
