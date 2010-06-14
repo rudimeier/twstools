@@ -278,10 +278,6 @@ void TwsDL::finData()
 		                 myProp->printFormatDates );
 		histTodo->tellDone();
 	}
-	if( histTodo->countLeft() > 0 ) {
-		qDebug() << "optimize queue";
-		histTodo->optimize(&pacingControl, &dataFarms);
-	}
 	
 	p_histData.clear();
 	currentRequest.close();
