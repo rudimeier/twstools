@@ -1056,7 +1056,9 @@ void PacingGod::checkAdd( const IB::Contract& c,
 			} else {
 				qDebug() << "merge pacing control lazy into farm"
 					<< lazyC << farm;
-				controlHmds.value(farm)->merge(*controlLazy.take(lazyC));
+				PacingControl *pC = controlLazy.take(lazyC);
+				controlHmds.value(farm)->merge(*pC);
+				delete pC;
 			}
 		}
 		Q_ASSERT( controlHmds.contains(farm) );
