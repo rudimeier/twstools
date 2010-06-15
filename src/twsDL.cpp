@@ -277,6 +277,8 @@ void TwsDL::finData()
 		p_histData.dump( histTodo->current(),
 		                 myProp->printFormatDates );
 		histTodo->tellDone();
+	} else {
+		histTodo->cancelCurrent();
 	}
 	
 	p_histData.clear();
