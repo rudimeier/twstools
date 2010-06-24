@@ -16,6 +16,8 @@ namespace Test {
 
 
 
+quint64 nowInMsecs();
+
 /// stupid static helper
 QString ibDate2ISO( const QString &ibDate );
 
@@ -244,8 +246,6 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		static quint64 nowInMsecs();
-		
 		QList<quint64> dateTimes;
 		QList<bool> violations;
 		

@@ -17,6 +17,14 @@ namespace Test {
 
 
 
+quint64 nowInMsecs()
+{
+	const QDateTime now = QDateTime::currentDateTime();
+	const quint64 now_t = (now.toTime_t() * 1000) + now.time().msec();
+	return now_t;
+}
+
+
 /// stupid static helper
 QString ibDate2ISO( const QString &ibDate )
 {
@@ -672,14 +680,6 @@ void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 
 
 
-
-
-quint64 PacingControl::nowInMsecs()
-{
-	const QDateTime now = QDateTime::currentDateTime();
-	const quint64 now_t = (now.toTime_t() * 1000) + now.time().msec();
-	return now_t;
-}
 
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
