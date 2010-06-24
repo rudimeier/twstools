@@ -85,12 +85,15 @@ class GenericRequest
 		
 		ReqType reqType() const;
 		int reqId() const;
+		int age() const;
 		void nextRequest( ReqType );
 		void close();
 		
 	private:
 		ReqType _reqType;
 		int _reqId;
+		
+		quint64 _ctime;
 };
 
 

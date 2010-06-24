@@ -215,7 +215,8 @@ void HistRequest::clear()
 
 GenericRequest::GenericRequest() :
 	_reqType(NONE),
-	_reqId(0)
+	_reqId(0),
+	_ctime(0)
 {
 }
 
@@ -232,10 +233,17 @@ int GenericRequest::reqId() const
 }
 
 
+int GenericRequest::age() const
+{
+	return (nowInMsecs() - _ctime);
+}
+
+
 void GenericRequest::nextRequest( ReqType t )
 {
 	_reqType = t;
 	_reqId++;
+	_ctime = nowInMsecs();
 }
 
 
