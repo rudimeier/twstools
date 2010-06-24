@@ -144,7 +144,7 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
-	Q_ASSERT(currentRequest.reqType == GenericRequest::NONE);
+	Q_ASSERT(currentRequest.reqType() == GenericRequest::NONE);
 	
 	if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
 		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
@@ -234,7 +234,8 @@ void TwsDL::getData()
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	
-	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex() << currentRequest.reqId << ibToString(hR.ibContract);
+	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex()
+		<< currentRequest.reqId() << ibToString(hR.ibContract);
 	
 	reqHistoricalData( hR );
 	
@@ -247,7 +248,7 @@ void TwsDL::waitData()
 {
 	idleTimer->setInterval( 0 );
 	
-	switch( currentRequest.reqType ) {
+	switch( currentRequest.reqType() ) {
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
 		if( p_contractDetails.isFinished() ) {
 			finContracts();
@@ -351,10 +352,10 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 {
 	msgCounter++;
 	
-	if( id == currentRequest.reqId ) {
+	if( id == currentRequest.reqId() ) {
 		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
 		if( state == WAIT_DATA ) {
-			switch( currentRequest.reqType ) {
+			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
 				errorContracts( id, errorCode, errorMsg );
 				break;
@@ -381,14 +382,14 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 			break;
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
-			if( currentRequest.reqType == GenericRequest::HIST_REQUEST ) {
+			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				p_histData.closeError( true );
 				idleTimer->setInterval( 0 );
 			}
 			break;
 		case 1102:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
-			if( currentRequest.reqType == GenericRequest::HIST_REQUEST ) {
+			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				p_histData.closeError( true );
 				idleTimer->setInterval( 0 );
 			}
@@ -473,7 +474,7 @@ void TwsDL::twsConnected( bool connected )
 		idleTimer->setInterval( 1000 ); //TODO wait for first tws messages
 	} else {
 		// TODO should we check current state here?
-		switch( currentRequest.reqType ) {
+		switch( currentRequest.reqType() ) {
 		case GenericRequest::CONTRACT_DETAILS_REQUEST:
 			if( !p_contractDetails.isFinished() ) {
 				Q_ASSERT(false); // TODO repeat
@@ -491,7 +492,7 @@ void TwsDL::twsConnected( bool connected )
 			break;
 		}
 // 		Q_ASSERT( state == IDLE || state == CONNECT );
-		Q_ASSERT( currentRequest.reqType == GenericRequest::NONE );
+		Q_ASSERT( currentRequest.reqType() == GenericRequest::NONE );
 		state = CONNECT;
 		idleTimer->setInterval( 10000 );
 	}
@@ -501,8 +502,9 @@ void TwsDL::twsConnected( bool connected )
 void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
 	
-	if( currentRequest.reqId != reqId ) {
-		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
+	if( currentRequest.reqId() != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:"
+			<< currentRequest.reqId();
 		Q_ASSERT( false );
 	}
 	
@@ -512,8 +514,9 @@ void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContract
 
 void TwsDL::twsContractDetailsEnd( int reqId )
 {
-	if( currentRequest.reqId != reqId ) {
-		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
+	if( currentRequest.reqId() != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:"
+			<< currentRequest.reqId();
 		Q_ASSERT( false );
 	}
 	
@@ -525,8 +528,9 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
-	if( currentRequest.reqId != reqId ) {
-		qDebug() << "got reqId" << reqId << "but currentReqId:" << currentRequest.reqId;
+	if( currentRequest.reqId() != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:"
+			<< currentRequest.reqId();
 		Q_ASSERT( false );
 	}
 	
@@ -616,14 +620,14 @@ TwsDL::State TwsDL::currentState() const
 
 void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 {
-	twsClient->reqContractDetails( currentRequest.reqId, cdR.ibContract );
+	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract );
 }
 
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
-	p_histData.record( currentRequest.reqId );
-	twsClient->reqHistoricalData( currentRequest.reqId,
+	p_histData.record( currentRequest.reqId() );
+	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract,
 	                              hR.endDateTime,
 	                              hR.durationStr,

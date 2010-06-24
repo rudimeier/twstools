@@ -81,11 +81,14 @@ class GenericRequest
 		
 		GenericRequest();
 		
+		ReqType reqType() const;
+		int reqId() const;
 		void nextRequest( ReqType );
 		void close();
 		
-		ReqType reqType;
-		int reqId;
+	private:
+		ReqType _reqType;
+		int _reqId;
 };
 
 

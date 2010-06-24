@@ -206,22 +206,34 @@ void HistRequest::clear()
 
 
 GenericRequest::GenericRequest() :
-	reqType(NONE),
-	reqId(0)
+	_reqType(NONE),
+	_reqId(0)
 {
+}
+
+
+GenericRequest::ReqType GenericRequest::reqType() const
+{
+	return _reqType;
+}
+
+
+int GenericRequest::reqId() const
+{
+	return _reqId;
 }
 
 
 void GenericRequest::nextRequest( ReqType t )
 {
-	reqType = t;
-	reqId++;
+	_reqType = t;
+	_reqId++;
 }
 
 
 void GenericRequest::close()
 {
-	reqType = NONE;
+	_reqType = NONE;
 }
 
 
