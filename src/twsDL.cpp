@@ -173,7 +173,7 @@ void TwsDL::getContracts()
 		contractDetailsTodo->contractDetailsRequests.at( curIndexTodoContractDetails );
 	reqContractDetails( cdR );
 	
-	idleTimer->setInterval( myProp->reqTimeout );
+	idleTimer->setInterval( 1000 );
 	state = WAIT_DATA;
 }
 
@@ -239,33 +239,38 @@ void TwsDL::getData()
 	
 	reqHistoricalData( hR );
 	
-	idleTimer->setInterval( myProp->reqTimeout );
+	idleTimer->setInterval( 1000 );
 	state = WAIT_DATA;
 }
 
 
 void TwsDL::waitData()
 {
-	idleTimer->setInterval( 0 );
-	
 	switch( currentRequest.reqType() ) {
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
 		if( p_contractDetails.isFinished() ) {
 			finContracts();
-		}
-		return;
+			return;
+		};
+		break;
 	case GenericRequest::HIST_REQUEST:
 		if( p_histData.isFinished() ) {
 			finData();
+			return;
 		}
-		return;
+		break;
 	case GenericRequest::NONE:
 		Q_ASSERT( false );
 		break;
 	}
 	
-	qDebug() << "Timeout waiting for data.";
-	state = QUIT_ERROR;
+	if( currentRequest.age() > myProp->reqTimeout ) {
+		qDebug() << "Timeout waiting for data.";
+		state = QUIT_ERROR;
+		idleTimer->setInterval( 0 );
+	} else {
+		qDebug() << "still waiting for data.";
+	}
 }
 
 
