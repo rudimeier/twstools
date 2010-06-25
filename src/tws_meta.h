@@ -52,6 +52,14 @@ class ContractDetailsRequest
 class HistRequest
 {
 	public:
+		const IB::Contract& ibContract() const;
+		const QString& endDateTime() const;
+		const QString& durationStr() const;
+		const QString& barSizeSetting() const;
+		const QString& whatToShow() const;
+		int useRTH() const;
+		int formatDate() const;
+		
 		bool initialize( const IB::Contract&, const QString &endDateTime,
 			const QString &durationStr, const QString &barSizeSetting,
 			const QString &whatToShow, int useRTH, int formatDate );
@@ -59,14 +67,58 @@ class HistRequest
 		QString toString() const;
 		void clear();
 		
-		IB::Contract ibContract;
-		QString endDateTime;
-		QString durationStr;
-		QString barSizeSetting;
-		QString whatToShow;
-		int useRTH;
-		int formatDate;
+	private:
+		IB::Contract _ibContract;
+		QString _endDateTime;
+		QString _durationStr;
+		QString _barSizeSetting;
+		QString _whatToShow;
+		int _useRTH;
+		int _formatDate;
 };
+
+
+inline const IB::Contract& HistRequest::ibContract() const
+{
+	return _ibContract;
+}
+
+
+inline const QString& HistRequest::endDateTime() const
+{
+	return _endDateTime;
+}
+
+
+inline const QString& HistRequest::durationStr() const
+{
+	return _durationStr;
+}
+
+
+inline const QString& HistRequest::barSizeSetting() const
+{
+	return _barSizeSetting;
+}
+
+
+inline const QString& HistRequest::whatToShow() const
+{
+	return _whatToShow;
+}
+
+
+inline int HistRequest::useRTH() const
+{
+	return _useRTH;
+}
+
+
+inline int HistRequest::formatDate() const
+{
+	return _formatDate;
+}
+
 
 
 

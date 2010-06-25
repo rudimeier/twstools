@@ -237,7 +237,7 @@ void TwsDL::getData()
 	histTodo->checkoutOpt( &pacingControl, &dataFarms );
 	const HistRequest &hR = histTodo->current();
 	
-	int wait = pacingControl.goodTime( hR.ibContract );
+	int wait = pacingControl.goodTime( hR.ibContract() );
 	if( wait > 0 ) {
 		idleTimer->setInterval( qMin( 1000, wait ) );
 		histTodo->cancelCurrent();
@@ -248,12 +248,12 @@ void TwsDL::getData()
 		qDebug() << "late timeout:" << wait;
 	}
 	
-	pacingControl.addRequest( hR.ibContract );
+	pacingControl.addRequest( hR.ibContract() );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	
 	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex()
-		<< currentRequest.reqId() << ibToString(hR.ibContract);
+		<< currentRequest.reqId() << ibToString(hR.ibContract());
 	
 	reqHistoricalData( hR );
 	
@@ -458,18 +458,18 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( true );
 			pacingControl.notifyViolation(
-				histTodo->current().ibContract );
+				histTodo->current().ibContract() );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << histTodo->currentIndex() << id;
-			dataFarms.learnHmds( histTodo->current().ibContract );
+			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
 			/*TODO we should skip all similar work intelligently*/
 			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << histTodo->currentIndex() << id;
-			dataFarms.learnHmds( histTodo->current().ibContract );
+			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( false );
 			idleTimer->setInterval( 0 );
 		} else {
@@ -482,7 +482,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
 			idleTimer->setInterval( myProp->reqTimeout );
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
-			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract );
+			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract() );
 		} else {
 			// nothing
 		}
@@ -570,7 +570,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	}
 	
 	// TODO we shouldn't do this each row
-	dataFarms.learnHmds( histTodo->current().ibContract );
+	dataFarms.learnHmds( histTodo->current().ibContract() );
 	
 	Q_ASSERT( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,
@@ -681,13 +681,13 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
 	p_histData.record( currentRequest.reqId() );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
-	                              hR.ibContract,
-	                              hR.endDateTime,
-	                              hR.durationStr,
-	                              hR.barSizeSetting,
-	                              hR.whatToShow,
-	                              hR.useRTH,
-	                              hR.formatDate );
+	                              hR.ibContract(),
+	                              hR.endDateTime(),
+	                              hR.durationStr(),
+	                              hR.barSizeSetting(),
+	                              hR.whatToShow(),
+	                              hR.useRTH(),
+	                              hR.formatDate() );
 }
 
 

@@ -134,13 +134,13 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 	const QString &d, const QString &b,
 	const QString &w, int u, int f )
 {
-	ibContract = c;
-	endDateTime = e;
-	durationStr = d;
-	barSizeSetting = b;
-	whatToShow = w;
-	useRTH = u;
-	formatDate = f;
+	_ibContract = c;
+	_endDateTime = e;
+	_durationStr = d;
+	_barSizeSetting = b;
+	_whatToShow = w;
+	_useRTH = u;
+	_formatDate = f;
 	return true;
 }
 
@@ -155,29 +155,29 @@ bool HistRequest::fromString( const QString& s )
 	}
 	
 	int i = 0;
-	endDateTime = sl.at(i++);
-	durationStr = sl.at(i++);
-	barSizeSetting = sl.at(i++);
-	whatToShow = sl.at(i++);
-	useRTH = sl.at(i++).toInt( &ok );
+	_endDateTime = sl.at(i++);
+	_durationStr = sl.at(i++);
+	_barSizeSetting = sl.at(i++);
+	_whatToShow = sl.at(i++);
+	_useRTH = sl.at(i++).toInt( &ok );
 	if( !ok ) {
 		return false;
 	}
-	formatDate = sl.at(i++).toInt( &ok );
+	_formatDate = sl.at(i++).toInt( &ok );
 	if( !ok ) {
 		return false;
 	}
 	
-	ibContract.symbol = toIBString(sl.at(i++));
-	ibContract.secType = toIBString(sl.at(i++));
-	ibContract.exchange = toIBString(sl.at(i++));
-	ibContract.currency = toIBString(sl.at(i++));
-	ibContract.expiry = toIBString(sl.at(i++));
-	ibContract.strike = sl.at(i++).toDouble( &ok );
+	_ibContract.symbol = toIBString(sl.at(i++));
+	_ibContract.secType = toIBString(sl.at(i++));
+	_ibContract.exchange = toIBString(sl.at(i++));
+	_ibContract.currency = toIBString(sl.at(i++));
+	_ibContract.expiry = toIBString(sl.at(i++));
+	_ibContract.strike = sl.at(i++).toDouble( &ok );
 	if( !ok ) {
 		return false;
 	}
-	ibContract.right = toIBString(sl.at(i++));
+	_ibContract.right = toIBString(sl.at(i++));
 	
 	return ok;
 }
@@ -186,21 +186,21 @@ bool HistRequest::fromString( const QString& s )
 QString HistRequest::toString() const
 {
 	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(toQString(ibContract.symbol))
-		.arg(toQString(ibContract.secType))
-		.arg(toQString(ibContract.exchange))
-		.arg(toQString(ibContract.currency))
-		.arg(toQString(ibContract.expiry))
-		.arg(ibContract.strike)
-		.arg(toQString(ibContract.right));
+		.arg(toQString(_ibContract.symbol))
+		.arg(toQString(_ibContract.secType))
+		.arg(toQString(_ibContract.exchange))
+		.arg(toQString(_ibContract.currency))
+		.arg(toQString(_ibContract.expiry))
+		.arg(_ibContract.strike)
+		.arg(toQString(_ibContract.right));
 	
 	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(endDateTime)
-		.arg(durationStr)
-		.arg(barSizeSetting)
-		.arg(whatToShow)
-		.arg(useRTH)
-		.arg(formatDate)
+		.arg(_endDateTime)
+		.arg(_durationStr)
+		.arg(_barSizeSetting)
+		.arg(_whatToShow)
+		.arg(_useRTH)
+		.arg(_formatDate)
 		.arg(c_str);
 	
 	return retVal;
@@ -209,8 +209,8 @@ QString HistRequest::toString() const
 
 void HistRequest::clear()
 {
-	ibContract = IB::Contract();
-	whatToShow.clear();
+	_ibContract = IB::Contract();
+	_whatToShow.clear();
 }
 
 
@@ -374,7 +374,7 @@ void HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	
 	QHash< QString, QList<int> > hashByFarm;
 	foreach( int i ,leftRequests ) {
-		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract);
+		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract());
 		if( !hashByFarm.contains(farm) ) {
 			hashByFarm.insert(farm, QList<int>());
 		}
@@ -390,7 +390,7 @@ void HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		QList<int> &l = hashByFarm[farm];
 		Q_ASSERT( l.size() > 0 );
 		Q_ASSERT( histRequests.size() > l.first() );
-		const IB::Contract& c = histRequests.at(l.first())->ibContract;
+		const IB::Contract& c = histRequests.at(l.first())->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.isEmpty() ) {
 				// 1. the unknown ones to learn farm quickly
@@ -455,7 +455,7 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 	QList<int> tmp;
 	QHash< QString, QList<int> > h;
 	foreach( int i ,leftRequests ) {
-		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract);
+		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract());
 		if( !h.contains(farm) ) {
 			h.insert(farm, QList<int>());
 		}
@@ -473,7 +473,7 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 		QList<int> &l = h[farm];
 		Q_ASSERT( l.size() > 0 );
 		Q_ASSERT( histRequests.size() > l.first() );
-		const IB::Contract& c = histRequests.at(l.first())->ibContract;
+		const IB::Contract& c = histRequests.at(l.first())->ibContract();
 		int count = qMin( pG->countLeft( c ), l.size() );
 		while( i < count) {
 			tmp.append(l.takeFirst());
@@ -655,9 +655,9 @@ void PacketHistData::closeError( bool repeat )
 void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED_SUCC || ( mode == CLOSED_ERR && !repeat ) );
-	const IB::Contract &c = hR.ibContract;
-	const QString &wts = hR.whatToShow;
-	const QString &barSizeSetting = hR.barSizeSetting;
+	const IB::Contract &c = hR.ibContract();
+	const QString &wts = hR.whatToShow();
+	const QString &barSizeSetting = hR.barSizeSetting();
 	
 	foreach( Row r, rows ) {
 		QString expiry = toQString(c.expiry);
