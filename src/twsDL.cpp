@@ -25,6 +25,8 @@ namespace Test {
 
 TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	state(CONNECT),
+	lastConnectionTime(0),
+	connection_failed( false ),
 	confFile(confFile),
 	workFile(workFile),
 	myProp(NULL),
@@ -119,10 +121,20 @@ void TwsDL::idleTimeout()
 
 void TwsDL::connectTws()
 {
+	qint64 w = nowInMsecs() - lastConnectionTime;
+	if( w < myProp->conTimeout ) {
+		qDebug() << "Waiting" << (myProp->conTimeout - w)
+			<< "ms before connecting again.";
+		idleTimer->setInterval( myProp->conTimeout - w );
+		return;
+	}
+	
+	connection_failed = false;
+	lastConnectionTime = nowInMsecs();
+	changeState( WAIT_TWS_CON );
+	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
-	
-	changeState( WAIT_TWS_CON );
 }
 
 
@@ -132,9 +144,16 @@ void TwsDL::waitTwsCon()
 		qDebug() << "We are connected to TWS.";
 		changeState( IDLE );
 	} else {
-		qDebug() << "Timeout connecting TWS.";
-		idleTimer->setInterval( 10000 );
-		state = CONNECT;
+		if( connection_failed ) {
+			qDebug() << "Connecting TWS failed.";
+			changeState( CONNECT );
+		} else if( (nowInMsecs() - lastConnectionTime) > myProp->conTimeout ) {
+				qDebug() << "Timeout connecting TWS.";
+				twsClient->disconnectTWS();
+				idleTimer->setInterval( 1000 );
+		} else {
+			qDebug() << "Still waiting for tws connection.";
+		}
 	}
 }
 
@@ -142,6 +161,11 @@ void TwsDL::waitTwsCon()
 void TwsDL::idle()
 {
 	Q_ASSERT(currentRequest.reqType() == GenericRequest::NONE);
+	
+	if( !twsClient->isConnected() ) {
+		changeState( CONNECT );
+		return;
+	}
 	
 	if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
 		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
@@ -242,10 +266,10 @@ void TwsDL::waitData()
 	switch( currentRequest.reqType() ) {
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
 		waitContracts();
-		return;
+		break;
 	case GenericRequest::HIST_REQUEST:
 		waitHist();
-		return;
+		break;
 	case GenericRequest::NONE:
 		Q_ASSERT( false );
 		break;
@@ -257,13 +281,12 @@ void TwsDL::waitContracts()
 {
 	if( p_contractDetails.isFinished() ) {
 		finContracts();
+	} else if( currentRequest.age() > myProp->reqTimeout ) {
+		qDebug() << "Timeout waiting for data.";
+		// TODO repeat
+		changeState( QUIT_ERROR );
 	} else {
-		if( currentRequest.age() > myProp->reqTimeout ) {
-			qDebug() << "Timeout waiting for data.";
-			changeState( QUIT_ERROR );
-		} else {
-			qDebug() << "still waiting for data.";
-		}
+		qDebug() << "still waiting for data.";
 	}
 }
 
@@ -272,13 +295,12 @@ void TwsDL::waitHist()
 {
 	if( p_histData.isFinished() ) {
 		finData();
+	} else if( currentRequest.age() > myProp->reqTimeout ) {
+		qDebug() << "Timeout waiting for data.";
+		p_histData.closeError(true);
+		finData();
 	} else {
-		if( currentRequest.age() > myProp->reqTimeout ) {
-			qDebug() << "Timeout waiting for data.";
-			changeState( QUIT_ERROR );
-		} else {
-			qDebug() << "still waiting for data.";
-		}
+		qDebug() << "still waiting for data.";
 	}
 }
 
@@ -485,28 +507,29 @@ void TwsDL::twsConnected( bool connected )
 		Q_ASSERT( state == WAIT_TWS_CON );
 		idleTimer->setInterval( 1000 ); //TODO wait for first tws messages
 	} else {
-		// TODO should we check current state here?
-		switch( currentRequest.reqType() ) {
-		case GenericRequest::CONTRACT_DETAILS_REQUEST:
-			if( !p_contractDetails.isFinished() ) {
-				Q_ASSERT(false); // TODO repeat
+		qDebug() << "disconnected in state" << state;
+		Q_ASSERT( state != CONNECT );
+		
+		if( state == WAIT_TWS_CON ) {
+			connection_failed = true;
+		} else if( state == WAIT_DATA ) {
+			switch( currentRequest.reqType() ) {
+			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+				if( !p_contractDetails.isFinished() ) {
+					Q_ASSERT(false); // TODO repeat
+				}
+				break;
+			case GenericRequest::HIST_REQUEST:
+				if( !p_histData.isFinished() ) {
+					p_histData.closeError( true );
+				}
+				break;
+			case GenericRequest::NONE:
+				Q_ASSERT(false);
+				break;
 			}
-			finContracts();
-			break;
-		case GenericRequest::HIST_REQUEST:
-			if( !p_histData.isFinished() ) {
-				p_histData.closeError( true );
-			}
-			finData();
-			break;
-		case GenericRequest::NONE:
-			qDebug() << "NONE";
-			break;
 		}
-// 		Q_ASSERT( state == IDLE || state == CONNECT );
-		Q_ASSERT( currentRequest.reqType() == GenericRequest::NONE );
-		state = CONNECT;
-		idleTimer->setInterval( 10000 );
+		idleTimer->setInterval( 0 );
 	}
 }
 
@@ -636,11 +659,14 @@ void TwsDL::changeState( State s )
 	state = s;
 	
 	if( state == WAIT_TWS_CON ) {
-		idleTimer->setInterval( myProp->conTimeout );
+		qDebug() << "TTTTTTTTTTT" << 50;
+		idleTimer->setInterval( 50 );
 	} else if( state == WAIT_DATA ) {
 		idleTimer->setInterval( 1000 );
+		qDebug() << "TTTTTTTTTTT" << 1000;
 	} else {
 		idleTimer->setInterval( 0 );
+		qDebug() << "TTTTTTTTTTT" << 0;
 	}
 }
 

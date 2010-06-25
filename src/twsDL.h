@@ -131,6 +131,8 @@ class TwsDL : public QObject
 		void errorHistData(int, int, const QString &);
 		
 		State state;
+		qint64 lastConnectionTime;
+		bool connection_failed;
 		
 		QString confFile;
 		QString workFile;
