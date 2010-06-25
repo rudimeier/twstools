@@ -99,21 +99,27 @@ const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 
 
 
+
+const IB::Contract& ContractDetailsRequest::ibContract() const
+{
+	return _ibContract;
+}
+
 bool ContractDetailsRequest::initialize( const IB::Contract& c )
 {
-	ibContract = c;
+	_ibContract = c;
 	return true;
 }
 
 
 bool ContractDetailsRequest::fromStringList( const QList<QString>& sl )
 {
-	ibContract.symbol = toIBString( sl[0] );
-	ibContract.secType = toIBString( sl[1]);
-	ibContract.exchange= toIBString( sl[2] );
+	_ibContract.symbol = toIBString( sl[0] );
+	_ibContract.secType = toIBString( sl[1]);
+	_ibContract.exchange= toIBString( sl[2] );
 	// optional filter for a single expiry
 	QString e = sl.size() > 3 ? sl[3] : "";
-	ibContract.expiry = toIBString( e );
+	_ibContract.expiry = toIBString( e );
 	return true;
 }
 

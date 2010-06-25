@@ -673,7 +673,7 @@ void TwsDL::changeState( State s )
 
 void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 {
-	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract );
+	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
 }
 
 

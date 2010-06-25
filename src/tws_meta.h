@@ -34,10 +34,12 @@ extern const QHash<QString, const char*> short_bar_size;
 class ContractDetailsRequest
 {
 	public:
+		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
 		bool fromStringList( const QList<QString>& );
 		
-		IB::Contract ibContract;
+	private:
+		IB::Contract _ibContract;
 };
 
 
