@@ -372,13 +372,16 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
 	Q_ASSERT( checkedOutRequests.isEmpty() );
 	
-	QHash< QString, QList<int> > hashByFarm;
+	QHash< QString, int > hashByFarm;
+	QHash<QString, int> countByFarm;
 	foreach( int i ,leftRequests ) {
 		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract());
 		if( !hashByFarm.contains(farm) ) {
-			hashByFarm.insert(farm, QList<int>());
+			hashByFarm.insert(farm, i);
+			countByFarm.insert(farm, 1);
+		} else {
+			countByFarm[farm]++;
 		}
-		hashByFarm[farm].append(i);
 	}
 	
 	QStringList farms = hashByFarm.keys();
@@ -387,19 +390,18 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	int countTodo = 0;
 	foreach( QString farm, farms ) {
 		Q_ASSERT( hashByFarm.contains(farm) );
-		QList<int> &l = hashByFarm[farm];
-		Q_ASSERT( l.size() > 0 );
-		Q_ASSERT( histRequests.size() > l.first() );
-		const IB::Contract& c = histRequests.at(l.first())->ibContract();
+		int tmpid = hashByFarm[farm];
+		Q_ASSERT( histRequests.size() > tmpid );
+		const IB::Contract& c = histRequests.at(tmpid)->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.isEmpty() ) {
 				// 1. the unknown ones to learn farm quickly
-				todoId = l.first();
+				todoId = tmpid;
 				break;
-			} else if( countTodo < l.size() ) {
+			} else if( countTodo < countByFarm[farm] ) {
 				// 2. get from them biggest list
-				todoId = l.first();
-				countTodo = l.size();
+				todoId = tmpid;
+				countTodo = countByFarm[farm];
 			}
 		}
 	}
