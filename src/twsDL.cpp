@@ -241,27 +241,44 @@ void TwsDL::waitData()
 {
 	switch( currentRequest.reqType() ) {
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
-		if( p_contractDetails.isFinished() ) {
-			finContracts();
-			return;
-		};
-		break;
+		waitContracts();
+		return;
 	case GenericRequest::HIST_REQUEST:
-		if( p_histData.isFinished() ) {
-			finData();
-			return;
-		}
-		break;
+		waitHist();
+		return;
 	case GenericRequest::NONE:
 		Q_ASSERT( false );
 		break;
 	}
-	
-	if( currentRequest.age() > myProp->reqTimeout ) {
-		qDebug() << "Timeout waiting for data.";
-		changeState( QUIT_ERROR );
+}
+
+
+void TwsDL::waitContracts()
+{
+	if( p_contractDetails.isFinished() ) {
+		finContracts();
 	} else {
-		qDebug() << "still waiting for data.";
+		if( currentRequest.age() > myProp->reqTimeout ) {
+			qDebug() << "Timeout waiting for data.";
+			changeState( QUIT_ERROR );
+		} else {
+			qDebug() << "still waiting for data.";
+		}
+	}
+}
+
+
+void TwsDL::waitHist()
+{
+	if( p_histData.isFinished() ) {
+		finData();
+	} else {
+		if( currentRequest.age() > myProp->reqTimeout ) {
+			qDebug() << "Timeout waiting for data.";
+			changeState( QUIT_ERROR );
+		} else {
+			qDebug() << "still waiting for data.";
+		}
 	}
 }
 
