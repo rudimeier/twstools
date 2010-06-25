@@ -122,18 +122,15 @@ void TwsDL::connectTws()
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
 	
-	state = WAIT_TWS_CON;
-	idleTimer->setInterval( myProp->conTimeout );
+	changeState( WAIT_TWS_CON );
 }
 
 
 void TwsDL::waitTwsCon()
 {
-	idleTimer->setInterval( 0 );
-	
 	if( twsClient->isConnected() ) {
 		qDebug() << "We are connected to TWS.";
-		state = IDLE;
+		changeState( IDLE );
 	} else {
 		qDebug() << "Timeout connecting TWS.";
 		idleTimer->setInterval( 10000 );
@@ -162,7 +159,7 @@ void TwsDL::idle()
 	    && ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
 		getData();
 	} else {
-		state = QUIT_READY;
+		changeState( QUIT_READY );
 	}
 }
 
@@ -173,15 +170,12 @@ void TwsDL::getContracts()
 		contractDetailsTodo->contractDetailsRequests.at( curIndexTodoContractDetails );
 	reqContractDetails( cdR );
 	
-	idleTimer->setInterval( 1000 );
-	state = WAIT_DATA;
+	changeState( WAIT_DATA );
 }
 
 
 void TwsDL::finContracts()
 {
-	idleTimer->setInterval( 0 );
-	
 	int inserted;
 	inserted = storage2stdout();
 	
@@ -202,13 +196,13 @@ void TwsDL::finContracts()
 	
 	p_contractDetails.clear();
 	if( inserted == -1 ) {
-		state = QUIT_ERROR;
+		changeState( QUIT_ERROR );
 		return;
 	}
 	
 	curIndexTodoContractDetails++;
 	currentRequest.close();
-	state = IDLE;
+	changeState( IDLE );
 }
 
 
@@ -239,8 +233,7 @@ void TwsDL::getData()
 	
 	reqHistoricalData( hR );
 	
-	idleTimer->setInterval( 1000 );
-	state = WAIT_DATA;
+	changeState( WAIT_DATA );
 }
 
 
@@ -266,8 +259,7 @@ void TwsDL::waitData()
 	
 	if( currentRequest.age() > myProp->reqTimeout ) {
 		qDebug() << "Timeout waiting for data.";
-		state = QUIT_ERROR;
-		idleTimer->setInterval( 0 );
+		changeState( QUIT_ERROR );
 	} else {
 		qDebug() << "still waiting for data.";
 	}
@@ -276,8 +268,6 @@ void TwsDL::waitData()
 
 void TwsDL::finData()
 {
-	idleTimer->setInterval( 0 );
-	
 	Q_ASSERT( p_histData.isFinished() );
 	if( !p_histData.needRepeat() ) {
 		p_histData.dump( histTodo->current(),
@@ -289,7 +279,7 @@ void TwsDL::finData()
 	
 	p_histData.clear();
 	currentRequest.close();
-	state = IDLE;
+	changeState( IDLE );
 }
 
 
@@ -620,6 +610,21 @@ void TwsDL::dumpWorkTodo() const
 TwsDL::State TwsDL::currentState() const
 {
 	return state;
+}
+
+
+void TwsDL::changeState( State s )
+{
+	Q_ASSERT( state != s );
+	state = s;
+	
+	if( state == WAIT_TWS_CON ) {
+		idleTimer->setInterval( myProp->conTimeout );
+	} else if( state == WAIT_DATA ) {
+		idleTimer->setInterval( 1000 );
+	} else {
+		idleTimer->setInterval( 0 );
+	}
 }
 
 

@@ -118,6 +118,8 @@ class TwsDL : public QObject
 		void finData();
 		void onQuit( int ret );
 		
+		void changeState( State );
+		
 		void initWork();
 		
 		void reqContractDetails( const ContractDetailsRequest& );
