@@ -369,6 +369,7 @@ class DataFarmStates
 		QString getHmdsFarm( const QString& lazyC ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
+		void setAllBroken();
 		void notify(int msgNumber, int errorCode, const QString &msg);
 		void learnMarket( const IB::Contract& );
 		void learnHmds( const IB::Contract& );

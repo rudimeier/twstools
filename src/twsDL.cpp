@@ -539,6 +539,8 @@ void TwsDL::twsConnected( bool connected )
 				break;
 			}
 		}
+		dataFarms.setAllBroken();
+		pacingControl.clear();
 		idleTimer->setInterval( 0 );
 	}
 }

@@ -1141,6 +1141,24 @@ DataFarmStates::DataFarmStates() :
 }
 
 
+void DataFarmStates::setAllBroken()
+{
+	QHash<const QString, State>::iterator it;
+	
+	it = mStates.begin();
+	while( it != mStates.end() ) {
+		*it = BROKEN;
+		it++;
+	}
+	
+	it = hStates.begin();
+	while( it != hStates.end() ) {
+		*it = BROKEN;
+		it++;
+	}
+}
+
+
 void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
 {
 	lastMsgNumber = msgNumber;
