@@ -16,7 +16,7 @@ namespace Test {
 
 
 
-quint64 nowInMsecs();
+qint64 nowInMsecs();
 
 /// stupid static helper
 QString ibDate2ISO( const QString &ibDate );
@@ -93,7 +93,7 @@ class GenericRequest
 		ReqType _reqType;
 		int _reqId;
 		
-		quint64 _ctime;
+		qint64 _ctime;
 };
 
 
@@ -249,7 +249,7 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<quint64> dateTimes;
+		QList<qint64> dateTimes;
 		QList<bool> violations;
 		
 		int maxRequests;
