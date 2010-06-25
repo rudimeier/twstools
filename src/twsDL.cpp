@@ -497,6 +497,13 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			// nothing
 		}
 		break;
+	case 321:
+		// comes from directly from TWS whith prefix "Error validating request:-"
+		if( ERR_MATCH("Please enter a valid security type") ) {
+			p_histData.closeError( PacketHistData::ERR_REQUEST );
+			idleTimer->setInterval( 0 );
+		}
+		break;
 	default:
 		// nothing
 		break;
