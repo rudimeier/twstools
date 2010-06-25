@@ -408,7 +408,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	
 	int i = leftRequests.indexOf( todoId );
 	Q_ASSERT( i>=0 );
-	int wait = pG->goodTime( histRequests[i]->ibContract() );
+	int wait = pG->goodTime( histRequests[todoId]->ibContract() );
 	if( wait <= 0 ) {
 		leftRequests.removeAt( i );
 		checkedOutRequests.append(todoId);
