@@ -416,11 +416,17 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 }
 
 
-void HistTodo::cancelCurrent()
+void HistTodo::cancelForRepeat( int priority )
 {
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	Q_ASSERT( checkedOutRequests.size() == 1 );
 	int id = checkedOutRequests.takeFirst();
-	leftRequests.append(id);
+	if( priority <= 0 ) {
+		leftRequests.prepend(id);
+	} else if( priority <=1 ) {
+		leftRequests.append(id);
+	} else {
+		errorRequests.append(id);
+	}
 }
 
 

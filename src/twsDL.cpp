@@ -316,9 +316,13 @@ void TwsDL::finData()
 		histTodo->tellDone();
 		break;
 	case PacketHistData::ERR_TWSCON:
+		histTodo->cancelForRepeat(0);
+		break;
 	case PacketHistData::ERR_TIMEOUT:
+		histTodo->cancelForRepeat(1);
+		break;
 	case PacketHistData::ERR_REQUEST:
-		histTodo->cancelCurrent();
+		histTodo->cancelForRepeat(2);
 		break;
 	}
 	
