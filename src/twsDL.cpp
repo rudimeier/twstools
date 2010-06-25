@@ -296,7 +296,7 @@ void TwsDL::waitHist()
 		finData();
 	} else if( currentRequest.age() > myProp->reqTimeout ) {
 		qDebug() << "Timeout waiting for data.";
-		p_histData.closeError(true);
+		p_histData.closeError( PacketHistData::ERR_TIMEOUT );
 		finData();
 	} else {
 		qDebug() << "still waiting for data.";
@@ -307,12 +307,19 @@ void TwsDL::waitHist()
 void TwsDL::finData()
 {
 	Q_ASSERT( p_histData.isFinished() );
-	if( !p_histData.needRepeat() ) {
-		p_histData.dump( histTodo->current(),
-		                 myProp->printFormatDates );
+	
+	switch( p_histData.getError() ) {
+	case PacketHistData::ERR_NONE:
+		p_histData.dump( histTodo->current(), myProp->printFormatDates );
+	case PacketHistData::ERR_NODATA:
+	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();
-	} else {
+		break;
+	case PacketHistData::ERR_TWSCON:
+	case PacketHistData::ERR_TIMEOUT:
+	case PacketHistData::ERR_REQUEST:
 		histTodo->cancelCurrent();
+		break;
 	}
 	
 	p_histData.clear();
@@ -416,14 +423,14 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				p_histData.closeError( true );
+				p_histData.closeError( PacketHistData::ERR_TWSCON );
 				idleTimer->setInterval( 0 );
 			}
 			break;
 		case 1102:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				p_histData.closeError( true );
+				p_histData.closeError( PacketHistData::ERR_TWSCON );
 				idleTimer->setInterval( 0 );
 			}
 			break;
@@ -455,21 +462,21 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	//Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
-			p_histData.closeError( true );
+			p_histData.closeError( PacketHistData::ERR_TWSCON );
 			pacingControl.notifyViolation(
 				histTodo->current().ibContract() );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << histTodo->currentIndex() << id;
 			dataFarms.learnHmds( histTodo->current().ibContract() );
-			p_histData.closeError( false );
+			p_histData.closeError( PacketHistData::ERR_NODATA );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
 			/*TODO we should skip all similar work intelligently*/
 			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << histTodo->currentIndex() << id;
 			dataFarms.learnHmds( histTodo->current().ibContract() );
-			p_histData.closeError( false );
+			p_histData.closeError( PacketHistData::ERR_NAV );
 			idleTimer->setInterval( 0 );
 		} else {
 			// nothing
@@ -520,7 +527,7 @@ void TwsDL::twsConnected( bool connected )
 				break;
 			case GenericRequest::HIST_REQUEST:
 				if( !p_histData.isFinished() ) {
-					p_histData.closeError( true );
+					p_histData.closeError( PacketHistData::ERR_TWSCON );
 				}
 				break;
 			case GenericRequest::NONE:

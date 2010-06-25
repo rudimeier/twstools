@@ -239,18 +239,20 @@ class PacketContractDetails
 class PacketHistData
 {
 	public:
-		enum Mode { CLEAN, RECORD, CLOSED_SUCC, CLOSED_ERR };
+		enum Mode { CLEAN, RECORD, CLOSED };
+		enum Error { ERR_NONE, ERR_NODATA, ERR_NAV,
+			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
 		
 		PacketHistData();
 		
 		bool isFinished() const;
-		bool needRepeat() const;
+		Error getError() const;
 		void clear();
 		void record( int reqId );
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
-		void closeError( bool repeat );
+		void closeError( Error );
 		void dump( const HistRequest&, bool printFormatDates );
 		
 	private:
@@ -271,7 +273,7 @@ class PacketHistData
 		};
 		
 		Mode mode;
-		bool repeat;
+		Error error;
 		
 		int reqId;
 		QList<Row> rows;

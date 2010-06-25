@@ -596,28 +596,28 @@ void PacketHistData::Row::clear()
 PacketHistData::PacketHistData()
 {
 	mode = CLEAN;
+	error = ERR_NONE;
 	reqId = -1;
-	repeat = false;
 }
 
 
 bool PacketHistData::isFinished() const
 {
-	return (mode == CLOSED_SUCC) || (mode == CLOSED_ERR) ;
+	return (mode == CLOSED);
 }
 
 
-bool PacketHistData::needRepeat() const
+PacketHistData::Error PacketHistData::getError() const
 {
-	return repeat;
+	return error;
 }
 
 
 void PacketHistData::clear()
 {
 	mode = CLEAN;
+	error = ERR_NONE;
 	reqId = -1;
-	repeat = false;
 	rows.clear();
 	finishRow.clear();
 }
@@ -625,7 +625,7 @@ void PacketHistData::clear()
 
 void PacketHistData::record( int reqId )
 {
-	Q_ASSERT( mode == CLEAN );
+	Q_ASSERT( mode == CLEAN && error == ERR_NONE );
 	mode = RECORD;
 	this->reqId = reqId;
 }
@@ -635,14 +635,14 @@ void PacketHistData::append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
-	Q_ASSERT( mode == RECORD);
+	Q_ASSERT( mode == RECORD && error == ERR_NONE );
 	Q_ASSERT( this->reqId == reqId );
 	
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
 	if( date.startsWith("finished") ) {
-		mode = CLOSED_SUCC;
+		mode = CLOSED;
 		finishRow = row;
 	} else {
 		rows.append( row );
@@ -650,17 +650,17 @@ void PacketHistData::append( int reqId, const QString &date,
 }
 
 
-void PacketHistData::closeError( bool repeat )
+void PacketHistData::closeError( Error e )
 {
 	Q_ASSERT( mode == RECORD);
-	mode = CLOSED_ERR;
-	this->repeat = repeat;
+	mode = CLOSED;
+	error = e;
 }
 
 
 void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 {
-	Q_ASSERT( mode == CLOSED_SUCC || ( mode == CLOSED_ERR && !repeat ) );
+	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = hR.ibContract();
 	const QString &wts = hR.whatToShow();
 	const QString &barSizeSetting = hR.barSizeSetting();
