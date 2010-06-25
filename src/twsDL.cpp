@@ -463,7 +463,7 @@ void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 {
 	switch( errorCode ) {
-	//Historical Market Data Service error message:
+	// Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( PacketHistData::ERR_TWSCON );
@@ -477,16 +477,20 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No historical market data for") ||
 		           ERR_MATCH("No data of type EODChart is available") ) {
-			/*TODO we should skip all similar work intelligently*/
+			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << histTodo->currentIndex() << id;
 			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			idleTimer->setInterval( 0 );
+		} else if( ERR_MATCH("No market data permissions for") ) {
+			// NOTE we should skip all similar work intelligently
+			p_histData.closeError( PacketHistData::ERR_REQUEST );
+			idleTimer->setInterval( 0 );
 		} else {
-			// nothing
+			qDebug() << "Warning, unhandled error message.";
 		}
 		break;
-	//Historical Market Data Service query message:
+	// Historical Market Data Service query message:
 	case 165:
 		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
@@ -494,25 +498,36 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
 			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract() );
 		} else {
-			// nothing
+			qDebug() << "Warning, unhandled error message.";
 		}
 		break;
+	// No security definition has been found for the request"
+	case 200:
+		// NOTE we could find out more to throw away similar worktodo
+		p_histData.closeError( PacketHistData::ERR_REQUEST );
+		idleTimer->setInterval( 0 );
+		break;
+	// Order rejected - Reason:
+	case 201:
+	// Order cancelled - Reason:
+	case 202:
+		qDebug() << "Warning, unexpected error code.";
+		break;
+	// The security <security> is not available or allowed for this account
+	case 203:
+		qDebug() << "Warning, unhandled error code.";
+		break;
+	// Server error when validating an API client request
 	case 321:
-		// comes from directly from TWS whith prefix "Error validating request:-"
-		if( ERR_MATCH("Please enter a valid security type") ) {
-			p_histData.closeError( PacketHistData::ERR_REQUEST );
-			idleTimer->setInterval( 0 );
-		}
+		// comes directly from TWS whith prefix "Error validating request:-"
+		// NOTE we could find out more to throw away similar worktodo
+		p_histData.closeError( PacketHistData::ERR_REQUEST );
+		idleTimer->setInterval( 0 );
 		break;
 	default:
-		// nothing
+		qDebug() << "Warning, unhandled error code.";
 		break;
 	}
-	// TODO, handle:
-	// 200 "No security definition has been found for the request"
-	//
-	// -1 1100 "Connectivity between IB and TWS has been lost."
-	// -1 1102 "Connectivity between IB and TWS has been restored - data maintained."
 }
 
 #undef ERR_MATCH
