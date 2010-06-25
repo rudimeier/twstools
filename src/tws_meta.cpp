@@ -368,7 +368,7 @@ void HistTodo::checkout()
 }
 
 
-void HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
+int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
 	Q_ASSERT( checkedOutRequests.isEmpty() );
 	
@@ -404,9 +404,15 @@ void HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		}
 	}
 	
-	bool ok = leftRequests.removeOne( todoId );
-	Q_ASSERT(ok);
-	checkedOutRequests.append(todoId);
+	int i = leftRequests.indexOf( todoId );
+	Q_ASSERT( i>=0 );
+	int wait = pG->goodTime( histRequests[i]->ibContract() );
+	if( wait <= 0 ) {
+		leftRequests.removeAt( i );
+		checkedOutRequests.append(todoId);
+	}
+	
+	return wait;
 }
 
 

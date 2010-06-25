@@ -234,19 +234,18 @@ void TwsDL::getData()
 {
 	Q_ASSERT( histTodo->countLeft() > 0 );
 	
-	histTodo->checkoutOpt( &pacingControl, &dataFarms );
-	const HistRequest &hR = histTodo->current();
+	int wait = histTodo->checkoutOpt( &pacingControl, &dataFarms );
 	
-	int wait = pacingControl.goodTime( hR.ibContract() );
 	if( wait > 0 ) {
 		idleTimer->setInterval( qMin( 1000, wait ) );
-		histTodo->cancelCurrent();
 		return;
 	}
 	if( wait < -1 ) {
 		// just debug timer resolution
 		qDebug() << "late timeout:" << wait;
 	}
+	
+	const HistRequest &hR = histTodo->current();
 	
 	pacingControl.addRequest( hR.ibContract() );
 	

@@ -173,7 +173,7 @@ class HistTodo
 		int countDone() const;
 		int countLeft() const;
 		void checkout();
-		void checkoutOpt( PacingGod *pG, const DataFarmStates *dfs );
+		int checkoutOpt( PacingGod *pG, const DataFarmStates *dfs );
 		void cancelCurrent();
 		int currentIndex() const;
 		const HistRequest& current() const;
