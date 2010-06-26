@@ -416,7 +416,10 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 		return;
 	}
 	
-	Q_ASSERT( id == -1 );
+	if( id != -1 ) {
+		qDebug() << "Warning, unexpected request Id";
+		return;
+	}
 	
 	// TODO do better
 	switch( errorCode ) {
