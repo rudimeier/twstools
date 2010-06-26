@@ -603,7 +603,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	if( currentRequest.reqId() != reqId ) {
 		qDebug() << "got reqId" << reqId << "but currentReqId:"
 			<< currentRequest.reqId();
-		Q_ASSERT( false );
+		return;
 	}
 	
 	// TODO we shouldn't do this each row
