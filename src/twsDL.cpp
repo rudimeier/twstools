@@ -491,6 +491,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			idleTimer->setInterval( 0 );
 		} else {
 			qDebug() << "Warning, unhandled error message.";
+			// seen: "TWS exited during processing of HMDS query"
 		}
 		break;
 	// Historical Market Data Service query message:
