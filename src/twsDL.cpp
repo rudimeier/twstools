@@ -173,11 +173,8 @@ void TwsDL::idle()
 		return;
 	}
 	
-	// TODO we want to dump histTodo when contractDetailsTodo is finished but
-	// this way it might be dumped twice
-	if( histTodo->countDone() == 0 && curIndexTodoContractDetails > 0) {
-		dumpWorkTodo();
-	}
+	// TODO we want to dump only one time
+	dumpWorkTodo();
 	
 	if( myProp->downloadData  && histTodo->countLeft() > 0
 	    && ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
@@ -689,7 +686,12 @@ void TwsDL::initWork()
 
 void TwsDL::dumpWorkTodo() const
 {
-	histTodo->dumpLeft( stderr );
+	// HACK just dump it one time
+	static bool firstTime = true;
+	if( firstTime ) {
+		firstTime = false;
+		histTodo->dumpLeft( stderr );
+	}
 }
 
 
