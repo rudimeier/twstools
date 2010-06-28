@@ -478,11 +478,18 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
 			idleTimer->setInterval( 0 );
-		} else if( ERR_MATCH("No historical market data for") ||
-		           ERR_MATCH("No data of type EODChart is available") ) {
+		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
-			qDebug() << "WARNING - THIS KIND OF DATA IS NOT AVAILABLE" << histTodo->currentIndex() << id;
+			qDebug() << "WARNING - DATA IS NOT AVAILABLE on HMDS server."
+				<< histTodo->currentIndex() << id;
 			dataFarms.learnHmds( histTodo->current().ibContract() );
+			p_histData.closeError( PacketHistData::ERR_NAV );
+			idleTimer->setInterval( 0 );
+		} else if( ERR_MATCH("No data of type EODChart is available") ||
+			ERR_MATCH("No data of type DayChart is available") ) {
+			// NOTE we should skip all similar work intelligently
+			qDebug() << "WARNING - DATA IS NOT AVAILABLE (no HMDS route)."
+				<< histTodo->currentIndex() << id;
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No market data permissions for") ) {
