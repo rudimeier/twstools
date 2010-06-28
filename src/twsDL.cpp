@@ -494,6 +494,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			idleTimer->setInterval( 0 );
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
+			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
 			idleTimer->setInterval( 0 );
 		} else {
