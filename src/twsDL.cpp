@@ -778,6 +778,8 @@ void PropTwsDL::initDefaults()
 	
 	printFormatDates = true;
 	
+	includeExpired = false;
+	
 	endDateTime = "20100514 22:15:00 GMT";
 	durationStr = "1 W";
 	barSizeSetting = "1 hour";
@@ -808,6 +810,8 @@ bool PropTwsDL::readProperties()
 	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	
 	ok = ok & get("printFormatDates", printFormatDates);
+	
+	ok = ok & get("includeExpired", includeExpired);
 	
 	ok = ok & get("endDateTime", endDateTime);
 	ok = ok & get("durationStr", durationStr);

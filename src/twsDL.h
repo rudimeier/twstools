@@ -61,6 +61,8 @@ class PropTwsDL : public PropSub
 		
 		bool printFormatDates;
 		
+		bool includeExpired;
+		
 		QString endDateTime;
 		QString durationStr;
 		QString barSizeSetting;
