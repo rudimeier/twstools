@@ -676,7 +676,8 @@ void TwsDL::initWork()
 {
 	if( workFile.isEmpty() ) {
 		qDebug() << "getting contracts from TWS";
-		int i = contractDetailsTodo->fromConfig( myProp->contractSpecs );
+		int i = contractDetailsTodo->fromConfig(
+			myProp->contractSpecs, myProp->includeExpired );
 		Q_ASSERT( i>=0 );
 // 		state = IDLE;
 	} else {

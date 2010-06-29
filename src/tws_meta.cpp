@@ -112,7 +112,8 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 }
 
 
-bool ContractDetailsRequest::fromStringList( const QList<QString>& sl )
+bool ContractDetailsRequest::fromStringList( const QList<QString>& sl,
+	bool includeExpired )
 {
 	_ibContract.symbol = toIBString( sl[0] );
 	_ibContract.secType = toIBString( sl[1]);
@@ -120,6 +121,7 @@ bool ContractDetailsRequest::fromStringList( const QList<QString>& sl )
 	// optional filter for a single expiry
 	QString e = sl.size() > 3 ? sl[3] : "";
 	_ibContract.expiry = toIBString( e );
+	_ibContract.includeExpired = includeExpired;
 	return true;
 }
 
@@ -517,12 +519,13 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
-int ContractDetailsTodo::fromConfig( const QList< QList<QString> > &contractSpecs )
+int ContractDetailsTodo::fromConfig(
+		const QList< QList<QString> > &contractSpecs, bool includeExpired )
 {
 	int retVal = contractSpecs.size();
 	foreach( const QList<QString> &sl, contractSpecs ) {
 		ContractDetailsRequest cdR;
-		bool ok = cdR.fromStringList( sl );
+		bool ok = cdR.fromStringList( sl, includeExpired );
 		Q_ASSERT(ok); //TODO
 		contractDetailsRequests.append( cdR );
 	}

@@ -36,7 +36,7 @@ class ContractDetailsRequest
 	public:
 		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
-		bool fromStringList( const QList<QString>& );
+		bool fromStringList( const QList<QString>&, bool includeExpired );
 		
 	private:
 		IB::Contract _ibContract;
@@ -201,7 +201,8 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		int fromConfig( const QList< QList<QString> > &contractSpecs );
+		int fromConfig( const QList< QList<QString> > &contractSpecs,
+			bool includeExpired );
 		
 		QList<ContractDetailsRequest> contractDetailsRequests;
 };
