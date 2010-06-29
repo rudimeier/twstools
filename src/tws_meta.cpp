@@ -147,7 +147,7 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 }
 
 
-bool HistRequest::fromString( const QString& s )
+bool HistRequest::fromString( const QString& s, bool includeExpired )
 {
 	bool ok = false;
 	QStringList sl = s.split('\t');
@@ -180,6 +180,7 @@ bool HistRequest::fromString( const QString& s )
 		return false;
 	}
 	_ibContract.right = toIBString(sl.at(i++));
+	_ibContract.includeExpired = includeExpired;
 	
 	return ok;
 }
@@ -283,7 +284,7 @@ HistTodo::~HistTodo()
 }
 
 
-int HistTodo::fromFile( const QString & fileName )
+int HistTodo::fromFile( const QString & fileName, bool includeExpired )
 {
 	histRequests.clear();
 	
@@ -300,7 +301,7 @@ int HistTodo::fromFile( const QString & fileName )
 			row.remove(0, firstTab+1 );
 		}
 		HistRequest hR;
-		bool ok = hR.fromString( row );
+		bool ok = hR.fromString( row, includeExpired );
 		Q_ASSERT(ok); //TODO
 		add( hR );
 	}

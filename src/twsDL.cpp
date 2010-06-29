@@ -202,6 +202,8 @@ void TwsDL::finContracts()
 	
 	for( int i = 0; i<p_contractDetails.constList().size(); i++ ) {
 		const IB::ContractDetails &cd = p_contractDetails.constList().at(i);
+		IB::Contract c = cd.summary;
+		c.includeExpired = myProp->includeExpired;
 		
 		if( myProp->reqMaxContractsPerSpec > 0 && myProp->reqMaxContractsPerSpec <= i ) {
 			break;
@@ -209,7 +211,7 @@ void TwsDL::finContracts()
 		
 		foreach( QString wts, myProp->whatToShow ) {
 			HistRequest hR;
-			hR.initialize( cd.summary, myProp->endDateTime, myProp->durationStr,
+			hR.initialize( c, myProp->endDateTime, myProp->durationStr,
 			               myProp->barSizeSetting, wts, myProp->useRTH, myProp->formatDate );
 			histTodo->add( hR );
 		}
@@ -683,7 +685,7 @@ void TwsDL::initWork()
 	} else {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
-			int i = histTodo->fromFile(workFile);
+			int i = histTodo->fromFile(workFile, myProp->includeExpired);
 			Q_ASSERT( i>=0 );
 			dumpWorkTodo();
 // 			state = IDLE;;

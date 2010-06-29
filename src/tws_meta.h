@@ -63,7 +63,7 @@ class HistRequest
 		bool initialize( const IB::Contract&, const QString &endDateTime,
 			const QString &durationStr, const QString &barSizeSetting,
 			const QString &whatToShow, int useRTH, int formatDate );
-		bool fromString( const QString& );
+		bool fromString( const QString&, bool includeExpired );
 		QString toString() const;
 		void clear();
 		
@@ -166,7 +166,7 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		int fromFile( const QString & fileName );
+		int fromFile( const QString & fileName, bool includeExpired );
 		void dump( FILE *stream ) const;
 		void dumpLeft( FILE *stream ) const;
 		
