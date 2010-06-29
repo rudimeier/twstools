@@ -457,6 +457,15 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 {
 	// TODO
+	switch( errorCode ) {
+		// No security definition has been found for the request"
+		case 200:
+		twsContractDetailsEnd( id );
+		break;
+	default:
+		qDebug() << "Warning, unhandled error code.";
+		break;
+	}
 }
 
 
