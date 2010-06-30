@@ -524,6 +524,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	// No security definition has been found for the request"
 	case 200:
 		// NOTE we could find out more to throw away similar worktodo
+		// TODO "The contract description specified for DESX5 is ambiguous;\nyou must specify the multiplier."
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
 		idleTimer->setInterval( 0 );
 		break;
