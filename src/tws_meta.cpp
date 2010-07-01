@@ -1206,7 +1206,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
 		//API docu: "A market data farm connection has become inactive but should be available upon demand."
 		pHash = &mStates;
 		state = INACTIVE;
-		farm = getFarm("never seen", msg); // will cause assert
+		farm = getFarm("Market data farm connection is inactive but should be available upon demand.", msg);
 		break;
 	default:
 		Q_ASSERT(false);
