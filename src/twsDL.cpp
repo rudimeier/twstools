@@ -651,7 +651,8 @@ int TwsDL::storage2stdout()
 		const IB::Contract &c = cD.summary;
 
 
-		QString c1_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
+		QString c1_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8")
+			.arg( c.conId )
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))
 			.arg(toQString(c.exchange))
@@ -675,7 +676,8 @@ int TwsDL::storage2stdout()
 		
 		
 		QString cD1_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9"
-				"\t%10\t%11\t%12\t%13\t%14\t%15")
+				"\t%10\t%11\t%12\t%13\t%14\t%15\t%16")
+			.arg( c.conId )
 			.arg( toQString(cD.marketName) )
 			.arg( toQString(cD.tradingClass) )
 			.arg( cD.minTick )
@@ -694,7 +696,8 @@ int TwsDL::storage2stdout()
 		
 		// BOND values
 			QString cD2_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9"
-			"\t%10\t%11\t%12\t%13\t%14\t%15")
+			"\t%10\t%11\t%12\t%13\t%14\t%15\t%16")
+			.arg( c.conId )
 			.arg( toQString(cD.cusip) )
 			.arg( toQString(cD.ratings) )
 			.arg( toQString(cD.descAppend) )
@@ -712,14 +715,14 @@ int TwsDL::storage2stdout()
 			.arg( toQString(cD.notes) );
 		
 		
-		fprintf( stderr, "_CD_C1___\t%s\n",
+		fprintf( stderr, "_CD_SUM_A_:%s\n",
 		         c1_str.toUtf8().constData() );
-		fprintf( stderr, "_CD_C2___\t%s\n",
+		fprintf( stderr, "_CD_SUM_B_:%s\n",
 		         c2_str.toUtf8().constData() );
 		
-		fprintf( stderr, "_CD_CD___\t%s\n",
+		fprintf( stderr, "_CD_DET_A_:%s\n",
 		         cD1_str.toUtf8().constData() );
-		fprintf( stderr, "_CD_BOND_\t%s\n",
+		fprintf( stderr, "_CD_DET_B_:%s\n",
 		         cD2_str.toUtf8().constData() );
 
 
