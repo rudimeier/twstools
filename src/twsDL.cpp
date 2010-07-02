@@ -379,6 +379,8 @@ void TwsDL::initTwsClient()
 		 this,SLOT(twsConnected(bool)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(contractDetails(int, IB::ContractDetails)),
 		 this,SLOT(twsContractDetails(int, IB::ContractDetails)), Qt::QueuedConnection );
+	connect ( twsClient, SIGNAL(bondContractDetails(int, IB::ContractDetails)),
+		 this,SLOT(twsBondContractDetails(int, IB::ContractDetails)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(contractDetailsEnd(int)),
 		 this,SLOT(twsContractDetailsEnd(int)), Qt::QueuedConnection );
 	connect ( twsClient, SIGNAL(historicalData(int, const QString&, double, double, double,
@@ -592,6 +594,18 @@ void TwsDL::twsConnected( bool connected )
 void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
 	
+	if( currentRequest.reqId() != reqId ) {
+		qDebug() << "got reqId" << reqId << "but currentReqId:"
+			<< currentRequest.reqId();
+		Q_ASSERT( false );
+	}
+	
+	p_contractDetails.append(reqId, ibContractDetails);
+}
+
+
+void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
+{
 	if( currentRequest.reqId() != reqId ) {
 		qDebug() << "got reqId" << reqId << "but currentReqId:"
 			<< currentRequest.reqId();

@@ -167,6 +167,8 @@ class TwsDL : public QObject
 		void twsConnected( bool connected );
 		void twsContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
+		void twsBondContractDetails( int reqId,
+			const IB::ContractDetails &ibContractDetails );
 		void twsContractDetailsEnd( int reqId );
 		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps );
