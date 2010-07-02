@@ -117,10 +117,10 @@ bool ContractDetailsRequest::fromStringList( const QList<QString>& sl,
 {
 	_ibContract.symbol = toIBString( sl[0] );
 	_ibContract.secType = toIBString( sl[1]);
-	_ibContract.exchange= toIBString( sl[2] );
+	// optional filter for exchange
+	_ibContract.exchange= toIBString( sl.size() > 2 ? sl[2] : "" );
 	// optional filter for a single expiry
-	QString e = sl.size() > 3 ? sl[3] : "";
-	_ibContract.expiry = toIBString( e );
+	_ibContract.expiry = toIBString( sl.size() > 3 ? sl[3] : "" );
 	_ibContract.includeExpired = includeExpired;
 	return true;
 }
