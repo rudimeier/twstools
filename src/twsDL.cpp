@@ -651,68 +651,66 @@ int TwsDL::storage2stdout()
 		const IB::Contract &c = cD.summary;
 
 
-		QString c1_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8")
-			.arg( c.conId )
-			.arg(toQString(c.symbol))
-			.arg(toQString(c.secType))
-			.arg(toQString(c.exchange))
-			.arg(toQString(c.currency))
-			.arg(toQString(c.expiry))
-			.arg(c.strike)
-			.arg(toQString(c.right));
+		QString c1_str = QString()
+			+ QString::number(c.conId) + "\t"
+			+ toQString(c.symbol) + "\t"
+			+ toQString(c.secType)  + "\t"
+			+ toQString(c.exchange) + "\t"
+			+ toQString(c.currency) + "\t"
+			+ toQString(c.expiry) + "\t"
+			+ QString::number(c.strike) + "\t"
+			+ toQString(c.right);
 		
-		QString c2_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-			.arg( c.conId )
-			.arg( toQString(c.multiplier) )
-			.arg( toQString(c.primaryExchange) )
-			.arg( toQString(c.localSymbol) )
-			.arg( c.includeExpired )
-			.arg( toQString(c.secIdType) )
-			.arg( toQString(c.secId) );
+		QString c2_str = QString()
+			+ QString::number(c.conId) + "\t"
+			+ toQString(c.multiplier) + "\t"
+			+ toQString(c.primaryExchange) + "\t"
+			+ toQString(c.localSymbol) + "\t"
+			+ (c.includeExpired ? "1" : "0") + "\t"
+			+ toQString(c.secIdType) + "\t"
+			+ toQString(c.secId);
 		
 		// IBString c.comboLegsDescrip;
 		// ComboLegList* comboLegs;
 		// UnderComp* underComp;
 		
 		
-		QString cD1_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9"
-				"\t%10\t%11\t%12\t%13\t%14\t%15\t%16")
-			.arg( c.conId )
-			.arg( toQString(cD.marketName) )
-			.arg( toQString(cD.tradingClass) )
-			.arg( cD.minTick )
-			.arg( toQString(cD.orderTypes) )
-			.arg( toQString(cD.validExchanges) )
-			.arg( cD.priceMagnifier )
-			.arg( cD.underConId )
-			.arg( toQString(cD.longName) )
-			.arg( toQString(cD.contractMonth) )
-			.arg( toQString(cD.industry) )
-			.arg( toQString(cD.category) )
-			.arg( toQString(cD.subcategory) )
-			.arg( toQString(cD.timeZoneId) )
-			.arg( toQString(cD.tradingHours) )
-			.arg( toQString(cD.liquidHours) );
+		QString cD1_str = QString()
+			+ QString::number(c.conId) + "\t"
+			+ toQString(cD.marketName) + "\t"
+			+ toQString(cD.tradingClass) + "\t"
+			+ QString::number(cD.minTick) + "\t"
+			+ toQString(cD.orderTypes) + "\t"
+			+ toQString(cD.validExchanges) + "\t"
+			+ QString::number(cD.priceMagnifier) + "\t"
+			+ QString::number(cD.underConId) + "\t"
+			+ toQString(cD.longName) + "\t"
+			+ toQString(cD.contractMonth) + "\t"
+			+ toQString(cD.industry) + "\t"
+			+ toQString(cD.category) + "\t"
+			+ toQString(cD.subcategory) + "\t"
+			+ toQString(cD.timeZoneId) + "\t"
+			+ toQString(cD.tradingHours) + "\t"
+			+ toQString(cD.liquidHours);
 		
 		// BOND values
-			QString cD2_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9"
-			"\t%10\t%11\t%12\t%13\t%14\t%15\t%16")
-			.arg( c.conId )
-			.arg( toQString(cD.cusip) )
-			.arg( toQString(cD.ratings) )
-			.arg( toQString(cD.descAppend) )
-			.arg( toQString(cD.bondType) )
-			.arg( toQString(cD.couponType) )
-			.arg( cD.callable )
-			.arg( cD.putable )
-			.arg( cD.coupon )
-			.arg( cD.convertible )
-			.arg( toQString(cD.maturity) )
-			.arg( toQString(cD.issueDate) )
-			.arg( toQString(cD.nextOptionDate) )
-			.arg( toQString(cD.nextOptionType) )
-			.arg( cD.nextOptionPartial )
-			.arg( toQString(cD.notes) );
+		QString cD2_str = QString()
+			+ QString::number(c.conId) + "\t"
+			+ toQString(cD.cusip) + "\t"
+			+ toQString(cD.ratings) + "\t"
+			+ toQString(cD.descAppend) + "\t"
+			+ toQString(cD.bondType) + "\t"
+			+ toQString(cD.couponType) + "\t"
+			+ (cD.callable ? "1" : "0") + "\t"
+			+ (cD.putable ? "1" : "0") + "\t"
+			+ QString::number(cD.coupon) + "\t"
+			+ (cD.convertible ? "1" : "0") + "\t"
+			+ toQString(cD.maturity) + "\t"
+			+ toQString(cD.issueDate) + "\t"
+			+ toQString(cD.nextOptionDate) + "\t"
+			+ toQString(cD.nextOptionType) + "\t"
+			+ (cD.nextOptionPartial ? "1" : "0") + "\t"
+			+ toQString(cD.notes);
 		
 		
 		fprintf( stderr, "_CD_SUM_A_:%s\n",
