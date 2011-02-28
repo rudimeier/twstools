@@ -1,7 +1,7 @@
 #include "tws_meta.h"
 
-#include "twsapi/twsUtil.h"
-#include "utilities/debug.h"
+#include "twsUtil.h"
+#include "debug.h"
 
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>

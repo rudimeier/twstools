@@ -1,5 +1,5 @@
 #include "twsDL.h"
-#include "utilities/debug.h"
+#include "debug.h"
 
 #include <QtCore/QCoreApplication>
 #include <stdio.h>

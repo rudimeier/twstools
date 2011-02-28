@@ -1,13 +1,13 @@
 #include "twsDL.h"
 #include "tws_meta.h"
 
-#include "twsapi/twsUtil.h"
-#include "twsapi/twsClient.h"
-#include "twsapi/twsWrapper.h"
-#include "utilities/debug.h"
+#include "twsUtil.h"
+#include "twsClient.h"
+#include "twsWrapper.h"
+#include "debug.h"
 
 // from global installed ibtws
-#include "Contract.h"
+#include "ibtws/Contract.h"
 
 #include <QtCore/QTimer>
 #include <QtCore/QVariant>
