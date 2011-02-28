@@ -1,6 +1,6 @@
 #include "twsWrapper.h"
 #include "twsUtil.h"
-#include "utilities/debug.h"
+#include "debug.h"
 
 // from global installed ibapi
 #include "ibtws/EWrapper.h"

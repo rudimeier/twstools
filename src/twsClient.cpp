@@ -1,7 +1,6 @@
 #include "twsClient.h"
 #include "twsUtil.h"
-#include "utilities/error.h"
-#include "utilities/debug.h"
+#include "debug.h"
 
 // from global installed ibtws
 #include "ibtws/Contract.h"
@@ -514,21 +513,27 @@ int     TWSClient::getClientId() const
 
 void TWSClient::setTWSHost( const QString &host )
 {
-	if ( isConnected() ) throw ::Exception( QString("Cant set twsHost while TWSClient is connected") );
+	if ( isConnected() ) {
+		Q_ASSERT(false); // TODO handle that
+	}
 	this->twsHost = host;
 }
 
 
 void TWSClient::setTWSPort( const quint16 &port )
 {
-	if ( isConnected() ) throw ::Exception( QString("Cant set twsPort while TWSClient is connected") );
+	if ( isConnected() ) {
+		Q_ASSERT(false); // TODO handle that
+	}
 	this->twsPort  = port;
 }
 
 
 void TWSClient::setClientId( const int clientId )
 {
-	if ( isConnected() ) throw ::Exception( QString("Cant set clientId while TWSClient is connected") );
+	if ( isConnected() ) {
+		Q_ASSERT(false); // TODO handle that
+	}
 	this->clientId = clientId;
 }
 

@@ -1,7 +1,7 @@
 #ifndef TWS_DL_H
 #define TWS_DL_H
 
-#include "core/properties.h"
+#include "properties.h"
 
 #include <QtCore/QObject>
 #include <QtCore/QList>
