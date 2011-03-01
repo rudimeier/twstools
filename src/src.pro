@@ -48,5 +48,6 @@ LIBS += \
   -libtws \
   -lconfig++ \
 
+TARGET = twstool
 
 TARGETDEPS +=
