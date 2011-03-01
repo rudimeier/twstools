@@ -1,0 +1,34 @@
+# general excludes
+*~
+*.o
+moc_*
+*.moc
+qrc_*
+ui_*
+*.a
+*.so
+*.so.*
+*.cfg
+*.cfg.*
+*.log
+Makefile
+
+# specific dirs and files (auto generated at compile or run time)
+bin/
+conf/
+html/
+logs/
+
+# core dumps etc.
+.nfs*
+callgrind.*
+core
+core*dump
+
+# meta files from IDEs etc.
+.svn/
+*.kdevelop
+*.kdevelop.pcs
+*.kdevses
+*.tag
+
