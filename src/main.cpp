@@ -18,16 +18,16 @@ int main(int argc, char *argv[])
 	if( argc == 3 ) {
 		workfile = argv[2];
 	}
-	Test::TwsDL twsDL( argc >= 2 ? argv[1] : "twsDL.cfg", workfile );
+	TwsDL twsDL( argc >= 2 ? argv[1] : "twsDL.cfg", workfile );
 	QObject::connect( &twsDL, SIGNAL(finished()), &app, SLOT(quit()) );
 	twsDL.start();
 	int ret = app.exec();
 	Q_ASSERT( ret == 0 );
 	
-	Test::TwsDL::State state = twsDL.currentState();
-	Q_ASSERT( (state == Test::TwsDL::QUIT_READY) ||
-		(state == Test::TwsDL::QUIT_ERROR) );
-	if( state == Test::TwsDL::QUIT_READY ) {
+	TwsDL::State state = twsDL.currentState();
+	Q_ASSERT( (state == TwsDL::QUIT_READY) ||
+		(state == TwsDL::QUIT_ERROR) );
+	if( state == TwsDL::QUIT_READY ) {
 		return 0;
 	} else {
 		qDebug() << "Finished with errors.";

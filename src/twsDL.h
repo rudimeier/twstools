@@ -19,7 +19,6 @@ namespace IB {
 }
 
 
-namespace Test {
 
 
 
@@ -177,5 +176,4 @@ class TwsDL : public QObject
 
 
 
-} // namespace Test
 #endif

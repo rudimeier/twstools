@@ -18,7 +18,6 @@
 
 
 
-namespace Test {
 
 
 
@@ -914,4 +913,3 @@ bool PropTwsDL::readProperties()
 ///////////////////////////////////////////////////////////////////////////////
 
 
-} // namespace Test
