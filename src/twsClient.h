@@ -38,7 +38,7 @@ class TWSClient : public QObject
 		
 		/////////////////////////////////////////////////////
 		void connectTWS();
-		void connectTWS( const QString &host, const quint16 &port, int clientId );
+		void connectTWS( const QString &host, quint16 port, int clientId );
 		void disconnectTWS();
 		
 		void reqMktData( int tickerId, const IB::Contract &contract, const QString &genericTickList, bool snapshot );
@@ -102,12 +102,6 @@ class TWSClient : public QObject
 		QTimer *selectTimer;
 		
 	private slots:
-		//// wrapper slots to do requests from within the right thread /////
-		void _connectTWS();
-		void _connectTWS( QString host, quint16 port, int clientId );
-		void _disconnectTWS();
-		//// end wrapper slots /////////////////////////////////////////////
-		
 		//// internal slots ////////////////////////////////////////////////
 		void disconnected(); //should be "really" private 
 		void tcpError(/*QAbstractSocket::SocketError socketError*/); //should be "really" private 
@@ -115,24 +109,6 @@ class TWSClient : public QObject
 		void selectStuff();
 		//// internal slots ////////////////////////////////////////////////
 };
-
-
-inline void TWSClient::connectTWS()
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_connectTWS", Qt::QueuedConnection) );
-}
-
-
-inline void TWSClient::connectTWS( const QString &host, const quint16 &port, int clientId)
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_connectTWS", Qt::QueuedConnection,
-		Q_ARG(QString, host), Q_ARG( quint16, port ),  Q_ARG(int, clientId)) );
-}
-
-
-inline void TWSClient::disconnectTWS() {
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_disconnectTWS", Qt::QueuedConnection) );
-}
 
 
 #endif

@@ -532,14 +532,14 @@ void TWSClient::setClientId( const int clientId )
 }
 
 
-void TWSClient::_connectTWS()
+void TWSClient::connectTWS()
 {
-	//TODO _connectTWS( host, port, clientId ) should call _connectTWS()
-	_connectTWS( twsHost, twsPort, clientId );
+	//TODO connectTWS( host, port, clientId ) should call connectTWS()
+	connectTWS( twsHost, twsPort, clientId );
 }
 
 
-void TWSClient::_connectTWS( QString host, quint16 port, int clientId )
+void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
 {
 	qDebug() << "called:" <<  QString("%1:%2, clientId: %3").arg(host).arg(port).arg(clientId);
 	
@@ -571,7 +571,7 @@ void TWSClient::_connectTWS( QString host, quint16 port, int clientId )
 }
 
 
-void TWSClient::_disconnectTWS()
+void TWSClient::disconnectTWS()
 {
 	qDebug();
 	
@@ -646,7 +646,7 @@ void TWSClient::selectStuff()
 	} else if( ret < 0) {
 		TWS_DEBUG( 1 , QString("Select failed with failed with errno: %1.")
 			.arg(strerror(errno)) );
-		_disconnectTWS();
+		disconnectTWS();
 		return;
 	}
 	
