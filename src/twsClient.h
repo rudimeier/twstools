@@ -1,15 +1,13 @@
 #ifndef TWS_CLIENT_H
 #define TWS_CLIENT_H
 
-// from global installed ibapi
-#include "ibtws/Contract.h"
-#include "ibtws/Order.h"
-
 #include <QtCore/QObject>
-#include <QtCore/QMutex>
 
 
 namespace IB {
+	class Contract;
+	class ContractDetails;
+	class Order;
 	class OrderState;
 	class Execution;
 	class EPosixClientSocket;
