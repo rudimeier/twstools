@@ -448,11 +448,6 @@ TWSClient::TWSClient()
 {
 	registerMetaTypes();
 	
-	if( pipe(pipefd) == -1 ) {
-		qDebug() << strerror(errno);
-		Q_ASSERT(false);
-	}
-	
 	twsHost  = "otto";
 	twsPort  = 7497;
 	clientId = 579;
@@ -478,9 +473,6 @@ TWSClient::~TWSClient()
 	qDebug() << "called";
 	
 	delete selectTimer;
-	
-	close(pipefd[1]);
-	close(pipefd[0]);
 	
 	if( ePosixClient != NULL ) {
 		delete ePosixClient;
@@ -639,7 +631,6 @@ void TWSClient::selectStuff()
 	errorSet = writeSet = readSet;
 	
 	FD_SET( fd, &readSet);
-	FD_SET( pipefd[0], &readSet);
 	if( !ePosixClient->isOutBufferEmpty()) {
 		FD_SET( fd, &writeSet);
 	}
@@ -681,15 +672,6 @@ void TWSClient::selectStuff()
 	if( FD_ISSET( fd, &readSet)) {
 		TWS_DEBUG( 6 ,"Socket is ready for reading." );
 		ePosixClient->onReceive(); // might disconnect us on socket errors
-	}
-	
-	
-	if( FD_ISSET( pipefd[0], &readSet)) {
-		TWS_DEBUG( 4 ,"Pending outgoing messages." );
-		// doing nothing than read out the pipe and leaving to event loop
-		char buf;
-		int n = read(pipefd[0], &buf, 1);
-		Q_ASSERT( n > 0 );
 	}
 }
 

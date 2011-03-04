@@ -90,9 +90,6 @@ class TWSClient : public QObject
 		void startSelect();
 		void stopSelect();
 		
-		/// Writes something to pipefd to wake up selectStuff().
-		void infoPipe();
-		
 		QString twsHost;
 		quint16 twsPort;
 		int     clientId;
@@ -104,12 +101,6 @@ class TWSClient : public QObject
 		MyEWrapper* myEWrapper;
 		
 		QTimer *selectTimer;
-		
-		/// A pipe file descriptor used to wake up selectStuff() on pending
-		/// outgoing messages.
-		int pipefd[2];
-		/// Needed to make infoPipe() thread safe.
-		QMutex pipeMutex;
 		
 	private slots:
 		//// wrapper slots to do requests from within the right thread /////
@@ -140,19 +131,9 @@ class TWSClient : public QObject
 };
 
 
-inline void TWSClient::infoPipe()
-{
-	QMutexLocker locker( &pipeMutex );
-	char bla = 'A';
-	int n = write( pipefd[1], &bla, 1);
-	Q_ASSERT( n > 0 );
-}
-
-
 inline void TWSClient::connectTWS()
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_connectTWS", Qt::QueuedConnection) );
-	infoPipe();
 }
 
 
@@ -160,13 +141,11 @@ inline void TWSClient::connectTWS( const QString &host, const quint16 &port, int
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_connectTWS", Qt::QueuedConnection,
 		Q_ARG(QString, host), Q_ARG( quint16, port ),  Q_ARG(int, clientId)) );
-	infoPipe();
 }
 
 
 inline void TWSClient::disconnectTWS() {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_disconnectTWS", Qt::QueuedConnection) );
-	infoPipe();
 }
 
 
@@ -174,14 +153,12 @@ inline void TWSClient::reqMktData( int tickerId, const IB::Contract &contract, c
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqMktData", Qt::QueuedConnection,
 		Q_ARG(int, tickerId), Q_ARG(IB::Contract, contract), Q_ARG(QString, genericTickList), Q_ARG(bool, snapshot)) );
-	infoPipe();
 }
 
 
 inline void TWSClient::cancelMktData( int tickerId ) {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_cancelMktData", Qt::QueuedConnection,
 		Q_ARG(int, tickerId)) );
-	infoPipe();
 }
 
 
@@ -189,7 +166,6 @@ inline void TWSClient::placeOrder( int id, const IB::Contract &contract, const I
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_placeOrder", Qt::QueuedConnection,
 		Q_ARG(int, id), Q_ARG(IB::Contract, contract), Q_ARG(IB::Order, order)) );
-	infoPipe();
 }
 
 
@@ -197,14 +173,12 @@ inline void TWSClient::cancelOrder( int id )
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_cancelOrder", Qt::QueuedConnection,
 		Q_ARG(int, id)) );
-	infoPipe();
 }
 
 
 inline void TWSClient::reqOpenOrders()
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqOpenOrders", Qt::QueuedConnection) );
-	infoPipe();
 }
 
 
@@ -212,7 +186,6 @@ inline void TWSClient::reqAccountUpdates( bool subscribe, const QString &acctCod
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqAccountUpdates", Qt::QueuedConnection,
 		Q_ARG(bool, subscribe),Q_ARG(QString, acctCode)) );
-	infoPipe();
 }
 
 
@@ -220,7 +193,6 @@ inline void TWSClient::reqIds( int numIds )
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqIds", Qt::QueuedConnection,
 		Q_ARG(int, numIds)) );
-	infoPipe();
 }
 
 
@@ -228,7 +200,6 @@ inline void TWSClient::reqContractDetails( int reqId, const IB::Contract &contra
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqContractDetails", Qt::QueuedConnection,
 		Q_ARG(int, reqId), Q_ARG(IB::Contract, contract)) );
-	infoPipe();
 }
 
 
@@ -236,7 +207,6 @@ inline void TWSClient::setServerLogLevel( int logLevel )
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_setServerLogLevel", Qt::QueuedConnection,
 		Q_ARG(int, logLevel)) );
-	infoPipe();
 }
 
 
@@ -246,14 +216,12 @@ inline void TWSClient::reqHistoricalData ( int tickerId, const IB::Contract &con
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqHistoricalData", Qt::QueuedConnection,
 		Q_ARG(int,tickerId),Q_ARG(IB::Contract,contract),Q_ARG(QString,endDateTime),Q_ARG(QString,durationStr),
 		Q_ARG(QString,barSizeSetting),Q_ARG(QString,whatToShow),Q_ARG(int,useRTH),Q_ARG(int,formatDate)) );
-	infoPipe();
 }
 
 
 inline void TWSClient::reqCurrentTime()
 {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqCurrentTime", Qt::QueuedConnection) );
-	infoPipe();
 }
 
 #endif
