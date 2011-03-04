@@ -443,10 +443,9 @@ void TWSClient::registerMetaTypes()
 
 
 TWSClient::TWSClient()
-	: QThread(),
+	: QObject(),
 	ePosixClient(NULL)
 {
-	moveToThread(this);
 	registerMetaTypes();
 	
 	if( pipe(pipefd) == -1 ) {
@@ -460,22 +459,25 @@ TWSClient::TWSClient()
 	
 	myEWrapper = new MyEWrapper( this );
 	
-	start();
+	//start();
+	qDebug() << "running";
+	
+	selectTimer = new QTimer();
+	selectTimer->setInterval(0);
+	selectTimer->setSingleShot(false);
+	connect( selectTimer, SIGNAL(timeout()), this, SLOT(selectStuff()) );
+	
+	// TODO do something like that:
+	//connect ( tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
+	//connect ( tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(tcpError(/*QAbstractSocket::SocketError*/)) );
 }
 
 
 TWSClient::~TWSClient()
 {
-	static const int secsToWait = 3;
-	
 	qDebug() << "called";
 	
-	exit();
-	infoPipe(); // wake up selectStuff()
-	if( ! wait(secsToWait * 1000) ) {
-		qDebug() << QString("Warning, thread did not terminate within %s.")
-			.arg(secsToWait);
-	}
+	delete selectTimer;
 	
 	close(pipefd[1]);
 	close(pipefd[0]);
@@ -604,27 +606,6 @@ void TWSClient::tcpError(/*QAbstractSocket::SocketError socketError*/)
 	//TODO: handle SocketErrors somehow
 	// should we call disconnected() here or is it _always_ called anyway?
 	//qDebug() << tcpSocket->errorString();
-}
-
-
-void TWSClient::run()
-{
-	qDebug() << "running";
-	
-	selectTimer = new QTimer();
-	selectTimer->setInterval(0);
-	selectTimer->setSingleShot(false);
-	connect( selectTimer, SIGNAL(timeout()), this, SLOT(selectStuff()) );
-	
-	// TODO do something like that:
-	//connect ( tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
-	//connect ( tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(tcpError(/*QAbstractSocket::SocketError*/)) );
-
-	int retVal = exec();
-	
-	delete selectTimer;
-	
-	qDebug() << "exec() returned:" << retVal;
 }
 
 

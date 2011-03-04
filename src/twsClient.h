@@ -5,7 +5,7 @@
 #include "ibtws/Contract.h"
 #include "ibtws/Order.h"
 
-#include <QtCore/QThread>
+#include <QtCore/QObject>
 #include <QtCore/QMutex>
 
 
@@ -18,7 +18,7 @@ namespace IB {
 class QTimer;
 
 
-class TWSClient : public QThread
+class TWSClient : public QObject
 {
 	Q_OBJECT
 	
@@ -87,7 +87,6 @@ class TWSClient : public QThread
 	private:
 		static void registerMetaTypes();
 		
-		void run();
 		void startSelect();
 		void stopSelect();
 		
