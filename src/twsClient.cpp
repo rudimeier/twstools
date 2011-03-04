@@ -680,7 +680,8 @@ void TWSClient::selectStuff()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void TWSClient::_reqMktData(int tickerId, IB::Contract contract, QString genericTickList, bool snapshot)
+void TWSClient::reqMktData(int tickerId, const IB::Contract &contract,
+	const  QString &genericTickList, bool snapshot)
 {
 	qDebug() << "REQ_MKT_DATA" << tickerId << toQString(contract.symbol) <<  toQString(contract.exchange)
 		<< toQString(contract.secType) << toQString(contract.expiry) << toQString(contract.right)
@@ -691,7 +692,7 @@ void TWSClient::_reqMktData(int tickerId, IB::Contract contract, QString generic
 }
 
 
-void TWSClient::_cancelMktData ( int tickerId )
+void TWSClient::cancelMktData ( int tickerId )
 {
 	qDebug() << "CANCEL_MKT_DATA" << tickerId;
 	
@@ -699,7 +700,8 @@ void TWSClient::_cancelMktData ( int tickerId )
 }
 
 
-void TWSClient::_placeOrder ( int id, IB::Contract contract, IB::Order order )
+void TWSClient::placeOrder ( int id, const IB::Contract &contract,
+	const IB::Order &order )
 {
 	qDebug() << "PLACE_ORDER" << id << toQString(order.orderType) << order.totalQuantity << toQString(order.action) << order.lmtPrice << toQString(contract.symbol);
 	
@@ -707,7 +709,7 @@ void TWSClient::_placeOrder ( int id, IB::Contract contract, IB::Order order )
 }
 
 
-void TWSClient::_cancelOrder ( int id )
+void TWSClient::cancelOrder ( int id )
 {
 	qDebug() << "CANCEL_ORDER" << id;
 	
@@ -715,7 +717,7 @@ void TWSClient::_cancelOrder ( int id )
 }
 
 
-void TWSClient::_reqOpenOrders()
+void TWSClient::reqOpenOrders()
 {
 	qDebug() << "REQ_OPEN_ORDERS";
 	
@@ -723,7 +725,7 @@ void TWSClient::_reqOpenOrders()
 }
 
 
-void TWSClient::_reqAccountUpdates( bool subscribe, QString acctCode )
+void TWSClient::reqAccountUpdates( bool subscribe, const QString &acctCode )
 {
 	qDebug() << "REQ_ACCOUNT_DATA" << subscribe << acctCode;
 	
@@ -731,7 +733,7 @@ void TWSClient::_reqAccountUpdates( bool subscribe, QString acctCode )
 }
 
 
-void TWSClient::_reqIds( int numIds)
+void TWSClient::reqIds( int numIds)
 {
 	qDebug() << "REQ_IDS" << numIds;
 	
@@ -739,7 +741,7 @@ void TWSClient::_reqIds( int numIds)
 }
 
 
-void TWSClient::_reqContractDetails( int reqId, IB::Contract contract )
+void TWSClient::reqContractDetails( int reqId, const IB::Contract &contract )
 {
 	qDebug() << "REQ_CONTRACT_DATA" << reqId << toQString(contract.symbol)
 		<< toQString(contract.secType) << toQString(contract.exchange);
@@ -748,7 +750,7 @@ void TWSClient::_reqContractDetails( int reqId, IB::Contract contract )
 }
 
 
-void TWSClient::_setServerLogLevel( int logLevel )
+void TWSClient::setServerLogLevel( int logLevel )
 {
 	qDebug() << "SET_SERVER_LOGLEVEL" << logLevel;
 	
@@ -756,8 +758,10 @@ void TWSClient::_setServerLogLevel( int logLevel )
 }
 
 
-void TWSClient::_reqHistoricalData ( int tickerId, IB::Contract contract, QString endDateTime, QString durationStr,
-		QString barSizeSetting, QString whatToShow, int useRTH, int formatDate )
+void TWSClient::reqHistoricalData ( int tickerId, const IB::Contract &contract,
+	const QString &endDateTime, const QString &durationStr,
+	const QString &barSizeSetting, const QString &whatToShow, int useRTH,
+	int formatDate )
 {
 	qDebug() << "REQ_HISTORICAL_DATA" << tickerId << toQString(contract.symbol)
 		<< toQString(contract.secType) << toQString(contract.exchange) << endDateTime << durationStr
@@ -769,7 +773,7 @@ void TWSClient::_reqHistoricalData ( int tickerId, IB::Contract contract, QStrin
 }
 
 
-void TWSClient::_reqCurrentTime()
+void TWSClient::reqCurrentTime()
 {
 	qDebug() << "REQ_CURRENT_TIME";
 	

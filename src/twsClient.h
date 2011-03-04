@@ -54,7 +54,6 @@ class TWSClient : public QObject
 			const QString &barSizeSetting, const QString &whatToShow, int useRTH, int formatDate );
 		void reqCurrentTime();
 		
-		
 	signals:
 		void connected(bool connected);
 		
@@ -107,19 +106,6 @@ class TWSClient : public QObject
 		void _connectTWS();
 		void _connectTWS( QString host, quint16 port, int clientId );
 		void _disconnectTWS();
-
-		void _reqMktData( int tickerId, IB::Contract contract, QString genericTickList, bool snapshot );
-		void _cancelMktData( int tickerId );
-		void _placeOrder( int id, IB::Contract contract, IB::Order order );
-		void _cancelOrder( int id );
-		void _reqOpenOrders();
-		void _reqAccountUpdates( bool subscribe, QString acctCode );
-		void _reqIds( int numIds );
-		void _reqContractDetails( int reqId, IB::Contract contract );
-		void _setServerLogLevel( int logLevel );
-		void _reqHistoricalData ( int tickerId, IB::Contract, QString endDateTime, QString durationStr,
-			QString barSizeSetting, QString whatToShow, int useRTH, int formatDate );
-		void _reqCurrentTime();
 		//// end wrapper slots /////////////////////////////////////////////
 		
 		//// internal slots ////////////////////////////////////////////////
@@ -148,80 +134,5 @@ inline void TWSClient::disconnectTWS() {
 	Q_ASSERT( QMetaObject::invokeMethod( this, "_disconnectTWS", Qt::QueuedConnection) );
 }
 
-
-inline void TWSClient::reqMktData( int tickerId, const IB::Contract &contract, const QString &genericTickList, bool snapshot )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqMktData", Qt::QueuedConnection,
-		Q_ARG(int, tickerId), Q_ARG(IB::Contract, contract), Q_ARG(QString, genericTickList), Q_ARG(bool, snapshot)) );
-}
-
-
-inline void TWSClient::cancelMktData( int tickerId ) {
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_cancelMktData", Qt::QueuedConnection,
-		Q_ARG(int, tickerId)) );
-}
-
-
-inline void TWSClient::placeOrder( int id, const IB::Contract &contract, const IB::Order &order )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_placeOrder", Qt::QueuedConnection,
-		Q_ARG(int, id), Q_ARG(IB::Contract, contract), Q_ARG(IB::Order, order)) );
-}
-
-
-inline void TWSClient::cancelOrder( int id )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_cancelOrder", Qt::QueuedConnection,
-		Q_ARG(int, id)) );
-}
-
-
-inline void TWSClient::reqOpenOrders()
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqOpenOrders", Qt::QueuedConnection) );
-}
-
-
-inline void TWSClient::reqAccountUpdates( bool subscribe, const QString &acctCode )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqAccountUpdates", Qt::QueuedConnection,
-		Q_ARG(bool, subscribe),Q_ARG(QString, acctCode)) );
-}
-
-
-inline void TWSClient::reqIds( int numIds )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqIds", Qt::QueuedConnection,
-		Q_ARG(int, numIds)) );
-}
-
-
-inline void TWSClient::reqContractDetails( int reqId, const IB::Contract &contract )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqContractDetails", Qt::QueuedConnection,
-		Q_ARG(int, reqId), Q_ARG(IB::Contract, contract)) );
-}
-
-
-inline void TWSClient::setServerLogLevel( int logLevel )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_setServerLogLevel", Qt::QueuedConnection,
-		Q_ARG(int, logLevel)) );
-}
-
-
-inline void TWSClient::reqHistoricalData ( int tickerId, const IB::Contract &contract, const QString &endDateTime, const QString &durationStr,
-			const QString &barSizeSetting, const QString &whatToShow, int useRTH, int formatDate )
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqHistoricalData", Qt::QueuedConnection,
-		Q_ARG(int,tickerId),Q_ARG(IB::Contract,contract),Q_ARG(QString,endDateTime),Q_ARG(QString,durationStr),
-		Q_ARG(QString,barSizeSetting),Q_ARG(QString,whatToShow),Q_ARG(int,useRTH),Q_ARG(int,formatDate)) );
-}
-
-
-inline void TWSClient::reqCurrentTime()
-{
-	Q_ASSERT( QMetaObject::invokeMethod( this, "_reqCurrentTime", Qt::QueuedConnection) );
-}
 
 #endif
