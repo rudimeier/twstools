@@ -87,6 +87,8 @@ class TWSClient : public QObject
 		void startSelect();
 		void stopSelect();
 		
+		void disconnected();
+		
 		QString twsHost;
 		quint16 twsPort;
 		int     clientId;
@@ -100,12 +102,8 @@ class TWSClient : public QObject
 		QTimer *selectTimer;
 		
 	private slots:
-		//// internal slots ////////////////////////////////////////////////
-		void disconnected(); //should be "really" private 
-		void tcpError(/*QAbstractSocket::SocketError socketError*/); //should be "really" private 
 		
 		void selectStuff();
-		//// internal slots ////////////////////////////////////////////////
 };
 
 

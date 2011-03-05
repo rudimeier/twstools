@@ -461,10 +461,6 @@ TWSClient::TWSClient()
 	selectTimer->setInterval(0);
 	selectTimer->setSingleShot(false);
 	connect( selectTimer, SIGNAL(timeout()), this, SLOT(selectStuff()) );
-	
-	// TODO do something like that:
-	//connect ( tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()) );
-	//connect ( tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(tcpError(/*QAbstractSocket::SocketError*/)) );
 }
 
 
@@ -590,14 +586,6 @@ void TWSClient::disconnected()
 	stopSelect();
 	emit connected( false );
 	qDebug() << "We are disconnected";
-}
-
-
-void TWSClient::tcpError(/*QAbstractSocket::SocketError socketError*/)
-{
-	//TODO: handle SocketErrors somehow
-	// should we call disconnected() here or is it _always_ called anyway?
-	//qDebug() << tcpSocket->errorString();
 }
 
 
