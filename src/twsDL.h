@@ -10,7 +10,6 @@
 
 
 class TWSClient;
-class TWSWrapper;
 class QTimer;
 
 namespace IB {
@@ -140,7 +139,6 @@ class TwsDL : public QObject
 		PropTwsDL *myProp;
 		
 		TWSClient  *twsClient;
-		TWSWrapper *twsWrapper;
 		
 		int msgCounter;
 		GenericRequest &currentRequest;

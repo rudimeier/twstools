@@ -3,7 +3,6 @@
 
 #include "twsUtil.h"
 #include "twsClient.h"
-#include "twsWrapper.h"
 #include "debug.h"
 
 // from global installed ibtws
@@ -30,7 +29,6 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	workFile(workFile),
 	myProp(NULL),
 	twsClient(NULL),
-	twsWrapper(NULL),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
@@ -58,9 +56,6 @@ TwsDL::~TwsDL()
 	
 	if( twsClient != NULL ) {
 		delete twsClient;
-	}
-	if( twsWrapper != NULL ) {
-		delete twsWrapper;
 	}
 	if( myProp  != NULL ) {
 		delete myProp;
@@ -359,16 +354,9 @@ void TwsDL::initIdleTimer()
 
 void TwsDL::initTwsClient()
 {
-	Q_ASSERT( (twsClient == NULL) && (twsWrapper == NULL) );
+	Q_ASSERT( twsClient == NULL );
 	
 	twsClient = new TWSClient();
-	twsWrapper = new TWSWrapper();
-	
-	// connecting all TWS signals to twsWrapper
-	TWSWrapper::connectAllSignals(twsClient, twsWrapper);
-	TWSWrapper::disconnectContractDetails(twsClient, twsWrapper);
-	TWSWrapper::disconnectContractDetailsEnd(twsClient, twsWrapper);
-	TWSWrapper::disconnectHistoricalData(twsClient, twsWrapper);
 	
 	// connecting some TWS signals to this
 	connect(twsClient, SIGNAL(error(int, int, const QString &)),
