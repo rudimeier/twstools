@@ -53,9 +53,6 @@ class TWSClient : public QObject
 			const QString &barSizeSetting, const QString &whatToShow, int useRTH, int formatDate );
 		void reqCurrentTime();
 		
-	signals:
-		void error(int id, int errorCode, const QString &errorMsg);
-		
 	private:
 		static void registerMetaTypes();
 		

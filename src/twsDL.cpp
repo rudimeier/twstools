@@ -444,10 +444,6 @@ void TwsDL::initTwsClient()
 	
 	twsWrapper = new TwsDlWrapper(this);
 	twsClient = new TWSClient( twsWrapper );
-	
-	// connecting some TWS signals to this
-	connect(twsClient, SIGNAL(error(int, int, const QString &)),
-		this, SLOT(twsError(int, int, const QString &)), Qt::DirectConnection );
 }
 
 

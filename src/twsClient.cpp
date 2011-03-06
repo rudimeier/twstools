@@ -131,8 +131,8 @@ void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
 	qDebug() << "called:" <<  QString("%1:%2, clientId: %3").arg(host).arg(port).arg(clientId);
 	
 	if( isConnected() ) {
-		emit error ( IB::NO_VALID_ID, IB::ALREADY_CONNECTED.code(),
-		             toQString(IB::ALREADY_CONNECTED.msg()) );
+		myEWrapper->error( IB::NO_VALID_ID, IB::ALREADY_CONNECTED.code(),
+			IB::ALREADY_CONNECTED.msg() );
 		return;
 	} else if( ePosixClient != NULL ) {
 		delete ePosixClient;
