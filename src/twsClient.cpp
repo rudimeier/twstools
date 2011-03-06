@@ -11,8 +11,6 @@
 #include "ibtws/EWrapper.h"
 #include "ibtws/EPosixClientSocket.h"
 
-#include <QtCore/QTimer>
-#include <QtCore/QMetaType>
 #include <unistd.h>
 #include <errno.h>
 
@@ -27,27 +25,10 @@
 
 
 
-void TWSClient::registerMetaTypes()
-{
-	static bool qMetaTypesRegistered = false;
-	
-	if( !qMetaTypesRegistered ) {
-		qRegisterMetaType<IB::Contract>("IB::Contract");
-		qRegisterMetaType<IB::ContractDetails>("IB::ContractDetails");
-		qRegisterMetaType<IB::Order>("IB::Order");
-		qRegisterMetaType<IB::Order>("IB::OrderState");
-		qRegisterMetaType<IB::Execution>("IB::Execution");
-		qMetaTypesRegistered = true;
-	}
-}
-
-
 TWSClient::TWSClient( IB::EWrapper *ew ) :
 	myEWrapper(ew),
 	ePosixClient(NULL)
 {
-	registerMetaTypes();
-	
 	twsHost  = "otto";
 	twsPort  = 7497;
 	clientId = 579;

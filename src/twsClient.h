@@ -52,8 +52,6 @@ class TWSClient
 		void reqCurrentTime();
 		
 	private:
-		static void registerMetaTypes();
-		
 		void disconnected();
 		
 		QString twsHost;
