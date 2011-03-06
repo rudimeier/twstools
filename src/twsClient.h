@@ -54,8 +54,6 @@ class TWSClient : public QObject
 		void reqCurrentTime();
 		
 	signals:
-		void connected(bool connected);
-		
 		void error(int id, int errorCode, const QString &errorMsg);
 		
 	private:

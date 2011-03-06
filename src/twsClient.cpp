@@ -145,15 +145,6 @@ void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
 	this->clientId = clientId;
 	
 	ePosixClient->eConnect( host.toUtf8().constData(), port, clientId );
-	
-	if( !ePosixClient->isConnected() ) {
-		qDebug() << "Connection to TWS failed:"; //TODO print a specific error
-		emit connected( false );
-		return;
-	} else {
-		//TODO print client/server version and m_TwsTime
-		emit connected( true );
-	}
 }
 
 
@@ -173,7 +164,7 @@ void TWSClient::disconnectTWS()
 void TWSClient::disconnected()
 {
 	Q_ASSERT( !isConnected() );
-	emit connected( false );
+	myEWrapper->connectionClosed();
 	qDebug() << "We are disconnected";
 }
 

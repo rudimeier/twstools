@@ -25,6 +25,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 		virtual ~TwsDlWrapper();
 		
 // 		void twsConnected( bool connected );
+		void connectionClosed();
 		
 		void error( const int id, const int errorCode,
 			const IB::IBString errorString );
@@ -50,6 +51,12 @@ TwsDlWrapper::TwsDlWrapper( TwsDL* parent ) :
 
 TwsDlWrapper::~TwsDlWrapper()
 {
+}
+
+
+void TwsDlWrapper::connectionClosed()
+{
+	parentTwsDL->twsConnected( false );
 }
 
 
@@ -211,6 +218,14 @@ void TwsDL::connectTws()
 	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
+	
+	if( !twsClient->isConnected() ) {
+		qDebug() << "Connection to TWS failed:"; //TODO print a specific error
+		twsConnected( false );
+	} else {
+		//TODO print client/server version and m_TwsTime
+		twsConnected( true );
+	}
 }
 
 
@@ -433,9 +448,6 @@ void TwsDL::initTwsClient()
 	// connecting some TWS signals to this
 	connect(twsClient, SIGNAL(error(int, int, const QString &)),
 		this, SLOT(twsError(int, int, const QString &)), Qt::DirectConnection );
-	
-	connect ( twsClient, SIGNAL(connected(bool)),
-		 this,SLOT(twsConnected(bool)), Qt::DirectConnection );
 }
 
 
