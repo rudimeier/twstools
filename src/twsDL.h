@@ -133,6 +133,7 @@ class TwsDL : public QObject
 		State state;
 		qint64 lastConnectionTime;
 		bool connection_failed;
+		int curIdleTime;
 		
 		QString confFile;
 		QString workFile;

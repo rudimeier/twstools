@@ -25,6 +25,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	state(CONNECT),
 	lastConnectionTime(0),
 	connection_failed( false ),
+	curIdleTime(0),
 	confFile(confFile),
 	workFile(workFile),
 	myProp(NULL),
@@ -83,6 +84,7 @@ void TwsDL::start()
 		(state == QUIT_READY) || (state == QUIT_ERROR) );
 	
 	state = CONNECT;
+	curIdleTime = 0;
 	idleTimer->setInterval(0);
 	idleTimer->start();
 }
@@ -90,6 +92,9 @@ void TwsDL::start()
 
 void TwsDL::idleTimeout()
 {
+	if( curIdleTime > 0 ) {
+		twsClient->selectStuff( curIdleTime );
+	}
 	switch( state ) {
 		case CONNECT:
 			connectTws();
@@ -119,7 +124,7 @@ void TwsDL::connectTws()
 	if( w < myProp->conTimeout ) {
 		qDebug() << "Waiting" << (myProp->conTimeout - w)
 			<< "ms before connecting again.";
-		idleTimer->setInterval( myProp->conTimeout - w );
+		curIdleTime = myProp->conTimeout - w;
 		return;
 	}
 	
@@ -144,7 +149,7 @@ void TwsDL::waitTwsCon()
 		} else if( (nowInMsecs() - lastConnectionTime) > myProp->conTimeout ) {
 				qDebug() << "Timeout connecting TWS.";
 				twsClient->disconnectTWS();
-				idleTimer->setInterval( 1000 );
+				curIdleTime = 1000;
 		} else {
 			qDebug() << "Still waiting for tws connection.";
 		}
@@ -230,7 +235,7 @@ void TwsDL::getData()
 	int wait = histTodo->checkoutOpt( &pacingControl, &dataFarms );
 	
 	if( wait > 0 ) {
-		idleTimer->setInterval( qMin( 1000, wait ) );
+		curIdleTime = qMin( 1000, wait );
 		return;
 	}
 	if( wait < -1 ) {
@@ -327,6 +332,7 @@ void TwsDL::finData()
 
 void TwsDL::onQuit( int /*ret*/ )
 {
+	curIdleTime = 0;
 	idleTimer->stop();
 	emit finished();
 }
@@ -413,20 +419,20 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 	switch( errorCode ) {
 		case 1100:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been lost."));
-			idleTimer->setInterval( myProp->reqTimeout );
+			curIdleTime = myProp->reqTimeout;
 			break;
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				p_histData.closeError( PacketHistData::ERR_TWSCON );
-				idleTimer->setInterval( 0 );
+				curIdleTime = 0;
 			}
 			break;
 		case 1102:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				p_histData.closeError( PacketHistData::ERR_TWSCON );
-				idleTimer->setInterval( 0 );
+				curIdleTime = 0;
 			}
 			break;
 		case 1300:
@@ -469,31 +475,31 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			p_histData.closeError( PacketHistData::ERR_TWSCON );
 			pacingControl.notifyViolation(
 				histTodo->current().ibContract() );
-			idleTimer->setInterval( 0 );
+			curIdleTime = 0;
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			qDebug() << "READY - NO DATA" << histTodo->currentIndex() << id;
 			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
-			idleTimer->setInterval( 0 );
+			curIdleTime = 0;
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - DATA IS NOT AVAILABLE on HMDS server."
 				<< histTodo->currentIndex() << id;
 			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_NAV );
-			idleTimer->setInterval( 0 );
+			curIdleTime = 0;
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - DATA IS NOT AVAILABLE (no HMDS route)."
 				<< histTodo->currentIndex() << id;
 			p_histData.closeError( PacketHistData::ERR_NAV );
-			idleTimer->setInterval( 0 );
+			curIdleTime = 0;
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
-			idleTimer->setInterval( 0 );
+			curIdleTime = 0;
 		} else {
 			qDebug() << "Warning, unhandled error message.";
 			// seen: "TWS exited during processing of HMDS query"
@@ -503,7 +509,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	case 165:
 		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
-			idleTimer->setInterval( myProp->reqTimeout );
+			curIdleTime = myProp->reqTimeout;
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
 			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract() );
 		} else {
@@ -515,7 +521,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		// NOTE we could find out more to throw away similar worktodo
 		// TODO "The contract description specified for DESX5 is ambiguous;\nyou must specify the multiplier."
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
-		idleTimer->setInterval( 0 );
+		curIdleTime = 0;
 		break;
 	// Order rejected - Reason:
 	case 201:
@@ -532,7 +538,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		// comes directly from TWS whith prefix "Error validating request:-"
 		// NOTE we could find out more to throw away similar worktodo
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
-		idleTimer->setInterval( 0 );
+		curIdleTime = 0;
 		break;
 	default:
 		qDebug() << "Warning, unhandled error code.";
@@ -547,7 +553,7 @@ void TwsDL::twsConnected( bool connected )
 {
 	if( connected ) {
 		Q_ASSERT( state == WAIT_TWS_CON );
-		idleTimer->setInterval( 1000 ); //TODO wait for first tws messages
+		curIdleTime = 1000; //TODO wait for first tws messages
 	} else {
 		qDebug() << "disconnected in state" << state;
 		Q_ASSERT( state != CONNECT );
@@ -573,7 +579,7 @@ void TwsDL::twsConnected( bool connected )
 		}
 		dataFarms.setAllBroken();
 		pacingControl.clear();
-		idleTimer->setInterval( 0 );
+		curIdleTime = 0;
 	}
 }
 
@@ -611,7 +617,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 		Q_ASSERT( false );
 	}
 	
-	idleTimer->setInterval( 0 );
+	curIdleTime = 0;
 	p_contractDetails.setFinished();
 }
 
@@ -633,7 +639,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 		close, volume, count, WAP, hasGaps );
 	
 	if( p_histData.isFinished() ) {
-		idleTimer->setInterval( 0 );
+		curIdleTime = 0;
 		qDebug() << "READY" << histTodo->currentIndex() << reqId;
 	}
 }
@@ -780,12 +786,12 @@ void TwsDL::changeState( State s )
 	
 	if( state == WAIT_TWS_CON ) {
 		qDebug() << "TTTTTTTTTTT" << 50;
-		idleTimer->setInterval( 50 );
+		curIdleTime = 50;
 	} else if( state == WAIT_DATA ) {
-		idleTimer->setInterval( 1000 );
+		curIdleTime = 1000;
 		qDebug() << "TTTTTTTTTTT" << 1000;
 	} else {
-		idleTimer->setInterval( 0 );
+		curIdleTime = 0;
 		qDebug() << "TTTTTTTTTTT" << 0;
 	}
 }
