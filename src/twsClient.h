@@ -1,7 +1,7 @@
 #ifndef TWS_CLIENT_H
 #define TWS_CLIENT_H
 
-#include <QtCore/QObject>
+#include <QtCore/QString>
 
 
 namespace IB {
@@ -15,10 +15,8 @@ namespace IB {
 };
 
 
-class TWSClient : public QObject
+class TWSClient
 {
-	Q_OBJECT
-	
 	public:
 		TWSClient( IB::EWrapper *ew );
 		~TWSClient();

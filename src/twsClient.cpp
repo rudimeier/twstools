@@ -42,8 +42,7 @@ void TWSClient::registerMetaTypes()
 }
 
 
-TWSClient::TWSClient( IB::EWrapper *ew )
-	: QObject(),
+TWSClient::TWSClient( IB::EWrapper *ew ) :
 	myEWrapper(ew),
 	ePosixClient(NULL)
 {
