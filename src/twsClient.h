@@ -13,8 +13,6 @@ namespace IB {
 	class EPosixClientSocket;
 };
 
-class QTimer;
-
 
 class TWSClient : public QObject
 {
@@ -33,6 +31,8 @@ class TWSClient : public QObject
 		void setTWSHost( const QString &host );
 		void setTWSPort( const quint16 &port );
 		void setClientId( int clientId );
+		
+		void selectStuff( int msec );
 		
 		/////////////////////////////////////////////////////
 		void connectTWS();
@@ -84,9 +84,6 @@ class TWSClient : public QObject
 	private:
 		static void registerMetaTypes();
 		
-		void startSelect();
-		void stopSelect();
-		
 		void disconnected();
 		
 		QString twsHost;
@@ -98,12 +95,6 @@ class TWSClient : public QObject
 		
 		class MyEWrapper;
 		MyEWrapper* myEWrapper;
-		
-		QTimer *selectTimer;
-		
-	private slots:
-		
-		void selectStuff();
 };
 
 

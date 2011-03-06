@@ -456,19 +456,12 @@ TWSClient::TWSClient()
 	
 	//start();
 	qDebug() << "running";
-	
-	selectTimer = new QTimer();
-	selectTimer->setInterval(0);
-	selectTimer->setSingleShot(false);
-	connect( selectTimer, SIGNAL(timeout()), this, SLOT(selectStuff()) );
 }
 
 
 TWSClient::~TWSClient()
 {
 	qDebug() << "called";
-	
-	delete selectTimer;
 	
 	if( ePosixClient != NULL ) {
 		delete ePosixClient;
@@ -562,7 +555,6 @@ void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
 	} else {
 		//TODO print client/server version and m_TwsTime
 		emit connected( true );
-		startSelect();
 	}
 }
 
@@ -583,35 +575,20 @@ void TWSClient::disconnectTWS()
 void TWSClient::disconnected()
 {
 	Q_ASSERT( !isConnected() );
-	stopSelect();
 	emit connected( false );
 	qDebug() << "We are disconnected";
 }
 
 
-void TWSClient::startSelect()
-{
-	qDebug();
-	selectTimer->start();
-}
-
-
-void TWSClient::stopSelect()
-{
-	qDebug();
-	selectTimer->stop();
-}
-
-
-void TWSClient::selectStuff()
+void TWSClient::selectStuff( int msec )
 {
 	int fd = ePosixClient->fd();
 	
 	Q_ASSERT( fd >= 0 && isConnected() );
 	
 	struct timeval tval;
-	tval.tv_usec = 0;
-	tval.tv_sec = 1;
+	tval.tv_usec = msec * 1000;
+	tval.tv_sec = 0;
 	
 	fd_set readSet, writeSet, errorSet;
 	
