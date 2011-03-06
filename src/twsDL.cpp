@@ -366,20 +366,20 @@ void TwsDL::initTwsClient()
 	
 	// connecting some TWS signals to this
 	connect(twsClient, SIGNAL(error(int, int, const QString &)),
-		this, SLOT(twsError(int, int, const QString &)), Qt::QueuedConnection );
+		this, SLOT(twsError(int, int, const QString &)), Qt::DirectConnection );
 	
 	connect ( twsClient, SIGNAL(connected(bool)),
-		 this,SLOT(twsConnected(bool)), Qt::QueuedConnection );
+		 this,SLOT(twsConnected(bool)), Qt::DirectConnection );
 	connect ( twsClient, SIGNAL(contractDetails(int, IB::ContractDetails)),
-		 this,SLOT(twsContractDetails(int, IB::ContractDetails)), Qt::QueuedConnection );
+		 this,SLOT(twsContractDetails(int, IB::ContractDetails)), Qt::DirectConnection );
 	connect ( twsClient, SIGNAL(bondContractDetails(int, IB::ContractDetails)),
-		 this,SLOT(twsBondContractDetails(int, IB::ContractDetails)), Qt::QueuedConnection );
+		 this,SLOT(twsBondContractDetails(int, IB::ContractDetails)), Qt::DirectConnection );
 	connect ( twsClient, SIGNAL(contractDetailsEnd(int)),
-		 this,SLOT(twsContractDetailsEnd(int)), Qt::QueuedConnection );
+		 this,SLOT(twsContractDetailsEnd(int)), Qt::DirectConnection );
 	connect ( twsClient, SIGNAL(historicalData(int, const QString&, double, double, double,
 			double, int, int, double, bool )),
 		 this,SLOT(twsHistoricalData(int, const QString&, double, double, double,
-			double, int, int, double, bool )), Qt::QueuedConnection );
+			double, int, int, double, bool )), Qt::DirectConnection );
 }
 
 
