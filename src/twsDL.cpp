@@ -436,16 +436,6 @@ void TwsDL::initTwsClient()
 	
 	connect ( twsClient, SIGNAL(connected(bool)),
 		 this,SLOT(twsConnected(bool)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(contractDetails(int, IB::ContractDetails)),
-		 this,SLOT(twsContractDetails(int, IB::ContractDetails)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(bondContractDetails(int, IB::ContractDetails)),
-		 this,SLOT(twsBondContractDetails(int, IB::ContractDetails)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(contractDetailsEnd(int)),
-		 this,SLOT(twsContractDetailsEnd(int)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(historicalData(int, const QString&, double, double, double,
-			double, int, int, double, bool )),
-		 this,SLOT(twsHistoricalData(int, const QString&, double, double, double,
-			double, int, int, double, bool )), Qt::DirectConnection );
 }
 
 
