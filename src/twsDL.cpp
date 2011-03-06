@@ -8,7 +8,6 @@
 // from global installed ibtws
 #include "ibtws/Contract.h"
 
-#include <QtCore/QTimer>
 #include <QtCore/QVariant>
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
@@ -38,15 +37,13 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	p_contractDetails( *(new PacketContractDetails()) ),
 	p_histData( *(new PacketHistData()) ),
 	dataFarms( *(new DataFarmStates()) ),
-	pacingControl( *(new PacingGod(dataFarms)) ),
-	idleTimer(NULL)
+	pacingControl( *(new PacingGod(dataFarms)) )
 {
 	initProperties();
 	pacingControl.setPacingTime( myProp->maxRequests,
 		myProp->pacingInterval, myProp->minPacingTime );
 	pacingControl.setViolationPause( myProp->violationPause );
 	initTwsClient();
-	initIdleTimer();
 	initWork();
 }
 
@@ -71,49 +68,49 @@ TwsDL::~TwsDL()
 	delete &p_histData;
 	delete &pacingControl;
 	delete &dataFarms;
-	if( idleTimer != NULL ) {
-		delete idleTimer;
-	}
 }
 
 
 void TwsDL::start()
 {
-	Q_ASSERT( !idleTimer->isActive() );
 	Q_ASSERT( (state == CONNECT) ||
 		(state == QUIT_READY) || (state == QUIT_ERROR) );
 	
 	state = CONNECT;
 	curIdleTime = 0;
-	idleTimer->setInterval(0);
-	idleTimer->start();
+	eventLoop();
 }
 
 
-void TwsDL::idleTimeout()
+void TwsDL::eventLoop()
 {
-	if( curIdleTime > 0 ) {
-		twsClient->selectStuff( curIdleTime );
-	}
-	switch( state ) {
-		case CONNECT:
-			connectTws();
-			break;
-		case WAIT_TWS_CON:
-			waitTwsCon();
-			break;
-		case IDLE:
-			idle();
-			break;
-		case WAIT_DATA:
-			waitData();
-			break;
-		case QUIT_READY:
+	bool run = true;
+	while( run ) {
+		if( curIdleTime > 0 ) {
+			twsClient->selectStuff( curIdleTime );
+		}
+		switch( state ) {
+			case CONNECT:
+				connectTws();
+				break;
+			case WAIT_TWS_CON:
+				waitTwsCon();
+				break;
+			case IDLE:
+				idle();
+				break;
+			case WAIT_DATA:
+				waitData();
+				break;
+			case QUIT_READY:
 				onQuit(0);
-			break;
-		case QUIT_ERROR:
+				run = false;
+				break;
+			case QUIT_ERROR:
 				onQuit(-1);
-			break;
+				run = false;
+				break;
+		}
 	}
 }
 
@@ -333,8 +330,6 @@ void TwsDL::finData()
 void TwsDL::onQuit( int /*ret*/ )
 {
 	curIdleTime = 0;
-	idleTimer->stop();
-	emit finished();
 }
 
 
@@ -345,16 +340,6 @@ void TwsDL::initProperties()
 	
 	myProp = new PropTwsDL(prop);
 	myProp->readProperties();
-}
-
-
-void TwsDL::initIdleTimer()
-{
-	Q_ASSERT( idleTimer == NULL );
-	
-	idleTimer = new QTimer();
-	idleTimer->setSingleShot(false);
-	connect( idleTimer, SIGNAL(timeout()), this, SLOT(idleTimeout()) );
 }
 
 

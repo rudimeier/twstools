@@ -10,7 +10,6 @@
 
 
 class TWSClient;
-class QTimer;
 
 namespace IB {
 	class ContractDetails;
@@ -95,13 +94,10 @@ class TwsDL : public QObject
 		
 		State currentState() const;
 		
-	signals:
-		void finished();
-		
 	private:
 		void initProperties();
 		void initTwsClient();
-		void initIdleTimer();
+		void eventLoop();
 		
 		/// Returns the count of inserted rows or -1 on error.
 		int storage2stdout();
@@ -155,11 +151,7 @@ class TwsDL : public QObject
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
 		
-		QTimer *idleTimer;
-		
 	private slots:
-		void idleTimeout();
-		
 		void twsError(int, int, const QString &);
 		
 		void twsConnected( bool connected );
