@@ -184,7 +184,6 @@ void TWSClient::selectStuff( int msec )
 		return;
 	}
 	
-	Q_ASSERT( fd == ePosixClient->fd() ); //can't change in the meanwhile
 	if( FD_ISSET( fd, &errorSet)) {
 		TWS_DEBUG( 1 ,"Error on socket." );
 		ePosixClient->onError(); // might disconnect us
@@ -193,7 +192,6 @@ void TWSClient::selectStuff( int msec )
 		}
 	}
 	
-	Q_ASSERT( fd == ePosixClient->fd() );
 	if( FD_ISSET( fd, &writeSet)) {
 		TWS_DEBUG( 1 ,"Socket is ready for writing." );
 		ePosixClient->onSend(); // might disconnect us on socket errors
@@ -202,7 +200,6 @@ void TWSClient::selectStuff( int msec )
 		}
 	}
 	
-	Q_ASSERT( fd == ePosixClient->fd() );
 	if( FD_ISSET( fd, &readSet)) {
 		TWS_DEBUG( 6 ,"Socket is ready for reading." );
 		ePosixClient->onReceive(); // might disconnect us on socket errors
