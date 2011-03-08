@@ -34,3 +34,19 @@ core*dump
 *.kdevses
 *.tag
 
+## autotools
+Makefile.in
+aclocal.m4
+autom4te.cache
+configure
+config.log
+depcomp
+install-sh
+missing
+config.h
+config.h.in
+config.status
+build
+=build
+.deps
+stamp-h1
