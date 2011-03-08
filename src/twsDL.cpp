@@ -3,6 +3,7 @@
 
 #include "twsUtil.h"
 #include "twsClient.h"
+#include "twsWrapper.h"
 #include "debug.h"
 
 // from global installed ibtws
@@ -17,6 +18,88 @@
 
 
 
+class TwsDlWrapper : public DebugTwsWrapper
+{
+	public:
+		TwsDlWrapper( TwsDL* parent );
+		virtual ~TwsDlWrapper();
+		
+// 		void twsConnected( bool connected );
+		void connectionClosed();
+		
+		void error( const int id, const int errorCode,
+			const IB::IBString errorString );
+		void contractDetails( int reqId,
+			const IB::ContractDetails& contractDetails );
+		void bondContractDetails( int reqId,
+			const IB::ContractDetails& contractDetails );
+		void contractDetailsEnd( int reqId );
+		void historicalData( IB::TickerId reqId, const IB::IBString& date,
+			double open, double high, double low, double close, int volume,
+			int barCount, double WAP, int hasGaps );
+		
+	private:
+		TwsDL* parentTwsDL;
+};
+
+
+TwsDlWrapper::TwsDlWrapper( TwsDL* parent ) :
+	parentTwsDL(parent)
+{
+}
+
+
+TwsDlWrapper::~TwsDlWrapper()
+{
+}
+
+
+void TwsDlWrapper::connectionClosed()
+{
+	parentTwsDL->twsConnected( false );
+}
+
+
+void TwsDlWrapper::error( const int id, const int errorCode,
+	const IB::IBString errorString )
+{
+	parentTwsDL->twsError(
+		id, errorCode, toQString(errorString) );
+}
+
+
+void TwsDlWrapper::contractDetails( int reqId,
+	const IB::ContractDetails& contractDetails )
+{
+	parentTwsDL->twsContractDetails(
+		reqId, contractDetails );
+}
+
+
+void TwsDlWrapper::bondContractDetails( int reqId,
+	const IB::ContractDetails& contractDetails )
+{
+	parentTwsDL->twsBondContractDetails(
+		reqId, contractDetails );
+}
+
+
+void TwsDlWrapper::contractDetailsEnd( int reqId )
+{
+	parentTwsDL->twsContractDetailsEnd(
+		reqId);
+}
+
+
+void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
+	double open, double high, double low, double close, int volume,
+	int barCount, double WAP, int hasGaps )
+{
+	parentTwsDL->twsHistoricalData(
+		reqId, toQString(date), open, high, low, close, volume,
+		barCount, WAP, hasGaps);
+}
+
 
 
 
@@ -28,6 +111,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	confFile(confFile),
 	workFile(workFile),
 	myProp(NULL),
+	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
@@ -54,6 +138,9 @@ TwsDL::~TwsDL()
 	
 	if( twsClient != NULL ) {
 		delete twsClient;
+	}
+	if( twsWrapper != NULL ) {
+		delete twsWrapper;
 	}
 	if( myProp  != NULL ) {
 		delete myProp;
@@ -131,6 +218,14 @@ void TwsDL::connectTws()
 	
 	twsClient->connectTWS(
 		myProp->twsHost, myProp->twsPort, myProp->clientId );
+	
+	if( !twsClient->isConnected() ) {
+		qDebug() << "Connection to TWS failed:"; //TODO print a specific error
+		twsConnected( false );
+	} else {
+		//TODO print client/server version and m_TwsTime
+		twsConnected( true );
+	}
 }
 
 
@@ -345,26 +440,10 @@ void TwsDL::initProperties()
 
 void TwsDL::initTwsClient()
 {
-	Q_ASSERT( twsClient == NULL );
+	Q_ASSERT( twsClient == NULL && twsWrapper == NULL );
 	
-	twsClient = new TWSClient();
-	
-	// connecting some TWS signals to this
-	connect(twsClient, SIGNAL(error(int, int, const QString &)),
-		this, SLOT(twsError(int, int, const QString &)), Qt::DirectConnection );
-	
-	connect ( twsClient, SIGNAL(connected(bool)),
-		 this,SLOT(twsConnected(bool)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(contractDetails(int, IB::ContractDetails)),
-		 this,SLOT(twsContractDetails(int, IB::ContractDetails)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(bondContractDetails(int, IB::ContractDetails)),
-		 this,SLOT(twsBondContractDetails(int, IB::ContractDetails)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(contractDetailsEnd(int)),
-		 this,SLOT(twsContractDetailsEnd(int)), Qt::DirectConnection );
-	connect ( twsClient, SIGNAL(historicalData(int, const QString&, double, double, double,
-			double, int, int, double, bool )),
-		 this,SLOT(twsHistoricalData(int, const QString&, double, double, double,
-			double, int, int, double, bool )), Qt::DirectConnection );
+	twsWrapper = new TwsDlWrapper(this);
+	twsClient = new TWSClient( twsWrapper );
 }
 
 
