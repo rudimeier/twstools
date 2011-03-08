@@ -3,12 +3,12 @@
 
 #include <QtCore/QString>
 #include <QtCore/QVector>
-#include <QtCore/QHash>
+#include <QtCore/QPair>
 
 
 
 class QTime;
-class QDate;
+
 
 #define properties Properties::globalProperties()
 

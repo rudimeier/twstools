@@ -3,15 +3,12 @@
 
 #include "properties.h"
 
-#include <QtCore/QObject>
 #include <QtCore/QList>
 
 
 
 
 class TWSClient;
-class TWSWrapper;
-class QTimer;
 
 namespace IB {
 	class ContractDetails;
@@ -19,7 +16,6 @@ namespace IB {
 }
 
 
-namespace Test {
 
 
 
@@ -75,11 +71,11 @@ class PropTwsDL : public PropSub
 
 
 
+class TwsDlWrapper;
 
-class TwsDL : public QObject
+
+class TwsDL
 {
-	Q_OBJECT
-	
 	public:
 		enum State {
 			CONNECT,
@@ -97,13 +93,10 @@ class TwsDL : public QObject
 		
 		State currentState() const;
 		
-	signals:
-		void finished();
-		
 	private:
 		void initProperties();
 		void initTwsClient();
-		void initIdleTimer();
+		void eventLoop();
 		
 		/// Returns the count of inserted rows or -1 on error.
 		int storage2stdout();
@@ -132,16 +125,30 @@ class TwsDL : public QObject
 		void errorContracts(int, int, const QString &);
 		void errorHistData(int, int, const QString &);
 		
+		// callbacks from our twsWrapper
+		void twsError(int, int, const QString &);
+		
+		void twsConnected( bool connected );
+		void twsContractDetails( int reqId,
+			const IB::ContractDetails &ibContractDetails );
+		void twsBondContractDetails( int reqId,
+			const IB::ContractDetails &ibContractDetails );
+		void twsContractDetailsEnd( int reqId );
+		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
+			double close, int volume, int count, double WAP, bool hasGaps );
+		
+		
 		State state;
 		qint64 lastConnectionTime;
 		bool connection_failed;
+		int curIdleTime;
 		
 		QString confFile;
 		QString workFile;
 		PropTwsDL *myProp;
 		
+		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
-		TWSWrapper *twsWrapper;
 		
 		int msgCounter;
 		GenericRequest &currentRequest;
@@ -157,25 +164,10 @@ class TwsDL : public QObject
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
 		
-		QTimer *idleTimer;
-		
-	private slots:
-		void idleTimeout();
-		
-		void twsError(int, int, const QString &);
-		
-		void twsConnected( bool connected );
-		void twsContractDetails( int reqId,
-			const IB::ContractDetails &ibContractDetails );
-		void twsBondContractDetails( int reqId,
-			const IB::ContractDetails &ibContractDetails );
-		void twsContractDetailsEnd( int reqId );
-		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
-			double close, int volume, int count, double WAP, bool hasGaps );
+	friend class TwsDlWrapper;
 };
 
 
 
 
-} // namespace Test
 #endif

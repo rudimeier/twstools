@@ -12,7 +12,6 @@
 
 
 
-namespace Test {
 
 
 
@@ -1334,4 +1333,3 @@ QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
 
 
 
-} // namespace Test
