@@ -12,17 +12,17 @@ AM_LDFLAGS += -lQtCore
 
 
 bin_PROGRAMS =
-bin_PROGRAMS += twstool
-twstool_SOURCES =
-twstool_SOURCES += main.cpp
-twstool_SOURCES += twsDL.cpp
-twstool_SOURCES += tws_meta.cpp
-twstool_SOURCES += twsClient.cpp
-twstool_SOURCES += twsUtil.cpp
-twstool_SOURCES += twsWrapper.cpp
-twstool_SOURCES += properties.cpp
-twstool_LDADD =
-twstool_LDADD += -libtws
+bin_PROGRAMS += twsDL
+twsDL_SOURCES =
+twsDL_SOURCES += main.cpp
+twsDL_SOURCES += twsDL.cpp
+twsDL_SOURCES += tws_meta.cpp
+twsDL_SOURCES += twsClient.cpp
+twsDL_SOURCES += twsUtil.cpp
+twsDL_SOURCES += twsWrapper.cpp
+twsDL_SOURCES += properties.cpp
+twsDL_LDADD =
+twsDL_LDADD += -libtws
 
 
 noinst_HEADERS =
