@@ -72,6 +72,8 @@ class PropTwsDL : public PropSub
 
 
 
+class TwsDlWrapper;
+
 
 class TwsDL : public QObject
 {
@@ -135,6 +137,7 @@ class TwsDL : public QObject
 		QString workFile;
 		PropTwsDL *myProp;
 		
+		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
 		
 		int msgCounter;
@@ -162,6 +165,8 @@ class TwsDL : public QObject
 		void twsContractDetailsEnd( int reqId );
 		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps );
+		
+	friend class TwsDlWrapper;
 };
 
 

@@ -11,6 +11,7 @@ namespace IB {
 	class OrderState;
 	class Execution;
 	class EPosixClientSocket;
+	class EWrapper;
 };
 
 
@@ -19,7 +20,7 @@ class TWSClient : public QObject
 	Q_OBJECT
 	
 	public:
-		TWSClient();
+		TWSClient( IB::EWrapper *ew );
 		~TWSClient();
 		
 		bool isConnected() const;
@@ -55,31 +56,7 @@ class TWSClient : public QObject
 	signals:
 		void connected(bool connected);
 		
-		void error( const QString &msg );
 		void error(int id, int errorCode, const QString &errorMsg);
-		
-		void tickPrice( int tickerId, int field, double price, int canAutoExecute);
-		void tickSize( int tickerId, int field, int size );
-		void orderStatus( int orderId, const QString &status, int filled, int remaining, double avgFillPrice,
-			int permId, int parentId, double lastFillPrice, int clientId, const QString &whyHeld );
-		void openOrder( int orderId, const IB::Contract &contract, const IB::Order &order, const IB::OrderState &orderState );
-		void updateAccountValue( const QString &key, const QString &value, const QString &currency, const QString &accountName);
-		void updatePortfolio( const IB::Contract &contract, int position, double marketPrice, double marketValue,
-			double averageCost, double unrealizedPNL, double realizedPNL, const QString &accountName );
-		void updateAccountTime( const QString &timeStamp );
-		void nextValidId( int orderId );
-		void bondContractDetails ( int reqId, const IB::ContractDetails &ibContractDetails );
-		void contractDetails ( int reqId, const IB::ContractDetails &ibContractDetails );
-		void contractDetailsEnd ( int reqId );
-		void execDetails( int reqId, const IB::Contract &contract, const IB::Execution &exec );
-		void managedAccounts( const QString &accountsList );
-    	void historicalData( int reqId, const QString &date, double open, double high, double low,
-			double close, int volume, int count, double WAP, bool hasGaps );
-		void tickOptionComputation ( int tickerId, int tickType, double impliedVol, double delta, double modelPrice, double pvDividend );
-		void tickGeneric( int tickerId, int tickType, double value );
-		void tickString( int tickerId, int tickType, const QString &value );
-		void currentTime( long time );
-		
 		
 	private:
 		static void registerMetaTypes();
@@ -90,11 +67,8 @@ class TWSClient : public QObject
 		quint16 twsPort;
 		int     clientId;
 		
-		
+		IB::EWrapper* myEWrapper;
 		IB::EPosixClientSocket* ePosixClient;
-		
-		class MyEWrapper;
-		MyEWrapper* myEWrapper;
 };
 
 

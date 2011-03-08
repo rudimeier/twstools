@@ -3,6 +3,7 @@
 
 #include "twsUtil.h"
 #include "twsClient.h"
+#include "twsWrapper.h"
 #include "debug.h"
 
 // from global installed ibtws
@@ -17,6 +18,81 @@
 
 
 
+class TwsDlWrapper : public DebugTwsWrapper
+{
+	public:
+		TwsDlWrapper( TwsDL* parent );
+		virtual ~TwsDlWrapper();
+		
+// 		void twsConnected( bool connected );
+		
+		void error( const int id, const int errorCode,
+			const IB::IBString errorString );
+		void contractDetails( int reqId,
+			const IB::ContractDetails& contractDetails );
+		void bondContractDetails( int reqId,
+			const IB::ContractDetails& contractDetails );
+		void contractDetailsEnd( int reqId );
+		void historicalData( IB::TickerId reqId, const IB::IBString& date,
+			double open, double high, double low, double close, int volume,
+			int barCount, double WAP, int hasGaps );
+		
+	private:
+		TwsDL* parentTwsDL;
+};
+
+
+TwsDlWrapper::TwsDlWrapper( TwsDL* parent ) :
+	parentTwsDL(parent)
+{
+}
+
+
+TwsDlWrapper::~TwsDlWrapper()
+{
+}
+
+
+void TwsDlWrapper::error( const int id, const int errorCode,
+	const IB::IBString errorString )
+{
+	parentTwsDL->twsError(
+		id, errorCode, toQString(errorString) );
+}
+
+
+void TwsDlWrapper::contractDetails( int reqId,
+	const IB::ContractDetails& contractDetails )
+{
+	parentTwsDL->twsContractDetails(
+		reqId, contractDetails );
+}
+
+
+void TwsDlWrapper::bondContractDetails( int reqId,
+	const IB::ContractDetails& contractDetails )
+{
+	parentTwsDL->twsBondContractDetails(
+		reqId, contractDetails );
+}
+
+
+void TwsDlWrapper::contractDetailsEnd( int reqId )
+{
+	parentTwsDL->twsContractDetailsEnd(
+		reqId);
+}
+
+
+void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
+	double open, double high, double low, double close, int volume,
+	int barCount, double WAP, int hasGaps )
+{
+	parentTwsDL->twsHistoricalData(
+		reqId, toQString(date), open, high, low, close, volume,
+		barCount, WAP, hasGaps);
+}
+
 
 
 
@@ -28,6 +104,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	confFile(confFile),
 	workFile(workFile),
 	myProp(NULL),
+	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
@@ -54,6 +131,9 @@ TwsDL::~TwsDL()
 	
 	if( twsClient != NULL ) {
 		delete twsClient;
+	}
+	if( twsWrapper != NULL ) {
+		delete twsWrapper;
 	}
 	if( myProp  != NULL ) {
 		delete myProp;
@@ -345,9 +425,10 @@ void TwsDL::initProperties()
 
 void TwsDL::initTwsClient()
 {
-	Q_ASSERT( twsClient == NULL );
+	Q_ASSERT( twsClient == NULL && twsWrapper == NULL );
 	
-	twsClient = new TWSClient();
+	twsWrapper = new TwsDlWrapper(this);
+	twsClient = new TWSClient( twsWrapper );
 	
 	// connecting some TWS signals to this
 	connect(twsClient, SIGNAL(error(int, int, const QString &)),
