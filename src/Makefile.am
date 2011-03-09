@@ -1,14 +1,11 @@
 AM_CPPFLAGS =
 AM_CPPFLAGS += -DDEBUG -D_GNU_SOURCE
 AM_CPPFLAGS += -DIB_USE_STD_STRING
-AM_CPPFLAGS += -D_REENTRANT -DQT_CORE_LIB -DQT_SHARED
-AM_CPPFLAGS += -I/usr/share/qt4/mkspecs/default
 AM_CXXFLAGS =
 AM_CXXFLAGS += $(DEFAULT_CXXFLAGS)
 AM_LDFLAGS =
 AM_LDFLAGS += -L/usr/local/lib64
 AM_LDFLAGS += -lconfig++
-AM_LDFLAGS += -lQtCore
 
 
 bin_PROGRAMS =
@@ -20,6 +17,10 @@ twsDL_SOURCES += twsClient.cpp
 twsDL_SOURCES += twsUtil.cpp
 twsDL_SOURCES += twsWrapper.cpp
 twsDL_SOURCES += properties.cpp
+twsDL_CPPFLAGS = ${AM_CPPFLAGS}
+twsDL_CPPFLAGS += ${QT4_DEPS_CFLAGS}
+twsDL_LDFLAGS = ${AM_LDFLAGS}
+twsDL_LDFLAGS += ${QT4_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
 
