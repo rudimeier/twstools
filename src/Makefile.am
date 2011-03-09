@@ -5,7 +5,6 @@ AM_CXXFLAGS =
 AM_CXXFLAGS += $(DEFAULT_CXXFLAGS)
 AM_LDFLAGS =
 AM_LDFLAGS += -L/usr/local/lib64
-AM_LDFLAGS += -lconfig++
 
 
 bin_PROGRAMS =
@@ -19,8 +18,10 @@ twsDL_SOURCES += twsWrapper.cpp
 twsDL_SOURCES += properties.cpp
 twsDL_CPPFLAGS = ${AM_CPPFLAGS}
 twsDL_CPPFLAGS += ${QT4_DEPS_CFLAGS}
+twsDL_CPPFLAGS += ${libconfig_DEPS_CFLAGS}
 twsDL_LDFLAGS = ${AM_LDFLAGS}
 twsDL_LDFLAGS += ${QT4_DEPS_LIBS}
+twsDL_LDFLAGS += ${libconfig_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
 

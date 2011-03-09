@@ -16,6 +16,7 @@ DEFAULT_CXXFLAGS="-Wall -W"
 AC_SUBST([DEFAULT_CXXFLAGS])
 
 PKG_CHECK_MODULES([QT4_DEPS], [QtCore >= 4.3])
+PKG_CHECK_MODULES([libconfig_DEPS], [libconfig++ >= 1.3])
 
 ## output
 AC_CONFIG_FILES([Makefile])
