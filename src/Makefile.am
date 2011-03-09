@@ -14,7 +14,6 @@ AM_LDFLAGS += -lQtCore
 bin_PROGRAMS =
 bin_PROGRAMS += twsDL
 twsDL_SOURCES =
-twsDL_SOURCES += main.cpp
 twsDL_SOURCES += twsDL.cpp
 twsDL_SOURCES += tws_meta.cpp
 twsDL_SOURCES += twsClient.cpp
