@@ -105,10 +105,9 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 
 int main(int argc, char *argv[])
 {
-	xmlDocPtr doc2 = xmlNewDoc( (const xmlChar*) "1.0");
-	xmlNodePtr root2 = xmlNewDocNode( doc2, NULL, (xmlChar*)"root",
-			NULL );
-	xmlDocSetRootElement( doc2, root2 );
+	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
+	xmlNodePtr root = xmlNewDocNode( doc, NULL, (xmlChar*)"root", NULL );
+	xmlDocSetRootElement( doc, root );
 
 
 
@@ -116,13 +115,13 @@ int main(int argc, char *argv[])
 
 	IB::Contract ic_orig, ic_conv, ic_conv2;
 	ic_orig.strike = 25.0;
-	conv_ib2xml( root2, ic_orig );
+	conv_ib2xml( root, ic_orig );
 	
-	xmlDocDump(stdout, doc2);
+	xmlDocDump(stdout, doc);
 	
-	xmlNodePtr xml_contract2 = xmlFirstElementChild( root2 );
+	xmlNodePtr xml_contract2 = xmlFirstElementChild( root );
 	conv_xml2ib( &ic_conv2, xml_contract2 );
-	xmlDocDump(stdout, doc2);
+	xmlDocDump(stdout, doc);
 	
 	#define DBG_EQUAL_FIELD( _attr_ ) \
 		qDebug() << #_attr_ << ( ic_orig._attr_ == ic_conv2._attr_ );
@@ -141,6 +140,8 @@ int main(int argc, char *argv[])
 	DBG_EQUAL_FIELD( secIdType );
 	DBG_EQUAL_FIELD( secId );
 	DBG_EQUAL_FIELD( comboLegsDescrip );
+	
+	xmlFreeDoc(doc);
 	
 	return 0;
 }
