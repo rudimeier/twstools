@@ -57,6 +57,19 @@ void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c )
 }
 
 
+void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
+{
+	char tmp[128];
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(xmlChar*)"IBContractDetails", NULL);
+	
+	
+	xmlAddChild(parent, ne);
+}
+
+
+
 
 #define GET_ATTR_LONG( _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
@@ -102,6 +115,13 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( comboLegsDescrip );
 	// TODO comboLegs
 	// TODO underComp
+}
+
+
+void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::ContractDetails dfltCntrctDtls;
 }
 
 
