@@ -60,19 +60,23 @@ void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c )
 
 #define GET_ATTR_LONG( _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? atol( tmp ) : dfltContract.conId
+	c->_attr_ = tmp ? atol( tmp ) : dfltContract.conId; \
+	free(tmp)
 
 #define GET_ATTR_DOUBLE( _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? atof( tmp ) : dfltContract.conId
+	c->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
+	free(tmp)
 
 #define GET_ATTR_BOOL( _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? atof( tmp ) : dfltContract.conId
+	c->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
+	free(tmp)
 
 #define GET_ATTR_STRING( _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? tmp : dfltContract._attr_
+	c->_attr_ = tmp ? std::string(tmp) : dfltContract._attr_; \
+	free(tmp)
 
 
 
