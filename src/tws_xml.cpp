@@ -16,19 +16,20 @@
 
 
 
-#define ADD_ATTR_LONG( _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%ld",c._attr_ ); \
+#define ADD_ATTR_LONG( _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
 	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp )
 
-#define ADD_ATTR_DOUBLE( _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%.10g",c._attr_ ); \
+#define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
 	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp )
 
-#define ADD_ATTR_BOOL( _attr_ ) \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) (c._attr_ ? "1" : "0") )
+#define ADD_ATTR_BOOL( _struct_, _attr_ ) \
+	xmlNewProp ( ne, (xmlChar*) #_attr_, \
+		(xmlChar*) (_struct_._attr_ ? "1" : "0") )
 
-#define ADD_ATTR_STRING( _attr_ ) \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) c._attr_.c_str() );
+#define ADD_ATTR_STRING( _struct_, _attr_ ) \
+	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) _struct_._attr_.c_str() );
 	
 
 void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c )
@@ -37,21 +38,21 @@ void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c )
 	
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"IBContract", NULL);
 	
-	ADD_ATTR_LONG( conId );
-	ADD_ATTR_STRING( symbol );
-	ADD_ATTR_STRING( secType );
-	ADD_ATTR_STRING( expiry );
-	ADD_ATTR_DOUBLE( strike );
-	ADD_ATTR_STRING( right );
-	ADD_ATTR_STRING( multiplier );
-	ADD_ATTR_STRING( exchange );
-	ADD_ATTR_STRING( primaryExchange );
-	ADD_ATTR_STRING( currency );
-	ADD_ATTR_STRING( localSymbol );
-	ADD_ATTR_BOOL( includeExpired );
-	ADD_ATTR_STRING( secIdType );
-	ADD_ATTR_STRING( secId );
-	ADD_ATTR_STRING( comboLegsDescrip );
+	ADD_ATTR_LONG( c, conId );
+	ADD_ATTR_STRING( c, symbol );
+	ADD_ATTR_STRING( c, secType );
+	ADD_ATTR_STRING( c, expiry );
+	ADD_ATTR_DOUBLE( c, strike );
+	ADD_ATTR_STRING( c, right );
+	ADD_ATTR_STRING( c, multiplier );
+	ADD_ATTR_STRING( c, exchange );
+	ADD_ATTR_STRING( c, primaryExchange );
+	ADD_ATTR_STRING( c, currency );
+	ADD_ATTR_STRING( c, localSymbol );
+	ADD_ATTR_BOOL( c, includeExpired );
+	ADD_ATTR_STRING( c, secIdType );
+	ADD_ATTR_STRING( c, secId );
+	ADD_ATTR_STRING( c, comboLegsDescrip );
 	
 	xmlAddChild(parent, ne);
 }
@@ -71,24 +72,24 @@ void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
 
 
 
-#define GET_ATTR_LONG( _attr_ ) \
+#define GET_ATTR_LONG( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? atol( tmp ) : dfltContract.conId; \
+	_struct_->_attr_ = tmp ? atol( tmp ) : dfltContract.conId; \
 	free(tmp)
 
-#define GET_ATTR_DOUBLE( _attr_ ) \
+#define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
 	free(tmp)
 
-#define GET_ATTR_BOOL( _attr_ ) \
+#define GET_ATTR_BOOL( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
 	free(tmp)
 
-#define GET_ATTR_STRING( _attr_ ) \
+#define GET_ATTR_STRING( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	c->_attr_ = tmp ? std::string(tmp) : dfltContract._attr_; \
+	_struct_->_attr_ = tmp ? std::string(tmp) : dfltContract._attr_; \
 	free(tmp)
 
 
@@ -98,21 +99,21 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	char* tmp;
 	static const IB::Contract dfltContract;
 	
-	GET_ATTR_LONG( conId );
-	GET_ATTR_STRING( symbol );
-	GET_ATTR_STRING( secType );
-	GET_ATTR_STRING( expiry );
-	GET_ATTR_DOUBLE( strike );
-	GET_ATTR_STRING( right );
-	GET_ATTR_STRING( multiplier );
-	GET_ATTR_STRING( exchange );
-	GET_ATTR_STRING( primaryExchange );
-	GET_ATTR_STRING( currency );
-	GET_ATTR_STRING( localSymbol );
-	GET_ATTR_BOOL( includeExpired );
-	GET_ATTR_STRING( secIdType );
-	GET_ATTR_STRING( secId );
-	GET_ATTR_STRING( comboLegsDescrip );
+	GET_ATTR_LONG( c, conId );
+	GET_ATTR_STRING( c, symbol );
+	GET_ATTR_STRING( c, secType );
+	GET_ATTR_STRING( c, expiry );
+	GET_ATTR_DOUBLE( c, strike );
+	GET_ATTR_STRING( c, right );
+	GET_ATTR_STRING( c, multiplier );
+	GET_ATTR_STRING( c, exchange );
+	GET_ATTR_STRING( c, primaryExchange );
+	GET_ATTR_STRING( c, currency );
+	GET_ATTR_STRING( c, localSymbol );
+	GET_ATTR_BOOL( c, includeExpired );
+	GET_ATTR_STRING( c, secIdType );
+	GET_ATTR_STRING( c, secId );
+	GET_ATTR_STRING( c, comboLegsDescrip );
 	// TODO comboLegs
 	// TODO underComp
 }
