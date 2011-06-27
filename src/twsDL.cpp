@@ -565,6 +565,11 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 			dataFarms.learnHmds( histTodo->current().ibContract() );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
 			curIdleTime = 0;
+		} else if( ERR_MATCH("Unknown contract") ) {
+			// NOTE we should skip all similar work intelligently
+			dataFarms.learnHmds( histTodo->current().ibContract() );
+			p_histData.closeError( PacketHistData::ERR_REQUEST );
+			curIdleTime = 0;
 		} else {
 			qDebug() << "Warning, unhandled error message.";
 			// seen: "TWS exited during processing of HMDS query"
