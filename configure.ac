@@ -1,7 +1,7 @@
 AC_PREREQ([2.61])
 AC_INIT([twstool], [0.1.0], [http://www.ga-group.nl/])
 AC_CONFIG_AUX_DIR([.])
-AC_CONFIG_HEADER([./config.h])
+AC_CONFIG_HEADER([src/config.h])
 AC_CONFIG_SRCDIR([src/])
 
 AM_INIT_AUTOMAKE([foreign])

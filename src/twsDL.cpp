@@ -5,6 +5,7 @@
 #include "twsClient.h"
 #include "twsWrapper.h"
 #include "debug.h"
+#include "config.h"
 
 // from global installed ibtws
 #include "ibtws/Contract.h"
