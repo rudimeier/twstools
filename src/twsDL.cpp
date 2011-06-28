@@ -44,6 +44,8 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 }
 
 static struct poptOption flow_opts[] = {
+	{"config", 'c', POPT_ARG_STRING, &configfilep, 0,
+		"Config file (default: twsDL.cfg).", "FILE"},
 	POPT_TABLEEND
 };
 
@@ -75,7 +77,7 @@ void twsDL_parse_cl(size_t argc, const char *argv[])
 	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
 	atexit(clear_popt);
 	
-	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [CONFIG_FILE] [WORK_FILE]");
+	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [WORK_FILE]");
 	
 	int rc;
 	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
@@ -91,10 +93,6 @@ void twsDL_parse_cl(size_t argc, const char *argv[])
 	
 	const char** rest = poptGetArgs(opt_ctx);
 	if( rest != NULL ) {
-		if( *rest != NULL ) {
-			configfilep = *rest;
-			rest++;
-		}
 		if( *rest != NULL ) {
 			workfilep = *rest;
 			rest++;
