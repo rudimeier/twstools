@@ -283,15 +283,12 @@ HistTodo::~HistTodo()
 }
 
 
-int HistTodo::fromFile( const QString & fileName, bool includeExpired )
+int HistTodo::fromFile( const QList<QByteArray> &rows, bool includeExpired )
 {
 	histRequests.clear();
 	
-	QList<QByteArray> rows;
-	int retVal = read_file( fileName, &rows );
-	if( retVal == -1) {
-		return retVal;
-	}
+	int retVal = rows.size();
+	
 	foreach( QByteArray row, rows ) {
 		if( row.startsWith('[') ) {
 			int firstTab = row.indexOf('\t');
@@ -303,28 +300,6 @@ int HistTodo::fromFile( const QString & fileName, bool includeExpired )
 		bool ok = hR.fromString( row, includeExpired );
 		Q_ASSERT(ok); //TODO
 		add( hR );
-	}
-	return retVal;
-}
-
-
-int HistTodo::read_file( const QString & fileName, QList<QByteArray> *list ) const
-{
-	int retVal = -1;
-	QFile f( fileName );
-	if (f.open(QFile::ReadOnly)) {
-		retVal = 0;
-		while (!f.atEnd()) {
-			QByteArray line = f.readLine();
-			line.chop(1); //remove line feed
-			if( line.startsWith('#') || line.isEmpty() ) {
-				continue;
-			}
-			list->append(line);
-			retVal++;
-		}
-	} else {
-// 		_lastError = QString("can't read file '%1'").arg(fileName);
 	}
 	return retVal;
 }
@@ -528,6 +503,55 @@ int ContractDetailsTodo::fromConfig(
 		bool ok = cdR.fromStringList( sl, includeExpired );
 		Q_ASSERT(ok); //TODO
 		contractDetailsRequests.append( cdR );
+	}
+	return retVal;
+}
+
+
+
+
+
+
+
+
+WorkTodo::WorkTodo() :
+	reqType(GenericRequest::NONE),
+	rows(new QList<QByteArray>())
+{
+}
+
+
+WorkTodo::~WorkTodo()
+{
+	delete rows;
+}
+
+
+const QList<QByteArray>& WorkTodo::getRows() const
+{
+	return *rows;
+}
+
+
+int WorkTodo::read_file( const QString & fileName )
+{
+	int retVal = -1;
+	QFile f( fileName );
+	
+	rows->clear();
+	if (f.open(QFile::ReadOnly)) {
+		retVal = 0;
+		while (!f.atEnd()) {
+			QByteArray line = f.readLine();
+			line.chop(1); //remove line feed
+			if( line.startsWith('#') || line.isEmpty() ) {
+				continue;
+			}
+			rows->append(line);
+			retVal++;
+		}
+	} else {
+// 		_lastError = QString("can't read file '%1'").arg(fileName);
 	}
 	return retVal;
 }

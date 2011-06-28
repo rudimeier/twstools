@@ -205,6 +205,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
+	workTodo( new WorkTodo() ),
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
@@ -233,6 +234,9 @@ TwsDL::~TwsDL()
 	}
 	if( myProp  != NULL ) {
 		delete myProp;
+	}
+	if( workTodo != NULL ) {
+		delete workTodo;
 	}
 	if( histTodo != NULL ) {
 		delete histTodo;
@@ -900,6 +904,11 @@ int TwsDL::storage2stdout()
 
 void TwsDL::initWork()
 {
+	int cnt = workTodo->read_file(workFile);
+	const QList<QByteArray> &rows = workTodo->getRows();
+	qDebug() << QString("got %1, %2 rows from workFile %3")
+		.arg(cnt).arg(rows.size()).arg(workFile);
+	
 	if( workFile.isEmpty() ) {
 		qDebug() << "getting contracts from TWS";
 		int i = contractDetailsTodo->fromConfig(
@@ -909,7 +918,7 @@ void TwsDL::initWork()
 	} else {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
-			int i = histTodo->fromFile(workFile, myProp->includeExpired);
+			int i = histTodo->fromFile(rows, myProp->includeExpired);
 			Q_ASSERT( i>=0 );
 			dumpWorkTodo();
 // 			state = IDLE;;

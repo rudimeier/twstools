@@ -23,6 +23,7 @@ namespace IB {
 class ContractDetailsRequest;
 class HistRequest;
 class GenericRequest;
+class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class PacketContractDetails;
@@ -155,6 +156,7 @@ class TwsDL
 		
 		int curIndexTodoContractDetails;
 		
+		WorkTodo *workTodo;
 		ContractDetailsTodo *contractDetailsTodo;
 		HistTodo *histTodo;
 		
