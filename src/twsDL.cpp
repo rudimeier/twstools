@@ -4,6 +4,7 @@
 #include "twsUtil.h"
 #include "twsClient.h"
 #include "twsWrapper.h"
+#include "tws_xml.h"
 #include "debug.h"
 #include "config.h"
 
@@ -809,6 +810,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 
 int TwsDL::storage2stdout()
 {
+	IbXml ibXml;
 	QTime  stopWatch;
 	stopWatch.start();
 	
@@ -818,8 +820,9 @@ int TwsDL::storage2stdout()
 		
 		const IB::ContractDetails &cD = p_contractDetails.constList()[i];
 		const IB::Contract &c = cD.summary;
-
-
+		
+		ibXml.add(cD);
+		
 		QString c1_str = QString()
 			+ QString::number(c.conId) + "\t"
 			+ toQString(c.symbol) + "\t"
@@ -897,6 +900,8 @@ int TwsDL::storage2stdout()
 	qDebug() << QString(
 		"Contracts received: %1 (%2ms)")
 		.arg(countReceived).arg(stopWatch.elapsed());
+	
+	ibXml.dump();
 	
 	return countReceived;
 }
