@@ -15,6 +15,9 @@
 
 
 
+#define ADD_ATTR_INT( _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp )
 
 #define ADD_ATTR_LONG( _struct_, _attr_ ) \
 	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
@@ -65,6 +68,39 @@ void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(xmlChar*)"IBContractDetails", NULL);
 	
+	conv_ib2xml( ne, cd.summary );
+	ADD_ATTR_STRING( cd, marketName );
+	ADD_ATTR_STRING( cd, tradingClass );
+	ADD_ATTR_DOUBLE( cd, minTick );
+	ADD_ATTR_STRING( cd, orderTypes );
+	ADD_ATTR_STRING( cd, validExchanges );
+	ADD_ATTR_LONG( cd, priceMagnifier );
+	ADD_ATTR_INT( cd, underConId );
+	ADD_ATTR_STRING( cd, longName );
+	ADD_ATTR_STRING( cd, contractMonth );
+	ADD_ATTR_STRING( cd, industry );
+	ADD_ATTR_STRING( cd, category );
+	ADD_ATTR_STRING( cd, subcategory );
+	ADD_ATTR_STRING( cd, timeZoneId );
+	ADD_ATTR_STRING( cd, tradingHours );
+	ADD_ATTR_STRING( cd, liquidHours );
+	
+	// BOND values
+	ADD_ATTR_STRING( cd, cusip );
+	ADD_ATTR_STRING( cd, ratings );
+	ADD_ATTR_STRING( cd, descAppend );
+	ADD_ATTR_STRING( cd, bondType );
+	ADD_ATTR_STRING( cd, couponType );
+	ADD_ATTR_BOOL( cd, callable );
+	ADD_ATTR_BOOL( cd, putable );
+	ADD_ATTR_DOUBLE( cd, coupon );
+	ADD_ATTR_BOOL( cd, convertible );
+	ADD_ATTR_STRING( cd, maturity );
+	ADD_ATTR_STRING( cd, issueDate );
+	ADD_ATTR_STRING( cd, nextOptionDate );
+	ADD_ATTR_STRING( cd, nextOptionType );
+	ADD_ATTR_BOOL( cd, nextOptionPartial );
+	ADD_ATTR_STRING( cd, notes );
 	
 	xmlAddChild(parent, ne);
 }
