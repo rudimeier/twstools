@@ -24,6 +24,7 @@ twsDL_LDFLAGS += ${QT4_DEPS_LIBS}
 twsDL_LDFLAGS += ${libconfig_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
+twsDL_LDADD += -lpopt
 
 
 noinst_HEADERS =
