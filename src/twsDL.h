@@ -66,8 +66,6 @@ class PropTwsDL : public PropSub
 		QList<QString> whatToShow;
 		int useRTH;
 		int formatDate;
-		
-		QList< QList<QString> > contractSpecs;
 };
 
 

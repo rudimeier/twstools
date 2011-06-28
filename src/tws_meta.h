@@ -199,8 +199,7 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		int fromConfig( const QList< QList<QString> > &contractSpecs,
-			bool includeExpired );
+		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
 		
 		QList<ContractDetailsRequest> contractDetailsRequests;
 };

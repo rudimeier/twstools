@@ -494,15 +494,24 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
-int ContractDetailsTodo::fromConfig(
-		const QList< QList<QString> > &contractSpecs, bool includeExpired )
+int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
+	bool includeExpired )
 {
-	int retVal = contractSpecs.size();
-	foreach( const QList<QString> &sl, contractSpecs ) {
+	int retVal = 0;
+	QRegExp regExp("^REQ_CD:?");
+	
+	foreach( QByteArray row, rows ) {
+		QString s(row);
+		Q_ASSERT( s.contains( regExp ) );
+		s.remove( regExp );
+		QList<QString> sl = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
+		Q_ASSERT( sl.size() >= 2 && sl.size() <= 4 ); // TODO handle that
+		
 		ContractDetailsRequest cdR;
 		bool ok = cdR.fromStringList( sl, includeExpired );
 		Q_ASSERT(ok); //TODO
 		contractDetailsRequests.append( cdR );
+		retVal++;
 	}
 	return retVal;
 }

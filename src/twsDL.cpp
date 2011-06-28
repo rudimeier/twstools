@@ -911,8 +911,7 @@ void TwsDL::initWork()
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
-		int i = contractDetailsTodo->fromConfig(
-			myProp->contractSpecs, myProp->includeExpired );
+		int i = contractDetailsTodo->fromFile( rows, myProp->includeExpired );
 		Q_ASSERT( i>=0 );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
@@ -1059,15 +1058,6 @@ bool PropTwsDL::readProperties()
 	
 	ok = ok & get("useRTH", useRTH);
 	ok = ok & get("formatDate", formatDate);
-	
-	contractSpecs.clear();
-	QVector<QString> tmp;
-	ok = ok & get("contractSpecs", tmp);
-	foreach( QString s, tmp ) {
-		QList<QString> l = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-		Q_ASSERT( l.size() >= 2 && l.size() <= 4 ); // TODO handle that
-		contractSpecs.append( l );
-	}
 	
 	return ok;
 }
