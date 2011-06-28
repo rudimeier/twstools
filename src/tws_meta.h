@@ -218,6 +218,7 @@ class WorkTodo
 		WorkTodo();
 		virtual ~WorkTodo();
 		
+		GenericRequest::ReqType getType() const;
 		const QList<QByteArray>& getRows() const;
 		int read_file( const QString & fileName);
 		

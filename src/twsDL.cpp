@@ -909,13 +909,13 @@ void TwsDL::initWork()
 	qDebug() << QString("got %1, %2 rows from workFile %3")
 		.arg(cnt).arg(rows.size()).arg(workFile);
 	
-	if( workFile.isEmpty() ) {
+	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
 		int i = contractDetailsTodo->fromConfig(
 			myProp->contractSpecs, myProp->includeExpired );
 		Q_ASSERT( i>=0 );
 // 		state = IDLE;
-	} else {
+	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
 			int i = histTodo->fromFile(rows, myProp->includeExpired);

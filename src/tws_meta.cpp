@@ -527,6 +527,12 @@ WorkTodo::~WorkTodo()
 }
 
 
+GenericRequest::ReqType WorkTodo::getType() const
+{
+	return reqType;
+}
+
+
 const QList<QByteArray>& WorkTodo::getRows() const
 {
 	return *rows;
@@ -538,6 +544,7 @@ int WorkTodo::read_file( const QString & fileName )
 	int retVal = -1;
 	QFile f( fileName );
 	
+	reqType = GenericRequest::NONE;
 	rows->clear();
 	if (f.open(QFile::ReadOnly)) {
 		retVal = 0;
@@ -546,6 +553,14 @@ int WorkTodo::read_file( const QString & fileName )
 			line.chop(1); //remove line feed
 			if( line.startsWith('#') || line.isEmpty() ) {
 				continue;
+			}
+			// TODO for now first line defines whole file's reqType
+			if( reqType == GenericRequest::NONE ) {
+				if( ! line.startsWith("REQ_CD") ) {
+					reqType = GenericRequest::HIST_REQUEST;
+				} else {
+					reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
+				}
 			}
 			rows->append(line);
 			retVal++;
