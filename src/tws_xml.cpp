@@ -128,28 +128,68 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 
 
 
+IbXml::IbXml()
+{
+	doc = xmlNewDoc( (const xmlChar*) "1.0");
+	root = xmlNewDocNode( doc, NULL, (xmlChar*)"root", NULL );
+	xmlDocSetRootElement( doc, root );
+}
+
+IbXml::~IbXml()
+{
+	xmlFreeDoc(doc);
+}
+
+void IbXml::dump() const
+{
+	xmlDocFormatDump(stdout, doc, 1);
+}
+
+void IbXml::add( const IB::Contract& c )
+{
+	conv_ib2xml( root, c );
+}
+
+void IbXml::add( const IB::ContractDetails& cd )
+{
+	conv_ib2xml( root, cd );
+}
+
+xmlDocPtr IbXml::getDoc() const
+{
+	return doc;
+}
+
+xmlNodePtr IbXml::getRoot() const
+{
+	return root; 
+}
+
+
+
+
+#ifdef TWS_XML_MAIN
+
 int main(int argc, char *argv[])
 {
-	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
-	xmlNodePtr root = xmlNewDocNode( doc, NULL, (xmlChar*)"root", NULL );
-	xmlDocSetRootElement( doc, root );
+	IbXml ibXml;
 
 
 
 
 
-	IB::Contract ic_orig, ic_conv, ic_conv2;
+	IB::Contract ic_orig, ic_conv;
 	ic_orig.strike = 25.0;
-	conv_ib2xml( root, ic_orig );
+	ibXml.add( ic_orig );
 	
-	xmlDocDump(stdout, doc);
+	ibXml.dump();
 	
-	xmlNodePtr xml_contract2 = xmlFirstElementChild( root );
-	conv_xml2ib( &ic_conv2, xml_contract2 );
-	xmlDocDump(stdout, doc);
+	xmlNodePtr xml_contract2 = xmlFirstElementChild( ibXml.getRoot() );
+	conv_xml2ib( &ic_conv, xml_contract2 );
+	ic_conv.strike = 27.0;
 	
 	#define DBG_EQUAL_FIELD( _attr_ ) \
-		qDebug() << #_attr_ << ( ic_orig._attr_ == ic_conv2._attr_ );
+		qDebug() << #_attr_ << ( ic_orig._attr_ == ic_conv._attr_ );
 	DBG_EQUAL_FIELD( conId );
 	DBG_EQUAL_FIELD( symbol );
 	DBG_EQUAL_FIELD( secType );
@@ -166,7 +206,7 @@ int main(int argc, char *argv[])
 	DBG_EQUAL_FIELD( secId );
 	DBG_EQUAL_FIELD( comboLegsDescrip );
 	
-	xmlFreeDoc(doc);
-	
 	return 0;
 }
+
+#endif

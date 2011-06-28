@@ -30,6 +30,7 @@ tws_xml_SOURCES =
 tws_xml_SOURCES += tws_xml.cpp
 tws_xml_SOURCES += twsUtil.cpp
 tws_xml_CPPFLAGS = ${AM_CPPFLAGS}
+tws_xml_CPPFLAGS += "-D TWS_XML_MAIN"
 tws_xml_CPPFLAGS += ${QtCore_DEPS_CFLAGS}
 tws_xml_CPPFLAGS += ${libxml2_DEPS_CFLAGS}
 tws_xml_LDFLAGS = ${AM_LDFLAGS}
