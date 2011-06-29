@@ -8,7 +8,7 @@ AM_LDFLAGS += -L/usr/local/lib64
 
 
 bin_PROGRAMS =
-bin_PROGRAMS += twsDL tws-xml
+bin_PROGRAMS += twsDL
 
 twsDL_SOURCES =
 twsDL_SOURCES += twsDL.cpp
@@ -25,18 +25,6 @@ twsDL_LDFLAGS += ${QtCore_DEPS_LIBS}
 twsDL_LDFLAGS += ${libconfig_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
-
-tws_xml_SOURCES =
-tws_xml_SOURCES += tws_xml.cpp
-tws_xml_SOURCES += twsUtil.cpp
-tws_xml_CPPFLAGS = ${AM_CPPFLAGS}
-tws_xml_CPPFLAGS += "-D TWS_XML_MAIN"
-tws_xml_CPPFLAGS += ${QtCore_DEPS_CFLAGS}
-tws_xml_CPPFLAGS += ${libxml2_DEPS_CFLAGS}
-tws_xml_LDFLAGS = ${AM_LDFLAGS}
-tws_xml_LDFLAGS += ${QtCore_DEPS_LIBS}
-tws_xml_LDFLAGS += ${libxml2_DEPS_LIBS}
-tws_xml_LDADD =
 
 noinst_HEADERS =
 noinst_HEADERS += twsClient.h
