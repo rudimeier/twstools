@@ -28,6 +28,8 @@ class IbXml
 		IbXml();
 		virtual ~IbXml();
 		
+		static void setSkipDefaults( bool );
+		
 		void dump() const;
 		void add( const IB::Contract& cd );
 		void add( const IB::ContractDetails& cd );
@@ -36,6 +38,8 @@ class IbXml
 		xmlNodePtr getRoot() const;
 		
 	private:
+		static bool skip_defaults;
+		
 		xmlDocPtr doc;
 		xmlNodePtr root;
 };

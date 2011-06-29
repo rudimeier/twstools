@@ -220,6 +220,8 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 
 
 
+bool IbXml::skip_defaults = false;
+
 IbXml::IbXml()
 {
 	doc = xmlNewDoc( (const xmlChar*) "1.0");
@@ -232,6 +234,11 @@ IbXml::~IbXml()
 	xmlFreeDoc(doc);
 }
 
+void IbXml::setSkipDefaults( bool b )
+{
+	skip_defaults = b;
+}
+
 void IbXml::dump() const
 {
 	xmlDocFormatDump(stdout, doc, 1);
@@ -239,12 +246,12 @@ void IbXml::dump() const
 
 void IbXml::add( const IB::Contract& c )
 {
-	conv_ib2xml( root, c );
+	conv_ib2xml( root, c, skip_defaults );
 }
 
 void IbXml::add( const IB::ContractDetails& cd )
 {
-	conv_ib2xml( root, cd );
+	conv_ib2xml( root, cd, skip_defaults );
 }
 
 xmlDocPtr IbXml::getDoc() const
@@ -265,7 +272,7 @@ xmlNodePtr IbXml::getRoot() const
 int main(int argc, char *argv[])
 {
 	IbXml ibXml;
-
+	IbXml::setSkipDefaults( true );
 
 
 
