@@ -17,28 +17,39 @@
 
 
 #define ADD_ATTR_INT( _struct_, _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp )
+	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
 
 #define ADD_ATTR_LONG( _struct_, _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp )
+	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
 
 #define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp )
+	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
 
 #define ADD_ATTR_BOOL( _struct_, _attr_ ) \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, \
-		(xmlChar*) (_struct_._attr_ ? "1" : "0") )
+	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, \
+			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
+	}
 
 #define ADD_ATTR_STRING( _struct_, _attr_ ) \
-	xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) _struct_._attr_.c_str() );
-	
+	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, \
+			(xmlChar*) _struct_._attr_.c_str() ); \
+	}
 
-void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c )
+void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c, bool skip_defaults )
 {
 	char tmp[128];
+	static const IB::Contract dflt;
 	
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"IBContract", NULL);
 	
@@ -62,14 +73,17 @@ void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c )
 }
 
 
-void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
+void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd,
+	bool skip_defaults )
 {
 	char tmp[128];
+	static const IB::ContractDetails dflt;
 	
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(xmlChar*)"IBContractDetails", NULL);
 	
-	conv_ib2xml( ne, cd.summary );
+	conv_ib2xml( ne, cd.summary, skip_defaults );
+	
 	ADD_ATTR_STRING( cd, marketName );
 	ADD_ATTR_STRING( cd, tradingClass );
 	ADD_ATTR_DOUBLE( cd, minTick );
