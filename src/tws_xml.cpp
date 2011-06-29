@@ -110,17 +110,17 @@ void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
 
 #define GET_ATTR_LONG( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atol( tmp ) : dfltContract.conId; \
+	_struct_->_attr_ = tmp ? atol( tmp ) : dfltContract._attr_; \
 	free(tmp)
 
 #define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract._attr_; \
 	free(tmp)
 
 #define GET_ATTR_BOOL( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract.conId; \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract._attr_; \
 	free(tmp)
 
 #define GET_ATTR_STRING( _struct_, _attr_ ) \
