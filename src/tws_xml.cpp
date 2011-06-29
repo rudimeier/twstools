@@ -106,6 +106,18 @@ void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c, bool skip_defaults )
 	ADD_ATTR_STRING( c, secId );
 	ADD_ATTR_STRING( c, comboLegsDescrip );
 	
+	if( c.comboLegs != NULL ) {
+		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
+		
+		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
+		for ( it = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
+			conv_ib2xml( ncl, **it, skip_defaults );
+		}
+	}
+	if( c.underComp != NULL ) {
+		conv_ib2xml( ne, *c.underComp, skip_defaults );
+	}
+	
 	xmlAddChild(parent, ne);
 }
 
@@ -229,8 +241,27 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( c, secIdType );
 	GET_ATTR_STRING( c, secId );
 	GET_ATTR_STRING( c, comboLegsDescrip );
-	// TODO comboLegs
-	// TODO underComp
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
+			if( c->comboLegs == NULL ) {
+				c->comboLegs = new IB::Contract::ComboLegList();
+			} else {
+				c->comboLegs->clear();
+			}
+			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				IB::ComboLeg *cl = new IB::ComboLeg();
+				conv_xml2ib( cl, q );
+				c->comboLegs->push_back(cl);
+			}
+		} else if( p->name && (strcmp((char*) p->name, "UnderComp") == 0)) {
+			if( c->underComp == NULL ) {
+				c->underComp = new IB::UnderComp();
+			}
+			conv_xml2ib( c->underComp, p );
+		}
+		
+	}
 }
 
 
@@ -332,12 +363,17 @@ xmlNodePtr IbXml::getRoot() const
 int main(int argc, char *argv[])
 {
 	IbXml ibXml;
-	IbXml::setSkipDefaults( true );
+	IbXml::setSkipDefaults( false );
 
 
 
 
 	IB::ContractDetails ic_orig, ic_conv;
+	ic_orig.summary.comboLegs = new IB::Contract::ComboLegList();
+	ic_orig.summary.comboLegs->push_back(new IB::ComboLeg());
+	ic_orig.summary.comboLegs->push_back(new IB::ComboLeg());
+	ic_orig.summary.comboLegs->push_back(new IB::ComboLeg());
+	ic_orig.summary.underComp = new IB::UnderComp();
 	ic_orig.summary.strike = 25.0;
 	ic_orig.coupon = 1234.567;
 	ibXml.add( ic_orig );
@@ -347,6 +383,11 @@ int main(int argc, char *argv[])
 	xmlNodePtr xml_contract2 = xmlFirstElementChild( ibXml.getRoot() );
 	conv_xml2ib( &ic_conv, xml_contract2 );
 	ic_conv.summary.strike = 27.0;
+	
+	IbXml ibXml2;
+	ibXml2.add( ic_conv );
+	ibXml2.dump();
+	
 	
 	#define DBG_EQUAL_FIELD( _attr_ ) \
 		qDebug() << #_attr_ << ( ic_orig.summary._attr_ == ic_conv.summary._attr_ );
