@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -107,6 +108,10 @@ void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
 
 
 
+#define GET_ATTR_INT( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dfltContract._attr_; \
+	free(tmp)
 
 #define GET_ATTR_LONG( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
@@ -120,7 +125,7 @@ void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& cd )
 
 #define GET_ATTR_BOOL( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dfltContract._attr_; \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dfltContract._attr_; \
 	free(tmp)
 
 #define GET_ATTR_STRING( _struct_, _attr_ ) \
@@ -158,7 +163,44 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::ContractDetails dfltCntrctDtls;
+	static const IB::ContractDetails dfltContract;
+	
+	xmlNodePtr xc = xmlFirstElementChild( node );
+	conv_xml2ib( &cd->summary, xc );
+	assert( strcmp((char*)xc->name,"IBContract") == 0 ); //TODO
+	
+	GET_ATTR_STRING( cd, marketName );
+	GET_ATTR_STRING( cd, tradingClass );
+	GET_ATTR_DOUBLE( cd, minTick );
+	GET_ATTR_STRING( cd, orderTypes );
+	GET_ATTR_STRING( cd, validExchanges );
+	GET_ATTR_LONG( cd, priceMagnifier );
+	GET_ATTR_INT( cd, underConId );
+	GET_ATTR_STRING( cd, longName );
+	GET_ATTR_STRING( cd, contractMonth );
+	GET_ATTR_STRING( cd, industry );
+	GET_ATTR_STRING( cd, category );
+	GET_ATTR_STRING( cd, subcategory );
+	GET_ATTR_STRING( cd, timeZoneId );
+	GET_ATTR_STRING( cd, tradingHours );
+	GET_ATTR_STRING( cd, liquidHours );
+	
+	// BOND values
+	GET_ATTR_STRING( cd, cusip );
+	GET_ATTR_STRING( cd, ratings );
+	GET_ATTR_STRING( cd, descAppend );
+	GET_ATTR_STRING( cd, bondType );
+	GET_ATTR_STRING( cd, couponType );
+	GET_ATTR_BOOL( cd, callable );
+	GET_ATTR_BOOL( cd, putable );
+	GET_ATTR_DOUBLE( cd, coupon );
+	GET_ATTR_BOOL( cd, convertible );
+	GET_ATTR_STRING( cd, maturity );
+	GET_ATTR_STRING( cd, issueDate );
+	GET_ATTR_STRING( cd, nextOptionDate );
+	GET_ATTR_STRING( cd, nextOptionType );
+	GET_ATTR_BOOL( cd, nextOptionPartial );
+	GET_ATTR_STRING( cd, notes );
 }
 
 
@@ -214,18 +256,19 @@ int main(int argc, char *argv[])
 
 
 
-	IB::Contract ic_orig, ic_conv;
-	ic_orig.strike = 25.0;
+	IB::ContractDetails ic_orig, ic_conv;
+	ic_orig.summary.strike = 25.0;
+	ic_orig.coupon = 1234.567;
 	ibXml.add( ic_orig );
 	
 	ibXml.dump();
 	
 	xmlNodePtr xml_contract2 = xmlFirstElementChild( ibXml.getRoot() );
 	conv_xml2ib( &ic_conv, xml_contract2 );
-	ic_conv.strike = 27.0;
+	ic_conv.summary.strike = 27.0;
 	
 	#define DBG_EQUAL_FIELD( _attr_ ) \
-		qDebug() << #_attr_ << ( ic_orig._attr_ == ic_conv._attr_ );
+		qDebug() << #_attr_ << ( ic_orig.summary._attr_ == ic_conv.summary._attr_ );
 	DBG_EQUAL_FIELD( conId );
 	DBG_EQUAL_FIELD( symbol );
 	DBG_EQUAL_FIELD( secType );
