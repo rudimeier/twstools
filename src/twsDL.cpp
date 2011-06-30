@@ -5,6 +5,7 @@
 #include "twsClient.h"
 #include "twsWrapper.h"
 #include "debug.h"
+#include "config.h"
 
 // from global installed ibtws
 #include "ibtws/Contract.h"
@@ -14,7 +15,94 @@
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
 #include <QtCore/QCoreApplication>
+#include <popt.h>
 #include <stdio.h>
+
+
+static poptContext opt_ctx;
+static const char *workfilep = "";
+static const char *configfilep = "twsDL.cfg";
+
+#define VERSION_MSG \
+PACKAGE_NAME " " PACKAGE_VERSION "\n\
+Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
+License: BSD 3-Clause\n"
+
+
+static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
+	poptOption *key, const char */*arg*/, void */*data*/ )
+{
+	if (key->shortName == 'h') {
+		poptPrintHelp(con, stdout, 0);
+	} else if (key->shortName == 'V') {
+		fprintf(stdout, VERSION_MSG);
+	} else {
+		poptPrintUsage(con, stdout, 0);
+	}
+	
+	exit(0);
+}
+
+static struct poptOption flow_opts[] = {
+	{"config", 'c', POPT_ARG_STRING, &configfilep, 0,
+		"Config file (default: twsDL.cfg).", "FILE"},
+	POPT_TABLEEND
+};
+
+static struct poptOption help_opts[] = {
+	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
+	{"help", 'h', POPT_ARG_NONE, NULL, 0, "Show this help message.", NULL},
+	{"version", 'V', POPT_ARG_NONE, NULL, 0, "Print version string and exit.",
+		NULL},
+	{"usage", '\0', POPT_ARG_NONE, NULL, 0, "Display brief usage message."
+		, NULL},
+	POPT_TABLEEND
+};
+
+static const struct poptOption twsDL_opts[] = {
+	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, flow_opts, 0,
+	 "Program advice:", NULL},
+	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, help_opts, 0,
+	 "Help options:", NULL},
+	POPT_TABLEEND
+};
+
+void clear_popt()
+{
+	poptFreeContext(opt_ctx);
+}
+
+void twsDL_parse_cl(size_t argc, const char *argv[])
+{
+	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
+	atexit(clear_popt);
+	
+	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [WORK_FILE]");
+	
+	int rc;
+	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
+		// handle options when we have returning ones
+		Q_ASSERT(false);
+	}
+	
+	if( rc != -1 ) {
+		fprintf( stderr, "error: %s '%s'\n",
+			poptStrerror(rc), poptBadOption(opt_ctx, 0) );
+		exit(2);
+	}
+	
+	const char** rest = poptGetArgs(opt_ctx);
+	if( rest != NULL ) {
+		if( *rest != NULL ) {
+			workfilep = *rest;
+			rest++;
+		}
+		if( *rest != NULL ) {
+			fprintf( stderr, "error: bad usage\n" );
+			exit(2);
+		}
+	}
+}
 
 
 
@@ -117,6 +205,7 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
+	workTodo( new WorkTodo() ),
 	contractDetailsTodo( new ContractDetailsTodo() ),
 	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
@@ -145,6 +234,9 @@ TwsDL::~TwsDL()
 	}
 	if( myProp  != NULL ) {
 		delete myProp;
+	}
+	if( workTodo != NULL ) {
+		delete workTodo;
 	}
 	if( histTodo != NULL ) {
 		delete histTodo;
@@ -812,16 +904,20 @@ int TwsDL::storage2stdout()
 
 void TwsDL::initWork()
 {
-	if( workFile.isEmpty() ) {
+	int cnt = workTodo->read_file(workFile);
+	const QList<QByteArray> &rows = workTodo->getRows();
+	qDebug() << QString("got %1, %2 rows from workFile %3")
+		.arg(cnt).arg(rows.size()).arg(workFile);
+	
+	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
-		int i = contractDetailsTodo->fromConfig(
-			myProp->contractSpecs, myProp->includeExpired );
+		int i = contractDetailsTodo->fromFile( rows, myProp->includeExpired );
 		Q_ASSERT( i>=0 );
 // 		state = IDLE;
-	} else {
+	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
 		if( myProp->downloadData ) {
 			qDebug() << "read work from file";
-			int i = histTodo->fromFile(workFile, myProp->includeExpired);
+			int i = histTodo->fromFile(rows, myProp->includeExpired);
 			Q_ASSERT( i>=0 );
 			dumpWorkTodo();
 // 			state = IDLE;;
@@ -963,15 +1059,6 @@ bool PropTwsDL::readProperties()
 	ok = ok & get("useRTH", useRTH);
 	ok = ok & get("formatDate", formatDate);
 	
-	contractSpecs.clear();
-	QVector<QString> tmp;
-	ok = ok & get("contractSpecs", tmp);
-	foreach( QString s, tmp ) {
-		QList<QString> l = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-		Q_ASSERT( l.size() >= 2 && l.size() <= 4 ); // TODO handle that
-		contractSpecs.append( l );
-	}
-	
 	return ok;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -983,15 +1070,9 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication app( argc, argv );
 	
-	if( argc > 3 ) {
-		fprintf( stderr, "Usage: %s [configuration file] [worktodo file]\n", argv[0] );
-		return 2;
-	}
-	QString workfile;
-	if( argc == 3 ) {
-		workfile = argv[2];
-	}
-	TwsDL twsDL( argc >= 2 ? argv[1] : "twsDL.cfg", workfile );
+	twsDL_parse_cl(argc, (const char **) argv);
+	
+	TwsDL twsDL( configfilep, workfilep );
 	twsDL.start();
 	
 	TwsDL::State state = twsDL.currentState();

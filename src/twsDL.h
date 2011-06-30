@@ -23,6 +23,7 @@ namespace IB {
 class ContractDetailsRequest;
 class HistRequest;
 class GenericRequest;
+class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class PacketContractDetails;
@@ -65,8 +66,6 @@ class PropTwsDL : public PropSub
 		QList<QString> whatToShow;
 		int useRTH;
 		int formatDate;
-		
-		QList< QList<QString> > contractSpecs;
 };
 
 
@@ -155,6 +154,7 @@ class TwsDL
 		
 		int curIndexTodoContractDetails;
 		
+		WorkTodo *workTodo;
 		ContractDetailsTodo *contractDetailsTodo;
 		HistTodo *histTodo;
 		

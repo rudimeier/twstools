@@ -283,15 +283,12 @@ HistTodo::~HistTodo()
 }
 
 
-int HistTodo::fromFile( const QString & fileName, bool includeExpired )
+int HistTodo::fromFile( const QList<QByteArray> &rows, bool includeExpired )
 {
 	histRequests.clear();
 	
-	QList<QByteArray> rows;
-	int retVal = read_file( fileName, &rows );
-	if( retVal == -1) {
-		return retVal;
-	}
+	int retVal = rows.size();
+	
 	foreach( QByteArray row, rows ) {
 		if( row.startsWith('[') ) {
 			int firstTab = row.indexOf('\t');
@@ -303,28 +300,6 @@ int HistTodo::fromFile( const QString & fileName, bool includeExpired )
 		bool ok = hR.fromString( row, includeExpired );
 		Q_ASSERT(ok); //TODO
 		add( hR );
-	}
-	return retVal;
-}
-
-
-int HistTodo::read_file( const QString & fileName, QList<QByteArray> *list ) const
-{
-	int retVal = -1;
-	QFile f( fileName );
-	if (f.open(QFile::ReadOnly)) {
-		retVal = 0;
-		while (!f.atEnd()) {
-			QByteArray line = f.readLine();
-			line.chop(1); //remove line feed
-			if( line.startsWith('#') || line.isEmpty() ) {
-				continue;
-			}
-			list->append(line);
-			retVal++;
-		}
-	} else {
-// 		_lastError = QString("can't read file '%1'").arg(fileName);
 	}
 	return retVal;
 }
@@ -519,15 +494,88 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
-int ContractDetailsTodo::fromConfig(
-		const QList< QList<QString> > &contractSpecs, bool includeExpired )
+int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
+	bool includeExpired )
 {
-	int retVal = contractSpecs.size();
-	foreach( const QList<QString> &sl, contractSpecs ) {
+	int retVal = 0;
+	QRegExp regExp("^REQ_CD:?");
+	
+	foreach( QByteArray row, rows ) {
+		QString s(row);
+		Q_ASSERT( s.contains( regExp ) );
+		s.remove( regExp );
+		QList<QString> sl = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
+		Q_ASSERT( sl.size() >= 2 && sl.size() <= 4 ); // TODO handle that
+		
 		ContractDetailsRequest cdR;
 		bool ok = cdR.fromStringList( sl, includeExpired );
 		Q_ASSERT(ok); //TODO
 		contractDetailsRequests.append( cdR );
+		retVal++;
+	}
+	return retVal;
+}
+
+
+
+
+
+
+
+
+WorkTodo::WorkTodo() :
+	reqType(GenericRequest::NONE),
+	rows(new QList<QByteArray>())
+{
+}
+
+
+WorkTodo::~WorkTodo()
+{
+	delete rows;
+}
+
+
+GenericRequest::ReqType WorkTodo::getType() const
+{
+	return reqType;
+}
+
+
+const QList<QByteArray>& WorkTodo::getRows() const
+{
+	return *rows;
+}
+
+
+int WorkTodo::read_file( const QString & fileName )
+{
+	int retVal = -1;
+	QFile f( fileName );
+	
+	reqType = GenericRequest::NONE;
+	rows->clear();
+	if (f.open(QFile::ReadOnly)) {
+		retVal = 0;
+		while (!f.atEnd()) {
+			QByteArray line = f.readLine();
+			line.chop(1); //remove line feed
+			if( line.startsWith('#') || line.isEmpty() ) {
+				continue;
+			}
+			// TODO for now first line defines whole file's reqType
+			if( reqType == GenericRequest::NONE ) {
+				if( ! line.startsWith("REQ_CD") ) {
+					reqType = GenericRequest::HIST_REQUEST;
+				} else {
+					reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
+				}
+			}
+			rows->append(line);
+			retVal++;
+		}
+	} else {
+// 		_lastError = QString("can't read file '%1'").arg(fileName);
 	}
 	return retVal;
 }

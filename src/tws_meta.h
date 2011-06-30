@@ -158,6 +158,7 @@ class GenericRequest
 
 class PacingGod;
 class DataFarmStates;
+class WorkTodo;
 
 class HistTodo
 {
@@ -165,7 +166,7 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		int fromFile( const QString & fileName, bool includeExpired );
+		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
 		void dump( FILE *stream ) const;
 		void dumpLeft( FILE *stream ) const;
 		
@@ -181,8 +182,6 @@ class HistTodo
 		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
-		int read_file( const QString & fileName, QList<QByteArray> *list ) const;
-		
 		QList<HistRequest*> histRequests;
 		QList<int> doneRequests;
 		QList<int> leftRequests;
@@ -200,10 +199,31 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		int fromConfig( const QList< QList<QString> > &contractSpecs,
-			bool includeExpired );
+		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
 		
 		QList<ContractDetailsRequest> contractDetailsRequests;
+};
+
+
+
+
+
+
+
+
+class WorkTodo
+{
+	public:
+		WorkTodo();
+		virtual ~WorkTodo();
+		
+		GenericRequest::ReqType getType() const;
+		const QList<QByteArray>& getRows() const;
+		int read_file( const QString & fileName);
+		
+	private:
+		GenericRequest::ReqType reqType;
+		QList<QByteArray> *rows;
 };
 
 
