@@ -8,6 +8,8 @@
 
 
 static poptContext opt_ctx;
+static const char *filep = NULL;
+static int histjobp = 0;
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -30,6 +32,8 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 }
 
 static struct poptOption flow_opts[] = {
+	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
+		"generate hist job", "FILE"},
 	POPT_TABLEEND
 };
 
@@ -61,7 +65,7 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
 	atexit(clear_popt);
 	
-	poptSetOtherOptionHelp( opt_ctx, "[OPTION]...");
+	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... FILE");
 	
 	int rc;
 	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
@@ -77,8 +81,14 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 	
 	const char** rest = poptGetArgs(opt_ctx);
 	if( rest != NULL ) {
-		fprintf( stderr, "error: bad usage\n" );
-		exit(2);
+		if( *rest != NULL ) {
+			filep = *rest;
+			rest++;
+		}
+		if( *rest != NULL ) {
+			fprintf( stderr, "error: bad usage\n" );
+			exit(2);
+		}
 	}
 }
 
@@ -88,6 +98,10 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 int main(int argc, char *argv[])
 {
 	twsgen_parse_cl(argc, (const char **) argv);
+	
+	if( histjobp ) {
+		printf("generate hist hob from file '%s'\n", filep);
+	}
 	
 	return 0;
 }
