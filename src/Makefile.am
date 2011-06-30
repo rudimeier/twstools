@@ -18,18 +18,23 @@ twsDL_SOURCES += twsUtil.cpp
 twsDL_SOURCES += twsWrapper.cpp
 twsDL_SOURCES += properties.cpp
 twsDL_CPPFLAGS = ${AM_CPPFLAGS}
-twsDL_CPPFLAGS += ${QT4_DEPS_CFLAGS}
+twsDL_CPPFLAGS += ${QtCore_DEPS_CFLAGS}
 twsDL_CPPFLAGS += ${libconfig_DEPS_CFLAGS}
 twsDL_LDFLAGS = ${AM_LDFLAGS}
-twsDL_LDFLAGS += ${QT4_DEPS_LIBS}
+twsDL_LDFLAGS += ${QtCore_DEPS_LIBS}
 twsDL_LDFLAGS += ${libconfig_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
 
 tws_xml_SOURCES =
 tws_xml_SOURCES += tws_xml.cpp
+tws_xml_SOURCES += twsUtil.cpp
 tws_xml_CPPFLAGS = ${AM_CPPFLAGS}
+tws_xml_CPPFLAGS += ${QtCore_DEPS_CFLAGS}
+tws_xml_CPPFLAGS += ${libxml2_DEPS_CFLAGS}
 tws_xml_LDFLAGS = ${AM_LDFLAGS}
+tws_xml_LDFLAGS += ${QtCore_DEPS_LIBS}
+tws_xml_LDFLAGS += ${libxml2_DEPS_LIBS}
 tws_xml_LDADD =
 
 noinst_HEADERS =
