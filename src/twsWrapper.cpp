@@ -33,11 +33,12 @@ void DebugTwsWrapper::tickSize( IB::TickerId tickerId, IB::TickType field,
 
 void DebugTwsWrapper::tickOptionComputation ( IB::TickerId tickerId,
 	IB::TickType tickType, double impliedVol, double delta, double optPrice,
-	double pvDividend/*, double gamma, double vega, double theta,
-	double undPrice*/ )
+	double pvDividend, double gamma, double vega, double theta,
+	double undPrice )
 {
 	qDebug() << "TICK_OPTION_COMPUTATION:" << tickerId << ibToString(tickType)
-		<< impliedVol << delta << optPrice << pvDividend;
+		<< impliedVol << delta << optPrice << pvDividend << gamma << vega
+		<< theta << undPrice;
 }
 
 

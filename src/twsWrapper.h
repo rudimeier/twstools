@@ -19,8 +19,8 @@ class DebugTwsWrapper : public IB::EWrapper
 		void tickSize( IB::TickerId tickerId, IB::TickType field, int size );
 		void tickOptionComputation( IB::TickerId tickerId,
 			IB::TickType tickType, double impliedVol, double delta,
-			double optPrice, double pvDividend/*, double gamma, double vega,
-			double theta, double undPrice*/ );
+			double optPrice, double pvDividend, double gamma, double vega,
+			double theta, double undPrice );
 		void tickGeneric( IB::TickerId tickerId, IB::TickType tickType,
 			double value );
 		void tickString(IB::TickerId tickerId, IB::TickType tickType,
