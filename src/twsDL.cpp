@@ -352,21 +352,26 @@ void TwsDL::idle()
 		return;
 	}
 	
-	if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
-		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
-		getContracts();
-		return;
+	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
+			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
+			getContracts();
+			return;
+		}
 	}
 	
 	// TODO we want to dump only one time
 	dumpWorkTodo();
 	
-	if( myProp->downloadData  && histTodo->countLeft() > 0
-	    && ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
-		getData();
-	} else {
-		changeState( QUIT_READY );
+	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
+		if( histTodo->countLeft() > 0
+	    	&& ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
+			getData();
+			return;
+		}
 	}
+	
+	changeState( QUIT_READY );
 }
 
 
@@ -920,15 +925,11 @@ void TwsDL::initWork()
 		Q_ASSERT( i>=0 );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if( myProp->downloadData ) {
-			qDebug() << "read work from file";
-			int i = histTodo->fromFile(rows, myProp->includeExpired);
-			Q_ASSERT( i>=0 );
-			dumpWorkTodo();
-// 			state = IDLE;;
-		} else {
-// 			state = QUIT_READY;
-		}
+		qDebug() << "read work from file";
+		int i = histTodo->fromFile(rows, myProp->includeExpired);
+		Q_ASSERT( i>=0 );
+		dumpWorkTodo();
+// 		state = IDLE;;
 	}
 }
 
@@ -1012,7 +1013,6 @@ void PropTwsDL::initDefaults()
 	minPacingTime = 1500;
 	violationPause = 60000;
 	
-	downloadData = false;
 	reqMaxContracts = -1;
 	reqMaxContractsPerSpec = -1;
 	
@@ -1045,7 +1045,6 @@ bool PropTwsDL::readProperties()
 	ok &= get("minPacingTime", minPacingTime);
 	ok &= get("violationPause", violationPause);
 	
-	ok = ok & get("downloadData", downloadData);
 	ok = ok & get("reqMaxContracts", reqMaxContracts);
 	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	

@@ -52,7 +52,6 @@ class PropTwsDL : public PropSub
 		int minPacingTime;
 		int violationPause;
 		
-		bool downloadData;
 		int reqMaxContracts;
 		int reqMaxContractsPerSpec;
 		
