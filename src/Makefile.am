@@ -8,7 +8,7 @@ AM_LDFLAGS += -L/usr/local/lib64
 
 
 bin_PROGRAMS =
-bin_PROGRAMS += twsDL
+bin_PROGRAMS += twsDL twsgen
 
 twsDL_SOURCES =
 twsDL_SOURCES += twsDL.cpp
@@ -28,6 +28,13 @@ twsDL_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
 twsDL_LDADD += -lpopt
+
+twsgen_SOURCES =
+twsgen_SOURCES += twsgen.cpp
+twsgen_CPPFLAGS = ${AM_CPPFLAGS}
+twsgen_LDFLAGS = ${AM_LDFLAGS}
+twsgen_LDADD =
+twsgen_LDADD += -lpopt
 
 noinst_HEADERS =
 noinst_HEADERS += twsClient.h
