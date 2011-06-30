@@ -9,6 +9,7 @@ AM_LDFLAGS += -L/usr/local/lib64
 
 bin_PROGRAMS =
 bin_PROGRAMS += twsDL
+
 twsDL_SOURCES =
 twsDL_SOURCES += twsDL.cpp
 twsDL_SOURCES += tws_meta.cpp
@@ -17,15 +18,14 @@ twsDL_SOURCES += twsUtil.cpp
 twsDL_SOURCES += twsWrapper.cpp
 twsDL_SOURCES += properties.cpp
 twsDL_CPPFLAGS = ${AM_CPPFLAGS}
-twsDL_CPPFLAGS += ${QT4_DEPS_CFLAGS}
+twsDL_CPPFLAGS += ${QtCore_DEPS_CFLAGS}
 twsDL_CPPFLAGS += ${libconfig_DEPS_CFLAGS}
 twsDL_LDFLAGS = ${AM_LDFLAGS}
-twsDL_LDFLAGS += ${QT4_DEPS_LIBS}
+twsDL_LDFLAGS += ${QtCore_DEPS_LIBS}
 twsDL_LDFLAGS += ${libconfig_DEPS_LIBS}
 twsDL_LDADD =
 twsDL_LDADD += -libtws
 twsDL_LDADD += -lpopt
-
 
 noinst_HEADERS =
 noinst_HEADERS += twsClient.h
@@ -35,6 +35,7 @@ noinst_HEADERS += properties.h
 noinst_HEADERS += debug.h
 noinst_HEADERS += twsDL.h
 noinst_HEADERS += tws_meta.h
+noinst_HEADERS += tws_xml.h
 
 
 
