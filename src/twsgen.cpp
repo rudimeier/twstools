@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 
 static poptContext opt_ctx;
@@ -95,12 +97,41 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 
 
 
+int open_file( const char *filename )
+{
+	xmlDocPtr doc;
+	
+	doc = xmlReadFile(filename, NULL, 0);
+	if( doc == NULL ) {
+		fprintf(stderr, "Failed to parse %s\n", filename);
+		return -1;
+	}
+	
+	xmlNodePtr root = doc->children;
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+		 	printf( "%d, %s, %d\n", p->type, p->name, p->line);
+			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				if( q->type == XML_ELEMENT_NODE ) {
+			 		printf( "%d, %s, %d\n", q->type, q->name, q->line);
+				}
+			}
+		}
+	}
+	
+	xmlFreeDoc(doc);
+	return 0;
+}
+
+
+
+
 int main(int argc, char *argv[])
 {
 	twsgen_parse_cl(argc, (const char **) argv);
 	
 	if( histjobp ) {
-		printf("generate hist hob from file '%s'\n", filep);
+		open_file( filep );
 	}
 	
 	return 0;

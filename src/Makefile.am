@@ -33,6 +33,7 @@ twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp
 twsgen_CPPFLAGS = ${AM_CPPFLAGS}
 twsgen_LDFLAGS = ${AM_LDFLAGS}
+twsgen_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsgen_LDADD =
 twsgen_LDADD += -lpopt
 
