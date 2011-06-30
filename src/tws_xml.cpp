@@ -62,6 +62,7 @@ void conv_ib2xml( xmlNodePtr parent, const IB::ComboLeg& cl,
 	ADD_ATTR_LONG( cl, openClose );
 	ADD_ATTR_LONG( cl, shortSaleSlot );
 	ADD_ATTR_STRING( cl, designatedLocation );
+	ADD_ATTR_INT( cl, exemptCode );
 	
 	xmlAddChild(parent, ne);
 }
@@ -209,6 +210,7 @@ void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 	GET_ATTR_LONG( cl, openClose );
 	GET_ATTR_LONG( cl, shortSaleSlot );
 	GET_ATTR_STRING( cl, designatedLocation );
+	GET_ATTR_INT( cl, exemptCode );
 }
 
 void conv_xml2ib( IB::UnderComp* uc, const xmlNodePtr node )
