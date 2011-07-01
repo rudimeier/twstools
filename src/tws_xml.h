@@ -46,8 +46,10 @@ class IbXml
 		xmlDocPtr getDoc() const;
 		xmlNodePtr getRoot() const;
 		
+		static const bool &skip_defaults;
+		
 	private:
-		static bool skip_defaults;
+		static bool _skip_defaults;
 		
 		xmlDocPtr doc;
 		xmlNodePtr root;
