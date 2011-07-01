@@ -591,12 +591,28 @@ PacketContractDetails::PacketContractDetails()
 {
 	complete = false;
 	reqId = -1;
+	reqContract = NULL;
 }
 
+PacketContractDetails::~PacketContractDetails()
+{
+	if( reqContract != NULL ) {
+		delete reqContract;
+	}
+}
 
 const QList<IB::ContractDetails>& PacketContractDetails::constList() const
 {
 	return cdList;
+}
+
+void PacketContractDetails::record( int reqId,
+	const ContractDetailsRequest& cdr )
+{
+	Q_ASSERT( !complete && this->reqId == -1 && reqContract == NULL
+		&& cdList.isEmpty() );
+	this->reqId = reqId;
+	this->reqContract = new IB::Contract( cdr.ibContract() );
 }
 
 void PacketContractDetails::setFinished()
@@ -617,6 +633,10 @@ void PacketContractDetails::clear()
 	complete = false;
 	reqId = -1;
 	cdList.clear();
+	if( reqContract != NULL ) {
+		delete reqContract;
+		reqContract = NULL;
+	}
 }
 
 

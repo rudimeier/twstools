@@ -236,8 +236,10 @@ class PacketContractDetails
 {
 	public:
 		PacketContractDetails();
+		virtual ~PacketContractDetails();
 		
 		const QList<IB::ContractDetails>& constList() const;
+		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
 		bool isFinished() const;
 		void clear();
@@ -246,6 +248,7 @@ class PacketContractDetails
 	private:
 		bool complete;
 		int reqId;
+		const IB::Contract *reqContract;
 		QList<IB::ContractDetails> cdList;
 };
 
