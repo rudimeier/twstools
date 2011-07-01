@@ -23,6 +23,7 @@
 static poptContext opt_ctx;
 static const char *workfilep = "";
 static const char *configfilep = "twsDL.cfg";
+static int skipdefp = 0;
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -45,6 +46,8 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 }
 
 static struct poptOption flow_opts[] = {
+	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
+		"Never skip xml default values.", NULL},
 	{"config", 'c', POPT_ARG_STRING, &configfilep, 0,
 		"Config file (default: twsDL.cfg).", "FILE"},
 	POPT_TABLEEND
@@ -1003,6 +1006,8 @@ int main(int argc, char *argv[])
 	QCoreApplication app( argc, argv );
 	
 	twsDL_parse_cl(argc, (const char **) argv);
+	
+	IbXml::setSkipDefaults( !skipdefp );
 	
 	TwsDL twsDL( configfilep, workfilep );
 	twsDL.start();
