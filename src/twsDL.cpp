@@ -815,7 +815,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 
 int TwsDL::storage2stdout()
 {
-	IbXml ibXml;
+	IbXml ibXml( "ContractDetailsRequest" );
 	QTime  stopWatch;
 	stopWatch.start();
 	

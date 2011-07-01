@@ -34,7 +34,7 @@ void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
 class IbXml
 {
 	public:
-		IbXml();
+		IbXml( const char* rootname );
 		virtual ~IbXml();
 		
 		static void setSkipDefaults( bool );

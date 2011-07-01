@@ -315,10 +315,10 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 
 bool IbXml::skip_defaults = false;
 
-IbXml::IbXml()
+IbXml::IbXml( const char* rootname )
 {
 	doc = xmlNewDoc( (const xmlChar*) "1.0");
-	root = xmlNewDocNode( doc, NULL, (xmlChar*)"root", NULL );
+	root = xmlNewDocNode( doc, NULL, (const xmlChar*) rootname, NULL );
 	xmlDocSetRootElement( doc, root );
 }
 
