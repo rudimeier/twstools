@@ -822,8 +822,6 @@ int TwsDL::storage2stdout()
 	const ContractDetailsRequest& cdR = contractDetailsTodo
 		->contractDetailsRequests.at( curIndexTodoContractDetails);
 	ibXml.add( "reqContract", cdR.ibContract() );
-	QTime  stopWatch;
-	stopWatch.start();
 	
 	int countReceived = p_contractDetails.constList().size();
 	
@@ -834,8 +832,7 @@ int TwsDL::storage2stdout()
 		ibXml.add("ContractDetails", cD);
 	}
 	qDebug() << QString(
-		"Contracts received: %1 (%2ms)")
-		.arg(countReceived).arg(stopWatch.elapsed());
+		"Contracts received: %1").arg(countReceived);
 	
 	ibXml.dump();
 	
