@@ -390,8 +390,10 @@ void TwsDL::getContracts()
 
 void TwsDL::finContracts()
 {
-	int inserted;
-	inserted = storage2stdout();
+	qDebug() << QString( "Contracts received: %1")
+		.arg(p_contractDetails.constList().size() );
+	
+	p_contractDetails.dumpXml();
 	
 	for( int i = 0; i<p_contractDetails.constList().size(); i++ ) {
 		const IB::ContractDetails &cd = p_contractDetails.constList().at(i);
@@ -411,10 +413,6 @@ void TwsDL::finContracts()
 	}
 	
 	p_contractDetails.clear();
-	if( inserted == -1 ) {
-		changeState( QUIT_ERROR );
-		return;
-	}
 	
 	curIndexTodoContractDetails++;
 	currentRequest.close();
@@ -813,19 +811,6 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 		curIdleTime = 0;
 		qDebug() << "READY" << histTodo->currentIndex() << reqId;
 	}
-}
-
-
-int TwsDL::storage2stdout()
-{
-	int countReceived = p_contractDetails.constList().size();
-	
-	qDebug() << QString(
-		"Contracts received: %1").arg(countReceived);
-	
-	p_contractDetails.dumpXml();
-	
-	return countReceived;
 }
 
 

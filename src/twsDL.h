@@ -96,9 +96,6 @@ class TwsDL
 		void initTwsClient();
 		void eventLoop();
 		
-		/// Returns the count of inserted rows or -1 on error.
-		int storage2stdout();
-		
 		void dumpWorkTodo() const;
 		
 		void connectTws();
