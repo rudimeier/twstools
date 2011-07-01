@@ -664,9 +664,13 @@ void PacketContractDetails::dumpXml()
 		(const xmlChar*)"PacketContractDetails", NULL );
 	xmlDocSetRootElement( doc, root );
 	
-	conv_ib2xml( root, "reqContract", *reqContract, IbXml::skip_defaults );
+	xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "reqContract", *reqContract, IbXml::skip_defaults );
+	
+	
+	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
 	for( int i=0; i<cdList.size(); i++ ) {
-		conv_ib2xml( root, "ContractDetails", cdList[i], IbXml::skip_defaults );
+		conv_ib2xml( nrsp, "ContractDetails", cdList[i], IbXml::skip_defaults );
 	}
 	
 	xmlDocFormatDump(stdout, doc, 1);
