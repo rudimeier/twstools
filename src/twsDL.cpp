@@ -816,6 +816,9 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 int TwsDL::storage2stdout()
 {
 	IbXml ibXml( "ContractDetailsRequest" );
+	const ContractDetailsRequest& cdR = contractDetailsTodo
+		->contractDetailsRequests.at( curIndexTodoContractDetails);
+	ibXml.add( "reqContract", cdR.ibContract() );
 	QTime  stopWatch;
 	stopWatch.start();
 	
@@ -825,7 +828,7 @@ int TwsDL::storage2stdout()
 		
 		const IB::ContractDetails &cD = p_contractDetails.constList()[i];
 		
-		ibXml.add(cD);
+		ibXml.add("ContractDetails", cD);
 	}
 	qDebug() << QString(
 		"Contracts received: %1 (%2ms)")

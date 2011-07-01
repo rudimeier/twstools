@@ -14,13 +14,13 @@ typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
 
-void conv_ib2xml( xmlNodePtr parent, const IB::ComboLeg& c,
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& c,
 	bool skip_defaults=false );
-void conv_ib2xml( xmlNodePtr parent, const IB::UnderComp& c,
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& c,
 	bool skip_defaults=false );
-void conv_ib2xml( xmlNodePtr parent, const IB::Contract& c,
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
 	bool skip_defaults=false );
-void conv_ib2xml( xmlNodePtr parent, const IB::ContractDetails& c,
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ContractDetails& c,
 	bool skip_defaults=false );
 
 void conv_xml2ib( IB::ComboLeg* c, const xmlNodePtr node );
@@ -40,8 +40,8 @@ class IbXml
 		static void setSkipDefaults( bool );
 		
 		void dump() const;
-		void add( const IB::Contract& cd );
-		void add( const IB::ContractDetails& cd );
+		void add( const char* name, const IB::Contract& cd );
+		void add( const char* name, const IB::ContractDetails& cd );
 		
 		xmlDocPtr getDoc() const;
 		xmlNodePtr getRoot() const;
