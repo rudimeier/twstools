@@ -245,6 +245,8 @@ class PacketContractDetails
 		void clear();
 		void append( int reqId, const IB::ContractDetails& );
 		
+		void dumpXml();
+		
 	private:
 		bool complete;
 		int reqId;

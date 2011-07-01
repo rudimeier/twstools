@@ -1,4 +1,5 @@
 #include "tws_meta.h"
+#include "tws_xml.h"
 
 #include "twsUtil.h"
 #include "debug.h"
@@ -6,6 +7,10 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
+
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include <limits.h>
 
@@ -649,6 +654,23 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 	Q_ASSERT( !complete );
 	
 	cdList.append(c);
+}
+
+
+void PacketContractDetails::dumpXml()
+{
+	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
+	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+		(const xmlChar*)"PacketContractDetails", NULL );
+	xmlDocSetRootElement( doc, root );
+	
+	conv_ib2xml( root, "reqContract", *reqContract, IbXml::skip_defaults );
+	for( int i=0; i<cdList.size(); i++ ) {
+		conv_ib2xml( root, "ContractDetails", cdList[i], IbXml::skip_defaults );
+	}
+	
+	xmlDocFormatDump(stdout, doc, 1);
+	xmlFreeDoc(doc);
 }
 
 
