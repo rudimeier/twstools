@@ -818,23 +818,12 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 
 int TwsDL::storage2stdout()
 {
-	IbXml ibXml( "ContractDetailsRequest" );
-	const ContractDetailsRequest& cdR = contractDetailsTodo
-		->contractDetailsRequests.at( curIndexTodoContractDetails);
-	ibXml.add( "reqContract", cdR.ibContract() );
-	
 	int countReceived = p_contractDetails.constList().size();
 	
-	for( int i=0; i<countReceived; i++ ) {
-		
-		const IB::ContractDetails &cD = p_contractDetails.constList()[i];
-		
-		ibXml.add("ContractDetails", cD);
-	}
 	qDebug() << QString(
 		"Contracts received: %1").arg(countReceived);
 	
-	ibXml.dump();
+	p_contractDetails.dumpXml();
 	
 	return countReceived;
 }
@@ -899,6 +888,7 @@ void TwsDL::changeState( State s )
 
 void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 {
+	p_contractDetails.record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
 }
 
