@@ -674,6 +674,9 @@ void PacketContractDetails::dumpXml()
 	}
 	
 	xmlDocFormatDump(stdout, doc, 1);
+	//HACK print form feed as xml file separator
+	printf("\f");
+	
 	xmlFreeDoc(doc);
 }
 
