@@ -206,6 +206,11 @@ int main(int argc, char *argv[])
 	while( (doc = file.nextXmlDoc()) != NULL ) {
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( doc );
+		for( int i = 0; i<pcd->constList().size(); i++ ) {
+			pcd->constList().at(i).summary;
+		}
+		delete pcd;
+		xmlFreeDoc(doc);
 	}
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );

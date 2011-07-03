@@ -606,9 +606,26 @@ PacketContractDetails::~PacketContractDetails()
 	}
 }
 
-PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr )
+PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
 {
+	PacketContractDetails *pcd = new PacketContractDetails();
 	
+	xmlNodePtr root = doc->children;
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "response") == 0 ) {
+			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				if( q->type == XML_ELEMENT_NODE
+					&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
+					IB::ContractDetails cd;
+					conv_xml2ib(&cd, q);
+					pcd->cdList.append(cd);
+				}
+			}
+		}
+	}
+	
+	return pcd;
 }
 
 const QList<IB::ContractDetails>& PacketContractDetails::constList() const
