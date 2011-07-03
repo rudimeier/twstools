@@ -731,6 +731,106 @@ PacketHistData::PacketHistData()
 }
 
 
+PacketHistData * PacketHistData::fromXml( xmlDocPtr )
+{
+	PacketHistData *phd = new PacketHistData();
+	Q_ASSERT(false); // not implemented yet
+	return phd;
+}
+
+#define ADD_ATTR_QSTRING( _ne_, _struct_, _attr_ ) \
+	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+			(xmlChar*) toIBString(_struct_._attr_).c_str() ); \
+	}
+
+#define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
+	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
+	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_BOOL( _ne_, _struct_, _attr_ ) \
+	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
+	}
+
+void PacketHistData::dumpXml( const HistRequest& hR )
+{
+	char tmp[128];
+	
+	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
+	
+	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
+	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+		(const xmlChar*)"PacketHistData", NULL );
+	xmlDocSetRootElement( doc, root );
+	{
+		struct s_bla {
+			const QString &endDateTime;
+			const QString &durationStr;
+			const QString &barSizeSetting;
+			const QString &whatToShow;
+			int useRTH;
+			int formatDate;
+		};
+		static const s_bla dflt = {"", "", "", "", 0, 0 };
+		const IB::Contract &c = hR.ibContract();
+		s_bla bla = { hR.endDateTime(), hR.durationStr(), hR.barSizeSetting(),
+			hR.whatToShow(), hR.useRTH(), hR.formatDate() };
+		
+		xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
+		conv_ib2xml( nqry, "reqContract", c, IbXml::skip_defaults );
+		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
+		ADD_ATTR_QSTRING( nqry, bla, durationStr );
+		ADD_ATTR_QSTRING( nqry, bla, barSizeSetting );
+		ADD_ATTR_QSTRING( nqry, bla, whatToShow );
+		ADD_ATTR_INT( nqry, bla, useRTH );
+		ADD_ATTR_INT( nqry, bla, formatDate );
+	}
+	
+	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
+	{
+		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
+		for( int i=0; i<rows.size(); i++ ) {
+			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
+			ADD_ATTR_QSTRING( nrow, rows[i], date );
+			ADD_ATTR_DOUBLE( nrow, rows[i], open );
+			ADD_ATTR_DOUBLE( nrow, rows[i], high );
+			ADD_ATTR_DOUBLE( nrow, rows[i], low );
+			ADD_ATTR_DOUBLE( nrow, rows[i], close );
+			ADD_ATTR_INT( nrow, rows[i], volume );
+			ADD_ATTR_INT( nrow, rows[i], count );
+			ADD_ATTR_DOUBLE( nrow, rows[i], WAP );
+			ADD_ATTR_BOOL( nrow, rows[i], hasGaps );
+		}
+		xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
+		ADD_ATTR_QSTRING( nrow, finishRow, date );
+		ADD_ATTR_DOUBLE( nrow, finishRow, open );
+		ADD_ATTR_DOUBLE( nrow, finishRow, high );
+		ADD_ATTR_DOUBLE( nrow, finishRow, low );
+		ADD_ATTR_DOUBLE( nrow, finishRow, close );
+		ADD_ATTR_INT( nrow, finishRow, volume );
+		ADD_ATTR_INT( nrow, finishRow, count );
+		ADD_ATTR_DOUBLE( nrow, finishRow, WAP );
+		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
+	}
+	
+	xmlDocFormatDump(stdout, doc, 1);
+	//HACK print form feed as xml file separator
+	printf("\f");
+	
+	xmlFreeDoc(doc);
+}
+
+
 bool PacketHistData::isFinished() const
 {
 	return (mode == CLOSED);

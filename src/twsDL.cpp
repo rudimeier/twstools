@@ -501,6 +501,7 @@ void TwsDL::finData()
 	switch( p_histData.getError() ) {
 	case PacketHistData::ERR_NONE:
 		p_histData.dump( histTodo->current(), myProp->printFormatDates );
+		p_histData.dumpXml( histTodo->current() );
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();

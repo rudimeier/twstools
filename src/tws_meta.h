@@ -273,6 +273,8 @@ class PacketHistData
 		
 		PacketHistData();
 		
+		static PacketHistData * fromXml( xmlDocPtr );
+		
 		bool isFinished() const;
 		Error getError() const;
 		void clear();
@@ -282,6 +284,8 @@ class PacketHistData
 			int volume, int count, double WAP, bool hasGaps );
 		void closeError( Error );
 		void dump( const HistRequest&, bool printFormatDates );
+		
+		void dumpXml( const HistRequest& );
 		
 	private:
 		class Row
