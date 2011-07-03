@@ -203,15 +203,40 @@ int main(int argc, char *argv[])
 	
 	xmlDocPtr doc;
 	int count_docs = 0;
+	HistTodo histTodo;
 	while( (doc = file.nextXmlDoc()) != NULL ) {
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( doc );
+		
+		bool myProp_includeExpired = true;
+		int myProp_reqMaxContractsPerSpec = -1;
+		QList<QString> myProp_whatToShow = QList<QString>() << "BID";
+		QString myProp_endDateTime = "20110214 16:00:00 America/Chicago";
+		QString myProp_durationStr = "1 W";
+		QString myProp_barSizeSetting = "30 mins";
+		int myProp_useRTH = 1;
+		int myProp_formatDate = 1;
 		for( int i = 0; i<pcd->constList().size(); i++ ) {
-			pcd->constList().at(i).summary;
+			
+			const IB::ContractDetails &cd = pcd->constList().at(i);
+			IB::Contract c = cd.summary;
+			c.includeExpired = myProp_includeExpired;
+			
+			if( myProp_reqMaxContractsPerSpec > 0 && myProp_reqMaxContractsPerSpec <= i ) {
+				break;
+			}
+			
+			foreach( QString wts, myProp_whatToShow ) {
+				HistRequest hR;
+				hR.initialize( c, myProp_endDateTime, myProp_durationStr,
+				               myProp_barSizeSetting, wts, myProp_useRTH, myProp_formatDate );
+				histTodo.add( hR );
+			}
 		}
 		delete pcd;
 		xmlFreeDoc(doc);
 	}
+	histTodo.dumpLeft( stdout );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
 	
