@@ -1,4 +1,5 @@
 #include "twsgen.h"
+#include "tws_meta.h"
 #include "config.h"
 
 #include <popt.h>
@@ -204,18 +205,7 @@ int main(int argc, char *argv[])
 	int count_docs = 0;
 	while( (doc = file.nextXmlDoc()) != NULL ) {
 		count_docs++;
-		xmlNodePtr root = doc->children;
-		for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
-			if( p->type == XML_ELEMENT_NODE
-				&& strcmp((char*)p->name, "response") == 0 ) {
-				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-					if( q->type == XML_ELEMENT_NODE
-						&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
-				 		printf( "%d, %s, %d\n", q->type, q->name, q->line);
-					}
-				}
-			}
-		}
+		PacketContractDetails *pcd = PacketContractDetails::fromXml( doc );
 	}
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );

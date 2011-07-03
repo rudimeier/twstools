@@ -7,7 +7,8 @@
 #include <QtCore/QList>
 #include <QtCore/QHash>
 
-
+typedef struct _xmlNode * xmlNodePtr;
+typedef struct _xmlDoc * xmlDocPtr;
 
 
 
@@ -237,6 +238,8 @@ class PacketContractDetails
 	public:
 		PacketContractDetails();
 		virtual ~PacketContractDetails();
+		
+		static PacketContractDetails * fromXml( xmlDocPtr );
 		
 		const QList<IB::ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );

@@ -606,6 +606,11 @@ PacketContractDetails::~PacketContractDetails()
 	}
 }
 
+PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr )
+{
+	
+}
+
 const QList<IB::ContractDetails>& PacketContractDetails::constList() const
 {
 	return cdList;
