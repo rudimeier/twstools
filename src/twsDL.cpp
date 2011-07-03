@@ -394,24 +394,6 @@ void TwsDL::finContracts()
 		.arg(p_contractDetails.constList().size() );
 	
 	p_contractDetails.dumpXml();
-	
-	for( int i = 0; i<p_contractDetails.constList().size(); i++ ) {
-		const IB::ContractDetails &cd = p_contractDetails.constList().at(i);
-		IB::Contract c = cd.summary;
-		c.includeExpired = myProp->includeExpired;
-		
-		if( myProp->reqMaxContractsPerSpec > 0 && myProp->reqMaxContractsPerSpec <= i ) {
-			break;
-		}
-		
-		foreach( QString wts, myProp->whatToShow ) {
-			HistRequest hR;
-			hR.initialize( c, myProp->endDateTime, myProp->durationStr,
-			               myProp->barSizeSetting, wts, myProp->useRTH, myProp->formatDate );
-			histTodo->add( hR );
-		}
-	}
-	
 	p_contractDetails.clear();
 	
 	curIndexTodoContractDetails++;
@@ -923,13 +905,6 @@ void PropTwsDL::initDefaults()
 	printFormatDates = true;
 	
 	includeExpired = false;
-	
-	endDateTime = "20100514 22:15:00 GMT";
-	durationStr = "1 W";
-	barSizeSetting = "1 hour";
-	whatToShow = QList<QString>() << "TRADES";
-	useRTH = 1;
-	formatDate = 1;
 }
 
 
@@ -955,17 +930,6 @@ bool PropTwsDL::readProperties()
 	ok = ok & get("printFormatDates", printFormatDates);
 	
 	ok = ok & get("includeExpired", includeExpired);
-	
-	ok = ok & get("endDateTime", endDateTime);
-	ok = ok & get("durationStr", durationStr);
-	ok = ok & get("barSizeSetting", barSizeSetting);
-	
-	QString wtsStr;
-	ok = ok & get("whatToShow", wtsStr);
-	whatToShow = wtsStr.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-	
-	ok = ok & get("useRTH", useRTH);
-	ok = ok & get("formatDate", formatDate);
 	
 	return ok;
 }
