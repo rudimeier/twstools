@@ -612,19 +612,28 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
 	
 	xmlNodePtr root = doc->children;
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
-		if( p->type == XML_ELEMENT_NODE
-			&& strcmp((char*)p->name, "response") == 0 ) {
-			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				if( q->type == XML_ELEMENT_NODE
-					&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
-					IB::ContractDetails cd;
-					conv_xml2ib(&cd, q);
-					pcd->cdList.append(cd);
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type == XML_ELEMENT_NODE
+						&& strcmp((char*)q->name, "reqContract") == 0 )  {
+						pcd->reqContract = new IB::Contract();
+						conv_xml2ib( (IB::Contract*)pcd->reqContract, q);
+					}
+				}
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type == XML_ELEMENT_NODE
+						&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
+						IB::ContractDetails cd;
+						conv_xml2ib(&cd, q);
+						pcd->cdList.append(cd);
+					}
 				}
 			}
 		}
 	}
-	
 	return pcd;
 }
 
