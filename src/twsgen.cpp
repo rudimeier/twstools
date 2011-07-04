@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
@@ -82,45 +87,100 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 	}
 	
 	const char** rest = poptGetArgs(opt_ctx);
-	if( rest != NULL ) {
-		if( *rest != NULL ) {
-			filep = *rest;
-			rest++;
-		}
+	if( rest != NULL && *rest != NULL ) {
+		filep = *rest;
+		rest++;
+		
 		if( *rest != NULL ) {
 			fprintf( stderr, "error: bad usage\n" );
 			exit(2);
 		}
+	} else {
+			fprintf( stderr, "error: bad usage\n" );
+			exit(2);
 	}
 }
 
 
 
 
-int open_file( const char *filename )
+static int find_form_feed( const char *s, int n )
 {
-	xmlDocPtr doc;
+	int i;
+	for( i=0; i<n; i++ ) {
+		if( s[i] == '\f' ) {
+			break;
+		}
+	}
+	return i;
+}
+
+#define CHUNK_SIZE 1024
+
+class XmlFile
+{
+	public:
+		XmlFile();
+		virtual ~XmlFile();
+		
+		bool openFile( const char *filename );
+		xmlDocPtr nextXmlDoc();
 	
-	doc = xmlReadFile(filename, NULL, 0);
-	if( doc == NULL ) {
-		fprintf(stderr, "Failed to parse %s\n", filename);
-		return -1;
+	private:
+		FILE *file;
+		char *buf;
+};
+
+XmlFile::XmlFile() :
+	file(NULL),
+	buf( (char*) malloc(1024*1024))
+{
+}
+
+XmlFile::~XmlFile()
+{
+	if( file != NULL ) {
+		fclose(file);
+	}
+	free(buf);
+}
+
+bool XmlFile::openFile( const char *filename )
+{
+	file = fopen(filename, "rb");
+	
+	if( file == NULL ) {
+		fprintf( stderr, "error, %s: '%s'\n", strerror(errno), filename );
+		return false;
 	}
 	
-	xmlNodePtr root = doc->children;
-	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
-		if( p->type == XML_ELEMENT_NODE ) {
-		 	printf( "%d, %s, %d\n", p->type, p->name, p->line);
-			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				if( q->type == XML_ELEMENT_NODE ) {
-			 		printf( "%d, %s, %d\n", q->type, q->name, q->line);
-				}
-			}
+	return true;
+}
+
+xmlDocPtr XmlFile::nextXmlDoc()
+{
+	xmlDocPtr doc = NULL;
+	if( file == NULL ) {
+		return doc;
+	}
+	
+	char *cp = buf;
+	int tmp_len;
+	while( (tmp_len = fread(cp, 1, CHUNK_SIZE, file)) > 0 ) {
+		int ff = find_form_feed(cp, tmp_len);
+		if( ff < tmp_len ) {
+			int suc = fseek( file, -(tmp_len - (ff + 1)), SEEK_CUR);
+			assert( suc == 0 );
+			cp += ff;
+			break;
+		} else {
+			cp += tmp_len;
 		}
 	}
 	
-	xmlFreeDoc(doc);
-	return 0;
+	doc = xmlReadMemory( buf, cp-buf, "URL", NULL, 0 );
+	
+	return doc;
 }
 
 
@@ -130,9 +190,23 @@ int main(int argc, char *argv[])
 {
 	twsgen_parse_cl(argc, (const char **) argv);
 	
-	if( histjobp ) {
-		open_file( filep );
+	if( !histjobp ) {
+		fprintf( stderr, "error, only -H is implemented\n" );
+		return 1;
 	}
+	
+	XmlFile file;
+	if( ! file.openFile(filep) ) {
+		return 1;
+	}
+	
+	xmlDocPtr doc;
+	int count_docs = 0;
+	while( (doc = file.nextXmlDoc()) != NULL ) {
+		count_docs++;
+	}
+	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
+		count_docs, filep );
 	
 	return 0;
 }
