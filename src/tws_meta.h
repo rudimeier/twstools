@@ -241,6 +241,7 @@ class PacketContractDetails
 		
 		static PacketContractDetails * fromXml( xmlDocPtr );
 		
+		const IB::Contract& getReqContract() const;
 		const QList<IB::ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();

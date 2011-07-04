@@ -560,28 +560,34 @@ int WorkTodo::read_file( const QString & fileName )
 	
 	reqType = GenericRequest::NONE;
 	rows->clear();
-	if (f.open(QFile::ReadOnly)) {
-		retVal = 0;
-		while (!f.atEnd()) {
-			QByteArray line = f.readLine();
-			line.chop(1); //remove line feed
-			if( line.startsWith('#') || line.isEmpty() ) {
-				continue;
-			}
-			// TODO for now first line defines whole file's reqType
-			if( reqType == GenericRequest::NONE ) {
-				if( ! line.startsWith("REQ_CD") ) {
-					reqType = GenericRequest::HIST_REQUEST;
-				} else {
-					reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
-				}
-			}
-			rows->append(line);
-			retVal++;
-		}
-	} else {
-// 		_lastError = QString("can't read file '%1'").arg(fileName);
+
+
+	XmlFile file;
+	if( ! file.openFile(fileName.toAscii().constData()) ) {
+		return retVal;
 	}
+	retVal = 0;
+	xmlDocPtr doc;
+	while( (doc = file.nextXmlDoc()) != NULL ) {
+		QByteArray line;
+		xmlNodePtr root = doc->children;
+		if( root->type == XML_ELEMENT_NODE
+			&& strcmp((char*)root->name, "PacketContractDetails") == 0 ) {
+			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
+			PacketContractDetails *pcd = PacketContractDetails::fromXml(doc);
+			line = QByteArray("REQ_CD: ")
+				+ pcd->getReqContract().symbol.c_str() + ", "
+				+ pcd->getReqContract().secType.c_str() + ", "
+				+ pcd->getReqContract().exchange.c_str();
+		} else if ( root->type == XML_ELEMENT_NODE
+			&& strcmp((char*)root->name, "PacketHistData") == 0 ) {
+			reqType = GenericRequest::HIST_REQUEST;
+			Q_ASSERT(false);
+		}
+		rows->append(line);
+		retVal++;
+	}
+	
 	return retVal;
 }
 
@@ -635,6 +641,11 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
 		}
 	}
 	return pcd;
+}
+
+const IB::Contract& PacketContractDetails::getReqContract() const
+{
+	return *reqContract;
 }
 
 const QList<IB::ContractDetails>& PacketContractDetails::constList() const
