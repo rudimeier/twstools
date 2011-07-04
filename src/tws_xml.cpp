@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -309,6 +310,75 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, nextOptionType );
 	GET_ATTR_BOOL( cd, nextOptionPartial );
 	GET_ATTR_STRING( cd, notes );
+}
+
+
+
+
+static int find_form_feed( const char *s, int n )
+{
+	int i;
+	for( i=0; i<n; i++ ) {
+		if( s[i] == '\f' ) {
+			break;
+		}
+	}
+	return i;
+}
+
+#define CHUNK_SIZE 1024
+
+
+XmlFile::XmlFile() :
+	file(NULL),
+	buf( (char*) malloc(1024*1024))
+{
+}
+
+XmlFile::~XmlFile()
+{
+	if( file != NULL ) {
+		fclose((FILE*)file);
+	}
+	free(buf);
+}
+
+bool XmlFile::openFile( const char *filename )
+{
+	file = fopen(filename, "rb");
+	
+	if( file == NULL ) {
+		fprintf( stderr, "error, %s: '%s'\n", strerror(errno), filename );
+		return false;
+	}
+	
+	return true;
+}
+
+xmlDocPtr XmlFile::nextXmlDoc()
+{
+	xmlDocPtr doc = NULL;
+	if( file == NULL ) {
+		return doc;
+	}
+	
+	char *cp = buf;
+	int tmp_len;
+	while( (tmp_len = fread(cp, 1, CHUNK_SIZE, (FILE*)file)) > 0 ) {
+		int ff = find_form_feed(cp, tmp_len);
+		if( ff < tmp_len ) {
+			int suc = fseek( (FILE*)file, -(tmp_len - (ff + 1)), SEEK_CUR);
+			assert( suc == 0 );
+			cp += ff;
+			break;
+		} else {
+			cp += tmp_len;
+		}
+	}
+	
+	doc = xmlReadMemory( buf, cp-buf, "URL", NULL, 0 );
+	
+	return doc;
 }
 
 

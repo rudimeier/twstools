@@ -31,6 +31,23 @@ void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
 
 
 
+class XmlFile
+{
+	public:
+		XmlFile();
+		virtual ~XmlFile();
+		
+		bool openFile( const char *filename );
+		xmlDocPtr nextXmlDoc();
+	
+	private:
+		void *file; // FILE*
+		char *buf;
+};
+
+
+
+
 class IbXml
 {
 	public:

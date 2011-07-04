@@ -1,4 +1,5 @@
 #include "twsgen.h"
+#include "tws_xml.h"
 #include "tws_meta.h"
 #include "config.h"
 
@@ -6,12 +7,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <libxml/parser.h>
 #include <libxml/tree.h>
 
 
@@ -100,88 +95,6 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 			fprintf( stderr, "error: bad usage\n" );
 			exit(2);
 	}
-}
-
-
-
-
-static int find_form_feed( const char *s, int n )
-{
-	int i;
-	for( i=0; i<n; i++ ) {
-		if( s[i] == '\f' ) {
-			break;
-		}
-	}
-	return i;
-}
-
-#define CHUNK_SIZE 1024
-
-class XmlFile
-{
-	public:
-		XmlFile();
-		virtual ~XmlFile();
-		
-		bool openFile( const char *filename );
-		xmlDocPtr nextXmlDoc();
-	
-	private:
-		FILE *file;
-		char *buf;
-};
-
-XmlFile::XmlFile() :
-	file(NULL),
-	buf( (char*) malloc(1024*1024))
-{
-}
-
-XmlFile::~XmlFile()
-{
-	if( file != NULL ) {
-		fclose(file);
-	}
-	free(buf);
-}
-
-bool XmlFile::openFile( const char *filename )
-{
-	file = fopen(filename, "rb");
-	
-	if( file == NULL ) {
-		fprintf( stderr, "error, %s: '%s'\n", strerror(errno), filename );
-		return false;
-	}
-	
-	return true;
-}
-
-xmlDocPtr XmlFile::nextXmlDoc()
-{
-	xmlDocPtr doc = NULL;
-	if( file == NULL ) {
-		return doc;
-	}
-	
-	char *cp = buf;
-	int tmp_len;
-	while( (tmp_len = fread(cp, 1, CHUNK_SIZE, file)) > 0 ) {
-		int ff = find_form_feed(cp, tmp_len);
-		if( ff < tmp_len ) {
-			int suc = fseek( file, -(tmp_len - (ff + 1)), SEEK_CUR);
-			assert( suc == 0 );
-			cp += ff;
-			break;
-		} else {
-			cp += tmp_len;
-		}
-	}
-	
-	doc = xmlReadMemory( buf, cp-buf, "URL", NULL, 0 );
-	
-	return doc;
 }
 
 
