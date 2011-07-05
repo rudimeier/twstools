@@ -331,7 +331,9 @@ static int find_form_feed( const char *s, int n )
 
 XmlFile::XmlFile() :
 	file(NULL),
-	buf( (char*) malloc(1024*1024))
+	buf( (char*) malloc(1024*1024)),
+	curDoc(NULL),
+	curNode(NULL)
 {
 }
 
@@ -341,6 +343,9 @@ XmlFile::~XmlFile()
 		fclose((FILE*)file);
 	}
 	free(buf);
+	if( curDoc != NULL ) {
+		xmlFreeDoc( curDoc );
+	}
 }
 
 bool XmlFile::openFile( const char *filename )
@@ -379,6 +384,25 @@ xmlDocPtr XmlFile::nextXmlDoc()
 	doc = xmlReadMemory( buf, cp-buf, "URL", NULL, 0 );
 	
 	return doc;
+}
+
+xmlNodePtr XmlFile::nextXmlNode()
+{
+	if( curNode != NULL && (curNode = curNode->next) != NULL ) {
+		return curNode;
+	}
+	assert( curNode == NULL );
+	
+	if( curDoc != NULL ) {
+		xmlFreeDoc(curDoc);
+	}
+	while( (curDoc = nextXmlDoc()) != NULL ) {
+		if( (curNode = curDoc->children) != NULL ) {
+			break;
+		}
+		xmlFreeDoc(curDoc);
+	}
+	return curNode;
 }
 
 

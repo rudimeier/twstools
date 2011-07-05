@@ -39,10 +39,13 @@ class XmlFile
 		
 		bool openFile( const char *filename );
 		xmlDocPtr nextXmlDoc();
+		xmlNodePtr nextXmlNode();
 	
 	private:
 		void *file; // FILE*
 		char *buf;
+		xmlDocPtr curDoc;
+		xmlNodePtr curNode;
 };
 
 
