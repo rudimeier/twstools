@@ -567,21 +567,20 @@ int WorkTodo::read_file( const QString & fileName )
 		return retVal;
 	}
 	retVal = 0;
-	xmlDocPtr doc;
-	while( (doc = file.nextXmlDoc()) != NULL ) {
+	xmlNodePtr xn;
+	while( (xn = file.nextXmlNode()) != NULL ) {
 		QByteArray line;
-		xmlNodePtr root = doc->children;
-		if( root->type == XML_ELEMENT_NODE
-			&& strcmp((char*)root->name, "PacketContractDetails") == 0 ) {
+		if( xn->type == XML_ELEMENT_NODE
+			&& strcmp((char*)xn->name, "PacketContractDetails") == 0 ) {
 			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
-			PacketContractDetails *pcd = PacketContractDetails::fromXml(doc);
+			PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
 			const IB::Contract &c = pcd->getRequest().ibContract();
 			line = QByteArray("REQ_CD: ")
 				+ c.symbol.c_str() + ", "
 				+ c.secType.c_str() + ", "
 				+ c.exchange.c_str();
-		} else if ( root->type == XML_ELEMENT_NODE
-			&& strcmp((char*)root->name, "PacketHistData") == 0 ) {
+		} else if ( xn->type == XML_ELEMENT_NODE
+			&& strcmp((char*)xn->name, "PacketHistData") == 0 ) {
 			reqType = GenericRequest::HIST_REQUEST;
 			Q_ASSERT(false);
 		}
@@ -613,11 +612,10 @@ PacketContractDetails::~PacketContractDetails()
 	}
 }
 
-PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
+PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 {
 	PacketContractDetails *pcd = new PacketContractDetails();
 	
-	xmlNodePtr root = doc->children;
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
@@ -754,7 +752,7 @@ PacketHistData::PacketHistData()
 }
 
 
-PacketHistData * PacketHistData::fromXml( xmlDocPtr )
+PacketHistData * PacketHistData::fromXml( xmlNodePtr )
 {
 	PacketHistData *phd = new PacketHistData();
 	Q_ASSERT(false); // not implemented yet

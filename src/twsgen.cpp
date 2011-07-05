@@ -114,12 +114,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	xmlDocPtr doc;
+	xmlNodePtr xn;
 	int count_docs = 0;
 	HistTodo histTodo;
-	while( (doc = file.nextXmlDoc()) != NULL ) {
+	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
-		PacketContractDetails *pcd = PacketContractDetails::fromXml( doc );
+		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
 		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
@@ -147,7 +147,6 @@ int main(int argc, char *argv[])
 			}
 		}
 		delete pcd;
-		xmlFreeDoc(doc);
 	}
 	histTodo.dumpLeft( stdout );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",

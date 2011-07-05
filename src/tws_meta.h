@@ -239,7 +239,7 @@ class PacketContractDetails
 		PacketContractDetails();
 		virtual ~PacketContractDetails();
 		
-		static PacketContractDetails * fromXml( xmlDocPtr );
+		static PacketContractDetails * fromXml( xmlNodePtr );
 		
 		const ContractDetailsRequest& getRequest() const;
 		const QList<IB::ContractDetails>& constList() const;
@@ -274,7 +274,7 @@ class PacketHistData
 		
 		PacketHistData();
 		
-		static PacketHistData * fromXml( xmlDocPtr );
+		static PacketHistData * fromXml( xmlNodePtr );
 		
 		bool isFinished() const;
 		Error getError() const;
