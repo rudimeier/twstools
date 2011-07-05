@@ -104,6 +104,22 @@ const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 
 
 
+ContractDetailsRequest * ContractDetailsRequest::fromXml( xmlNodePtr xn )
+{
+	ContractDetailsRequest *cdr = new ContractDetailsRequest();
+	
+	for( xmlNodePtr p = xn->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			IB::Contract c;
+			conv_xml2ib( &c, p);
+			cdr->initialize(c);
+		}
+	}
+	
+	return cdr;
+}
+
 const IB::Contract& ContractDetailsRequest::ibContract() const
 {
 	return _ibContract;
@@ -619,15 +635,7 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
-				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-					if( q->type == XML_ELEMENT_NODE
-						&& strcmp((char*)q->name, "reqContract") == 0 )  {
-						pcd->request = new ContractDetailsRequest();
-						IB::Contract c;
-						conv_xml2ib( &c, q);
-						pcd->request->initialize(c);
-					}
-				}
+				pcd->request = ContractDetailsRequest::fromXml(p);
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
