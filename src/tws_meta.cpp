@@ -575,10 +575,11 @@ int WorkTodo::read_file( const QString & fileName )
 			&& strcmp((char*)root->name, "PacketContractDetails") == 0 ) {
 			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 			PacketContractDetails *pcd = PacketContractDetails::fromXml(doc);
+			const IB::Contract &c = pcd->getRequest().ibContract();
 			line = QByteArray("REQ_CD: ")
-				+ pcd->getReqContract().symbol.c_str() + ", "
-				+ pcd->getReqContract().secType.c_str() + ", "
-				+ pcd->getReqContract().exchange.c_str();
+				+ c.symbol.c_str() + ", "
+				+ c.secType.c_str() + ", "
+				+ c.exchange.c_str();
 		} else if ( root->type == XML_ELEMENT_NODE
 			&& strcmp((char*)root->name, "PacketHistData") == 0 ) {
 			reqType = GenericRequest::HIST_REQUEST;
@@ -602,13 +603,13 @@ PacketContractDetails::PacketContractDetails()
 {
 	complete = false;
 	reqId = -1;
-	reqContract = NULL;
+	request = NULL;
 }
 
 PacketContractDetails::~PacketContractDetails()
 {
-	if( reqContract != NULL ) {
-		delete reqContract;
+	if( request != NULL ) {
+		delete request;
 	}
 }
 
@@ -623,8 +624,10 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 					if( q->type == XML_ELEMENT_NODE
 						&& strcmp((char*)q->name, "reqContract") == 0 )  {
-						pcd->reqContract = new IB::Contract();
-						conv_xml2ib( (IB::Contract*)pcd->reqContract, q);
+						pcd->request = new ContractDetailsRequest();
+						IB::Contract c;
+						conv_xml2ib( &c, q);
+						pcd->request->initialize(c);
 					}
 				}
 			}
@@ -643,9 +646,9 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
 	return pcd;
 }
 
-const IB::Contract& PacketContractDetails::getReqContract() const
+const ContractDetailsRequest& PacketContractDetails::getRequest() const
 {
-	return *reqContract;
+	return *request;
 }
 
 const QList<IB::ContractDetails>& PacketContractDetails::constList() const
@@ -656,10 +659,10 @@ const QList<IB::ContractDetails>& PacketContractDetails::constList() const
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
-	Q_ASSERT( !complete && this->reqId == -1 && reqContract == NULL
+	Q_ASSERT( !complete && this->reqId == -1 && request == NULL
 		&& cdList.isEmpty() );
 	this->reqId = reqId;
-	this->reqContract = new IB::Contract( cdr.ibContract() );
+	this->request = new ContractDetailsRequest( cdr );
 }
 
 void PacketContractDetails::setFinished()
@@ -680,9 +683,9 @@ void PacketContractDetails::clear()
 	complete = false;
 	reqId = -1;
 	cdList.clear();
-	if( reqContract != NULL ) {
-		delete reqContract;
-		reqContract = NULL;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
 	}
 }
 
@@ -707,7 +710,7 @@ void PacketContractDetails::dumpXml()
 	xmlDocSetRootElement( doc, root );
 	
 	xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "reqContract", *reqContract, IbXml::skip_defaults );
+	conv_ib2xml( nqry, "reqContract", request->ibContract(), IbXml::skip_defaults );
 	
 	
 	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
