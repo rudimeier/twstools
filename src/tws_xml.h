@@ -35,6 +35,8 @@ class TwsXml
 		virtual ~TwsXml();
 		
 		static void setSkipDefaults( bool );
+		static xmlNodePtr newDocRoot();
+		static void dumpAndFree( xmlNodePtr root );
 		
 		bool openFile( const char *filename );
 		xmlDocPtr nextXmlDoc();

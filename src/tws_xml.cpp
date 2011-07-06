@@ -463,6 +463,23 @@ void TwsXml::setSkipDefaults( bool b )
 	_skip_defaults = b;
 }
 
+xmlNodePtr TwsXml::newDocRoot()
+{
+	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
+	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+		(const xmlChar*)"TWSXML", NULL );
+	xmlDocSetRootElement( doc, root );
+	
+	//caller has to free root.doc
+	return root;
+}
 
-
+void TwsXml::dumpAndFree( xmlNodePtr root )
+{
+	xmlDocFormatDump(stdout, root->doc, 1);
+	//HACK print form feed as xml file separator
+	printf("\f");
+	
+	xmlFreeDoc(root->doc);
+}
 
