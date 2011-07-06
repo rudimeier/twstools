@@ -18,38 +18,37 @@
 
 
 #define ADD_ATTR_INT( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_LONG( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_BOOL( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, \
 			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
 	}
 
 #define ADD_ATTR_STRING( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, \
 			(xmlChar*) _struct_._attr_.c_str() ); \
 	}
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl,
-	bool skip_defaults )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
 	char tmp[128];
 	static const IB::ComboLeg dflt;
@@ -69,8 +68,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl,
 }
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc,
-	bool skip_defaults )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc )
 {
 	char tmp[128];
 	static const IB::UnderComp dflt;
@@ -85,8 +83,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc,
 }
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
-	bool skip_defaults )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 {
 	char tmp[128];
 	static const IB::Contract dflt;
@@ -114,11 +111,11 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
 		
 		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
 		for ( it = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
-			conv_ib2xml( ncl, "comboLeg", **it, skip_defaults );
+			conv_ib2xml( ncl, "comboLeg", **it );
 		}
 	}
 	if( c.underComp != NULL ) {
-		conv_ib2xml( ne, "underComp", *c.underComp, skip_defaults );
+		conv_ib2xml( ne, "underComp", *c.underComp );
 	}
 	
 	xmlAddChild(parent, ne);
@@ -126,7 +123,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
 
 
 void conv_ib2xml( xmlNodePtr parent, const char* name,
-	const IB::ContractDetails& cd, bool skip_defaults )
+	const IB::ContractDetails& cd )
 {
 	char tmp[128];
 	static const IB::ContractDetails dflt;
@@ -134,7 +131,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
 	
-	conv_ib2xml( ne, "summary", cd.summary, skip_defaults );
+	conv_ib2xml( ne, "summary", cd.summary );
 	
 	ADD_ATTR_STRING( cd, marketName );
 	ADD_ATTR_STRING( cd, tradingClass );

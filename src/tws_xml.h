@@ -14,14 +14,11 @@ typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& c,
-	bool skip_defaults=false );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& c,
-	bool skip_defaults=false );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
-	bool skip_defaults=false );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ContractDetails& c,
-	bool skip_defaults=false );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name,
+	const IB::ContractDetails& c );
 
 void conv_xml2ib( IB::ComboLeg* c, const xmlNodePtr node );
 void conv_xml2ib( IB::UnderComp* c, const xmlNodePtr node );

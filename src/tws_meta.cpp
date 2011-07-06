@@ -716,12 +716,12 @@ void PacketContractDetails::dumpXml()
 	xmlDocSetRootElement( doc, root );
 	
 	xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "reqContract", request->ibContract(), TwsXml::skip_defaults );
+	conv_ib2xml( nqry, "reqContract", request->ibContract() );
 	
 	
 	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
 	for( int i=0; i<cdList.size(); i++ ) {
-		conv_ib2xml( nrsp, "ContractDetails", cdList[i], TwsXml::skip_defaults );
+		conv_ib2xml( nrsp, "ContractDetails", cdList[i] );
 	}
 	
 	xmlDocFormatDump(stdout, doc, 1);
@@ -816,7 +816,7 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 			hR.whatToShow(), hR.useRTH(), hR.formatDate() };
 		
 		xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( nqry, "reqContract", c, TwsXml::skip_defaults );
+		conv_ib2xml( nqry, "reqContract", c );
 		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
 		ADD_ATTR_QSTRING( nqry, bla, durationStr );
 		ADD_ATTR_QSTRING( nqry, bla, barSizeSetting );
