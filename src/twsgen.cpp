@@ -12,6 +12,7 @@
 
 static poptContext opt_ctx;
 static const char *filep = NULL;
+static int skipdefp = 0;
 static int histjobp = 0;
 
 #define VERSION_MSG \
@@ -35,6 +36,8 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 }
 
 static struct poptOption flow_opts[] = {
+	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
+		"Never skip xml default values.", NULL},
 	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
 		"generate hist job", "FILE"},
 	POPT_TABLEEND
@@ -103,6 +106,8 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 int main(int argc, char *argv[])
 {
 	twsgen_parse_cl(argc, (const char **) argv);
+	
+	TwsXml::setSkipDefaults( !skipdefp );
 	
 	if( !histjobp ) {
 		fprintf( stderr, "error, only -H is implemented\n" );
