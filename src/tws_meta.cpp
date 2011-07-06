@@ -237,6 +237,42 @@ void HistRequest::clear()
 }
 
 
+#define GET_ATTR_QSTRING( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	toIBString(_struct_->_attr_) = tmp ? std::string(tmp) \
+		: toIBString(dflt._attr_); \
+	free(tmp)
+
+#define GET_ATTR_INT( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
+HistRequest * HistRequest::fromXml( xmlNodePtr node )
+{
+	char* tmp;
+	static const HistRequest dflt;
+	
+	HistRequest *hR = new HistRequest();
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &hR->_ibContract, p);
+		}
+	}
+	
+	GET_ATTR_QSTRING( hR, _endDateTime );
+	GET_ATTR_QSTRING( hR, _durationStr );
+	GET_ATTR_QSTRING( hR, _barSizeSetting );
+	GET_ATTR_QSTRING( hR, _whatToShow );
+	GET_ATTR_INT( hR, _useRTH );
+	GET_ATTR_INT( hR, _formatDate );
+	
+	return hR;
+}
+
+
 
 
 

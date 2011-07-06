@@ -53,6 +53,8 @@ class ContractDetailsRequest
 class HistRequest
 {
 	public:
+		static HistRequest * fromXml( xmlNodePtr );
+		
 		const IB::Contract& ibContract() const;
 		const QString& endDateTime() const;
 		const QString& durationStr() const;
