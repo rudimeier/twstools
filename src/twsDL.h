@@ -144,8 +144,6 @@ class TwsDL
 		int curIndexTodoContractDetails;
 		
 		WorkTodo *workTodo;
-		ContractDetailsTodo *contractDetailsTodo;
-		HistTodo *histTodo;
 		
 		PacketContractDetails &p_contractDetails;
 		PacketHistData &p_histData;

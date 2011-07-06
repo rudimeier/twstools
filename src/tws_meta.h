@@ -223,11 +223,17 @@ class WorkTodo
 		
 		GenericRequest::ReqType getType() const;
 		const QList<QByteArray>& getRows() const;
+		ContractDetailsTodo* contractDetailsTodo() const;
+		const ContractDetailsTodo& getContractDetailsTodo() const;
+		HistTodo* histTodo() const;
+		const HistTodo& getHistTodo() const;
 		int read_file( const QString & fileName);
 		
 	private:
 		GenericRequest::ReqType reqType;
 		QList<QByteArray> *rows;
+		ContractDetailsTodo *_contractDetailsTodo;
+		HistTodo *_histTodo;
 };
 
 

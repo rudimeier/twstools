@@ -582,7 +582,9 @@ int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
 
 WorkTodo::WorkTodo() :
 	reqType(GenericRequest::NONE),
-	rows(new QList<QByteArray>())
+	rows(new QList<QByteArray>()),
+	_contractDetailsTodo( new ContractDetailsTodo() ),
+	_histTodo( new HistTodo() )
 {
 }
 
@@ -590,6 +592,12 @@ WorkTodo::WorkTodo() :
 WorkTodo::~WorkTodo()
 {
 	delete rows;
+	if( _histTodo != NULL ) {
+		delete _histTodo;
+	}
+	if( _contractDetailsTodo != NULL ) {
+		delete _contractDetailsTodo;
+	}
 }
 
 
@@ -602,6 +610,26 @@ GenericRequest::ReqType WorkTodo::getType() const
 const QList<QByteArray>& WorkTodo::getRows() const
 {
 	return *rows;
+}
+
+ContractDetailsTodo* WorkTodo::contractDetailsTodo() const
+{
+	return _contractDetailsTodo;
+}
+
+const ContractDetailsTodo& WorkTodo::getContractDetailsTodo() const
+{
+	return *_contractDetailsTodo;
+}
+
+HistTodo* WorkTodo::histTodo() const
+{
+	return _histTodo;
+}
+
+const HistTodo& WorkTodo::getHistTodo() const
+{
+	return *_histTodo;
 }
 
 
