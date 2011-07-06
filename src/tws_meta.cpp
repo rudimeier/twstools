@@ -578,7 +578,7 @@ int WorkTodo::read_file( const QString & fileName )
 	rows->clear();
 
 
-	XmlFile file;
+	TwsXml file;
 	if( ! file.openFile(fileName.toAscii().constData()) ) {
 		return retVal;
 	}
@@ -716,12 +716,12 @@ void PacketContractDetails::dumpXml()
 	xmlDocSetRootElement( doc, root );
 	
 	xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "reqContract", request->ibContract(), IbXml::skip_defaults );
+	conv_ib2xml( nqry, "reqContract", request->ibContract(), TwsXml::skip_defaults );
 	
 	
 	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
 	for( int i=0; i<cdList.size(); i++ ) {
-		conv_ib2xml( nrsp, "ContractDetails", cdList[i], IbXml::skip_defaults );
+		conv_ib2xml( nrsp, "ContractDetails", cdList[i], TwsXml::skip_defaults );
 	}
 	
 	xmlDocFormatDump(stdout, doc, 1);
@@ -768,25 +768,25 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr )
 }
 
 #define ADD_ATTR_QSTRING( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
 			(xmlChar*) toIBString(_struct_._attr_).c_str() ); \
 	}
 
 #define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_BOOL( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
 			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
 	}
@@ -816,7 +816,7 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 			hR.whatToShow(), hR.useRTH(), hR.formatDate() };
 		
 		xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( nqry, "reqContract", c, IbXml::skip_defaults );
+		conv_ib2xml( nqry, "reqContract", c, TwsXml::skip_defaults );
 		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
 		ADD_ATTR_QSTRING( nqry, bla, durationStr );
 		ADD_ATTR_QSTRING( nqry, bla, barSizeSetting );

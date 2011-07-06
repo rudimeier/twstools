@@ -31,17 +31,23 @@ void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
 
 
 
-class XmlFile
+class TwsXml
 {
 	public:
-		XmlFile();
-		virtual ~XmlFile();
+		TwsXml();
+		virtual ~TwsXml();
+		
+		static void setSkipDefaults( bool );
 		
 		bool openFile( const char *filename );
 		xmlDocPtr nextXmlDoc();
 		xmlNodePtr nextXmlNode();
-	
+		
+		static const bool &skip_defaults;
+		
 	private:
+		static bool _skip_defaults;
+		
 		void *file; // FILE*
 		char *buf;
 		xmlDocPtr curDoc;
@@ -49,31 +55,6 @@ class XmlFile
 };
 
 
-
-
-class IbXml
-{
-	public:
-		IbXml( const char* rootname );
-		virtual ~IbXml();
-		
-		static void setSkipDefaults( bool );
-		
-		void dump() const;
-		void add( const char* name, const IB::Contract& cd );
-		void add( const char* name, const IB::ContractDetails& cd );
-		
-		xmlDocPtr getDoc() const;
-		xmlNodePtr getRoot() const;
-		
-		static const bool &skip_defaults;
-		
-	private:
-		static bool _skip_defaults;
-		
-		xmlDocPtr doc;
-		xmlNodePtr root;
-};
 
 
 #endif

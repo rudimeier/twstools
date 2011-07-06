@@ -944,7 +944,7 @@ int main(int argc, char *argv[])
 	
 	twsDL_parse_cl(argc, (const char **) argv);
 	
-	IbXml::setSkipDefaults( !skipdefp );
+	TwsXml::setSkipDefaults( !skipdefp );
 	
 	TwsDL twsDL( configfilep, workfilep );
 	twsDL.start();

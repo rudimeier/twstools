@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	XmlFile file;
+	TwsXml file;
 	if( ! file.openFile(filep) ) {
 		return 1;
 	}

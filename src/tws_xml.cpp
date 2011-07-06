@@ -329,7 +329,7 @@ static int find_form_feed( const char *s, int n )
 #define CHUNK_SIZE 1024
 
 
-XmlFile::XmlFile() :
+TwsXml::TwsXml() :
 	file(NULL),
 	buf( (char*) malloc(1024*1024)),
 	curDoc(NULL),
@@ -337,7 +337,7 @@ XmlFile::XmlFile() :
 {
 }
 
-XmlFile::~XmlFile()
+TwsXml::~TwsXml()
 {
 	if( file != NULL ) {
 		fclose((FILE*)file);
@@ -348,7 +348,7 @@ XmlFile::~XmlFile()
 	}
 }
 
-bool XmlFile::openFile( const char *filename )
+bool TwsXml::openFile( const char *filename )
 {
 	file = fopen(filename, "rb");
 	
@@ -360,7 +360,7 @@ bool XmlFile::openFile( const char *filename )
 	return true;
 }
 
-xmlDocPtr XmlFile::nextXmlDoc()
+xmlDocPtr TwsXml::nextXmlDoc()
 {
 	xmlDocPtr doc = NULL;
 	if( file == NULL ) {
@@ -386,7 +386,7 @@ xmlDocPtr XmlFile::nextXmlDoc()
 	return doc;
 }
 
-xmlNodePtr XmlFile::nextXmlNode()
+xmlNodePtr TwsXml::nextXmlNode()
 {
 	if( curNode != NULL && (curNode = curNode->next) != NULL ) {
 		return curNode;
@@ -408,50 +408,14 @@ xmlNodePtr XmlFile::nextXmlNode()
 
 
 
-bool IbXml::_skip_defaults = false;
-const bool& IbXml::skip_defaults = _skip_defaults;
+bool TwsXml::_skip_defaults = false;
+const bool& TwsXml::skip_defaults = _skip_defaults;
 
-IbXml::IbXml( const char* rootname )
-{
-	doc = xmlNewDoc( (const xmlChar*) "1.0");
-	root = xmlNewDocNode( doc, NULL, (const xmlChar*) rootname, NULL );
-	xmlDocSetRootElement( doc, root );
-}
-
-IbXml::~IbXml()
-{
-	xmlFreeDoc(doc);
-}
-
-void IbXml::setSkipDefaults( bool b )
+void TwsXml::setSkipDefaults( bool b )
 {
 	_skip_defaults = b;
 }
 
-void IbXml::dump() const
-{
-	xmlDocFormatDump(stdout, doc, 1);
-}
-
-void IbXml::add( const char* name, const IB::Contract& c )
-{
-	conv_ib2xml( root, name, c, _skip_defaults );
-}
-
-void IbXml::add( const char* name, const IB::ContractDetails& cd )
-{
-	conv_ib2xml( root, name, cd, _skip_defaults );
-}
-
-xmlDocPtr IbXml::getDoc() const
-{
-	return doc;
-}
-
-xmlNodePtr IbXml::getRoot() const
-{
-	return root; 
-}
 
 
 
