@@ -713,25 +713,19 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 
 void PacketContractDetails::dumpXml()
 {
-	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
-	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
 		(const xmlChar*)"PacketContractDetails", NULL );
-	xmlDocSetRootElement( doc, root );
 	
-	xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
 	conv_ib2xml( nqry, "reqContract", request->ibContract() );
 	
-	
-	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	for( int i=0; i<cdList.size(); i++ ) {
 		conv_ib2xml( nrsp, "ContractDetails", cdList[i] );
 	}
 	
-	xmlDocFormatDump(stdout, doc, 1);
-	//HACK print form feed as xml file separator
-	printf("\f");
-	
-	xmlFreeDoc(doc);
+	TwsXml::dumpAndFree( root );
 }
 
 
@@ -800,10 +794,10 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 	
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
 	
-	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
-	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr nphd = xmlNewChild( root, NULL,
 		(const xmlChar*)"PacketHistData", NULL );
-	xmlDocSetRootElement( doc, root );
+	
 	{
 		struct s_bla {
 			const QString &endDateTime;
@@ -818,7 +812,7 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 		s_bla bla = { hR.endDateTime(), hR.durationStr(), hR.barSizeSetting(),
 			hR.whatToShow(), hR.useRTH(), hR.formatDate() };
 		
-		xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
+		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
 		conv_ib2xml( nqry, "reqContract", c );
 		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
 		ADD_ATTR_QSTRING( nqry, bla, durationStr );
@@ -828,7 +822,7 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 		ADD_ATTR_INT( nqry, bla, formatDate );
 	}
 	
-	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
+	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 		for( int i=0; i<rows.size(); i++ ) {
@@ -855,11 +849,7 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
 	}
 	
-	xmlDocFormatDump(stdout, doc, 1);
-	//HACK print form feed as xml file separator
-	printf("\f");
-	
-	xmlFreeDoc(doc);
+	TwsXml::dumpAndFree( root );
 }
 
 
