@@ -586,8 +586,8 @@ int WorkTodo::read_file( const QString & fileName )
 	xmlNodePtr xn;
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		QByteArray line;
-		if( xn->type == XML_ELEMENT_NODE
-			&& strcmp((char*)xn->name, "PacketContractDetails") == 0 ) {
+		Q_ASSERT( xn->type == XML_ELEMENT_NODE  );
+		if( strcmp((char*)xn->name, "PacketContractDetails") == 0 ) {
 			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 			PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
 			const IB::Contract &c = pcd->getRequest().ibContract();
@@ -595,10 +595,13 @@ int WorkTodo::read_file( const QString & fileName )
 				+ c.symbol.c_str() + ", "
 				+ c.secType.c_str() + ", "
 				+ c.exchange.c_str();
-		} else if ( xn->type == XML_ELEMENT_NODE
-			&& strcmp((char*)xn->name, "PacketHistData") == 0 ) {
+		} else if ( strcmp((char*)xn->name, "PacketHistData") == 0 ) {
 			reqType = GenericRequest::HIST_REQUEST;
 			Q_ASSERT(false);
+		} else {
+			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
+				xn->name );
+			continue;
 		}
 		rows->append(line);
 		retVal++;

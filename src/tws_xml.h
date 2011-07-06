@@ -38,6 +38,7 @@ class TwsXml
 		
 		bool openFile( const char *filename );
 		xmlDocPtr nextXmlDoc();
+		xmlNodePtr nextXmlRoot();
 		xmlNodePtr nextXmlNode();
 		
 		static const bool &skip_defaults;
