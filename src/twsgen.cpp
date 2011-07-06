@@ -144,11 +144,16 @@ int main(int argc, char *argv[])
 				hR.initialize( c, myProp_endDateTime, myProp_durationStr,
 				               myProp_barSizeSetting, wts, myProp_useRTH, myProp_formatDate );
 				histTodo.add( hR );
+				
+				PacketHistData phd;
+				phd.record( 0, hR );
+				phd.dumpXml();
 			}
 		}
 		delete pcd;
 	}
-	histTodo.dumpLeft( stdout );
+	// TODO this should be xml dump
+	histTodo.dumpLeft( stderr );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
 	

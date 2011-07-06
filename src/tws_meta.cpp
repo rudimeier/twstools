@@ -633,7 +633,12 @@ int WorkTodo::read_file( const QString & fileName )
 				+ c.exchange.c_str();
 		} else if ( strcmp((char*)xn->name, "PacketHistData") == 0 ) {
 			reqType = GenericRequest::HIST_REQUEST;
-			Q_ASSERT(false);
+			PacketHistData *pcd = PacketHistData::fromXml(xn);
+			char tmp[1024];
+			sprintf( tmp, "[%d]\t%s",
+			         0,
+			         pcd->getRequest().toString().toAscii().constData() );
+			line = QByteArray(tmp);
 		} else {
 			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
 				xn->name );
@@ -851,8 +856,6 @@ void PacketHistData::dumpXml()
 {
 	char tmp[128];
 	
-	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
-	
 	xmlNodePtr root = TwsXml::newDocRoot();
 	xmlNodePtr nphd = xmlNewChild( root, NULL,
 		(const xmlChar*)"PacketHistData", NULL );
@@ -882,6 +885,7 @@ void PacketHistData::dumpXml()
 		ADD_ATTR_INT( nqry, bla, formatDate );
 	}
 	
+	if( mode == CLOSED ) {
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
