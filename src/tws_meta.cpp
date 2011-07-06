@@ -800,10 +800,26 @@ PacketHistData::~PacketHistData()
 	}
 }
 
-PacketHistData * PacketHistData::fromXml( xmlNodePtr )
+PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 {
 	PacketHistData *phd = new PacketHistData();
-	Q_ASSERT(false); // not implemented yet
+	
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				phd->request = HistRequest::fromXml(p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type == XML_ELEMENT_NODE
+						&& strcmp((char*)q->name, "row???????") == 0 )  {
+						// TODO
+					}
+				}
+			}
+		}
+	}
+	
 	return phd;
 }
 
