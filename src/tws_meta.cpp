@@ -908,10 +908,14 @@ void PacketHistData::dumpXml()
 		ADD_ATTR_DOUBLE( nrow, finishRow, WAP );
 		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
 	}
-	
+	}
 	TwsXml::dumpAndFree( root );
 }
 
+const HistRequest& PacketHistData::getRequest() const
+{
+	return *request;
+}
 
 bool PacketHistData::isFinished() const
 {
