@@ -237,14 +237,14 @@ void HistRequest::clear()
 }
 
 
-#define GET_ATTR_QSTRING( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	toIBString(_struct_->_attr_) = tmp ? std::string(tmp) \
-		: toIBString(dflt._attr_); \
+#define GET_ATTR_QSTRING( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? QString(tmp) \
+		: dflt._attr_; \
 	free(tmp)
 
-#define GET_ATTR_INT( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+#define GET_ATTR_INT( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
 	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
 	free(tmp)
 
@@ -262,12 +262,12 @@ HistRequest * HistRequest::fromXml( xmlNodePtr node )
 		}
 	}
 	
-	GET_ATTR_QSTRING( hR, _endDateTime );
-	GET_ATTR_QSTRING( hR, _durationStr );
-	GET_ATTR_QSTRING( hR, _barSizeSetting );
-	GET_ATTR_QSTRING( hR, _whatToShow );
-	GET_ATTR_INT( hR, _useRTH );
-	GET_ATTR_INT( hR, _formatDate );
+	GET_ATTR_QSTRING( hR, "endDateTime", _endDateTime );
+	GET_ATTR_QSTRING( hR, "durationStr", _durationStr );
+	GET_ATTR_QSTRING( hR, "barSizeSetting", _barSizeSetting );
+	GET_ATTR_QSTRING( hR, "whatToShow", _whatToShow );
+	GET_ATTR_INT( hR, "useRTH", _useRTH );
+	GET_ATTR_INT( hR, "formatDate", _formatDate );
 	
 	return hR;
 }
