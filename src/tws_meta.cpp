@@ -859,10 +859,10 @@ void PacketHistData::dumpXml()
 	
 	{
 		struct s_bla {
-			const QString &endDateTime;
-			const QString &durationStr;
-			const QString &barSizeSetting;
-			const QString &whatToShow;
+			const QString endDateTime;
+			const QString durationStr;
+			const QString barSizeSetting;
+			const QString whatToShow;
 			int useRTH;
 			int formatDate;
 		};
