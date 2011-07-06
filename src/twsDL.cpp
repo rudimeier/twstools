@@ -482,8 +482,8 @@ void TwsDL::finData()
 	
 	switch( p_histData.getError() ) {
 	case PacketHistData::ERR_NONE:
-		p_histData.dump( histTodo->current(), myProp->printFormatDates );
-		p_histData.dumpXml( histTodo->current() );
+		p_histData.dump( myProp->printFormatDates );
+		p_histData.dumpXml();
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();
@@ -863,7 +863,7 @@ void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
-	p_histData.record( currentRequest.reqId() );
+	p_histData.record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
 	                              hR.endDateTime(),

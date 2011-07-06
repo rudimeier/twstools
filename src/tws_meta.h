@@ -275,20 +275,21 @@ class PacketHistData
 			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
 		
 		PacketHistData();
+		virtual ~PacketHistData();
 		
 		static PacketHistData * fromXml( xmlNodePtr );
 		
 		bool isFinished() const;
 		Error getError() const;
 		void clear();
-		void record( int reqId );
+		void record( int reqId, const HistRequest& );
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
 		void closeError( Error );
-		void dump( const HistRequest&, bool printFormatDates );
+		void dump( bool printFormatDates );
 		
-		void dumpXml( const HistRequest& );
+		void dumpXml();
 		
 	private:
 		class Row
@@ -311,6 +312,7 @@ class PacketHistData
 		Error error;
 		
 		int reqId;
+		HistRequest *request;
 		QList<Row> rows;
 		Row finishRow;
 };

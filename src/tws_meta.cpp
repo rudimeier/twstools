@@ -754,8 +754,15 @@ PacketHistData::PacketHistData()
 	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
+	request = NULL;
 }
 
+PacketHistData::~PacketHistData()
+{
+	if( request != NULL ) {
+		delete request;
+	}
+}
 
 PacketHistData * PacketHistData::fromXml( xmlNodePtr )
 {
@@ -788,7 +795,7 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr )
 			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
 	}
 
-void PacketHistData::dumpXml( const HistRequest& hR )
+void PacketHistData::dumpXml()
 {
 	char tmp[128];
 	
@@ -808,9 +815,10 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 			int formatDate;
 		};
 		static const s_bla dflt = {"", "", "", "", 0, 0 };
-		const IB::Contract &c = hR.ibContract();
-		s_bla bla = { hR.endDateTime(), hR.durationStr(), hR.barSizeSetting(),
-			hR.whatToShow(), hR.useRTH(), hR.formatDate() };
+		const IB::Contract &c = request->ibContract();
+		s_bla bla = { request->endDateTime(), request->durationStr(),
+			request->barSizeSetting(), request->whatToShow(), request->useRTH(),
+			request->formatDate() };
 		
 		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
 		conv_ib2xml( nqry, "reqContract", c );
@@ -870,16 +878,21 @@ void PacketHistData::clear()
 	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
 	rows.clear();
 	finishRow.clear();
 }
 
 
-void PacketHistData::record( int reqId )
+void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	Q_ASSERT( mode == CLEAN && error == ERR_NONE );
+	Q_ASSERT( mode == CLEAN && error == ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
+	this->request = new HistRequest( hR );
 }
 
 
@@ -910,12 +923,12 @@ void PacketHistData::closeError( Error e )
 }
 
 
-void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
+void PacketHistData::dump( bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
-	const IB::Contract &c = hR.ibContract();
-	const QString &wts = hR.whatToShow();
-	const QString &barSizeSetting = hR.barSizeSetting();
+	const IB::Contract &c = request->ibContract();
+	const QString &wts = request->whatToShow();
+	const QString &barSizeSetting = request->barSizeSetting();
 	
 	foreach( Row r, rows ) {
 		QString expiry = toQString(c.expiry);
