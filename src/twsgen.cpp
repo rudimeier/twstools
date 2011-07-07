@@ -128,10 +128,10 @@ int main(int argc, char *argv[])
 		
 		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
-		QList<QString> myProp_whatToShow = QList<QString>() << "BID";
-		QString myProp_endDateTime = "20110214 16:00:00 America/Chicago";
-		QString myProp_durationStr = "1 W";
-		QString myProp_barSizeSetting = "30 mins";
+		QList<std::string> myProp_whatToShow = QList<std::string>() << "BID";
+		std::string myProp_endDateTime = "20110214 16:00:00 America/Chicago";
+		std::string myProp_durationStr = "1 W";
+		std::string myProp_barSizeSetting = "30 mins";
 		int myProp_useRTH = 1;
 		int myProp_formatDate = 1;
 		for( int i = 0; i<pcd->constList().size(); i++ ) {
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 				break;
 			}
 			
-			foreach( QString wts, myProp_whatToShow ) {
+			foreach( std::string wts, myProp_whatToShow ) {
 				HistRequest hR;
 				hR.initialize( c, myProp_endDateTime, myProp_durationStr,
 				               myProp_barSizeSetting, wts, myProp_useRTH, myProp_formatDate );

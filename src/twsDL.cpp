@@ -11,10 +11,7 @@
 // from global installed ibtws
 #include "ibtws/Contract.h"
 
-#include <QtCore/QVariant>
-#include <QtCore/QRegExp>
 #include <QtCore/QStringList>
-#include <QtCore/QFile>
 #include <QtCore/QCoreApplication>
 #include <popt.h>
 #include <stdio.h>
@@ -156,8 +153,7 @@ void TwsDlWrapper::connectionClosed()
 void TwsDlWrapper::error( const int id, const int errorCode,
 	const IB::IBString errorString )
 {
-	parentTwsDL->twsError(
-		id, errorCode, toQString(errorString) );
+	parentTwsDL->twsError( id, errorCode, errorString );
 }
 
 
@@ -189,14 +185,14 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 	int barCount, double WAP, int hasGaps )
 {
 	parentTwsDL->twsHistoricalData(
-		reqId, toQString(date), open, high, low, close, volume,
+		reqId, date, open, high, low, close, volume,
 		barCount, WAP, hasGaps);
 }
 
 
 
 
-TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
+TwsDL::TwsDL( const std::string& confFile, const std::string& workFile ) :
 	state(CONNECT),
 	lastConnectionTime(0),
 	connection_failed( false ),
@@ -293,7 +289,7 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
-	qint64 w = nowInMsecs() - lastConnectionTime;
+	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < myProp->conTimeout ) {
 		qDebug() << "Waiting" << (myProp->conTimeout - w)
 			<< "ms before connecting again.";
@@ -359,8 +355,7 @@ void TwsDL::idle()
 	dumpWorkTodo();
 	
 	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if(  workTodo->getHistTodo().countLeft() > 0
-	    	&& ( myProp->reqMaxContracts <= 0 || workTodo->getHistTodo().countDone() <= myProp->reqMaxContracts ) ) {
+		if(  workTodo->getHistTodo().countLeft() > 0 ) {
 			getData();
 			return;
 		}
@@ -524,14 +519,15 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	errorMsg.contains( QString(_strg_), Qt::CaseInsensitive )
+	toQString(errorMsg).contains( QString(_strg_), Qt::CaseInsensitive )
 
-void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
+void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
 	msgCounter++;
 	
 	if( id == currentRequest.reqId() ) {
-		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
+		qDebug() << "ERROR for request" << id << errorCode
+			<< toQString(errorMsg);
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
@@ -591,7 +587,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
+void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 {
 	// TODO
 	switch( errorCode ) {
@@ -606,7 +602,7 @@ void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
+void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
 	int curIndex = workTodo->getHistTodo().currentIndex();
@@ -768,7 +764,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 }
 
 
-void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
+void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
 	if( currentRequest.reqId() != reqId ) {
@@ -795,7 +791,7 @@ void TwsDL::initWork()
 {
 	int cnt = workTodo->read_file(workFile);
 	qDebug() << QString("got %1 jobs from workFile %2")
-		.arg(cnt).arg(workFile);
+		.arg(cnt).arg(toQString(workFile));
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
@@ -868,7 +864,7 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 
 ///////////////////////////////////////////////////////////////////////////////
 // PropTwsDL
-PropTwsDL::PropTwsDL( const Properties& prop, const QString& cName ) :
+PropTwsDL::PropTwsDL( const Properties& prop, const std::string& cName ) :
 	PropSub(prop,cName)
 {
 	PROP_DEBUG( 2, "INITIALIZING" );
@@ -890,9 +886,6 @@ void PropTwsDL::initDefaults()
 	minPacingTime = 1500;
 	violationPause = 60000;
 	
-	reqMaxContracts = -1;
-	reqMaxContractsPerSpec = -1;
-	
 	printFormatDates = true;
 }
 
@@ -912,9 +905,6 @@ bool PropTwsDL::readProperties()
 	ok &= get("pacingInterval", pacingInterval );
 	ok &= get("minPacingTime", minPacingTime);
 	ok &= get("violationPause", violationPause);
-	
-	ok = ok & get("reqMaxContracts", reqMaxContracts);
-	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	
 	ok = ok & get("printFormatDates", printFormatDates);
 	

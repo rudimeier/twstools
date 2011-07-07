@@ -6,7 +6,6 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
-#include <QtCore/QFile>
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -21,38 +20,38 @@
 
 
 
-qint64 nowInMsecs()
+int64_t nowInMsecs()
 {
 	const QDateTime now = QDateTime::currentDateTime();
-	const qint64 now_s = now.toTime_t();
-	const qint64 now_ms = now_s * 1000 + now.time().msec();
+	const int64_t now_s = now.toTime_t();
+	const int64_t now_ms = now_s * 1000 + now.time().msec();
 	return now_ms;
 }
 
 
 /// stupid static helper
-QString ibDate2ISO( const QString &ibDate )
+std::string ibDate2ISO( const std::string &ibDate )
 {
 	QDateTime dt;
 	
-	dt = QDateTime::fromString( ibDate, "yyyyMMdd  hh:mm:ss");
+	dt = QDateTime::fromString( toQString(ibDate), "yyyyMMdd  hh:mm:ss");
 	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
+		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
 	}
 	
-	dt.setDate( QDate::fromString( ibDate, "yyyyMMdd") );
+	dt.setDate( QDate::fromString( toQString(ibDate), "yyyyMMdd") );
 	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd");
+		return toIBString(dt.toString("yyyy-MM-dd"));
 	}
 	
 	bool ok = false;
-	uint t = ibDate.toUInt( &ok );
+	uint t = toQString(ibDate).toUInt( &ok );
 	if( ok ) {
 		dt.setTime_t( t );
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
+		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
 	}
 	
-	return QString();
+	return std::string();
 }
 
 
@@ -138,9 +137,9 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 
 
 
-bool HistRequest::initialize( const IB::Contract& c, const QString &e,
-	const QString &d, const QString &b,
-	const QString &w, int u, int f )
+bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
+	const std::string &d, const std::string &b,
+	const std::string &w, int u, int f )
 {
 	_ibContract = c;
 	_endDateTime = e;
@@ -153,7 +152,7 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 }
 
 
-QString HistRequest::toString() const
+std::string HistRequest::toString() const
 {
 	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 		.arg(toQString(_ibContract.symbol))
@@ -165,15 +164,15 @@ QString HistRequest::toString() const
 		.arg(toQString(_ibContract.right));
 	
 	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(_endDateTime)
-		.arg(_durationStr)
-		.arg(_barSizeSetting)
-		.arg(_whatToShow)
+		.arg(toQString(_endDateTime))
+		.arg(toQString(_durationStr))
+		.arg(toQString(_barSizeSetting))
+		.arg(toQString(_whatToShow))
 		.arg(_useRTH)
 		.arg(_formatDate)
 		.arg(c_str);
 	
-	return retVal;
+	return retVal.toStdString();
 }
 
 
@@ -184,9 +183,10 @@ void HistRequest::clear()
 }
 
 
-#define GET_ATTR_QSTRING( _struct_, _name_, _attr_ ) \
+
+#define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? QString(tmp) \
+	_struct_->_attr_ = tmp ? std::string(tmp) \
 		: dflt._attr_; \
 	free(tmp)
 
@@ -209,10 +209,10 @@ HistRequest * HistRequest::fromXml( xmlNodePtr node )
 		}
 	}
 	
-	GET_ATTR_QSTRING( hR, "endDateTime", _endDateTime );
-	GET_ATTR_QSTRING( hR, "durationStr", _durationStr );
-	GET_ATTR_QSTRING( hR, "barSizeSetting", _barSizeSetting );
-	GET_ATTR_QSTRING( hR, "whatToShow", _whatToShow );
+	GET_ATTR_STRING( hR, "endDateTime", _endDateTime );
+	GET_ATTR_STRING( hR, "durationStr", _durationStr );
+	GET_ATTR_STRING( hR, "barSizeSetting", _barSizeSetting );
+	GET_ATTR_STRING( hR, "whatToShow", _whatToShow );
 	GET_ATTR_INT( hR, "useRTH", _useRTH );
 	GET_ATTR_INT( hR, "formatDate", _formatDate );
 	
@@ -292,7 +292,7 @@ void HistTodo::dump( FILE *stream ) const
 	for(int i=0; i < histRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         i,
-		         histRequests.at(i)->toString().toUtf8().constData() );
+		         histRequests.at(i)->toString().c_str() );
 	}
 }
 
@@ -302,7 +302,7 @@ void HistTodo::dumpLeft( FILE *stream ) const
 	for(int i=0; i < leftRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         leftRequests[i],
-		         histRequests.at(leftRequests[i])->toString().toUtf8().constData() );
+		         histRequests.at(leftRequests[i])->toString().c_str() );
 	}
 }
 
@@ -521,15 +521,13 @@ const HistTodo& WorkTodo::getHistTodo() const
 }
 
 
-int WorkTodo::read_file( const QString & fileName )
+int WorkTodo::read_file( const std::string & fileName )
 {
 	int retVal = -1;
-	QFile f( fileName );
-	
 	reqType = GenericRequest::NONE;
 	
 	TwsXml file;
-	if( ! file.openFile(fileName.toAscii().constData()) ) {
+	if( ! file.openFile(fileName.c_str()) ) {
 		return retVal;
 	}
 	retVal = 0;
@@ -733,10 +731,11 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 	return phd;
 }
 
-#define ADD_ATTR_QSTRING( _ne_, _struct_, _attr_ ) \
+
+#define ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
 	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-			(xmlChar*) toIBString(_struct_._attr_).c_str() ); \
+			(xmlChar*) _struct_._attr_.c_str() ); \
 	}
 
 #define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
@@ -767,10 +766,10 @@ void PacketHistData::dumpXml()
 	
 	{
 		struct s_bla {
-			const QString endDateTime;
-			const QString durationStr;
-			const QString barSizeSetting;
-			const QString whatToShow;
+			const std::string endDateTime;
+			const std::string durationStr;
+			const std::string barSizeSetting;
+			const std::string whatToShow;
 			int useRTH;
 			int formatDate;
 		};
@@ -782,10 +781,10 @@ void PacketHistData::dumpXml()
 		
 		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
 		conv_ib2xml( nqry, "reqContract", c );
-		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
-		ADD_ATTR_QSTRING( nqry, bla, durationStr );
-		ADD_ATTR_QSTRING( nqry, bla, barSizeSetting );
-		ADD_ATTR_QSTRING( nqry, bla, whatToShow );
+		ADD_ATTR_STRING( nqry, bla, endDateTime );
+		ADD_ATTR_STRING( nqry, bla, durationStr );
+		ADD_ATTR_STRING( nqry, bla, barSizeSetting );
+		ADD_ATTR_STRING( nqry, bla, whatToShow );
 		ADD_ATTR_INT( nqry, bla, useRTH );
 		ADD_ATTR_INT( nqry, bla, formatDate );
 	}
@@ -796,7 +795,7 @@ void PacketHistData::dumpXml()
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 		for( int i=0; i<rows.size(); i++ ) {
 			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
-			ADD_ATTR_QSTRING( nrow, rows[i], date );
+			ADD_ATTR_STRING( nrow, rows[i], date );
 			ADD_ATTR_DOUBLE( nrow, rows[i], open );
 			ADD_ATTR_DOUBLE( nrow, rows[i], high );
 			ADD_ATTR_DOUBLE( nrow, rows[i], low );
@@ -807,7 +806,7 @@ void PacketHistData::dumpXml()
 			ADD_ATTR_BOOL( nrow, rows[i], hasGaps );
 		}
 		xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
-		ADD_ATTR_QSTRING( nrow, finishRow, date );
+		ADD_ATTR_STRING( nrow, finishRow, date );
 		ADD_ATTR_DOUBLE( nrow, finishRow, open );
 		ADD_ATTR_DOUBLE( nrow, finishRow, high );
 		ADD_ATTR_DOUBLE( nrow, finishRow, low );
@@ -861,7 +860,7 @@ void PacketHistData::record( int reqId, const HistRequest& hR )
 }
 
 
-void PacketHistData::append( int reqId, const QString &date,
+void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
@@ -871,7 +870,7 @@ void PacketHistData::append( int reqId, const QString &date,
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
-	if( date.startsWith("finished") ) {
+	if( strncmp(date.c_str(), "finished", 8) == 0) {
 		mode = CLOSED;
 		finishRow = row;
 	} else {
@@ -892,34 +891,34 @@ void PacketHistData::dump( bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = request->ibContract();
-	const QString &wts = request->whatToShow();
-	const QString &barSizeSetting = request->barSizeSetting();
+	const QString wts = toQString(request->whatToShow());
+	const QString barSizeSetting = toQString(request->barSizeSetting());
 	
 	foreach( Row r, rows ) {
-		QString expiry = toQString(c.expiry);
-		QString dateTime = r.date;
+		std::string expiry = c.expiry;
+		std::string dateTime = r.date;
 		if( printFormatDates ) {
-			if( expiry.isEmpty() ) {
+			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
-				expiry = ibDate2ISO( toQString(c.expiry) );
+				expiry = ibDate2ISO( c.expiry );
 			}
 			dateTime = ibDate2ISO(r.date);
-			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
+			Q_ASSERT( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))
 			.arg(toQString(c.exchange))
 			.arg(toQString(c.currency))
-			.arg(expiry)
+			.arg(toQString(expiry))
 			.arg(c.strike)
 			.arg(toQString(c.right));
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       short_wts.value( wts, "NNN" ),
 		       short_bar_size.value( barSizeSetting, "00N" ),
 		       c_str.toUtf8().constData(),
-		       dateTime.toUtf8().constData(),
+		       dateTime.c_str(),
 		       r.open, r.high, r.low, r.close,
 		       r.volume, r.count, r.WAP, r.hasGaps);
 		fflush(stdout);
@@ -965,7 +964,7 @@ bool PacingControl::isEmpty() const
 void PacingControl::clear()
 {
 	if( !dateTimes.isEmpty() ) {
-		qint64 now = nowInMsecs();
+		int64_t now = nowInMsecs();
 		if( now - dateTimes.last() < 5000  ) {
 			// HACK race condition might cause assert in notifyViolation(),
 			// to avoid this we would need to ack each request
@@ -983,7 +982,7 @@ void PacingControl::clear()
 
 void PacingControl::addRequest()
 {
-	const qint64 now_t = nowInMsecs();
+	const int64_t now_t = nowInMsecs();
 	dateTimes.append( now_t );
 	violations.append( false );
 }
@@ -1004,7 +1003,7 @@ void PacingControl::notifyViolation()
 
 int PacingControl::goodTime(const char** ddd) const
 {
-	const qint64 now = nowInMsecs();
+	const int64_t now = nowInMsecs();
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
@@ -1027,7 +1026,7 @@ int PacingControl::goodTime(const char** ddd) const
 	int waitBurst = INT_MIN;
 	int p_index = dateTimes.size() - maxRequests;
 	if( p_index >= 0 ) {
-		qint64 p_time = dateTimes.at( p_index );
+		int64_t p_time = dateTimes.at( p_index );
 		waitBurst = p_time + checkInterval - now;
 	}
 	SWAP_MAX( waitBurst, "wait burst" );
@@ -1041,7 +1040,7 @@ int PacingControl::goodTime(const char** ddd) const
 
 int PacingControl::countLeft() const
 {
-	const qint64 now = nowInMsecs();
+	const int64_t now = nowInMsecs();
 	
 	if( (dateTimes.size() > 0) && violations.last() ) {
 		int waitViol = dateTimes.last() + violationPause - now;
@@ -1051,7 +1050,7 @@ int PacingControl::countLeft() const
 	}
 	
 	int retVal = maxRequests;
-	QList<qint64>::const_iterator it = dateTimes.constEnd();
+	QList<int64_t>::const_iterator it = dateTimes.constEnd();
 	while( it != dateTimes.constBegin() ) {
 		it--;
 		int waitBurst = *it + checkInterval - now;
@@ -1069,9 +1068,9 @@ void PacingControl::merge( const PacingControl& other )
 {
 	qDebug() << dateTimes;
 	qDebug() << other.dateTimes;
-	QList<qint64>::iterator t_d = dateTimes.begin();
+	QList<int64_t>::iterator t_d = dateTimes.begin();
 	QList<bool>::iterator t_v = violations.begin();
-	QList<qint64>::const_iterator o_d = other.dateTimes.constBegin();
+	QList<int64_t>::const_iterator o_d = other.dateTimes.constBegin();
 	QList<bool>::const_iterator o_v = other.violations.constBegin();
 	
 	while( t_d != dateTimes.end() && o_d != other.dateTimes.constEnd() ) {
@@ -1358,7 +1357,7 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
-	lastChanged(INT_MIN)
+	lastMsgNumber(INT_MIN)
 {
 }
 
@@ -1381,8 +1380,10 @@ void DataFarmStates::setAllBroken()
 }
 
 
-void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
+void DataFarmStates::notify(int msgNumber, int errorCode,
+	const std::string &_msg)
 {
+	QString msg = toQString(_msg); // just convert to QString
 	lastMsgNumber = msgNumber;
 	QString farm;
 	State state;

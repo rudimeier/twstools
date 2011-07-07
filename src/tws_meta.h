@@ -6,6 +6,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QHash>
+#include <stdint.h>
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
@@ -15,10 +16,10 @@ typedef struct _xmlDoc * xmlDocPtr;
 
 
 
-qint64 nowInMsecs();
+int64_t nowInMsecs();
 
 /// stupid static helper
-QString ibDate2ISO( const QString &ibDate );
+std::string ibDate2ISO( const std::string &ibDate );
 
 extern const QHash<QString, const char*> short_wts;
 extern const QHash<QString, const char*> short_bar_size;
@@ -55,25 +56,25 @@ class HistRequest
 		static HistRequest * fromXml( xmlNodePtr );
 		
 		const IB::Contract& ibContract() const;
-		const QString& endDateTime() const;
-		const QString& durationStr() const;
-		const QString& barSizeSetting() const;
-		const QString& whatToShow() const;
+		const std::string& endDateTime() const;
+		const std::string& durationStr() const;
+		const std::string& barSizeSetting() const;
+		const std::string& whatToShow() const;
 		int useRTH() const;
 		int formatDate() const;
 		
-		bool initialize( const IB::Contract&, const QString &endDateTime,
-			const QString &durationStr, const QString &barSizeSetting,
-			const QString &whatToShow, int useRTH, int formatDate );
-		QString toString() const;
+		bool initialize( const IB::Contract&, const std::string &endDateTime,
+			const std::string &durationStr, const std::string &barSizeSetting,
+			const std::string &whatToShow, int useRTH, int formatDate );
+		std::string toString() const;
 		void clear();
 		
 	private:
 		IB::Contract _ibContract;
-		QString _endDateTime;
-		QString _durationStr;
-		QString _barSizeSetting;
-		QString _whatToShow;
+		std::string _endDateTime;
+		std::string _durationStr;
+		std::string _barSizeSetting;
+		std::string _whatToShow;
 		int _useRTH;
 		int _formatDate;
 };
@@ -85,25 +86,25 @@ inline const IB::Contract& HistRequest::ibContract() const
 }
 
 
-inline const QString& HistRequest::endDateTime() const
+inline const std::string& HistRequest::endDateTime() const
 {
 	return _endDateTime;
 }
 
 
-inline const QString& HistRequest::durationStr() const
+inline const std::string& HistRequest::durationStr() const
 {
 	return _durationStr;
 }
 
 
-inline const QString& HistRequest::barSizeSetting() const
+inline const std::string& HistRequest::barSizeSetting() const
 {
 	return _barSizeSetting;
 }
 
 
-inline const QString& HistRequest::whatToShow() const
+inline const std::string& HistRequest::whatToShow() const
 {
 	return _whatToShow;
 }
@@ -148,7 +149,7 @@ class GenericRequest
 		ReqType _reqType;
 		int _reqId;
 		
-		qint64 _ctime;
+		int64_t _ctime;
 };
 
 
@@ -221,7 +222,7 @@ class WorkTodo
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
-		int read_file( const QString & fileName);
+		int read_file( const std::string & fileName);
 		
 	private:
 		GenericRequest::ReqType reqType;
@@ -285,7 +286,7 @@ class PacketHistData
 		Error getError() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
-		void append( int reqId, const QString &date,
+		void append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
 		void closeError( Error );
@@ -299,7 +300,7 @@ class PacketHistData
 			public:
 				void clear();
 				
-				QString date;
+				std::string date;
 				double open;
 				double high;
 				double low;
@@ -344,7 +345,7 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<qint64> dateTimes;
+		QList<int64_t> dateTimes;
 		QList<bool> violations;
 		
 		int maxRequests;
@@ -408,7 +409,7 @@ class DataFarmStates
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
 		void setAllBroken();
-		void notify(int msgNumber, int errorCode, const QString &msg);
+		void notify(int msgNumber, int errorCode, const std::string &msg);
 		void learnMarket( const IB::Contract& );
 		void learnHmds( const IB::Contract& );
 		void learnHmdsLastOk(int msgNumber, const IB::Contract& );

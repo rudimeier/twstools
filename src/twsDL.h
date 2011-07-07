@@ -2,8 +2,7 @@
 #define TWS_DL_H
 
 #include "properties.h"
-
-#include <QtCore/QList>
+#include <stdint.h>
 
 
 
@@ -35,15 +34,15 @@ class DataFarmStates;
 class PropTwsDL : public PropSub
 {
 	public:
-		PropTwsDL( const Properties& prop, const QString& cName = "" );
+		PropTwsDL( const Properties& prop, const std::string& cName = "" );
 		
 		void initDefaults();
 		bool readProperties();
 		
 		// fields
-		QString twsHost;
-		quint16 twsPort;
-		int     clientId;
+		std::string twsHost;
+		int twsPort;
+		int clientId;
 		
 		int conTimeout;
 		int reqTimeout;
@@ -51,9 +50,6 @@ class PropTwsDL : public PropSub
 		int pacingInterval;
 		int minPacingTime;
 		int violationPause;
-		
-		int reqMaxContracts;
-		int reqMaxContractsPerSpec;
 		
 		bool printFormatDates;
 };
@@ -75,7 +71,7 @@ class TwsDL
 			QUIT_ERROR
 		};
 		
-		TwsDL( const QString& confFile, const QString& workFile );
+		TwsDL( const std::string& confFile, const std::string& workFile );
 		~TwsDL();
 		
 		void start();
@@ -108,11 +104,11 @@ class TwsDL
 		void reqContractDetails( const ContractDetailsRequest& );
 		void reqHistoricalData( const HistRequest& );
 		
-		void errorContracts(int, int, const QString &);
-		void errorHistData(int, int, const QString &);
+		void errorContracts(int, int, const std::string &);
+		void errorHistData(int, int, const std::string &);
 		
 		// callbacks from our twsWrapper
-		void twsError(int, int, const QString &);
+		void twsError(int, int, const std::string &);
 		
 		void twsConnected( bool connected );
 		void twsContractDetails( int reqId,
@@ -120,17 +116,18 @@ class TwsDL
 		void twsBondContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void twsContractDetailsEnd( int reqId );
-		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
-			double close, int volume, int count, double WAP, bool hasGaps );
+		void twsHistoricalData( int reqId, const std::string &date, double open,
+			double high, double low, double close, int volume, int count,
+			double WAP, bool hasGaps );
 		
 		
 		State state;
-		qint64 lastConnectionTime;
+		int64_t lastConnectionTime;
 		bool connection_failed;
 		int curIdleTime;
 		
-		QString confFile;
-		QString workFile;
+		std::string confFile;
+		std::string workFile;
 		PropTwsDL *myProp;
 		
 		TwsDlWrapper *twsWrapper;

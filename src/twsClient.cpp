@@ -54,13 +54,13 @@ bool TWSClient::isConnected() const
 }
 
 
-QString TWSClient::getTWSHost() const
+std::string TWSClient::getTWSHost() const
 {
 	return twsHost;
 }
 
 
-quint16 TWSClient::getTWSPort() const
+int TWSClient::getTWSPort() const
 {
 	return twsPort;
 }
@@ -72,7 +72,7 @@ int     TWSClient::getClientId() const
 }
 
 
-void TWSClient::setTWSHost( const QString &host )
+void TWSClient::setTWSHost( const std::string &host )
 {
 	if ( isConnected() ) {
 		Q_ASSERT(false); // TODO handle that
@@ -81,7 +81,7 @@ void TWSClient::setTWSHost( const QString &host )
 }
 
 
-void TWSClient::setTWSPort( const quint16 &port )
+void TWSClient::setTWSPort( const int port )
 {
 	if ( isConnected() ) {
 		Q_ASSERT(false); // TODO handle that
@@ -106,9 +106,11 @@ void TWSClient::connectTWS()
 }
 
 
-void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
+void TWSClient::connectTWS( const std::string &host, int port, int clientId )
 {
-	qDebug() << "called:" <<  QString("%1:%2, clientId: %3").arg(host).arg(port).arg(clientId);
+	
+	qDebug() << "called:" <<  QString("%1:%2, clientId: %3")
+		.arg(toQString(host)).arg(port).arg(clientId);
 	
 	if( isConnected() ) {
 		myEWrapper->error( IB::NO_VALID_ID, IB::ALREADY_CONNECTED.code(),
@@ -124,7 +126,7 @@ void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
 	this->twsPort  = port;
 	this->clientId = clientId;
 	
-	ePosixClient->eConnect( host.toUtf8().constData(), port, clientId );
+	ePosixClient->eConnect( host.c_str(), port, clientId );
 }
 
 
@@ -214,14 +216,14 @@ void TWSClient::selectStuff( int msec )
 
 
 void TWSClient::reqMktData(int tickerId, const IB::Contract &contract,
-	const  QString &genericTickList, bool snapshot)
+	const  std::string &genericTickList, bool snapshot)
 {
 	qDebug() << "REQ_MKT_DATA" << tickerId << toQString(contract.symbol) <<  toQString(contract.exchange)
 		<< toQString(contract.secType) << toQString(contract.expiry) << toQString(contract.right)
 		<< contract.strike << toQString(contract.currency)  << toQString(contract.localSymbol)
-		<< genericTickList;
+		<< toQString(genericTickList);
 	
-	ePosixClient->reqMktData( tickerId, contract, toIBString(genericTickList), snapshot );
+	ePosixClient->reqMktData( tickerId, contract, genericTickList, snapshot );
 }
 
 
@@ -258,11 +260,12 @@ void TWSClient::reqOpenOrders()
 }
 
 
-void TWSClient::reqAccountUpdates( bool subscribe, const QString &acctCode )
+void TWSClient::reqAccountUpdates( bool subscribe, const std::string &acctCode )
 {
-	qDebug() << "REQ_ACCOUNT_DATA" << subscribe << acctCode;
+	qDebug() << "REQ_ACCOUNT_DATA" << subscribe
+		<< toQString(acctCode);
 	
-	ePosixClient->reqAccountUpdates( subscribe, toIBString(acctCode) );
+	ePosixClient->reqAccountUpdates( subscribe, acctCode );
 }
 
 
@@ -292,17 +295,18 @@ void TWSClient::setServerLogLevel( int logLevel )
 
 
 void TWSClient::reqHistoricalData ( int tickerId, const IB::Contract &contract,
-	const QString &endDateTime, const QString &durationStr,
-	const QString &barSizeSetting, const QString &whatToShow, int useRTH,
-	int formatDate )
+	const std::string &endDateTime, const std::string &durationStr,
+	const std::string &barSizeSetting, const std::string &whatToShow,
+	int useRTH, int formatDate )
 {
 	qDebug() << "REQ_HISTORICAL_DATA" << tickerId << toQString(contract.symbol)
-		<< toQString(contract.secType) << toQString(contract.exchange) << endDateTime << durationStr
-		<< barSizeSetting << whatToShow << useRTH << formatDate;
+		<< toQString(contract.secType) << toQString(contract.exchange)
+		<< toQString(endDateTime) << toQString(durationStr)
+		<< toQString(barSizeSetting) << toQString(whatToShow)
+		<< useRTH << formatDate;
 	
-	ePosixClient->reqHistoricalData( tickerId, contract, toIBString(endDateTime),
-		toIBString(durationStr), toIBString(barSizeSetting),
-		toIBString(whatToShow), useRTH, formatDate );
+	ePosixClient->reqHistoricalData( tickerId, contract, endDateTime,
+		durationStr, barSizeSetting, whatToShow, useRTH, formatDate );
 }
 
 
