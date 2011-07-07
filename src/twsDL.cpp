@@ -359,8 +359,7 @@ void TwsDL::idle()
 	dumpWorkTodo();
 	
 	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if(  workTodo->getHistTodo().countLeft() > 0
-	    	&& ( myProp->reqMaxContracts <= 0 || workTodo->getHistTodo().countDone() <= myProp->reqMaxContracts ) ) {
+		if(  workTodo->getHistTodo().countLeft() > 0 ) {
 			getData();
 			return;
 		}
@@ -890,9 +889,6 @@ void PropTwsDL::initDefaults()
 	minPacingTime = 1500;
 	violationPause = 60000;
 	
-	reqMaxContracts = -1;
-	reqMaxContractsPerSpec = -1;
-	
 	printFormatDates = true;
 }
 
@@ -912,9 +908,6 @@ bool PropTwsDL::readProperties()
 	ok &= get("pacingInterval", pacingInterval );
 	ok &= get("minPacingTime", minPacingTime);
 	ok &= get("violationPause", violationPause);
-	
-	ok = ok & get("reqMaxContracts", reqMaxContracts);
-	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	
 	ok = ok & get("printFormatDates", printFormatDates);
 	
