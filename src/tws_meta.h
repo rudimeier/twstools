@@ -33,9 +33,10 @@ extern const QHash<QString, const char*> short_bar_size;
 class ContractDetailsRequest
 {
 	public:
+		static ContractDetailsRequest * fromXml( xmlNodePtr );
+		
 		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
-		bool fromStringList( const QList<QString>&, bool includeExpired );
 		
 	private:
 		IB::Contract _ibContract;
@@ -51,6 +52,8 @@ class ContractDetailsRequest
 class HistRequest
 {
 	public:
+		static HistRequest * fromXml( xmlNodePtr );
+		
 		const IB::Contract& ibContract() const;
 		const QString& endDateTime() const;
 		const QString& durationStr() const;
@@ -62,7 +65,6 @@ class HistRequest
 		bool initialize( const IB::Contract&, const QString &endDateTime,
 			const QString &durationStr, const QString &barSizeSetting,
 			const QString &whatToShow, int useRTH, int formatDate );
-		bool fromString( const QString&, bool includeExpired );
 		QString toString() const;
 		void clear();
 		
@@ -166,7 +168,6 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
 		void dump( FILE *stream ) const;
 		void dumpLeft( FILE *stream ) const;
 		
@@ -199,8 +200,6 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
-		
 		QList<ContractDetailsRequest> contractDetailsRequests;
 };
 
@@ -218,12 +217,16 @@ class WorkTodo
 		virtual ~WorkTodo();
 		
 		GenericRequest::ReqType getType() const;
-		const QList<QByteArray>& getRows() const;
+		ContractDetailsTodo* contractDetailsTodo() const;
+		const ContractDetailsTodo& getContractDetailsTodo() const;
+		HistTodo* histTodo() const;
+		const HistTodo& getHistTodo() const;
 		int read_file( const QString & fileName);
 		
 	private:
 		GenericRequest::ReqType reqType;
-		QList<QByteArray> *rows;
+		ContractDetailsTodo *_contractDetailsTodo;
+		HistTodo *_histTodo;
 };
 
 
@@ -239,7 +242,7 @@ class PacketContractDetails
 		PacketContractDetails();
 		virtual ~PacketContractDetails();
 		
-		static PacketContractDetails * fromXml( xmlDocPtr );
+		static PacketContractDetails * fromXml( xmlNodePtr );
 		
 		const ContractDetailsRequest& getRequest() const;
 		const QList<IB::ContractDetails>& constList() const;
@@ -273,20 +276,22 @@ class PacketHistData
 			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
 		
 		PacketHistData();
+		virtual ~PacketHistData();
 		
-		static PacketHistData * fromXml( xmlDocPtr );
+		static PacketHistData * fromXml( xmlNodePtr );
 		
+		const HistRequest& getRequest() const;
 		bool isFinished() const;
 		Error getError() const;
 		void clear();
-		void record( int reqId );
+		void record( int reqId, const HistRequest& );
 		void append( int reqId, const QString &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
 		void closeError( Error );
-		void dump( const HistRequest&, bool printFormatDates );
+		void dump( bool printFormatDates );
 		
-		void dumpXml( const HistRequest& );
+		void dumpXml();
 		
 	private:
 		class Row
@@ -309,6 +314,7 @@ class PacketHistData
 		Error error;
 		
 		int reqId;
+		HistRequest *request;
 		QList<Row> rows;
 		Row finishRow;
 };

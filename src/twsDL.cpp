@@ -210,8 +210,6 @@ TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
 	workTodo( new WorkTodo() ),
-	contractDetailsTodo( new ContractDetailsTodo() ),
-	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
 	p_histData( *(new PacketHistData()) ),
 	dataFarms( *(new DataFarmStates()) ),
@@ -241,12 +239,6 @@ TwsDL::~TwsDL()
 	}
 	if( workTodo != NULL ) {
 		delete workTodo;
-	}
-	if( histTodo != NULL ) {
-		delete histTodo;
-	}
-	if( contractDetailsTodo != NULL ) {
-		delete contractDetailsTodo;
 	}
 	delete &p_contractDetails;
 	delete &p_histData;
@@ -356,7 +348,7 @@ void TwsDL::idle()
 	}
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
+		if( curIndexTodoContractDetails < workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
 			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 			getContracts();
 			return;
@@ -367,8 +359,8 @@ void TwsDL::idle()
 	dumpWorkTodo();
 	
 	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if( histTodo->countLeft() > 0
-	    	&& ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
+		if(  workTodo->getHistTodo().countLeft() > 0
+	    	&& ( myProp->reqMaxContracts <= 0 || workTodo->getHistTodo().countDone() <= myProp->reqMaxContracts ) ) {
 			getData();
 			return;
 		}
@@ -381,7 +373,7 @@ void TwsDL::idle()
 void TwsDL::getContracts()
 {
 	const ContractDetailsRequest &cdR =
-		contractDetailsTodo->contractDetailsRequests.at( curIndexTodoContractDetails );
+		workTodo->getContractDetailsTodo().contractDetailsRequests.at( curIndexTodoContractDetails );
 	reqContractDetails( cdR );
 	
 	changeState( WAIT_DATA );
@@ -404,9 +396,9 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( histTodo->countLeft() > 0 );
+	Q_ASSERT( workTodo->getHistTodo().countLeft() > 0 );
 	
-	int wait = histTodo->checkoutOpt( &pacingControl, &dataFarms );
+	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
 	
 	if( wait > 0 ) {
 		curIdleTime = qMin( 1000, wait );
@@ -417,13 +409,13 @@ void TwsDL::getData()
 		qDebug() << "late timeout:" << wait;
 	}
 	
-	const HistRequest &hR = histTodo->current();
+	const HistRequest &hR = workTodo->getHistTodo().current();
 	
 	pacingControl.addRequest( hR.ibContract() );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	
-	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex()
+	qDebug() << "DOWNLOAD DATA" << workTodo->getHistTodo().currentIndex()
 		<< currentRequest.reqId() << ibToString(hR.ibContract());
 	
 	reqHistoricalData( hR );
@@ -479,11 +471,12 @@ void TwsDL::waitHist()
 void TwsDL::finData()
 {
 	Q_ASSERT( p_histData.isFinished() );
+	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( p_histData.getError() ) {
 	case PacketHistData::ERR_NONE:
-		p_histData.dump( histTodo->current(), myProp->printFormatDates );
-		p_histData.dumpXml( histTodo->current() );
+		p_histData.dump( myProp->printFormatDates );
+		p_histData.dumpXml();
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();
@@ -615,41 +608,42 @@ void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 
 void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 {
+	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
+	int curIndex = workTodo->getHistTodo().currentIndex();
 	switch( errorCode ) {
 	// Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( PacketHistData::ERR_TWSCON );
-			pacingControl.notifyViolation(
-				histTodo->current().ibContract() );
+			pacingControl.notifyViolation( curContract );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
-			qDebug() << "READY - NO DATA" << histTodo->currentIndex() << id;
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+			qDebug() << "READY - NO DATA" << curIndex << id;
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - DATA IS NOT AVAILABLE on HMDS server."
-				<< histTodo->currentIndex() << id;
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+				<< curIndex << id;
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - DATA IS NOT AVAILABLE (no HMDS route)."
-				<< histTodo->currentIndex() << id;
+				<< curIndex << id;
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
 			curIdleTime = 0;
 		} else {
@@ -663,7 +657,7 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
 			curIdleTime = myProp->reqTimeout;
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
-			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract() );
+			dataFarms.learnHmdsLastOk( msgCounter, curContract );
 		} else {
 			qDebug() << "Warning, unhandled error message.";
 		}
@@ -784,7 +778,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	}
 	
 	// TODO we shouldn't do this each row
-	dataFarms.learnHmds( histTodo->current().ibContract() );
+	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
 	
 	Q_ASSERT( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,
@@ -792,7 +786,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	
 	if( p_histData.isFinished() ) {
 		curIdleTime = 0;
-		qDebug() << "READY" << histTodo->currentIndex() << reqId;
+		qDebug() << "READY" << workTodo->getHistTodo().currentIndex() << reqId;
 	}
 }
 
@@ -800,19 +794,16 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 void TwsDL::initWork()
 {
 	int cnt = workTodo->read_file(workFile);
-	const QList<QByteArray> &rows = workTodo->getRows();
-	qDebug() << QString("got %1, %2 rows from workFile %3")
-		.arg(cnt).arg(rows.size()).arg(workFile);
+	qDebug() << QString("got %1 jobs from workFile %2")
+		.arg(cnt).arg(workFile);
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
-		int i = contractDetailsTodo->fromFile( rows, myProp->includeExpired );
-		Q_ASSERT( i>=0 );
+		Q_ASSERT( workTodo->getContractDetailsTodo().contractDetailsRequests.size() >= 0 );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		qDebug() << "read work from file";
-		int i = histTodo->fromFile(rows, myProp->includeExpired);
-		Q_ASSERT( i>=0 );
+		qDebug() << "getting hist data from TWS";
+		Q_ASSERT( workTodo->getHistTodo().countLeft() >= 0 );
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}
@@ -825,7 +816,7 @@ void TwsDL::dumpWorkTodo() const
 	static bool firstTime = true;
 	if( firstTime ) {
 		firstTime = false;
-		histTodo->dumpLeft( stderr );
+		workTodo->getHistTodo().dumpLeft( stderr );
 	}
 }
 
@@ -863,7 +854,7 @@ void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
-	p_histData.record( currentRequest.reqId() );
+	p_histData.record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
 	                              hR.endDateTime(),
@@ -903,8 +894,6 @@ void PropTwsDL::initDefaults()
 	reqMaxContractsPerSpec = -1;
 	
 	printFormatDates = true;
-	
-	includeExpired = false;
 }
 
 
@@ -929,8 +918,6 @@ bool PropTwsDL::readProperties()
 	
 	ok = ok & get("printFormatDates", printFormatDates);
 	
-	ok = ok & get("includeExpired", includeExpired);
-	
 	return ok;
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -944,7 +931,7 @@ int main(int argc, char *argv[])
 	
 	twsDL_parse_cl(argc, (const char **) argv);
 	
-	IbXml::setSkipDefaults( !skipdefp );
+	TwsXml::setSkipDefaults( !skipdefp );
 	
 	TwsDL twsDL( configfilep, workfilep );
 	twsDL.start();

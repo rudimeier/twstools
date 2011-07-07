@@ -104,6 +104,22 @@ const QHash<QString, const char*> short_bar_size = init_short_bar_size();
 
 
 
+ContractDetailsRequest * ContractDetailsRequest::fromXml( xmlNodePtr xn )
+{
+	ContractDetailsRequest *cdr = new ContractDetailsRequest();
+	
+	for( xmlNodePtr p = xn->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			IB::Contract c;
+			conv_xml2ib( &c, p);
+			cdr->initialize(c);
+		}
+	}
+	
+	return cdr;
+}
+
 const IB::Contract& ContractDetailsRequest::ibContract() const
 {
 	return _ibContract;
@@ -112,20 +128,6 @@ const IB::Contract& ContractDetailsRequest::ibContract() const
 bool ContractDetailsRequest::initialize( const IB::Contract& c )
 {
 	_ibContract = c;
-	return true;
-}
-
-
-bool ContractDetailsRequest::fromStringList( const QList<QString>& sl,
-	bool includeExpired )
-{
-	_ibContract.symbol = toIBString( sl[0] );
-	_ibContract.secType = toIBString( sl[1]);
-	// optional filter for exchange
-	_ibContract.exchange= toIBString( sl.size() > 2 ? sl[2] : "" );
-	// optional filter for a single expiry
-	_ibContract.expiry = toIBString( sl.size() > 3 ? sl[3] : "" );
-	_ibContract.includeExpired = includeExpired;
 	return true;
 }
 
@@ -148,45 +150,6 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 	_useRTH = u;
 	_formatDate = f;
 	return true;
-}
-
-
-bool HistRequest::fromString( const QString& s, bool includeExpired )
-{
-	bool ok = false;
-	QStringList sl = s.split('\t');
-	
-	if( sl.size() < 13 ) {
-		return ok;
-	}
-	
-	int i = 0;
-	_endDateTime = sl.at(i++);
-	_durationStr = sl.at(i++);
-	_barSizeSetting = sl.at(i++);
-	_whatToShow = sl.at(i++);
-	_useRTH = sl.at(i++).toInt( &ok );
-	if( !ok ) {
-		return false;
-	}
-	_formatDate = sl.at(i++).toInt( &ok );
-	if( !ok ) {
-		return false;
-	}
-	
-	_ibContract.symbol = toIBString(sl.at(i++));
-	_ibContract.secType = toIBString(sl.at(i++));
-	_ibContract.exchange = toIBString(sl.at(i++));
-	_ibContract.currency = toIBString(sl.at(i++));
-	_ibContract.expiry = toIBString(sl.at(i++));
-	_ibContract.strike = sl.at(i++).toDouble( &ok );
-	if( !ok ) {
-		return false;
-	}
-	_ibContract.right = toIBString(sl.at(i++));
-	_ibContract.includeExpired = includeExpired;
-	
-	return ok;
 }
 
 
@@ -218,6 +181,42 @@ void HistRequest::clear()
 {
 	_ibContract = IB::Contract();
 	_whatToShow.clear();
+}
+
+
+#define GET_ATTR_QSTRING( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? QString(tmp) \
+		: dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_INT( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
+HistRequest * HistRequest::fromXml( xmlNodePtr node )
+{
+	char* tmp;
+	static const HistRequest dflt;
+	
+	HistRequest *hR = new HistRequest();
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &hR->_ibContract, p);
+		}
+	}
+	
+	GET_ATTR_QSTRING( hR, "endDateTime", _endDateTime );
+	GET_ATTR_QSTRING( hR, "durationStr", _durationStr );
+	GET_ATTR_QSTRING( hR, "barSizeSetting", _barSizeSetting );
+	GET_ATTR_QSTRING( hR, "whatToShow", _whatToShow );
+	GET_ATTR_INT( hR, "useRTH", _useRTH );
+	GET_ATTR_INT( hR, "formatDate", _formatDate );
+	
+	return hR;
 }
 
 
@@ -285,28 +284,6 @@ HistTodo::~HistTodo()
 	foreach( HistRequest *hR, histRequests ) {
 		delete hR;
 	}
-}
-
-
-int HistTodo::fromFile( const QList<QByteArray> &rows, bool includeExpired )
-{
-	histRequests.clear();
-	
-	int retVal = rows.size();
-	
-	foreach( QByteArray row, rows ) {
-		if( row.startsWith('[') ) {
-			int firstTab = row.indexOf('\t');
-			Q_ASSERT( row.size() > firstTab );
-			Q_ASSERT( firstTab >= 0 ); //TODO
-			row.remove(0, firstTab+1 );
-		}
-		HistRequest hR;
-		bool ok = hR.fromString( row, includeExpired );
-		Q_ASSERT(ok); //TODO
-		add( hR );
-	}
-	return retVal;
 }
 
 
@@ -499,45 +476,22 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
-int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
-	bool includeExpired )
-{
-	int retVal = 0;
-	QRegExp regExp("^REQ_CD:?");
-	
-	foreach( QByteArray row, rows ) {
-		QString s(row);
-		Q_ASSERT( s.contains( regExp ) );
-		s.remove( regExp );
-		QList<QString> sl = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-		Q_ASSERT( sl.size() >= 2 && sl.size() <= 4 ); // TODO handle that
-		
-		ContractDetailsRequest cdR;
-		bool ok = cdR.fromStringList( sl, includeExpired );
-		Q_ASSERT(ok); //TODO
-		contractDetailsRequests.append( cdR );
-		retVal++;
-	}
-	return retVal;
-}
-
-
-
-
-
-
-
-
 WorkTodo::WorkTodo() :
 	reqType(GenericRequest::NONE),
-	rows(new QList<QByteArray>())
+	_contractDetailsTodo( new ContractDetailsTodo() ),
+	_histTodo( new HistTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
-	delete rows;
+	if( _histTodo != NULL ) {
+		delete _histTodo;
+	}
+	if( _contractDetailsTodo != NULL ) {
+		delete _contractDetailsTodo;
+	}
 }
 
 
@@ -546,10 +500,24 @@ GenericRequest::ReqType WorkTodo::getType() const
 	return reqType;
 }
 
-
-const QList<QByteArray>& WorkTodo::getRows() const
+ContractDetailsTodo* WorkTodo::contractDetailsTodo() const
 {
-	return *rows;
+	return _contractDetailsTodo;
+}
+
+const ContractDetailsTodo& WorkTodo::getContractDetailsTodo() const
+{
+	return *_contractDetailsTodo;
+}
+
+HistTodo* WorkTodo::histTodo() const
+{
+	return _histTodo;
+}
+
+const HistTodo& WorkTodo::getHistTodo() const
+{
+	return *_histTodo;
 }
 
 
@@ -559,33 +527,29 @@ int WorkTodo::read_file( const QString & fileName )
 	QFile f( fileName );
 	
 	reqType = GenericRequest::NONE;
-	rows->clear();
-
-
-	XmlFile file;
+	
+	TwsXml file;
 	if( ! file.openFile(fileName.toAscii().constData()) ) {
 		return retVal;
 	}
 	retVal = 0;
-	xmlDocPtr doc;
-	while( (doc = file.nextXmlDoc()) != NULL ) {
+	xmlNodePtr xn;
+	while( (xn = file.nextXmlNode()) != NULL ) {
 		QByteArray line;
-		xmlNodePtr root = doc->children;
-		if( root->type == XML_ELEMENT_NODE
-			&& strcmp((char*)root->name, "PacketContractDetails") == 0 ) {
+		Q_ASSERT( xn->type == XML_ELEMENT_NODE  );
+		if( strcmp((char*)xn->name, "PacketContractDetails") == 0 ) {
 			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
-			PacketContractDetails *pcd = PacketContractDetails::fromXml(doc);
-			const IB::Contract &c = pcd->getRequest().ibContract();
-			line = QByteArray("REQ_CD: ")
-				+ c.symbol.c_str() + ", "
-				+ c.secType.c_str() + ", "
-				+ c.exchange.c_str();
-		} else if ( root->type == XML_ELEMENT_NODE
-			&& strcmp((char*)root->name, "PacketHistData") == 0 ) {
+			PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
+			_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
+		} else if ( strcmp((char*)xn->name, "PacketHistData") == 0 ) {
 			reqType = GenericRequest::HIST_REQUEST;
-			Q_ASSERT(false);
+			PacketHistData *phd = PacketHistData::fromXml(xn);
+			_histTodo->add( phd->getRequest() );
+		} else {
+			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
+				xn->name );
+			continue;
 		}
-		rows->append(line);
 		retVal++;
 	}
 	
@@ -613,23 +577,14 @@ PacketContractDetails::~PacketContractDetails()
 	}
 }
 
-PacketContractDetails * PacketContractDetails::fromXml( xmlDocPtr doc )
+PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 {
 	PacketContractDetails *pcd = new PacketContractDetails();
 	
-	xmlNodePtr root = doc->children;
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
-				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-					if( q->type == XML_ELEMENT_NODE
-						&& strcmp((char*)q->name, "reqContract") == 0 )  {
-						pcd->request = new ContractDetailsRequest();
-						IB::Contract c;
-						conv_xml2ib( &c, q);
-						pcd->request->initialize(c);
-					}
-				}
+				pcd->request = ContractDetailsRequest::fromXml(p);
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
@@ -704,25 +659,19 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 
 void PacketContractDetails::dumpXml()
 {
-	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
-	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
 		(const xmlChar*)"PacketContractDetails", NULL );
-	xmlDocSetRootElement( doc, root );
 	
-	xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "reqContract", request->ibContract(), IbXml::skip_defaults );
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "reqContract", request->ibContract() );
 	
-	
-	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	for( int i=0; i<cdList.size(); i++ ) {
-		conv_ib2xml( nrsp, "ContractDetails", cdList[i], IbXml::skip_defaults );
+		conv_ib2xml( nrsp, "ContractDetails", cdList[i] );
 	}
 	
-	xmlDocFormatDump(stdout, doc, 1);
-	//HACK print form feed as xml file separator
-	printf("\f");
-	
-	xmlFreeDoc(doc);
+	TwsXml::dumpAndFree( root );
 }
 
 
@@ -751,66 +700,88 @@ PacketHistData::PacketHistData()
 	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
+	request = NULL;
 }
 
+PacketHistData::~PacketHistData()
+{
+	if( request != NULL ) {
+		delete request;
+	}
+}
 
-PacketHistData * PacketHistData::fromXml( xmlDocPtr )
+PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 {
 	PacketHistData *phd = new PacketHistData();
-	Q_ASSERT(false); // not implemented yet
+	
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				phd->request = HistRequest::fromXml(p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type == XML_ELEMENT_NODE
+						&& strcmp((char*)q->name, "row???????") == 0 )  {
+						// TODO
+					}
+				}
+			}
+		}
+	}
+	
 	return phd;
 }
 
 #define ADD_ATTR_QSTRING( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
 			(xmlChar*) toIBString(_struct_._attr_).c_str() ); \
 	}
 
 #define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_BOOL( _ne_, _struct_, _attr_ ) \
-	if( !IbXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
 			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
 	}
 
-void PacketHistData::dumpXml( const HistRequest& hR )
+void PacketHistData::dumpXml()
 {
 	char tmp[128];
 	
-	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
-	
-	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
-	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr nphd = xmlNewChild( root, NULL,
 		(const xmlChar*)"PacketHistData", NULL );
-	xmlDocSetRootElement( doc, root );
+	
 	{
 		struct s_bla {
-			const QString &endDateTime;
-			const QString &durationStr;
-			const QString &barSizeSetting;
-			const QString &whatToShow;
+			const QString endDateTime;
+			const QString durationStr;
+			const QString barSizeSetting;
+			const QString whatToShow;
 			int useRTH;
 			int formatDate;
 		};
 		static const s_bla dflt = {"", "", "", "", 0, 0 };
-		const IB::Contract &c = hR.ibContract();
-		s_bla bla = { hR.endDateTime(), hR.durationStr(), hR.barSizeSetting(),
-			hR.whatToShow(), hR.useRTH(), hR.formatDate() };
+		const IB::Contract &c = request->ibContract();
+		s_bla bla = { request->endDateTime(), request->durationStr(),
+			request->barSizeSetting(), request->whatToShow(), request->useRTH(),
+			request->formatDate() };
 		
-		xmlNodePtr nqry = xmlNewChild( root, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( nqry, "reqContract", c, IbXml::skip_defaults );
+		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
+		conv_ib2xml( nqry, "reqContract", c );
 		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
 		ADD_ATTR_QSTRING( nqry, bla, durationStr );
 		ADD_ATTR_QSTRING( nqry, bla, barSizeSetting );
@@ -819,7 +790,8 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 		ADD_ATTR_INT( nqry, bla, formatDate );
 	}
 	
-	xmlNodePtr nrsp = xmlNewChild( root, NULL, (xmlChar*)"response", NULL);
+	if( mode == CLOSED ) {
+	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 		for( int i=0; i<rows.size(); i++ ) {
@@ -845,14 +817,14 @@ void PacketHistData::dumpXml( const HistRequest& hR )
 		ADD_ATTR_DOUBLE( nrow, finishRow, WAP );
 		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
 	}
-	
-	xmlDocFormatDump(stdout, doc, 1);
-	//HACK print form feed as xml file separator
-	printf("\f");
-	
-	xmlFreeDoc(doc);
+	}
+	TwsXml::dumpAndFree( root );
 }
 
+const HistRequest& PacketHistData::getRequest() const
+{
+	return *request;
+}
 
 bool PacketHistData::isFinished() const
 {
@@ -871,16 +843,21 @@ void PacketHistData::clear()
 	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
 	rows.clear();
 	finishRow.clear();
 }
 
 
-void PacketHistData::record( int reqId )
+void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	Q_ASSERT( mode == CLEAN && error == ERR_NONE );
+	Q_ASSERT( mode == CLEAN && error == ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
+	this->request = new HistRequest( hR );
 }
 
 
@@ -911,12 +888,12 @@ void PacketHistData::closeError( Error e )
 }
 
 
-void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
+void PacketHistData::dump( bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
-	const IB::Contract &c = hR.ibContract();
-	const QString &wts = hR.whatToShow();
-	const QString &barSizeSetting = hR.barSizeSetting();
+	const IB::Contract &c = request->ibContract();
+	const QString &wts = request->whatToShow();
+	const QString &barSizeSetting = request->barSizeSetting();
 	
 	foreach( Row r, rows ) {
 		QString expiry = toQString(c.expiry);

@@ -12,6 +12,7 @@
 
 static poptContext opt_ctx;
 static const char *filep = NULL;
+static int skipdefp = 0;
 static int histjobp = 0;
 
 #define VERSION_MSG \
@@ -35,6 +36,8 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 }
 
 static struct poptOption flow_opts[] = {
+	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
+		"Never skip xml default values.", NULL},
 	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
 		"generate hist job", "FILE"},
 	POPT_TABLEEND
@@ -104,22 +107,24 @@ int main(int argc, char *argv[])
 {
 	twsgen_parse_cl(argc, (const char **) argv);
 	
+	TwsXml::setSkipDefaults( !skipdefp );
+	
 	if( !histjobp ) {
 		fprintf( stderr, "error, only -H is implemented\n" );
 		return 1;
 	}
 	
-	XmlFile file;
+	TwsXml file;
 	if( ! file.openFile(filep) ) {
 		return 1;
 	}
 	
-	xmlDocPtr doc;
+	xmlNodePtr xn;
 	int count_docs = 0;
 	HistTodo histTodo;
-	while( (doc = file.nextXmlDoc()) != NULL ) {
+	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
-		PacketContractDetails *pcd = PacketContractDetails::fromXml( doc );
+		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
 		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
@@ -144,12 +149,16 @@ int main(int argc, char *argv[])
 				hR.initialize( c, myProp_endDateTime, myProp_durationStr,
 				               myProp_barSizeSetting, wts, myProp_useRTH, myProp_formatDate );
 				histTodo.add( hR );
+				
+				PacketHistData phd;
+				phd.record( 0, hR );
+				phd.dumpXml();
 			}
 		}
 		delete pcd;
-		xmlFreeDoc(doc);
 	}
-	histTodo.dumpLeft( stdout );
+	// TODO this should be xml dump
+	histTodo.dumpLeft( stderr );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
 	

@@ -18,38 +18,37 @@
 
 
 #define ADD_ATTR_INT( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_LONG( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
 #define ADD_ATTR_BOOL( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, \
 			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
 	}
 
 #define ADD_ATTR_STRING( _struct_, _attr_ ) \
-	if( !skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, \
 			(xmlChar*) _struct_._attr_.c_str() ); \
 	}
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl,
-	bool skip_defaults )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
 	char tmp[128];
 	static const IB::ComboLeg dflt;
@@ -69,8 +68,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl,
 }
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc,
-	bool skip_defaults )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc )
 {
 	char tmp[128];
 	static const IB::UnderComp dflt;
@@ -85,8 +83,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc,
 }
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
-	bool skip_defaults )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 {
 	char tmp[128];
 	static const IB::Contract dflt;
@@ -114,11 +111,11 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
 		
 		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
 		for ( it = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
-			conv_ib2xml( ncl, "comboLeg", **it, skip_defaults );
+			conv_ib2xml( ncl, "comboLeg", **it );
 		}
 	}
 	if( c.underComp != NULL ) {
-		conv_ib2xml( ne, "underComp", *c.underComp, skip_defaults );
+		conv_ib2xml( ne, "underComp", *c.underComp );
 	}
 	
 	xmlAddChild(parent, ne);
@@ -126,7 +123,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c,
 
 
 void conv_ib2xml( xmlNodePtr parent, const char* name,
-	const IB::ContractDetails& cd, bool skip_defaults )
+	const IB::ContractDetails& cd )
 {
 	char tmp[128];
 	static const IB::ContractDetails dflt;
@@ -134,7 +131,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
 	
-	conv_ib2xml( ne, "summary", cd.summary, skip_defaults );
+	conv_ib2xml( ne, "summary", cd.summary );
 	
 	ADD_ATTR_STRING( cd, marketName );
 	ADD_ATTR_STRING( cd, tradingClass );
@@ -329,21 +326,26 @@ static int find_form_feed( const char *s, int n )
 #define CHUNK_SIZE 1024
 
 
-XmlFile::XmlFile() :
+TwsXml::TwsXml() :
 	file(NULL),
-	buf( (char*) malloc(1024*1024))
+	buf( (char*) malloc(1024*1024)),
+	curDoc(NULL),
+	curNode(NULL)
 {
 }
 
-XmlFile::~XmlFile()
+TwsXml::~TwsXml()
 {
 	if( file != NULL ) {
 		fclose((FILE*)file);
 	}
 	free(buf);
+	if( curDoc != NULL ) {
+		xmlFreeDoc( curDoc );
+	}
 }
 
-bool XmlFile::openFile( const char *filename )
+bool TwsXml::openFile( const char *filename )
 {
 	file = fopen(filename, "rb");
 	
@@ -355,7 +357,7 @@ bool XmlFile::openFile( const char *filename )
 	return true;
 }
 
-xmlDocPtr XmlFile::nextXmlDoc()
+xmlDocPtr TwsXml::nextXmlDoc()
 {
 	xmlDocPtr doc = NULL;
 	if( file == NULL ) {
@@ -381,53 +383,103 @@ xmlDocPtr XmlFile::nextXmlDoc()
 	return doc;
 }
 
-
-
-
-bool IbXml::_skip_defaults = false;
-const bool& IbXml::skip_defaults = _skip_defaults;
-
-IbXml::IbXml( const char* rootname )
+xmlNodePtr TwsXml::nextXmlRoot()
 {
-	doc = xmlNewDoc( (const xmlChar*) "1.0");
-	root = xmlNewDocNode( doc, NULL, (const xmlChar*) rootname, NULL );
-	xmlDocSetRootElement( doc, root );
+	if( curDoc != NULL ) {
+		xmlFreeDoc(curDoc);
+	}
+	
+	while( (curDoc = nextXmlDoc()) != NULL ) {
+		xmlNodePtr root = xmlDocGetRootElement(curDoc);
+		if( root != NULL ) {
+			assert( root->type == XML_ELEMENT_NODE );
+			if( strcmp((char*)root->name, "TWSXML") == 0 ) {
+				fprintf(stderr, "Notice, return root '%s'.\n", root->name);
+				return root;
+			} else {
+				fprintf(stderr, "Warning, ignore unknown root '%s'.\n",
+					root->name);
+			}
+		} else {
+			fprintf(stderr, "Warning, no root element found.\n");
+		}
+		xmlFreeDoc(curDoc);
+	}
+	fprintf(stderr, "Notice, all roots parsed.\n");
+	return NULL;
 }
 
-IbXml::~IbXml()
+xmlNodePtr TwsXml::nextXmlNode()
 {
-	xmlFreeDoc(doc);
+	if( curNode!= NULL ) {
+		curNode = curNode->next;
+	}
+	for( ; curNode!= NULL; curNode = curNode->next ) {
+		if( curNode->type == XML_ELEMENT_NODE ) {
+			fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
+			return curNode;
+		} else {
+			fprintf(stderr, "Warning, ignore element '%s'.\n",
+				curNode->name);
+		}
+	}	
+	assert( curNode == NULL );
+	
+	xmlNodePtr root;
+	while( (root = nextXmlRoot()) != NULL ) {
+		for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+			if( p->type == XML_ELEMENT_NODE ) {
+				curNode = p;
+				break;
+			} else {
+				fprintf(stderr, "Warning, ignore element '%s'.\n",
+					p->name);
+			}
+		}
+		if( curNode != NULL ) {
+			break;
+		} else {
+			fprintf(stderr, "Warning, no usable element found.\n");
+		}
+	}
+	
+	if( curNode != NULL ) {
+		fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
+	} else {
+		fprintf(stderr, "Notice, all elements parsed.\n");
+	}
+	
+	return curNode;
 }
 
-void IbXml::setSkipDefaults( bool b )
+
+
+
+bool TwsXml::_skip_defaults = false;
+const bool& TwsXml::skip_defaults = _skip_defaults;
+
+void TwsXml::setSkipDefaults( bool b )
 {
 	_skip_defaults = b;
 }
 
-void IbXml::dump() const
+xmlNodePtr TwsXml::newDocRoot()
 {
-	xmlDocFormatDump(stdout, doc, 1);
+	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
+	xmlNodePtr root = xmlNewDocNode( doc, NULL,
+		(const xmlChar*)"TWSXML", NULL );
+	xmlDocSetRootElement( doc, root );
+	
+	//caller has to free root.doc
+	return root;
 }
 
-void IbXml::add( const char* name, const IB::Contract& c )
+void TwsXml::dumpAndFree( xmlNodePtr root )
 {
-	conv_ib2xml( root, name, c, _skip_defaults );
+	xmlDocFormatDump(stdout, root->doc, 1);
+	//HACK print form feed as xml file separator
+	printf("\f");
+	
+	xmlFreeDoc(root->doc);
 }
-
-void IbXml::add( const char* name, const IB::ContractDetails& cd )
-{
-	conv_ib2xml( root, name, cd, _skip_defaults );
-}
-
-xmlDocPtr IbXml::getDoc() const
-{
-	return doc;
-}
-
-xmlNodePtr IbXml::getRoot() const
-{
-	return root; 
-}
-
-
 
