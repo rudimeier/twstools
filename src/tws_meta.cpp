@@ -31,28 +31,28 @@ qint64 nowInMsecs()
 
 
 /// stupid static helper
-QString ibDate2ISO( const QString &ibDate )
+std::string ibDate2ISO( const std::string &ibDate )
 {
 	QDateTime dt;
 	
-	dt = QDateTime::fromString( ibDate, "yyyyMMdd  hh:mm:ss");
+	dt = QDateTime::fromString( toQString(ibDate), "yyyyMMdd  hh:mm:ss");
 	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
+		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
 	}
 	
-	dt.setDate( QDate::fromString( ibDate, "yyyyMMdd") );
+	dt.setDate( QDate::fromString( toQString(ibDate), "yyyyMMdd") );
 	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd");
+		return toIBString(dt.toString("yyyy-MM-dd"));
 	}
 	
 	bool ok = false;
-	uint t = ibDate.toUInt( &ok );
+	uint t = toQString(ibDate).toUInt( &ok );
 	if( ok ) {
 		dt.setTime_t( t );
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
+		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
 	}
 	
-	return QString();
+	return std::string();
 }
 
 
@@ -896,30 +896,30 @@ void PacketHistData::dump( bool printFormatDates )
 	const QString barSizeSetting = toQString(request->barSizeSetting());
 	
 	foreach( Row r, rows ) {
-		QString expiry = toQString(c.expiry);
-		QString dateTime = toQString(r.date);
+		std::string expiry = c.expiry;
+		std::string dateTime = r.date;
 		if( printFormatDates ) {
-			if( expiry.isEmpty() ) {
+			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
-				expiry = ibDate2ISO( toQString(c.expiry) );
+				expiry = ibDate2ISO( c.expiry );
 			}
-			dateTime = ibDate2ISO(toQString(r.date));
-			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
+			dateTime = ibDate2ISO(r.date);
+			Q_ASSERT( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))
 			.arg(toQString(c.exchange))
 			.arg(toQString(c.currency))
-			.arg(expiry)
+			.arg(toQString(expiry))
 			.arg(c.strike)
 			.arg(toQString(c.right));
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       short_wts.value( wts, "NNN" ),
 		       short_bar_size.value( barSizeSetting, "00N" ),
 		       c_str.toUtf8().constData(),
-		       dateTime.toUtf8().constData(),
+		       dateTime.c_str(),
 		       r.open, r.high, r.low, r.close,
 		       r.volume, r.count, r.WAP, r.hasGaps);
 		fflush(stdout);

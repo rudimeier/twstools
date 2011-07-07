@@ -18,7 +18,7 @@ typedef struct _xmlDoc * xmlDocPtr;
 qint64 nowInMsecs();
 
 /// stupid static helper
-QString ibDate2ISO( const QString &ibDate );
+std::string ibDate2ISO( const std::string &ibDate );
 
 extern const QHash<QString, const char*> short_wts;
 extern const QHash<QString, const char*> short_bar_size;
