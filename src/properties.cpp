@@ -54,20 +54,6 @@ bool Properties::readConfigFile( const std::string &confFileName )
 	return false;
 }
 
-QByteArray Properties::getConfigBlob() const
-{
-	FILE* stream;
-	int size;
-	stream = tmpfile();
-	conf->write(stream);
-	size=ftell(stream);
-	fseek(stream,0,SEEK_SET);
-	QByteArray byteArray(size,0);
-	fread(byteArray.data(),size,1,stream);
-	fclose (stream);
-	return byteArray;
-}
-
 bool Properties::exists(const std::string &key) const
 {
 	return conf->exists(key.c_str());

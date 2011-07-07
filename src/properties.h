@@ -25,13 +25,11 @@ class Properties {
 		bool readConfigFile( const std::string &confFileName );
 		
 		const std::string& getConfFileName() const { return confFileName; }
-		QByteArray getConfigBlob() const;
 
 		bool exists(const std::string &key) const;
 		bool lookupValue(const std::string &key, bool    &value) const;
 		bool lookupValue(const std::string &key, int     &value) const;
 		bool lookupValue(const std::string &key, std::string &value) const;
-
 		bool lookupValue(const std::string &key, quint16 &value) const;
 
 
