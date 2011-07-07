@@ -1,16 +1,9 @@
 #ifndef PROPERTIES_H
-#define PROPERTIES_H PROPERTIES_H
+#define PROPERTIES_H
 
 #include <QtCore/QString>
-#include <QtCore/QVector>
-#include <QtCore/QPair>
 
 
-
-class QTime;
-
-
-#define properties Properties::globalProperties()
 
 // debug verbosity 0...n
 #define prop_debug_level 1 
@@ -37,11 +30,7 @@ class Properties {
 		bool exists(const QString &key) const;
 		bool lookupValue(const QString &key, bool    &value) const;
 		bool lookupValue(const QString &key, int     &value) const;
-		bool lookupValue(const QString &key, float   &value) const;
-		bool lookupValue(const QString &key, double  &value) const;
 		bool lookupValue(const QString &key, QString &value) const;
-		bool lookupValue(const QString &key, QVector<double>  &vector) const;
-		bool lookupValue(const QString &key, QVector<QString> &vector) const;
 
 		bool lookupValue(const QString &key, quint16 &value) const;
 
@@ -74,13 +63,7 @@ class PropSub {
 		bool exists(const QString& key) const;
 		bool get(const QString& key, bool&    value) const;
 		bool get(const QString& key, int&     value) const;
-		bool get(const QString& key, float&   value) const;
-		bool get(const QString& key, double&  value) const;
 		bool get(const QString& key, QString& value) const;
-		bool get(const QString& key, QTime&   value) const;
-		bool get(const QString& key, QPair<double,double>& pair) const;
-		bool get(const QString& key, QVector<double>&      vector) const;
-		bool get(const QString& key, QVector<QString>&     vector) const;
 		bool get(const QString& key, quint16&  value) const;
 		
 		const Properties& prop;

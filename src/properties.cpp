@@ -104,38 +104,6 @@ bool Properties::lookupValue(const QString &key, int &value) const
 	return false;
 }
 
-bool Properties::lookupValue(const QString &key, float &value) const
-{
-	QString errorMsg;
-	try {
-		value  = (float) conf->lookup(key.toAscii().data());
-		return true;
-	} catch (libconfig::SettingNotFoundException) { 
-		errorMsg = SETTING_NOT_FOUND_MSG;
-	} catch(libconfig::SettingTypeException) {
-		errorMsg = SETTING_TYPE_WRONG_MSG.arg("float");
-	}
-	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
-	return false;
-}
-
-bool Properties::lookupValue(const QString &key, double &value) const
-{
-	QString errorMsg;
-	try {
-		value  = (double) conf->lookup(key.toAscii().data());
-		return true;
-	} catch (libconfig::SettingNotFoundException) { 
-		errorMsg = SETTING_NOT_FOUND_MSG;
-	} catch(libconfig::SettingTypeException) {
-		errorMsg = SETTING_TYPE_WRONG_MSG.arg("double");
-	}
-	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
-	return false;
-}
-
 bool Properties::lookupValue(const QString &key, QString &value) const
 {
 	QString errorMsg;
@@ -146,50 +114,6 @@ bool Properties::lookupValue(const QString &key, QString &value) const
 		errorMsg = SETTING_NOT_FOUND_MSG;
 	} catch(libconfig::SettingTypeException) {
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("string");
-	}
-	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
-	return false;
-}
-
-bool Properties::lookupValue(const QString &key, QVector<double> &vector) const
-{
-	QString errorMsg;
-	try {
-		QVector<double> tmpVector;
-		libconfig::Setting &setting = conf->lookup(key.toAscii().data());
-		(double) setting[0]; // just casting 1st element to throw an exception on type mismatch
-		for (int i = 0; i < setting.getLength(); i++) {
-			tmpVector << (double) setting[i];
-		}
-		vector = tmpVector;
-		return true;
-	} catch (libconfig::SettingNotFoundException) { 
-		errorMsg = SETTING_NOT_FOUND_MSG;
-	} catch(libconfig::SettingTypeException) {
-		errorMsg = SETTING_TYPE_WRONG_MSG.arg("QVector<double>");
-	}
-	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
-	return false;
-}
-
-bool Properties::lookupValue(const QString &key, QVector<QString> &vector) const
-{
-	QString errorMsg;
-	try {
-		QVector<QString> tmpVector;
-		libconfig::Setting &setting = conf->lookup(key.toAscii().data());
-		(const char*) setting[0]; // just casting 1st element to throw an exception on type mismatch
-		for (int i = 0; i < setting.getLength(); i++) {
-			tmpVector << (const char*) setting[i];
-		}
-		vector = tmpVector;
-		return true;
-	} catch (libconfig::SettingNotFoundException) { 
-		errorMsg = SETTING_NOT_FOUND_MSG;
-	} catch(libconfig::SettingTypeException) {
-		errorMsg = SETTING_TYPE_WRONG_MSG.arg("QVector<QString>");
 	}
 	
 	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
@@ -223,61 +147,9 @@ bool PropSub::get(const QString& key, int& value) const
 	return prop.lookupValue(configName+"."+key,value);
 }
 
-bool PropSub::get(const QString& key, float& value) const
-{
-	return prop.lookupValue(configName+"."+key,value);
-}
-
-bool PropSub::get(const QString& key, double& value) const
-{
-	return prop.lookupValue(configName+"."+key,value);
-}
-
 bool PropSub::get(const QString& key, QString& value) const
 {
 	return prop.lookupValue(configName+"."+key,value);
-}
-
-bool PropSub::get(const QString& key, QTime& value) const
-{
-	const QString TIME_FORMAT = "hh:mm:ss";
-	QTime tmpTime;
-	QString tmpStrg = value.toString(TIME_FORMAT);
-	bool ok = get(key, tmpStrg);
-	
-	if (ok) {
-		tmpTime = QTime::fromString(tmpStrg,TIME_FORMAT);
-		if ( tmpTime.isValid() ) value = tmpTime;
-		else {
-			Q_ASSERT(false); // TODO handle that
-		}
-	}
-	return ok;
-}
-
-bool PropSub::get(const QString& key, QPair<double,double>& pair) const
-{
-	QVector<double> tmpVector;
-	bool ok = prop.lookupValue(configName+"."+key, tmpVector);
-	if ( ok ) {
-		if ( tmpVector.size() == 2 ) {
-			pair.first  = tmpVector[0];
-			pair.second = tmpVector[1];
-		} else {
-			Q_ASSERT(false); // TODO handle that
-		}
-	}
-	return ok;
-}
-
-bool PropSub::get(const QString& key, QVector<double>& vector) const
-{
-	return prop.lookupValue(configName+"."+key,vector);
-}
-
-bool PropSub::get(const QString& key, QVector<QString>& vector) const
-{
-	return prop.lookupValue(configName+"."+key,vector);
 }
 
 bool PropSub::get(const QString& key, quint16& value) const {
