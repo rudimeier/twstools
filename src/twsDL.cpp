@@ -188,7 +188,7 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 	int barCount, double WAP, int hasGaps )
 {
 	parentTwsDL->twsHistoricalData(
-		reqId, toQString(date), open, high, low, close, volume,
+		reqId, date, open, high, low, close, volume,
 		barCount, WAP, hasGaps);
 }
 
@@ -766,7 +766,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 }
 
 
-void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
+void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
 	if( currentRequest.reqId() != reqId ) {

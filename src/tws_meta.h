@@ -285,7 +285,7 @@ class PacketHistData
 		Error getError() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
-		void append( int reqId, const QString &date,
+		void append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
 		void closeError( Error );
@@ -299,7 +299,7 @@ class PacketHistData
 			public:
 				void clear();
 				
-				QString date;
+				std::string date;
 				double open;
 				double high;
 				double low;

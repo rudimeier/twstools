@@ -732,11 +732,6 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 	return phd;
 }
 
-#define ADD_ATTR_QSTRING( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-			(xmlChar*) toIBString(_struct_._attr_).c_str() ); \
-	}
 
 #define ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
 	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
@@ -801,7 +796,7 @@ void PacketHistData::dumpXml()
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 		for( int i=0; i<rows.size(); i++ ) {
 			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
-			ADD_ATTR_QSTRING( nrow, rows[i], date );
+			ADD_ATTR_STRING( nrow, rows[i], date );
 			ADD_ATTR_DOUBLE( nrow, rows[i], open );
 			ADD_ATTR_DOUBLE( nrow, rows[i], high );
 			ADD_ATTR_DOUBLE( nrow, rows[i], low );
@@ -812,7 +807,7 @@ void PacketHistData::dumpXml()
 			ADD_ATTR_BOOL( nrow, rows[i], hasGaps );
 		}
 		xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
-		ADD_ATTR_QSTRING( nrow, finishRow, date );
+		ADD_ATTR_STRING( nrow, finishRow, date );
 		ADD_ATTR_DOUBLE( nrow, finishRow, open );
 		ADD_ATTR_DOUBLE( nrow, finishRow, high );
 		ADD_ATTR_DOUBLE( nrow, finishRow, low );
@@ -866,7 +861,7 @@ void PacketHistData::record( int reqId, const HistRequest& hR )
 }
 
 
-void PacketHistData::append( int reqId, const QString &date,
+void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
@@ -876,7 +871,7 @@ void PacketHistData::append( int reqId, const QString &date,
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
-	if( date.startsWith("finished") ) {
+	if( strncmp(date.c_str(), "finished", 8) == 0) {
 		mode = CLOSED;
 		finishRow = row;
 	} else {
@@ -902,14 +897,14 @@ void PacketHistData::dump( bool printFormatDates )
 	
 	foreach( Row r, rows ) {
 		QString expiry = toQString(c.expiry);
-		QString dateTime = r.date;
+		QString dateTime = toQString(r.date);
 		if( printFormatDates ) {
 			if( expiry.isEmpty() ) {
 				expiry = "0000-00-00";
 			} else {
 				expiry = ibDate2ISO( toQString(c.expiry) );
 			}
-			dateTime = ibDate2ISO(r.date);
+			dateTime = ibDate2ISO(toQString(r.date));
 			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
 		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
