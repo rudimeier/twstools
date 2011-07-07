@@ -56,8 +56,6 @@ class PropTwsDL : public PropSub
 		int reqMaxContractsPerSpec;
 		
 		bool printFormatDates;
-		
-		bool includeExpired;
 };
 
 

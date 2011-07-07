@@ -894,8 +894,6 @@ void PropTwsDL::initDefaults()
 	reqMaxContractsPerSpec = -1;
 	
 	printFormatDates = true;
-	
-	includeExpired = false;
 }
 
 
@@ -919,8 +917,6 @@ bool PropTwsDL::readProperties()
 	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
 	
 	ok = ok & get("printFormatDates", printFormatDates);
-	
-	ok = ok & get("includeExpired", includeExpired);
 	
 	return ok;
 }
