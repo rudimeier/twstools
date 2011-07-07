@@ -22,9 +22,9 @@ class Properties {
 		
 		static const Properties& globalProperties();
 		
-		bool readConfigFile( const QString &confFileName );
+		bool readConfigFile( const std::string &confFileName );
 		
-		const QString& getConfFileName() const { return confFileName; }
+		const std::string& getConfFileName() const { return confFileName; }
 		QByteArray getConfigBlob() const;
 
 		bool exists(const std::string &key) const;
@@ -44,7 +44,7 @@ class Properties {
 		static const QString SETTING_TYPE_WRONG_MSG; // %1 = type %2 = configFile, %3 = key
 
 		libconfig::Config *conf;
-		QString           confFileName;
+		std::string confFileName;
 };
 
 

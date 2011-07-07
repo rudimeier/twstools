@@ -196,7 +196,7 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 
 
 
-TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
+TwsDL::TwsDL( const std::string& confFile, const QString& workFile ) :
 	state(CONNECT),
 	lastConnectionTime(0),
 	connection_failed( false ),

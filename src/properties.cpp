@@ -34,20 +34,21 @@ const Properties& Properties::globalProperties()
 	return *_properties;
 }
 
-bool Properties::readConfigFile( const QString &confFileName )
+bool Properties::readConfigFile( const std::string &confFileName )
 {
 	QString errorMsg;
 	try{
- 		conf->readFile(confFileName.toAscii().data());
+ 		conf->readFile(confFileName.c_str());
 		this->confFileName = confFileName;
 		conf->setAutoConvert(true);
 		PROP_DEBUG( 1, QString("auto convert readConfigFile: %1")
 			.arg(conf->getAutoConvert() ? "true" : "false") );
 		return true;
 	} catch(libconfig::FileIOException) {
-		errorMsg = FILE_IO_ERROR_MSQ.arg(confFileName);
+		errorMsg = FILE_IO_ERROR_MSQ.arg(QString::fromStdString(confFileName));
 	} catch(libconfig::ParseException e ) {
-		errorMsg = PARSE_ERROR_MSG.arg(confFileName).arg(e.getError()).arg(e.getLine());
+		errorMsg = PARSE_ERROR_MSG.arg(QString::fromStdString(confFileName))
+			.arg(e.getError()).arg(e.getLine());
 	}
 	PROP_DEBUG( 0, errorMsg );
 	return false;
@@ -84,7 +85,8 @@ bool Properties::lookupValue(const std::string &key, bool &value) const
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("bool");
 	}
 	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(QString::fromStdString(key)));
+	PROP_DEBUG( 3, errorMsg.arg(QString::fromStdString(confFileName))
+		.arg(QString::fromStdString(key)));
 	return false;
 }
 
@@ -100,7 +102,8 @@ bool Properties::lookupValue(const std::string &key, int &value) const
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("int");
 	}
 	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(QString::fromStdString(key)));
+	PROP_DEBUG( 3, errorMsg.arg(QString::fromStdString(confFileName))
+		.arg(QString::fromStdString(key)));
 	return false;
 }
 
@@ -116,7 +119,8 @@ bool Properties::lookupValue(const std::string &key, std::string &value) const
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("string");
 	}
 	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(QString::fromStdString(key)));
+	PROP_DEBUG( 3, errorMsg.arg(QString::fromStdString(confFileName))
+		.arg(QString::fromStdString(key)));
 	return false;
 }
 

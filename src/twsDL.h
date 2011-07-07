@@ -72,7 +72,7 @@ class TwsDL
 			QUIT_ERROR
 		};
 		
-		TwsDL( const QString& confFile, const QString& workFile );
+		TwsDL( const std::string& confFile, const QString& workFile );
 		~TwsDL();
 		
 		void start();
@@ -126,7 +126,7 @@ class TwsDL
 		bool connection_failed;
 		int curIdleTime;
 		
-		QString confFile;
+		std::string confFile;
 		QString workFile;
 		PropTwsDL *myProp;
 		
