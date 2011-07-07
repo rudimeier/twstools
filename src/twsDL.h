@@ -3,7 +3,6 @@
 
 #include "properties.h"
 
-#include <QtCore/QString>
 #include <QtCore/QList>
 
 
@@ -106,11 +105,11 @@ class TwsDL
 		void reqContractDetails( const ContractDetailsRequest& );
 		void reqHistoricalData( const HistRequest& );
 		
-		void errorContracts(int, int, const QString &);
-		void errorHistData(int, int, const QString &);
+		void errorContracts(int, int, const std::string &);
+		void errorHistData(int, int, const std::string &);
 		
 		// callbacks from our twsWrapper
-		void twsError(int, int, const QString &);
+		void twsError(int, int, const std::string &);
 		
 		void twsConnected( bool connected );
 		void twsContractDetails( int reqId,

@@ -1381,8 +1381,10 @@ void DataFarmStates::setAllBroken()
 }
 
 
-void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
+void DataFarmStates::notify(int msgNumber, int errorCode,
+	const std::string &_msg)
 {
+	QString msg = toQString(_msg); // just convert to QString
 	lastMsgNumber = msgNumber;
 	QString farm;
 	State state;

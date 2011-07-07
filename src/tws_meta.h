@@ -408,7 +408,7 @@ class DataFarmStates
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
 		void setAllBroken();
-		void notify(int msgNumber, int errorCode, const QString &msg);
+		void notify(int msgNumber, int errorCode, const std::string &msg);
 		void learnMarket( const IB::Contract& );
 		void learnHmds( const IB::Contract& );
 		void learnHmdsLastOk(int msgNumber, const IB::Contract& );

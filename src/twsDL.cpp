@@ -155,8 +155,7 @@ void TwsDlWrapper::connectionClosed()
 void TwsDlWrapper::error( const int id, const int errorCode,
 	const IB::IBString errorString )
 {
-	parentTwsDL->twsError(
-		id, errorCode, toQString(errorString) );
+	parentTwsDL->twsError( id, errorCode, errorString );
 }
 
 
@@ -522,14 +521,15 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	errorMsg.contains( QString(_strg_), Qt::CaseInsensitive )
+	toQString(errorMsg).contains( QString(_strg_), Qt::CaseInsensitive )
 
-void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
+void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
 	msgCounter++;
 	
 	if( id == currentRequest.reqId() ) {
-		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
+		qDebug() << "ERROR for request" << id << errorCode
+			<< toQString(errorMsg);
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
@@ -589,7 +589,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
+void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 {
 	// TODO
 	switch( errorCode ) {
@@ -604,7 +604,7 @@ void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
+void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
 	int curIndex = workTodo->getHistTodo().currentIndex();
