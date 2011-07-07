@@ -3,6 +3,7 @@
 
 #include "properties.h"
 
+#include <QtCore/QString>
 #include <QtCore/QList>
 
 

@@ -3,14 +3,21 @@
 #include <libconfig.h++>
 #include "properties.h"
 #include "debug.h"
+#include <QtCore/QString>
+
+
+
+// %1 = configFile
+static const QString FILE_IO_ERROR_MSQ("file io error %1");
+// %1 = configFile, %2 = error, %3 = line
+static const QString PARSE_ERROR_MSG("parse error in %1: %2, line %3");
+// %1 = configFile, %2 = key
+static const QString SETTING_NOT_FOUND_MSG("setting not found in %1: %2");
+// %1 = type %2 = configFile, %3 = key
+static const QString SETTING_TYPE_WRONG_MSG("wrong setting type (%1) in %2: %3");
 
 
 const Properties* Properties::_properties = NULL;
-
-const QString Properties::FILE_IO_ERROR_MSQ("file io error %1");
-const QString Properties::PARSE_ERROR_MSG("parse error in %1: %2, line %3");
-const QString Properties::SETTING_NOT_FOUND_MSG("setting not found in %1: %2");
-const QString Properties::SETTING_TYPE_WRONG_MSG("wrong setting type (%1) in %2: %3");
 
 Properties::Properties()
 {

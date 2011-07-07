@@ -1,8 +1,7 @@
 #ifndef PROPERTIES_H
 #define PROPERTIES_H
 
-#include <QtCore/QString>
-
+#include <string>
 
 
 // debug verbosity 0...n
@@ -35,11 +34,6 @@ class Properties {
 	private:
 		static const Properties *_properties;
 		
-		static const QString FILE_IO_ERROR_MSQ;      // %1 = configFile
-		static const QString PARSE_ERROR_MSG;        // %1 = configFile, %2 = error, %3 = line
-		static const QString SETTING_NOT_FOUND_MSG;  // %1 = configFile, %2 = key
-		static const QString SETTING_TYPE_WRONG_MSG; // %1 = type %2 = configFile, %3 = key
-
 		libconfig::Config *conf;
 		std::string confFileName;
 };
