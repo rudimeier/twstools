@@ -856,10 +856,10 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 	p_histData.record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
-	                              hR.endDateTime(),
-	                              hR.durationStr(),
-	                              hR.barSizeSetting(),
-	                              hR.whatToShow(),
+	                              hR.endDateTime().toStdString(),
+	                              hR.durationStr().toStdString(),
+	                              hR.barSizeSetting().toStdString(),
+	                              hR.whatToShow().toStdString(),
 	                              hR.useRTH(),
 	                              hR.formatDate() );
 }
