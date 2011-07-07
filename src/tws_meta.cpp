@@ -582,7 +582,6 @@ int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
 
 WorkTodo::WorkTodo() :
 	reqType(GenericRequest::NONE),
-	rows(new QList<QByteArray>()),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() )
 {
@@ -591,7 +590,6 @@ WorkTodo::WorkTodo() :
 
 WorkTodo::~WorkTodo()
 {
-	delete rows;
 	if( _histTodo != NULL ) {
 		delete _histTodo;
 	}
@@ -604,12 +602,6 @@ WorkTodo::~WorkTodo()
 GenericRequest::ReqType WorkTodo::getType() const
 {
 	return reqType;
-}
-
-
-const QList<QByteArray>& WorkTodo::getRows() const
-{
-	return *rows;
 }
 
 ContractDetailsTodo* WorkTodo::contractDetailsTodo() const
@@ -639,9 +631,7 @@ int WorkTodo::read_file( const QString & fileName )
 	QFile f( fileName );
 	
 	reqType = GenericRequest::NONE;
-	rows->clear();
-
-
+	
 	TwsXml file;
 	if( ! file.openFile(fileName.toAscii().constData()) ) {
 		return retVal;
@@ -654,25 +644,16 @@ int WorkTodo::read_file( const QString & fileName )
 		if( strcmp((char*)xn->name, "PacketContractDetails") == 0 ) {
 			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 			PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-			const IB::Contract &c = pcd->getRequest().ibContract();
-			line = QByteArray("REQ_CD: ")
-				+ c.symbol.c_str() + ", "
-				+ c.secType.c_str() + ", "
-				+ c.exchange.c_str();
+			_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
 		} else if ( strcmp((char*)xn->name, "PacketHistData") == 0 ) {
 			reqType = GenericRequest::HIST_REQUEST;
-			PacketHistData *pcd = PacketHistData::fromXml(xn);
-			char tmp[1024];
-			sprintf( tmp, "[%d]\t%s",
-			         0,
-			         pcd->getRequest().toString().toAscii().constData() );
-			line = QByteArray(tmp);
+			PacketHistData *phd = PacketHistData::fromXml(xn);
+			_histTodo->add( phd->getRequest() );
 		} else {
 			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
 				xn->name );
 			continue;
 		}
-		rows->append(line);
 		retVal++;
 	}
 	

@@ -794,19 +794,16 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 void TwsDL::initWork()
 {
 	int cnt = workTodo->read_file(workFile);
-	const QList<QByteArray> &rows = workTodo->getRows();
-	qDebug() << QString("got %1, %2 rows from workFile %3")
-		.arg(cnt).arg(rows.size()).arg(workFile);
+	qDebug() << QString("got %1 jobs from workFile %2")
+		.arg(cnt).arg(workFile);
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
-		int i = workTodo->contractDetailsTodo()->fromFile( rows, myProp->includeExpired );
-		Q_ASSERT( i>=0 );
+		Q_ASSERT( workTodo->getContractDetailsTodo().contractDetailsRequests.size() >= 0 );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		qDebug() << "read work from file";
-		int i = workTodo->histTodo()->fromFile(rows, myProp->includeExpired);
-		Q_ASSERT( i>=0 );
+		qDebug() << "getting hist data from TWS";
+		Q_ASSERT( workTodo->getHistTodo().countLeft() >= 0 );
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}

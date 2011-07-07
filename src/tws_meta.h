@@ -222,7 +222,6 @@ class WorkTodo
 		virtual ~WorkTodo();
 		
 		GenericRequest::ReqType getType() const;
-		const QList<QByteArray>& getRows() const;
 		ContractDetailsTodo* contractDetailsTodo() const;
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
@@ -231,7 +230,6 @@ class WorkTodo
 		
 	private:
 		GenericRequest::ReqType reqType;
-		QList<QByteArray> *rows;
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 };
