@@ -11,8 +11,6 @@
 // from global installed ibtws
 #include "ibtws/Contract.h"
 
-#include <QtCore/QVariant>
-#include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 #include <QtCore/QCoreApplication>
 #include <popt.h>

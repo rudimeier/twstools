@@ -1,5 +1,4 @@
 
-#include <cstdio>
 #include <libconfig.h++>
 #include "properties.h"
 #include "debug.h"
