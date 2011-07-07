@@ -30,7 +30,6 @@ class Properties {
 		bool lookupValue(const std::string &key, bool    &value) const;
 		bool lookupValue(const std::string &key, int     &value) const;
 		bool lookupValue(const std::string &key, std::string &value) const;
-		bool lookupValue(const std::string &key, quint16 &value) const;
 
 
 	private:
@@ -62,7 +61,6 @@ class PropSub {
 		bool get(const std::string& key, bool&    value) const;
 		bool get(const std::string& key, int&     value) const;
 		bool get(const std::string& key, std::string& value) const;
-		bool get(const std::string& key, quint16&  value) const;
 		
 		const Properties& prop;
 };

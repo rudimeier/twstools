@@ -110,18 +110,6 @@ bool Properties::lookupValue(const std::string &key, std::string &value) const
 	return false;
 }
 
-bool Properties::lookupValue(const std::string &key, quint16 &value) const
-{
-	bool retVal;
-	int  intTMP = value;
-	
-	retVal = lookupValue(key,intTMP);
-	value = (quint16) intTMP;
-	
-	return retVal;
-}
-
-
 bool PropSub::exists(const std::string& key) const
 {
 	return prop.exists(configName+"."+key);
@@ -141,11 +129,6 @@ bool PropSub::get(const std::string& key, std::string& value) const
 {
 	return prop.lookupValue(configName+"."+key,value);
 }
-
-bool PropSub::get(const std::string& key, quint16& value) const {
-	return prop.lookupValue(configName+"."+key,value);
-}
-
 
 
 

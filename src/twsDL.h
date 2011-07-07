@@ -42,8 +42,8 @@ class PropTwsDL : public PropSub
 		
 		// fields
 		std::string twsHost;
-		quint16 twsPort;
-		int     clientId;
+		int twsPort;
+		int clientId;
 		
 		int conTimeout;
 		int reqTimeout;
