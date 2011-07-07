@@ -37,7 +37,6 @@ class ContractDetailsRequest
 		
 		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
-		bool fromStringList( const QList<QString>&, bool includeExpired );
 		
 	private:
 		IB::Contract _ibContract;
@@ -66,7 +65,6 @@ class HistRequest
 		bool initialize( const IB::Contract&, const QString &endDateTime,
 			const QString &durationStr, const QString &barSizeSetting,
 			const QString &whatToShow, int useRTH, int formatDate );
-		bool fromString( const QString&, bool includeExpired );
 		QString toString() const;
 		void clear();
 		
@@ -170,7 +168,6 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
 		void dump( FILE *stream ) const;
 		void dumpLeft( FILE *stream ) const;
 		
@@ -203,8 +200,6 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
-		
 		QList<ContractDetailsRequest> contractDetailsRequests;
 };
 

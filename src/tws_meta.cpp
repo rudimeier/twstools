@@ -132,20 +132,6 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 }
 
 
-bool ContractDetailsRequest::fromStringList( const QList<QString>& sl,
-	bool includeExpired )
-{
-	_ibContract.symbol = toIBString( sl[0] );
-	_ibContract.secType = toIBString( sl[1]);
-	// optional filter for exchange
-	_ibContract.exchange= toIBString( sl.size() > 2 ? sl[2] : "" );
-	// optional filter for a single expiry
-	_ibContract.expiry = toIBString( sl.size() > 3 ? sl[3] : "" );
-	_ibContract.includeExpired = includeExpired;
-	return true;
-}
-
-
 
 
 
@@ -164,45 +150,6 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 	_useRTH = u;
 	_formatDate = f;
 	return true;
-}
-
-
-bool HistRequest::fromString( const QString& s, bool includeExpired )
-{
-	bool ok = false;
-	QStringList sl = s.split('\t');
-	
-	if( sl.size() < 13 ) {
-		return ok;
-	}
-	
-	int i = 0;
-	_endDateTime = sl.at(i++);
-	_durationStr = sl.at(i++);
-	_barSizeSetting = sl.at(i++);
-	_whatToShow = sl.at(i++);
-	_useRTH = sl.at(i++).toInt( &ok );
-	if( !ok ) {
-		return false;
-	}
-	_formatDate = sl.at(i++).toInt( &ok );
-	if( !ok ) {
-		return false;
-	}
-	
-	_ibContract.symbol = toIBString(sl.at(i++));
-	_ibContract.secType = toIBString(sl.at(i++));
-	_ibContract.exchange = toIBString(sl.at(i++));
-	_ibContract.currency = toIBString(sl.at(i++));
-	_ibContract.expiry = toIBString(sl.at(i++));
-	_ibContract.strike = sl.at(i++).toDouble( &ok );
-	if( !ok ) {
-		return false;
-	}
-	_ibContract.right = toIBString(sl.at(i++));
-	_ibContract.includeExpired = includeExpired;
-	
-	return ok;
 }
 
 
@@ -337,28 +284,6 @@ HistTodo::~HistTodo()
 	foreach( HistRequest *hR, histRequests ) {
 		delete hR;
 	}
-}
-
-
-int HistTodo::fromFile( const QList<QByteArray> &rows, bool includeExpired )
-{
-	histRequests.clear();
-	
-	int retVal = rows.size();
-	
-	foreach( QByteArray row, rows ) {
-		if( row.startsWith('[') ) {
-			int firstTab = row.indexOf('\t');
-			Q_ASSERT( row.size() > firstTab );
-			Q_ASSERT( firstTab >= 0 ); //TODO
-			row.remove(0, firstTab+1 );
-		}
-		HistRequest hR;
-		bool ok = hR.fromString( row, includeExpired );
-		Q_ASSERT(ok); //TODO
-		add( hR );
-	}
-	return retVal;
 }
 
 
@@ -542,35 +467,6 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 	qDebug() << tmp.size() << leftRequests.size();
 	Q_ASSERT( tmp.size() == leftRequests.size() );
 	leftRequests = tmp;
-}
-
-
-
-
-
-
-
-
-int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
-	bool includeExpired )
-{
-	int retVal = 0;
-	QRegExp regExp("^REQ_CD:?");
-	
-	foreach( QByteArray row, rows ) {
-		QString s(row);
-		Q_ASSERT( s.contains( regExp ) );
-		s.remove( regExp );
-		QList<QString> sl = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-		Q_ASSERT( sl.size() >= 2 && sl.size() <= 4 ); // TODO handle that
-		
-		ContractDetailsRequest cdR;
-		bool ok = cdR.fromStringList( sl, includeExpired );
-		Q_ASSERT(ok); //TODO
-		contractDetailsRequests.append( cdR );
-		retVal++;
-	}
-	return retVal;
 }
 
 
