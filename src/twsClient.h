@@ -23,11 +23,11 @@ class TWSClient
 		
 		bool isConnected() const;
 		
-		QString getTWSHost() const;
+		std::string getTWSHost() const;
 		quint16 getTWSPort() const;
 		int     getClientId() const;
 		
-		void setTWSHost( const QString &host );
+		void setTWSHost( const std::string &host );
 		void setTWSPort( const quint16 &port );
 		void setClientId( int clientId );
 		
@@ -35,7 +35,7 @@ class TWSClient
 		
 		/////////////////////////////////////////////////////
 		void connectTWS();
-		void connectTWS( const QString &host, quint16 port, int clientId );
+		void connectTWS( const std::string &host, quint16 port, int clientId );
 		void disconnectTWS();
 		
 		void reqMktData( int tickerId, const IB::Contract &contract, const QString &genericTickList, bool snapshot );
@@ -54,7 +54,7 @@ class TWSClient
 	private:
 		void disconnected();
 		
-		QString twsHost;
+		std::string twsHost;
 		quint16 twsPort;
 		int     clientId;
 		

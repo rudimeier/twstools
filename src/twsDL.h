@@ -41,7 +41,7 @@ class PropTwsDL : public PropSub
 		bool readProperties();
 		
 		// fields
-		QString twsHost;
+		std::string twsHost;
 		quint16 twsPort;
 		int     clientId;
 		

@@ -54,7 +54,7 @@ bool TWSClient::isConnected() const
 }
 
 
-QString TWSClient::getTWSHost() const
+std::string TWSClient::getTWSHost() const
 {
 	return twsHost;
 }
@@ -72,7 +72,7 @@ int     TWSClient::getClientId() const
 }
 
 
-void TWSClient::setTWSHost( const QString &host )
+void TWSClient::setTWSHost( const std::string &host )
 {
 	if ( isConnected() ) {
 		Q_ASSERT(false); // TODO handle that
@@ -106,9 +106,11 @@ void TWSClient::connectTWS()
 }
 
 
-void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
+void TWSClient::connectTWS( const std::string &host, quint16 port, int clientId )
 {
-	qDebug() << "called:" <<  QString("%1:%2, clientId: %3").arg(host).arg(port).arg(clientId);
+	
+	qDebug() << "called:" <<  QString("%1:%2, clientId: %3")
+		.arg(QString::fromStdString(host)).arg(port).arg(clientId);
 	
 	if( isConnected() ) {
 		myEWrapper->error( IB::NO_VALID_ID, IB::ALREADY_CONNECTED.code(),
@@ -124,7 +126,7 @@ void TWSClient::connectTWS( const QString &host, quint16 port, int clientId )
 	this->twsPort  = port;
 	this->clientId = clientId;
 	
-	ePosixClient->eConnect( host.toUtf8().constData(), port, clientId );
+	ePosixClient->eConnect( host.c_str(), port, clientId );
 }
 
 

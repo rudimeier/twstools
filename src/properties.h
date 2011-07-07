@@ -30,7 +30,7 @@ class Properties {
 		bool exists(const QString &key) const;
 		bool lookupValue(const QString &key, bool    &value) const;
 		bool lookupValue(const QString &key, int     &value) const;
-		bool lookupValue(const QString &key, QString &value) const;
+		bool lookupValue(const QString &key, std::string &value) const;
 
 		bool lookupValue(const QString &key, quint16 &value) const;
 
@@ -63,7 +63,7 @@ class PropSub {
 		bool exists(const QString& key) const;
 		bool get(const QString& key, bool&    value) const;
 		bool get(const QString& key, int&     value) const;
-		bool get(const QString& key, QString& value) const;
+		bool get(const QString& key, std::string& value) const;
 		bool get(const QString& key, quint16&  value) const;
 		
 		const Properties& prop;

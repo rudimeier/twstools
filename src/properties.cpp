@@ -104,7 +104,7 @@ bool Properties::lookupValue(const QString &key, int &value) const
 	return false;
 }
 
-bool Properties::lookupValue(const QString &key, QString &value) const
+bool Properties::lookupValue(const QString &key, std::string &value) const
 {
 	QString errorMsg;
 	try {
@@ -147,7 +147,7 @@ bool PropSub::get(const QString& key, int& value) const
 	return prop.lookupValue(configName+"."+key,value);
 }
 
-bool PropSub::get(const QString& key, QString& value) const
+bool PropSub::get(const QString& key, std::string& value) const
 {
 	return prop.lookupValue(configName+"."+key,value);
 }
