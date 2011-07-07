@@ -1358,7 +1358,7 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
-	lastChanged(INT_MIN)
+	lastMsgNumber(INT_MIN)
 {
 }
 
