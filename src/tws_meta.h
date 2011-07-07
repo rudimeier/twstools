@@ -55,25 +55,25 @@ class HistRequest
 		static HistRequest * fromXml( xmlNodePtr );
 		
 		const IB::Contract& ibContract() const;
-		const QString& endDateTime() const;
-		const QString& durationStr() const;
-		const QString& barSizeSetting() const;
-		const QString& whatToShow() const;
+		const std::string& endDateTime() const;
+		const std::string& durationStr() const;
+		const std::string& barSizeSetting() const;
+		const std::string& whatToShow() const;
 		int useRTH() const;
 		int formatDate() const;
 		
-		bool initialize( const IB::Contract&, const QString &endDateTime,
-			const QString &durationStr, const QString &barSizeSetting,
-			const QString &whatToShow, int useRTH, int formatDate );
-		QString toString() const;
+		bool initialize( const IB::Contract&, const std::string &endDateTime,
+			const std::string &durationStr, const std::string &barSizeSetting,
+			const std::string &whatToShow, int useRTH, int formatDate );
+		std::string toString() const;
 		void clear();
 		
 	private:
 		IB::Contract _ibContract;
-		QString _endDateTime;
-		QString _durationStr;
-		QString _barSizeSetting;
-		QString _whatToShow;
+		std::string _endDateTime;
+		std::string _durationStr;
+		std::string _barSizeSetting;
+		std::string _whatToShow;
 		int _useRTH;
 		int _formatDate;
 };
@@ -85,25 +85,25 @@ inline const IB::Contract& HistRequest::ibContract() const
 }
 
 
-inline const QString& HistRequest::endDateTime() const
+inline const std::string& HistRequest::endDateTime() const
 {
 	return _endDateTime;
 }
 
 
-inline const QString& HistRequest::durationStr() const
+inline const std::string& HistRequest::durationStr() const
 {
 	return _durationStr;
 }
 
 
-inline const QString& HistRequest::barSizeSetting() const
+inline const std::string& HistRequest::barSizeSetting() const
 {
 	return _barSizeSetting;
 }
 
 
-inline const QString& HistRequest::whatToShow() const
+inline const std::string& HistRequest::whatToShow() const
 {
 	return _whatToShow;
 }

@@ -138,9 +138,9 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 
 
 
-bool HistRequest::initialize( const IB::Contract& c, const QString &e,
-	const QString &d, const QString &b,
-	const QString &w, int u, int f )
+bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
+	const std::string &d, const std::string &b,
+	const std::string &w, int u, int f )
 {
 	_ibContract = c;
 	_endDateTime = e;
@@ -153,7 +153,7 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 }
 
 
-QString HistRequest::toString() const
+std::string HistRequest::toString() const
 {
 	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 		.arg(toQString(_ibContract.symbol))
@@ -165,15 +165,15 @@ QString HistRequest::toString() const
 		.arg(toQString(_ibContract.right));
 	
 	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(_endDateTime)
-		.arg(_durationStr)
-		.arg(_barSizeSetting)
-		.arg(_whatToShow)
+		.arg(toQString(_endDateTime))
+		.arg(toQString(_durationStr))
+		.arg(toQString(_barSizeSetting))
+		.arg(toQString(_whatToShow))
 		.arg(_useRTH)
 		.arg(_formatDate)
 		.arg(c_str);
 	
-	return retVal;
+	return retVal.toStdString();
 }
 
 
@@ -184,9 +184,10 @@ void HistRequest::clear()
 }
 
 
-#define GET_ATTR_QSTRING( _struct_, _name_, _attr_ ) \
+
+#define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? QString(tmp) \
+	_struct_->_attr_ = tmp ? std::string(tmp) \
 		: dflt._attr_; \
 	free(tmp)
 
@@ -209,10 +210,10 @@ HistRequest * HistRequest::fromXml( xmlNodePtr node )
 		}
 	}
 	
-	GET_ATTR_QSTRING( hR, "endDateTime", _endDateTime );
-	GET_ATTR_QSTRING( hR, "durationStr", _durationStr );
-	GET_ATTR_QSTRING( hR, "barSizeSetting", _barSizeSetting );
-	GET_ATTR_QSTRING( hR, "whatToShow", _whatToShow );
+	GET_ATTR_STRING( hR, "endDateTime", _endDateTime );
+	GET_ATTR_STRING( hR, "durationStr", _durationStr );
+	GET_ATTR_STRING( hR, "barSizeSetting", _barSizeSetting );
+	GET_ATTR_STRING( hR, "whatToShow", _whatToShow );
 	GET_ATTR_INT( hR, "useRTH", _useRTH );
 	GET_ATTR_INT( hR, "formatDate", _formatDate );
 	
@@ -292,7 +293,7 @@ void HistTodo::dump( FILE *stream ) const
 	for(int i=0; i < histRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         i,
-		         histRequests.at(i)->toString().toUtf8().constData() );
+		         histRequests.at(i)->toString().c_str() );
 	}
 }
 
@@ -302,7 +303,7 @@ void HistTodo::dumpLeft( FILE *stream ) const
 	for(int i=0; i < leftRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         leftRequests[i],
-		         histRequests.at(leftRequests[i])->toString().toUtf8().constData() );
+		         histRequests.at(leftRequests[i])->toString().c_str() );
 	}
 }
 
@@ -739,6 +740,12 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 			(xmlChar*) toIBString(_struct_._attr_).c_str() ); \
 	}
 
+#define ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+			(xmlChar*) _struct_._attr_.c_str() ); \
+	}
+
 #define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
 	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
@@ -767,10 +774,10 @@ void PacketHistData::dumpXml()
 	
 	{
 		struct s_bla {
-			const QString endDateTime;
-			const QString durationStr;
-			const QString barSizeSetting;
-			const QString whatToShow;
+			const std::string endDateTime;
+			const std::string durationStr;
+			const std::string barSizeSetting;
+			const std::string whatToShow;
 			int useRTH;
 			int formatDate;
 		};
@@ -782,10 +789,10 @@ void PacketHistData::dumpXml()
 		
 		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
 		conv_ib2xml( nqry, "reqContract", c );
-		ADD_ATTR_QSTRING( nqry, bla, endDateTime );
-		ADD_ATTR_QSTRING( nqry, bla, durationStr );
-		ADD_ATTR_QSTRING( nqry, bla, barSizeSetting );
-		ADD_ATTR_QSTRING( nqry, bla, whatToShow );
+		ADD_ATTR_STRING( nqry, bla, endDateTime );
+		ADD_ATTR_STRING( nqry, bla, durationStr );
+		ADD_ATTR_STRING( nqry, bla, barSizeSetting );
+		ADD_ATTR_STRING( nqry, bla, whatToShow );
 		ADD_ATTR_INT( nqry, bla, useRTH );
 		ADD_ATTR_INT( nqry, bla, formatDate );
 	}
@@ -892,8 +899,8 @@ void PacketHistData::dump( bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = request->ibContract();
-	const QString &wts = request->whatToShow();
-	const QString &barSizeSetting = request->barSizeSetting();
+	const QString wts = toQString(request->whatToShow());
+	const QString barSizeSetting = toQString(request->barSizeSetting());
 	
 	foreach( Row r, rows ) {
 		QString expiry = toQString(c.expiry);
