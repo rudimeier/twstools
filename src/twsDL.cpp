@@ -291,7 +291,7 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
-	qint64 w = nowInMsecs() - lastConnectionTime;
+	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < myProp->conTimeout ) {
 		qDebug() << "Waiting" << (myProp->conTimeout - w)
 			<< "ms before connecting again.";

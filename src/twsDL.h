@@ -2,8 +2,7 @@
 #define TWS_DL_H
 
 #include "properties.h"
-
-#include <QtCore/QList>
+#include <stdint.h>
 
 
 
@@ -123,7 +122,7 @@ class TwsDL
 		
 		
 		State state;
-		qint64 lastConnectionTime;
+		int64_t lastConnectionTime;
 		bool connection_failed;
 		int curIdleTime;
 		

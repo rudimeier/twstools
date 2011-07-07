@@ -21,11 +21,11 @@
 
 
 
-qint64 nowInMsecs()
+int64_t nowInMsecs()
 {
 	const QDateTime now = QDateTime::currentDateTime();
-	const qint64 now_s = now.toTime_t();
-	const qint64 now_ms = now_s * 1000 + now.time().msec();
+	const int64_t now_s = now.toTime_t();
+	const int64_t now_ms = now_s * 1000 + now.time().msec();
 	return now_ms;
 }
 
@@ -965,7 +965,7 @@ bool PacingControl::isEmpty() const
 void PacingControl::clear()
 {
 	if( !dateTimes.isEmpty() ) {
-		qint64 now = nowInMsecs();
+		int64_t now = nowInMsecs();
 		if( now - dateTimes.last() < 5000  ) {
 			// HACK race condition might cause assert in notifyViolation(),
 			// to avoid this we would need to ack each request
@@ -983,7 +983,7 @@ void PacingControl::clear()
 
 void PacingControl::addRequest()
 {
-	const qint64 now_t = nowInMsecs();
+	const int64_t now_t = nowInMsecs();
 	dateTimes.append( now_t );
 	violations.append( false );
 }
@@ -1004,7 +1004,7 @@ void PacingControl::notifyViolation()
 
 int PacingControl::goodTime(const char** ddd) const
 {
-	const qint64 now = nowInMsecs();
+	const int64_t now = nowInMsecs();
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
@@ -1027,7 +1027,7 @@ int PacingControl::goodTime(const char** ddd) const
 	int waitBurst = INT_MIN;
 	int p_index = dateTimes.size() - maxRequests;
 	if( p_index >= 0 ) {
-		qint64 p_time = dateTimes.at( p_index );
+		int64_t p_time = dateTimes.at( p_index );
 		waitBurst = p_time + checkInterval - now;
 	}
 	SWAP_MAX( waitBurst, "wait burst" );
@@ -1041,7 +1041,7 @@ int PacingControl::goodTime(const char** ddd) const
 
 int PacingControl::countLeft() const
 {
-	const qint64 now = nowInMsecs();
+	const int64_t now = nowInMsecs();
 	
 	if( (dateTimes.size() > 0) && violations.last() ) {
 		int waitViol = dateTimes.last() + violationPause - now;
@@ -1051,7 +1051,7 @@ int PacingControl::countLeft() const
 	}
 	
 	int retVal = maxRequests;
-	QList<qint64>::const_iterator it = dateTimes.constEnd();
+	QList<int64_t>::const_iterator it = dateTimes.constEnd();
 	while( it != dateTimes.constBegin() ) {
 		it--;
 		int waitBurst = *it + checkInterval - now;
@@ -1069,9 +1069,9 @@ void PacingControl::merge( const PacingControl& other )
 {
 	qDebug() << dateTimes;
 	qDebug() << other.dateTimes;
-	QList<qint64>::iterator t_d = dateTimes.begin();
+	QList<int64_t>::iterator t_d = dateTimes.begin();
 	QList<bool>::iterator t_v = violations.begin();
-	QList<qint64>::const_iterator o_d = other.dateTimes.constBegin();
+	QList<int64_t>::const_iterator o_d = other.dateTimes.constBegin();
 	QList<bool>::const_iterator o_v = other.violations.constBegin();
 	
 	while( t_d != dateTimes.end() && o_d != other.dateTimes.constEnd() ) {

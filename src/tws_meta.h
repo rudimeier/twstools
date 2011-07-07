@@ -6,6 +6,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QHash>
+#include <stdint.h>
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
@@ -15,7 +16,7 @@ typedef struct _xmlDoc * xmlDocPtr;
 
 
 
-qint64 nowInMsecs();
+int64_t nowInMsecs();
 
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate );
@@ -148,7 +149,7 @@ class GenericRequest
 		ReqType _reqType;
 		int _reqId;
 		
-		qint64 _ctime;
+		int64_t _ctime;
 };
 
 
@@ -344,7 +345,7 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<qint64> dateTimes;
+		QList<int64_t> dateTimes;
 		QList<bool> violations;
 		
 		int maxRequests;
