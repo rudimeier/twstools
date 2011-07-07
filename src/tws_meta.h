@@ -221,7 +221,7 @@ class WorkTodo
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
-		int read_file( const QString & fileName);
+		int read_file( const std::string & fileName);
 		
 	private:
 		GenericRequest::ReqType reqType;

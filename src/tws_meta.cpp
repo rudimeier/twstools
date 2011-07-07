@@ -522,15 +522,13 @@ const HistTodo& WorkTodo::getHistTodo() const
 }
 
 
-int WorkTodo::read_file( const QString & fileName )
+int WorkTodo::read_file( const std::string & fileName )
 {
 	int retVal = -1;
-	QFile f( fileName );
-	
 	reqType = GenericRequest::NONE;
 	
 	TwsXml file;
-	if( ! file.openFile(fileName.toAscii().constData()) ) {
+	if( ! file.openFile(fileName.c_str()) ) {
 		return retVal;
 	}
 	retVal = 0;

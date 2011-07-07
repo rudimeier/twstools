@@ -14,7 +14,6 @@
 #include <QtCore/QVariant>
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
-#include <QtCore/QFile>
 #include <QtCore/QCoreApplication>
 #include <popt.h>
 #include <stdio.h>
@@ -196,7 +195,7 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 
 
 
-TwsDL::TwsDL( const std::string& confFile, const QString& workFile ) :
+TwsDL::TwsDL( const std::string& confFile, const std::string& workFile ) :
 	state(CONNECT),
 	lastConnectionTime(0),
 	connection_failed( false ),
@@ -794,7 +793,7 @@ void TwsDL::initWork()
 {
 	int cnt = workTodo->read_file(workFile);
 	qDebug() << QString("got %1 jobs from workFile %2")
-		.arg(cnt).arg(workFile);
+		.arg(cnt).arg(toQString(workFile));
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";

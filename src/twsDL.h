@@ -73,7 +73,7 @@ class TwsDL
 			QUIT_ERROR
 		};
 		
-		TwsDL( const std::string& confFile, const QString& workFile );
+		TwsDL( const std::string& confFile, const std::string& workFile );
 		~TwsDL();
 		
 		void start();
@@ -128,7 +128,7 @@ class TwsDL
 		int curIdleTime;
 		
 		std::string confFile;
-		QString workFile;
+		std::string workFile;
 		PropTwsDL *myProp;
 		
 		TwsDlWrapper *twsWrapper;
