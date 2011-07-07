@@ -35,7 +35,7 @@ class DataFarmStates;
 class PropTwsDL : public PropSub
 {
 	public:
-		PropTwsDL( const Properties& prop, const QString& cName = "" );
+		PropTwsDL( const Properties& prop, const std::string& cName = "" );
 		
 		void initDefaults();
 		bool readProperties();

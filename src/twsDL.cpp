@@ -867,7 +867,7 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 
 ///////////////////////////////////////////////////////////////////////////////
 // PropTwsDL
-PropTwsDL::PropTwsDL( const Properties& prop, const QString& cName ) :
+PropTwsDL::PropTwsDL( const Properties& prop, const std::string& cName ) :
 	PropSub(prop,cName)
 {
 	PROP_DEBUG( 2, "INITIALIZING" );

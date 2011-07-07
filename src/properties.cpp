@@ -67,16 +67,16 @@ QByteArray Properties::getConfigBlob() const
 	return byteArray;
 }
 
-bool Properties::exists(const QString &key) const
+bool Properties::exists(const std::string &key) const
 {
-	return conf->exists(key.toAscii().data());
+	return conf->exists(key.c_str());
 }
 
-bool Properties::lookupValue(const QString &key, bool &value) const
+bool Properties::lookupValue(const std::string &key, bool &value) const
 {
 	QString errorMsg;
 	try {
-		value = (bool) conf->lookup(key.toAscii().data());
+		value = (bool) conf->lookup(key);
 		return true;
 	} catch (libconfig::SettingNotFoundException) { 
 		errorMsg = SETTING_NOT_FOUND_MSG;
@@ -84,15 +84,15 @@ bool Properties::lookupValue(const QString &key, bool &value) const
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("bool");
 	}
 	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
+	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(QString::fromStdString(key)));
 	return false;
 }
 
-bool Properties::lookupValue(const QString &key, int &value) const
+bool Properties::lookupValue(const std::string &key, int &value) const
 {
 	QString errorMsg;
 	try {
-		value = (int) conf->lookup(key.toAscii().data());
+		value = (int) conf->lookup(key);
 		return true;
 	} catch (libconfig::SettingNotFoundException) { 
 		errorMsg = SETTING_NOT_FOUND_MSG;
@@ -100,15 +100,15 @@ bool Properties::lookupValue(const QString &key, int &value) const
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("int");
 	}
 	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
+	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(QString::fromStdString(key)));
 	return false;
 }
 
-bool Properties::lookupValue(const QString &key, std::string &value) const
+bool Properties::lookupValue(const std::string &key, std::string &value) const
 {
 	QString errorMsg;
 	try {
-		value = (const char*) conf->lookup(key.toAscii().data());
+		value = (const char*) conf->lookup(key);
 		return true;
 	} catch (libconfig::SettingNotFoundException) { 
 		errorMsg = SETTING_NOT_FOUND_MSG;
@@ -116,11 +116,11 @@ bool Properties::lookupValue(const QString &key, std::string &value) const
 		errorMsg = SETTING_TYPE_WRONG_MSG.arg("string");
 	}
 	
-	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(key) );
+	PROP_DEBUG( 3, errorMsg.arg(confFileName).arg(QString::fromStdString(key)));
 	return false;
 }
 
-bool Properties::lookupValue(const QString &key, quint16 &value) const
+bool Properties::lookupValue(const std::string &key, quint16 &value) const
 {
 	bool retVal;
 	int  intTMP = value;
@@ -132,27 +132,27 @@ bool Properties::lookupValue(const QString &key, quint16 &value) const
 }
 
 
-bool PropSub::exists(const QString& key) const
+bool PropSub::exists(const std::string& key) const
 {
 	return prop.exists(configName+"."+key);
 }
 
-bool PropSub::get(const QString& key, bool& value) const
+bool PropSub::get(const std::string& key, bool& value) const
 {
 	return prop.lookupValue(configName+"."+key,value);
 }
 
-bool PropSub::get(const QString& key, int& value) const
+bool PropSub::get(const std::string& key, int& value) const
 {
 	return prop.lookupValue(configName+"."+key,value);
 }
 
-bool PropSub::get(const QString& key, std::string& value) const
+bool PropSub::get(const std::string& key, std::string& value) const
 {
 	return prop.lookupValue(configName+"."+key,value);
 }
 
-bool PropSub::get(const QString& key, quint16& value) const {
+bool PropSub::get(const std::string& key, quint16& value) const {
 	return prop.lookupValue(configName+"."+key,value);
 }
 
