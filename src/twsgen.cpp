@@ -15,6 +15,7 @@ static const char *filep = NULL;
 static int skipdefp = 0;
 static int histjobp = 0;
 static const char *endDateTimep = "";
+static const char *durationStrp = NULL;
 static const char *barSizeSettingp = "1 hour";
 
 #define VERSION_MSG \
@@ -44,6 +45,8 @@ static struct poptOption flow_opts[] = {
 		"generate hist job", "FILE"},
 	{"endDateTime", 'e', POPT_ARG_STRING, &endDateTimep, 0,
 		"Query end date time, default is \"\" which means now.", "DATETIME"},
+	{"durationStr", 'd', POPT_ARG_STRING, &durationStrp, 0,
+		"Query duration, default is maximum dependent on bar size.", NULL},
 	{"barSizeSetting", 'b', POPT_ARG_STRING, &barSizeSettingp, 0,
 		"Size of the bars, default is \"1 hour\".", NULL},
 	POPT_TABLEEND
@@ -107,6 +110,11 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 }
 
 
+const char* max_durationStr( const char* bar_size )
+{
+	// TODO
+	return "3 D";
+}
 
 
 int main(int argc, char *argv[])
@@ -114,6 +122,9 @@ int main(int argc, char *argv[])
 	twsgen_parse_cl(argc, (const char **) argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
+	if( !durationStrp ) {
+		durationStrp = max_durationStr( barSizeSettingp );
+	}
 	
 	if( !histjobp ) {
 		fprintf( stderr, "error, only -H is implemented\n" );
@@ -135,7 +146,6 @@ int main(int argc, char *argv[])
 		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
 		QList<std::string> myProp_whatToShow = QList<std::string>() << "BID";
-		std::string myProp_durationStr = "1 W";
 		int myProp_useRTH = 1;
 		int myProp_formatDate = 1;
 		for( int i = 0; i<pcd->constList().size(); i++ ) {
@@ -150,8 +160,8 @@ int main(int argc, char *argv[])
 			
 			foreach( std::string wts, myProp_whatToShow ) {
 				HistRequest hR;
-				hR.initialize( c, endDateTimep, myProp_durationStr,
-				               barSizeSettingp, wts, myProp_useRTH, myProp_formatDate );
+				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
+				               wts, myProp_useRTH, myProp_formatDate );
 				histTodo.add( hR );
 				
 				PacketHistData phd;
