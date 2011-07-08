@@ -14,6 +14,7 @@ static poptContext opt_ctx;
 static const char *filep = NULL;
 static int skipdefp = 0;
 static int histjobp = 0;
+static const char *endDateTimep = "";
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -40,6 +41,8 @@ static struct poptOption flow_opts[] = {
 		"Never skip xml default values.", NULL},
 	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
 		"generate hist job", "FILE"},
+	{"endDateTime", 'e', POPT_ARG_STRING, &endDateTimep, 0,
+		"Query end date time, default is \"\" which means now.", "DATETIME"},
 	POPT_TABLEEND
 };
 
@@ -129,7 +132,6 @@ int main(int argc, char *argv[])
 		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
 		QList<std::string> myProp_whatToShow = QList<std::string>() << "BID";
-		std::string myProp_endDateTime = "20110214 16:00:00 America/Chicago";
 		std::string myProp_durationStr = "1 W";
 		std::string myProp_barSizeSetting = "30 mins";
 		int myProp_useRTH = 1;
@@ -146,7 +148,7 @@ int main(int argc, char *argv[])
 			
 			foreach( std::string wts, myProp_whatToShow ) {
 				HistRequest hR;
-				hR.initialize( c, myProp_endDateTime, myProp_durationStr,
+				hR.initialize( c, endDateTimep, myProp_durationStr,
 				               myProp_barSizeSetting, wts, myProp_useRTH, myProp_formatDate );
 				histTodo.add( hR );
 				
