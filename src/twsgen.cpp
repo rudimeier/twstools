@@ -17,6 +17,7 @@ static int histjobp = 0;
 static const char *endDateTimep = "";
 static const char *durationStrp = NULL;
 static const char *barSizeSettingp = "1 hour";
+static const char *includeExpiredp = "auto";
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -49,6 +50,9 @@ static struct poptOption flow_opts[] = {
 		"Query duration, default is maximum dependent on bar size.", NULL},
 	{"barSizeSetting", 'b', POPT_ARG_STRING, &barSizeSettingp, 0,
 		"Size of the bars, default is \"1 hour\".", NULL},
+	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
+		"How to set includeExpired, valid args: auto, always, never, keep. "
+		"Default is auto (dependent on secType).", NULL},
 	POPT_TABLEEND
 };
 
@@ -116,6 +120,12 @@ const char* max_durationStr( const char* bar_size )
 	return "3 D";
 }
 
+bool get_includeExpired( const char* sec_type )
+{
+	// TODO
+	return 1;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -143,7 +153,6 @@ int main(int argc, char *argv[])
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
-		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
 		QList<std::string> myProp_whatToShow = QList<std::string>() << "BID";
 		int myProp_useRTH = 1;
@@ -152,7 +161,7 @@ int main(int argc, char *argv[])
 			
 			const IB::ContractDetails &cd = pcd->constList().at(i);
 			IB::Contract c = cd.summary;
-			c.includeExpired = myProp_includeExpired;
+			c.includeExpired = get_includeExpired( c.secType.c_str() );
 			
 			if( myProp_reqMaxContractsPerSpec > 0 && myProp_reqMaxContractsPerSpec <= i ) {
 				break;
