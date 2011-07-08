@@ -17,7 +17,12 @@ static int histjobp = 0;
 static const char *endDateTimep = "";
 static const char *durationStrp = NULL;
 static const char *barSizeSettingp = "1 hour";
+static const char *whatToShowp = "TRADES";
 static const char *includeExpiredp = "auto";
+
+static char** wts_list = NULL;
+static char* wts_split = NULL;
+
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -50,6 +55,9 @@ static struct poptOption flow_opts[] = {
 		"Query duration, default is maximum dependent on bar size.", NULL},
 	{"barSizeSetting", 'b', POPT_ARG_STRING, &barSizeSettingp, 0,
 		"Size of the bars, default is \"1 hour\".", NULL},
+	{"whatToShow", 'w', POPT_ARG_STRING, &whatToShowp, 0,
+		"List of data types, valid types are: TRADES, BID, ASK, etc., "
+		"default: TRADES", "LIST"},
 	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
 		"How to set includeExpired, valid args: auto, always, never, keep. "
 		"Default is auto (dependent on secType).", NULL},
@@ -126,6 +134,26 @@ bool get_includeExpired( const char* sec_type )
 	return 1;
 }
 
+void split_whatToShow()
+{
+	size_t len = strlen(whatToShowp) + 1;
+	wts_list = (char**) malloc( (len/2 + 1) * sizeof(char*) );
+	wts_split = (char*) malloc( len * sizeof(char) );
+	strcpy( wts_split, whatToShowp );
+	
+	char **wts = wts_list;
+	char *token = strtok( wts_split, ", \t" );
+	*wts = token;
+	wts++;
+	while( token != NULL ) {
+		token = strtok( NULL, ", \t" );
+		*wts = token;
+		wts++;
+	}
+	assert( *(wts - 1) == NULL );
+	assert( (wts - wts_list) <= (len/2 + 1) );
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -135,6 +163,7 @@ int main(int argc, char *argv[])
 	if( !durationStrp ) {
 		durationStrp = max_durationStr( barSizeSettingp );
 	}
+	split_whatToShow();
 	
 	if( !histjobp ) {
 		fprintf( stderr, "error, only -H is implemented\n" );
@@ -154,7 +183,6 @@ int main(int argc, char *argv[])
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
 		int myProp_reqMaxContractsPerSpec = -1;
-		QList<std::string> myProp_whatToShow = QList<std::string>() << "BID";
 		int myProp_useRTH = 1;
 		int myProp_formatDate = 1;
 		for( int i = 0; i<pcd->constList().size(); i++ ) {
@@ -167,10 +195,10 @@ int main(int argc, char *argv[])
 				break;
 			}
 			
-			foreach( std::string wts, myProp_whatToShow ) {
+			for( char **wts = wts_list; *wts != NULL; wts++ ) {
 				HistRequest hR;
 				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
-				               wts, myProp_useRTH, myProp_formatDate );
+				               *wts, myProp_useRTH, myProp_formatDate );
 				histTodo.add( hR );
 				
 				PacketHistData phd;
