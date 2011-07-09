@@ -23,6 +23,9 @@ static const char *includeExpiredp = "auto";
 static char** wts_list = NULL;
 static char* wts_split = NULL;
 
+enum expiry_mode{ EXP_AUTO, EXP_ALWAYS, EXP_NEVER, EXP_KEEP };
+static int exp_mode = -1;
+
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -128,10 +131,41 @@ const char* max_durationStr( const char* bar_size )
 	return "3 D";
 }
 
-bool get_includeExpired( const char* sec_type )
+void set_includeExpired()
 {
-	// TODO
-	return 1;
+	if( strcmp( includeExpiredp, "auto")==0 ) {
+		exp_mode = EXP_AUTO;
+	} else if( strcmp( includeExpiredp, "always")==0 ) {
+		exp_mode = EXP_ALWAYS;
+	} else if( strcmp( includeExpiredp, "never")==0 ) {
+		exp_mode = EXP_NEVER;
+	} else if( strcmp( includeExpiredp, "keep")==0 ) {
+		exp_mode = EXP_KEEP;
+	} else {
+		fprintf( stderr, "error, unknow argument '%s'\n", includeExpiredp );
+		exit(2);
+	}
+}
+
+bool get_inc_exp( const char* secType )
+{
+	switch( exp_mode ) {
+	case EXP_AUTO:
+		/* seems that includeExpired works for FUT only, however we set it for
+		   all secTypes where TWS doesn't return errors */
+		if( strcasecmp(secType, "OPT")==0 || strcasecmp(secType, "FUT")==0 ||
+			strcasecmp(secType, "FOP")==0 || strcasecmp(secType, "WAR")==0 ) {
+			return true;
+		}
+		return false;
+	case EXP_ALWAYS:
+		return true;
+	case EXP_NEVER:
+		return false;
+	default:
+		assert(false);
+		return false;
+	}
 }
 
 void split_whatToShow()
@@ -164,6 +198,7 @@ int main(int argc, char *argv[])
 		durationStrp = max_durationStr( barSizeSettingp );
 	}
 	split_whatToShow();
+	set_includeExpired();
 	
 	if( !histjobp ) {
 		fprintf( stderr, "error, only -H is implemented\n" );
@@ -189,8 +224,9 @@ int main(int argc, char *argv[])
 			
 			const IB::ContractDetails &cd = pcd->constList().at(i);
 			IB::Contract c = cd.summary;
-			c.includeExpired = get_includeExpired( c.secType.c_str() );
-			
+			if( exp_mode != EXP_KEEP ) {
+				c.includeExpired = get_inc_exp(c.secType.c_str());
+			}
 			if( myProp_reqMaxContractsPerSpec > 0 && myProp_reqMaxContractsPerSpec <= i ) {
 				break;
 			}
