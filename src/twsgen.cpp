@@ -125,10 +125,47 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 }
 
 
-const char* max_durationStr( const char* bar_size )
+const char* max_durationStr( const char* barSizeSetting )
 {
+/* valid bars: (1|5|15|30) secs, 1 min, (2|3|5|15|30) mins, 1 hour, 4 hours
+   seems to be not supported anymore: 1 day, 1 week, 1 month, 3 months, 1 year
+   valid durations: integer{SPACE}unit (S|D|W|M|Y) */
 	// TODO
-	return "3 D";
+
+	if( strcmp( barSizeSetting, "1 secs")==0 ) {
+		return "2000 S";
+	} else if( strcasecmp( barSizeSetting, "5 secs")==0 ) {
+		return "10000 S";
+	} else if( strcasecmp( barSizeSetting, "15 secs")==0 ) {
+		return "30000 S";
+	} else if( strcasecmp( barSizeSetting, "30 secs")==0 ) {
+		return "86400 S"; // seems to get more that "1 D"
+	} else if( strcasecmp( barSizeSetting, "1 min")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "2 mins")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "3 mins")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "5 mins")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "15 mins")==0 ) {
+		return "20 D";
+	} else if( strcasecmp( barSizeSetting, "30 mins")==0 ) {
+		return "34 D";
+	} else if( strcasecmp( barSizeSetting, "1 hour")==0 ) {
+		return "34 D";
+	} else if( strcasecmp( barSizeSetting, "4 hours")==0 ) {
+		return "34 D";
+	} else if( strcasecmp( barSizeSetting, "1 day")==0 ) {
+		/* Is "1 Y" always better than "52 W" or "12 M"? Note that longer
+		   requests will be rejected from local TWS itself! */
+		return "1 Y";
+	} else {
+		fprintf( stderr, "error, could not guess durationStr from unknown "
+			"--barSizeSetting '%s', use a known one or overide with "
+			"--durationStr\n", barSizeSettingp );
+			exit(2);
+	}
 }
 
 void set_includeExpired()
