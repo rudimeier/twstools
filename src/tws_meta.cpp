@@ -54,50 +54,62 @@ std::string ibDate2ISO( const std::string &ibDate )
 	return std::string();
 }
 
+typedef const char* string_pair[2];
 
-QHash<QString, const char*> init_short_wts()
+const string_pair short_wts_[]= {
+	{"TRADES", "T"},
+	{"MIDPOINT", "M"},
+	{"BID", "B"},
+	{"ASK", "A"},
+	{"BID_ASK", "BA"},
+	{"HISTORICAL_VOLATILITY", "HV"},
+	{"OPTION_IMPLIED_VOLATILITY", "OIV"},
+	{"OPTION_VOLUME", "OV"},
+	{NULL, "NNN"}
+};
+
+const string_pair short_bar_size_[]= {
+	{"1 secs",   "s01"},
+	{"5 secs",   "s05"},
+	{"15 secs",  "s15"},
+	{"30 secs",  "s30"},
+	{"1 min",    "m01"},
+	{"2 mins",   "m02"},
+	{"3 mins",   "m03"},
+	{"5 mins",   "m05"},
+	{"15 mins",  "m15"},
+	{"30 mins",  "m30"},
+	{"1 hour",   "h01"},
+	{"4 hour",   "h04"},
+	{"1 day",    "eod"},
+	{"1 week",   "w01"},
+	{"1 month",  "x01"},
+	{"3 months", "x03"},
+	{"1 year",   "y01"},
+	{NULL, "00N"}
+};
+
+const char* short_string( const string_pair* pairs, const char* s_short )
 {
-	QHash<QString, const char*> ht;
-	ht.insert("TRADES", "T");
-	ht.insert("MIDPOINT", "M");
-	ht.insert("BID", "B");
-	ht.insert("ASK", "A");
-	ht.insert("BID_ASK", "BA");
-	ht.insert("HISTORICAL_VOLATILITY", "HV");
-	ht.insert("OPTION_IMPLIED_VOLATILITY", "OIV");
-	ht.insert("OPTION_VOLUME", "OV");
-	return ht;
+	const string_pair *i = pairs;
+	while( (*i)[0] != 0 ) {
+		if( strcmp((*i)[0], s_short)==0 ) {
+			return (*i)[1];
+		}
+		i++;
+	}
+	return (*i)[1];
 }
 
-const QHash<QString, const char*> short_wts = init_short_wts();
-
-
-QHash<QString, const char*> init_short_bar_size()
+const char* short_wts( const char* wts )
 {
-	QHash<QString, const char*> ht;
-	ht.insert("1 secs",   "s01");
-	ht.insert("5 secs",   "s05");
-	ht.insert("15 secs",  "s15");
-	ht.insert("30 secs",  "s30");
-	ht.insert("1 min",    "m01");
-	ht.insert("2 mins",   "m02");
-	ht.insert("3 mins",   "m03");
-	ht.insert("5 mins",   "m05");
-	ht.insert("15 mins",  "m15");
-	ht.insert("30 mins",  "m30");
-	ht.insert("1 hour",   "h01");
-	ht.insert("1 day",    "eod");
-	ht.insert("1 week",   "w01");
-	ht.insert("1 month",  "x01");
-	ht.insert("3 months", "x03");
-	ht.insert("1 year",   "y01");
-	return ht;
+	return short_string( short_wts_, wts );
 }
 
-const QHash<QString, const char*> short_bar_size = init_short_bar_size();
-
-
-
+const char* short_bar_size( const char* bar_size )
+{
+	return short_string( short_bar_size_, bar_size );
+}
 
 
 
@@ -891,8 +903,8 @@ void PacketHistData::dump( bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = request->ibContract();
-	const QString wts = toQString(request->whatToShow());
-	const QString barSizeSetting = toQString(request->barSizeSetting());
+	const char *wts = short_wts( request->whatToShow().c_str() );
+	const char *bss = short_bar_size( request->barSizeSetting().c_str());
 	
 	foreach( Row r, rows ) {
 		std::string expiry = c.expiry;
@@ -915,8 +927,8 @@ void PacketHistData::dump( bool printFormatDates )
 			.arg(c.strike)
 			.arg(toQString(c.right));
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-		       short_wts.value( wts, "NNN" ),
-		       short_bar_size.value( barSizeSetting, "00N" ),
+		       wts,
+		       bss,
 		       c_str.toUtf8().constData(),
 		       dateTime.c_str(),
 		       r.open, r.high, r.low, r.close,

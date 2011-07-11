@@ -21,9 +21,8 @@ int64_t nowInMsecs();
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate );
 
-extern const QHash<QString, const char*> short_wts;
-extern const QHash<QString, const char*> short_bar_size;
-
+const char* short_wts( const char* wts );
+const char* short_bar_size( const char* bar_size );
 
 
 
