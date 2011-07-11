@@ -18,6 +18,8 @@ static const char *endDateTimep = "";
 static const char *durationStrp = NULL;
 static const char *barSizeSettingp = "1 hour";
 static const char *whatToShowp = "TRADES";
+static int useRTHp = 0;
+static int utcp = 0;
 static const char *includeExpiredp = "auto";
 
 static char** wts_list = NULL;
@@ -25,6 +27,14 @@ static char* wts_split = NULL;
 
 enum expiry_mode{ EXP_AUTO, EXP_ALWAYS, EXP_NEVER, EXP_KEEP };
 static int exp_mode = -1;
+
+static int formatDate()
+{
+	if( utcp ) {
+		return 2;
+	}
+	return 1;
+}
 
 
 #define VERSION_MSG \
@@ -61,6 +71,10 @@ static struct poptOption flow_opts[] = {
 	{"whatToShow", 'w', POPT_ARG_STRING, &whatToShowp, 0,
 		"List of data types, valid types are: TRADES, BID, ASK, etc., "
 		"default: TRADES", "LIST"},
+	{"useRTH", '\0', POPT_ARG_NONE, &useRTHp, 0,
+		"Return only data within regular trading hours (useRTH=1).", "FILE"},
+	{"utc", '\0', POPT_ARG_NONE, &utcp, 0,
+		"Dates are returned as seconds since unix epoch (formatDate=2).", "FILE"},
 	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
 		"How to set includeExpired, valid args: auto, always, never, keep. "
 		"Default is auto (dependent on secType).", NULL},
@@ -255,8 +269,6 @@ int main(int argc, char *argv[])
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
 		int myProp_reqMaxContractsPerSpec = -1;
-		int myProp_useRTH = 1;
-		int myProp_formatDate = 1;
 		for( int i = 0; i<pcd->constList().size(); i++ ) {
 			
 			const IB::ContractDetails &cd = pcd->constList().at(i);
@@ -271,7 +283,7 @@ int main(int argc, char *argv[])
 			for( char **wts = wts_list; *wts != NULL; wts++ ) {
 				HistRequest hR;
 				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
-				               *wts, myProp_useRTH, myProp_formatDate );
+				               *wts, useRTHp, formatDate() );
 				histTodo.add( hR );
 				
 				PacketHistData phd;
