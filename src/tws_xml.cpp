@@ -324,14 +324,17 @@ static int find_form_feed( const char *s, int n )
 }
 
 #define CHUNK_SIZE 1024
+#define BUF_SIZE 1024 * 1024
 
 
 TwsXml::TwsXml() :
 	file(NULL),
-	buf( (char*) malloc(1024*1024)),
+	buf_size(0),
+	buf(NULL),
 	curDoc(NULL),
 	curNode(NULL)
 {
+	resize_buf();
 }
 
 TwsXml::~TwsXml()
@@ -343,6 +346,12 @@ TwsXml::~TwsXml()
 	if( curDoc != NULL ) {
 		xmlFreeDoc( curDoc );
 	}
+}
+
+void TwsXml::resize_buf()
+{
+	buf_size = buf_size + BUF_SIZE;
+	buf = (char*) realloc( buf, buf_size );
 }
 
 bool TwsXml::openFile( const char *filename )
@@ -375,6 +384,11 @@ xmlDocPtr TwsXml::nextXmlDoc()
 			break;
 		} else {
 			cp += tmp_len;
+			long cur_len = cp - buf;
+			if( (cur_len + CHUNK_SIZE) >= buf_size ) {
+				resize_buf();
+				cp = buf + cur_len;
+			}
 		}
 	}
 	

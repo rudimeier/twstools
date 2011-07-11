@@ -46,9 +46,12 @@ class TwsXml
 		static const bool &skip_defaults;
 		
 	private:
+		void resize_buf();
+		
 		static bool _skip_defaults;
 		
 		void *file; // FILE*
+		long buf_size;
 		char *buf;
 		xmlDocPtr curDoc;
 		xmlNodePtr curNode;
