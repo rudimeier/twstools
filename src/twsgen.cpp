@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <libxml/tree.h>
+#include <QtCore/QList>
 
 
 static poptContext opt_ctx;
