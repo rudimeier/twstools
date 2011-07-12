@@ -261,7 +261,7 @@ class PacketContractDetails
 		bool complete;
 		int reqId;
 		ContractDetailsRequest *request;
-		QList<IB::ContractDetails> cdList;
+		QList<IB::ContractDetails> &cdList;
 };
 
 

@@ -600,7 +600,8 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 
-PacketContractDetails::PacketContractDetails()
+PacketContractDetails::PacketContractDetails() :
+	cdList(*(new QList<IB::ContractDetails>()))
 {
 	complete = false;
 	reqId = -1;
@@ -609,6 +610,7 @@ PacketContractDetails::PacketContractDetails()
 
 PacketContractDetails::~PacketContractDetails()
 {
+	delete &cdList;
 	if( request != NULL ) {
 		delete request;
 	}
