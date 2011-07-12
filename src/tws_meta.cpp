@@ -6,6 +6,8 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
+#include <QtCore/QHash>
+
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>

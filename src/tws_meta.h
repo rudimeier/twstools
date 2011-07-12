@@ -4,8 +4,7 @@
 #include "ibtws/Contract.h"
 
 #include <QtCore/QString>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include <QtCore/QtContainerFwd>
 #include <stdint.h>
 
 typedef struct _xmlNode * xmlNodePtr;
