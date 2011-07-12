@@ -200,7 +200,10 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		QList<ContractDetailsRequest> contractDetailsRequests;
+		ContractDetailsTodo();
+		virtual ~ContractDetailsTodo();
+		
+		QList<ContractDetailsRequest> &contractDetailsRequests;
 };
 
 

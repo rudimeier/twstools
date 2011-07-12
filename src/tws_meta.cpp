@@ -498,6 +498,23 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
+ContractDetailsTodo::ContractDetailsTodo() :
+	contractDetailsRequests(*(new QList<ContractDetailsRequest>()))
+{
+}
+
+ContractDetailsTodo::~ContractDetailsTodo()
+{
+	delete &contractDetailsRequests;
+}
+
+
+
+
+
+
+
+
 WorkTodo::WorkTodo() :
 	reqType(GenericRequest::NONE),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
