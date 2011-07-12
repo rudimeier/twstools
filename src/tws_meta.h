@@ -3,14 +3,14 @@
 
 #include "ibtws/Contract.h"
 
-#include <QtCore/QString>
 #include <QtCore/QtContainerFwd>
 #include <stdint.h>
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
-
+class QString;
+class QStringList;
 
 
 
@@ -427,7 +427,7 @@ class DataFarmStates
 		QHash<const QString, QString> &hLearn;
 		
 		int lastMsgNumber;
-		QString lastChanged;
+		std::string lastChanged;
 };
 
 

@@ -1499,7 +1499,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		return;
 	}
 	
-	lastChanged = farm;
+	lastChanged = toIBString(farm);
 	pHash->insert( farm, state );
 	qDebug() << *pHash;
 }
@@ -1554,6 +1554,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
+	QString lastChanged = toQString(this->lastChanged);
 	Q_ASSERT( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
 		QString lazyC = LAZY_CONTRACT_STR(c);
