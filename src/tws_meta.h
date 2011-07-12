@@ -387,8 +387,8 @@ class PacingGod
 		int violationPause;
 		
 		PacingControl &controlGlobal;
-		QHash<const QString, PacingControl*> controlHmds;
-		QHash<const QString, PacingControl*> controlLazy;
+		QHash<const QString, PacingControl*> &controlHmds;
+		QHash<const QString, PacingControl*> &controlLazy;
 };
 
 

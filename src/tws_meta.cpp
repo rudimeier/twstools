@@ -1157,7 +1157,9 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 	minPacingTime( 1500 ),
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
-		maxRequests, checkInterval, minPacingTime, violationPause)) )
+		maxRequests, checkInterval, minPacingTime, violationPause)) ),
+	controlHmds(*(new QHash<const QString, PacingControl*>()) ),
+	controlLazy(*(new QHash<const QString, PacingControl*>()) )
 {
 }
 
@@ -1177,6 +1179,8 @@ PacingGod::~PacingGod()
 		delete *it;
 		it = controlLazy.erase(it);
 	}
+	delete &controlHmds;
+	delete &controlLazy;
 }
 
 
