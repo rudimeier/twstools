@@ -286,7 +286,12 @@ void GenericRequest::close()
 
 
 
-HistTodo::HistTodo()
+HistTodo::HistTodo() :
+	histRequests(*(new QList<HistRequest*>())),
+	doneRequests(*(new QList<int>())),
+	leftRequests(*(new QList<int>())),
+	errorRequests(*(new QList<int>())),
+	checkedOutRequests(*(new QList<int>()))
 {
 }
 
@@ -296,6 +301,11 @@ HistTodo::~HistTodo()
 	foreach( HistRequest *hR, histRequests ) {
 		delete hR;
 	}
+	delete &histRequests;
+	delete &doneRequests;
+	delete &leftRequests;
+	delete &errorRequests;
+	delete &checkedOutRequests;
 }
 
 

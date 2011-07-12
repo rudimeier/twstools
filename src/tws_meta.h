@@ -183,11 +183,11 @@ class HistTodo
 		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
-		QList<HistRequest*> histRequests;
-		QList<int> doneRequests;
-		QList<int> leftRequests;
-		QList<int> errorRequests;
-		QList<int> checkedOutRequests;
+		QList<HistRequest*> &histRequests;
+		QList<int> &doneRequests;
+		QList<int> &leftRequests;
+		QList<int> &errorRequests;
+		QList<int> &checkedOutRequests;
 };
 
 
