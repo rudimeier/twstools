@@ -1543,20 +1543,20 @@ QStringList DataFarmStates::getActives() const
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
-	return mLearn[lazyC];
+	return mLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
-	return hLearn[lazyC];
+	return hLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
 {
-	return hLearn[lazyC];
+	return hLearn.value(lazyC);
 }
 
 
