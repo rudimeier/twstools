@@ -734,7 +734,8 @@ void PacketHistData::Row::clear()
 }
 
 
-PacketHistData::PacketHistData()
+PacketHistData::PacketHistData() :
+		rows(*(new QList<Row>()))
 {
 	mode = CLEAN;
 	error = ERR_NONE;
@@ -744,6 +745,7 @@ PacketHistData::PacketHistData()
 
 PacketHistData::~PacketHistData()
 {
+	delete &rows;
 	if( request != NULL ) {
 		delete request;
 	}

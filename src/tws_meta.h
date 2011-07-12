@@ -318,7 +318,7 @@ class PacketHistData
 		
 		int reqId;
 		HistRequest *request;
-		QList<Row> rows;
+		QList<Row> &rows;
 		Row finishRow;
 };
 
