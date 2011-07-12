@@ -1411,10 +1411,21 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
+	mStates( *(new QHash<const QString, State>()) ),
+	hStates( *(new QHash<const QString, State>()) ),
+	mLearn( *(new QHash<const QString, QString>()) ),
+	hLearn( *(new QHash<const QString, QString>()) ),
 	lastMsgNumber(INT_MIN)
 {
 }
 
+DataFarmStates::~DataFarmStates()
+{
+	delete &hLearn;
+	delete &mLearn;
+	delete &hStates;
+	delete &mStates;
+}
 
 void DataFarmStates::setAllBroken()
 {

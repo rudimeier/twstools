@@ -404,6 +404,7 @@ class DataFarmStates
 		enum State { BROKEN, INACTIVE, OK };
 		
 		DataFarmStates();
+		virtual ~DataFarmStates();
 		
 		QStringList getInactives() const;
 		QStringList getActives() const;
@@ -420,11 +421,11 @@ class DataFarmStates
 	private:
 		static QString getFarm( const QString prefix, const QString& msg );
 		
-		QHash<const QString, State> mStates;
-		QHash<const QString, State> hStates;
+		QHash<const QString, State> &mStates;
+		QHash<const QString, State> &hStates;
 		
-		QHash<const QString, QString> mLearn;
-		QHash<const QString, QString> hLearn;
+		QHash<const QString, QString> &mLearn;
+		QHash<const QString, QString> &hLearn;
 		
 		int lastMsgNumber;
 		QString lastChanged;
