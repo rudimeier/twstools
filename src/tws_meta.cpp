@@ -976,6 +976,8 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
+	dateTimes(*(new QList<int64_t>())),
+	violations(*(new QList<bool>())),
 	maxRequests( r ),
 	checkInterval( i ),
 	minPacingTime( m ),
@@ -983,6 +985,11 @@ PacingControl::PacingControl( int r, int i, int m, int v ) :
 {
 }
 
+PacingControl::~PacingControl()
+{
+	delete &violations;
+	delete &dateTimes;
+}
 
 void PacingControl::setPacingTime( int r, int i, int m )
 {

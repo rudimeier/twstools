@@ -333,6 +333,7 @@ class PacingControl
 {
 	public:
 		PacingControl( int packets, int interval, int min, int vPause );
+		virtual ~PacingControl();
 		
 		void setPacingTime( int packets, int interval, int min );
 		void setViolationPause( int violationPause );
@@ -347,8 +348,8 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<int64_t> dateTimes;
-		QList<bool> violations;
+		QList<int64_t> &dateTimes;
+		QList<bool> &violations;
 		
 		int maxRequests;
 		int checkInterval;
