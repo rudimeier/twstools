@@ -14,6 +14,28 @@ static poptContext opt_ctx;
 static const char *filep = NULL;
 static int skipdefp = 0;
 static int histjobp = 0;
+static const char *endDateTimep = "";
+static const char *durationStrp = NULL;
+static const char *barSizeSettingp = "1 hour";
+static const char *whatToShowp = "TRADES";
+static int useRTHp = 0;
+static int utcp = 0;
+static const char *includeExpiredp = "auto";
+
+static char** wts_list = NULL;
+static char* wts_split = NULL;
+
+enum expiry_mode{ EXP_AUTO, EXP_ALWAYS, EXP_NEVER, EXP_KEEP };
+static int exp_mode = -1;
+
+static int formatDate()
+{
+	if( utcp ) {
+		return 2;
+	}
+	return 1;
+}
+
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -40,6 +62,22 @@ static struct poptOption flow_opts[] = {
 		"Never skip xml default values.", NULL},
 	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
 		"generate hist job", "FILE"},
+	{"endDateTime", 'e', POPT_ARG_STRING, &endDateTimep, 0,
+		"Query end date time, default is \"\" which means now.", "DATETIME"},
+	{"durationStr", 'd', POPT_ARG_STRING, &durationStrp, 0,
+		"Query duration, default is maximum dependent on bar size.", NULL},
+	{"barSizeSetting", 'b', POPT_ARG_STRING, &barSizeSettingp, 0,
+		"Size of the bars, default is \"1 hour\".", NULL},
+	{"whatToShow", 'w', POPT_ARG_STRING, &whatToShowp, 0,
+		"List of data types, valid types are: TRADES, BID, ASK, etc., "
+		"default: TRADES", "LIST"},
+	{"useRTH", '\0', POPT_ARG_NONE, &useRTHp, 0,
+		"Return only data within regular trading hours (useRTH=1).", "FILE"},
+	{"utc", '\0', POPT_ARG_NONE, &utcp, 0,
+		"Dates are returned as seconds since unix epoch (formatDate=2).", "FILE"},
+	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
+		"How to set includeExpired, valid args: auto, always, never, keep. "
+		"Default is auto (dependent on secType).", NULL},
 	POPT_TABLEEND
 };
 
@@ -101,6 +139,105 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 }
 
 
+const char* max_durationStr( const char* barSizeSetting )
+{
+/* valid bars: (1|5|15|30) secs, 1 min, (2|3|5|15|30) mins, 1 hour, 4 hours
+   seems to be not supported anymore: 1 day, 1 week, 1 month, 3 months, 1 year
+   valid durations: integer{SPACE}unit (S|D|W|M|Y) */
+	// TODO
+
+	if( strcmp( barSizeSetting, "1 secs")==0 ) {
+		return "2000 S";
+	} else if( strcasecmp( barSizeSetting, "5 secs")==0 ) {
+		return "10000 S";
+	} else if( strcasecmp( barSizeSetting, "15 secs")==0 ) {
+		return "30000 S";
+	} else if( strcasecmp( barSizeSetting, "30 secs")==0 ) {
+		return "86400 S"; // seems to get more that "1 D"
+	} else if( strcasecmp( barSizeSetting, "1 min")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "2 mins")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "3 mins")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "5 mins")==0 ) {
+		return "6 D";
+	} else if( strcasecmp( barSizeSetting, "15 mins")==0 ) {
+		return "20 D";
+	} else if( strcasecmp( barSizeSetting, "30 mins")==0 ) {
+		return "34 D";
+	} else if( strcasecmp( barSizeSetting, "1 hour")==0 ) {
+		return "34 D";
+	} else if( strcasecmp( barSizeSetting, "4 hours")==0 ) {
+		return "34 D";
+	} else if( strcasecmp( barSizeSetting, "1 day")==0 ) {
+		/* Is "1 Y" always better than "52 W" or "12 M"? Note that longer
+		   requests will be rejected from local TWS itself! */
+		return "1 Y";
+	} else {
+		fprintf( stderr, "error, could not guess durationStr from unknown "
+			"--barSizeSetting '%s', use a known one or overide with "
+			"--durationStr\n", barSizeSettingp );
+			exit(2);
+	}
+}
+
+void set_includeExpired()
+{
+	if( strcmp( includeExpiredp, "auto")==0 ) {
+		exp_mode = EXP_AUTO;
+	} else if( strcmp( includeExpiredp, "always")==0 ) {
+		exp_mode = EXP_ALWAYS;
+	} else if( strcmp( includeExpiredp, "never")==0 ) {
+		exp_mode = EXP_NEVER;
+	} else if( strcmp( includeExpiredp, "keep")==0 ) {
+		exp_mode = EXP_KEEP;
+	} else {
+		fprintf( stderr, "error, unknow argument '%s'\n", includeExpiredp );
+		exit(2);
+	}
+}
+
+bool get_inc_exp( const char* secType )
+{
+	switch( exp_mode ) {
+	case EXP_AUTO:
+		/* seems that includeExpired works for FUT only, however we set it for
+		   all secTypes where TWS doesn't return errors */
+		if( strcasecmp(secType, "OPT")==0 || strcasecmp(secType, "FUT")==0 ||
+			strcasecmp(secType, "FOP")==0 || strcasecmp(secType, "WAR")==0 ) {
+			return true;
+		}
+		return false;
+	case EXP_ALWAYS:
+		return true;
+	case EXP_NEVER:
+		return false;
+	default:
+		assert(false);
+		return false;
+	}
+}
+
+void split_whatToShow()
+{
+	size_t len = strlen(whatToShowp) + 1;
+	wts_list = (char**) malloc( (len/2 + 1) * sizeof(char*) );
+	wts_split = (char*) malloc( len * sizeof(char) );
+	strcpy( wts_split, whatToShowp );
+	
+	char **wts = wts_list;
+	char *token = strtok( wts_split, ", \t" );
+	*wts = token;
+	wts++;
+	while( token != NULL ) {
+		token = strtok( NULL, ", \t" );
+		*wts = token;
+		wts++;
+	}
+	assert( *(wts - 1) == NULL );
+	assert( (wts - wts_list) <= (len/2 + 1) );
+}
 
 
 int main(int argc, char *argv[])
@@ -108,6 +245,11 @@ int main(int argc, char *argv[])
 	twsgen_parse_cl(argc, (const char **) argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
+	if( !durationStrp ) {
+		durationStrp = max_durationStr( barSizeSettingp );
+	}
+	split_whatToShow();
+	set_includeExpired();
 	
 	if( !histjobp ) {
 		fprintf( stderr, "error, only -H is implemented\n" );
@@ -126,28 +268,22 @@ int main(int argc, char *argv[])
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
-		bool myProp_includeExpired = true;
 		int myProp_reqMaxContractsPerSpec = -1;
-		QList<std::string> myProp_whatToShow = QList<std::string>() << "BID";
-		std::string myProp_endDateTime = "20110214 16:00:00 America/Chicago";
-		std::string myProp_durationStr = "1 W";
-		std::string myProp_barSizeSetting = "30 mins";
-		int myProp_useRTH = 1;
-		int myProp_formatDate = 1;
 		for( int i = 0; i<pcd->constList().size(); i++ ) {
 			
 			const IB::ContractDetails &cd = pcd->constList().at(i);
 			IB::Contract c = cd.summary;
-			c.includeExpired = myProp_includeExpired;
-			
+			if( exp_mode != EXP_KEEP ) {
+				c.includeExpired = get_inc_exp(c.secType.c_str());
+			}
 			if( myProp_reqMaxContractsPerSpec > 0 && myProp_reqMaxContractsPerSpec <= i ) {
 				break;
 			}
 			
-			foreach( std::string wts, myProp_whatToShow ) {
+			for( char **wts = wts_list; *wts != NULL; wts++ ) {
 				HistRequest hR;
-				hR.initialize( c, myProp_endDateTime, myProp_durationStr,
-				               myProp_barSizeSetting, wts, myProp_useRTH, myProp_formatDate );
+				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
+				               *wts, useRTHp, formatDate() );
 				histTodo.add( hR );
 				
 				PacketHistData phd;
