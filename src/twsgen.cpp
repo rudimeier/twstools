@@ -6,9 +6,9 @@
 #include <popt.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include <libxml/tree.h>
-#include <QtCore/QList>
 
 
 static poptContext opt_ctx;
@@ -270,14 +270,14 @@ int main(int argc, char *argv[])
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
 		
 		int myProp_reqMaxContractsPerSpec = -1;
-		for( int i = 0; i<pcd->constList().size(); i++ ) {
+		for( size_t i = 0; i < pcd->constList().size(); i++ ) {
 			
-			const IB::ContractDetails &cd = pcd->constList().at(i);
+			const IB::ContractDetails &cd = pcd->constList()[i];
 			IB::Contract c = cd.summary;
 			if( exp_mode != EXP_KEEP ) {
 				c.includeExpired = get_inc_exp(c.secType.c_str());
 			}
-			if( myProp_reqMaxContractsPerSpec > 0 && myProp_reqMaxContractsPerSpec <= i ) {
+			if( myProp_reqMaxContractsPerSpec > 0 && (size_t)myProp_reqMaxContractsPerSpec <= i ) {
 				break;
 			}
 			

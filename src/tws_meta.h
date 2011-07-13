@@ -247,7 +247,7 @@ class PacketContractDetails
 		static PacketContractDetails * fromXml( xmlNodePtr );
 		
 		const ContractDetailsRequest& getRequest() const;
-		const QList<IB::ContractDetails>& constList() const;
+		const std::vector<IB::ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
 		bool isFinished() const;
@@ -260,8 +260,15 @@ class PacketContractDetails
 		bool complete;
 		int reqId;
 		ContractDetailsRequest *request;
-		QList<IB::ContractDetails> &cdList;
+		std::vector<IB::ContractDetails> * const cdList;
 };
+
+
+inline const std::vector<IB::ContractDetails>&
+PacketContractDetails::constList() const
+{
+	return *cdList;
+}
 
 
 

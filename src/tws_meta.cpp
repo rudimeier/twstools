@@ -603,7 +603,7 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 PacketContractDetails::PacketContractDetails() :
-	cdList(*(new QList<IB::ContractDetails>()))
+	cdList(new std::vector<IB::ContractDetails>())
 {
 	complete = false;
 	reqId = -1;
@@ -612,7 +612,7 @@ PacketContractDetails::PacketContractDetails() :
 
 PacketContractDetails::~PacketContractDetails()
 {
-	delete &cdList;
+	delete cdList;
 	if( request != NULL ) {
 		delete request;
 	}
@@ -633,7 +633,7 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 						&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
 						IB::ContractDetails cd;
 						conv_xml2ib(&cd, q);
-						pcd->cdList.append(cd);
+						pcd->cdList->push_back(cd);
 					}
 				}
 			}
@@ -647,16 +647,11 @@ const ContractDetailsRequest& PacketContractDetails::getRequest() const
 	return *request;
 }
 
-const QList<IB::ContractDetails>& PacketContractDetails::constList() const
-{
-	return cdList;
-}
-
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
 	Q_ASSERT( !complete && this->reqId == -1 && request == NULL
-		&& cdList.isEmpty() );
+		&& cdList->empty() );
 	this->reqId = reqId;
 	this->request = new ContractDetailsRequest( cdr );
 }
@@ -678,7 +673,7 @@ void PacketContractDetails::clear()
 {
 	complete = false;
 	reqId = -1;
-	cdList.clear();
+	cdList->clear();
 	if( request != NULL ) {
 		delete request;
 		request = NULL;
@@ -688,13 +683,13 @@ void PacketContractDetails::clear()
 
 void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 {
-	if( cdList.isEmpty() ) {
+	if( cdList->empty() ) {
 		this->reqId = reqId;
 	}
 	Q_ASSERT( this->reqId == reqId );
 	Q_ASSERT( !complete );
 	
-	cdList.append(c);
+	cdList->push_back(c);
 }
 
 
@@ -708,8 +703,8 @@ void PacketContractDetails::dumpXml()
 	conv_ib2xml( nqry, "reqContract", request->ibContract() );
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
-	for( int i=0; i<cdList.size(); i++ ) {
-		conv_ib2xml( nrsp, "ContractDetails", cdList[i] );
+	for( size_t i=0; i<cdList->size(); i++ ) {
+		conv_ib2xml( nrsp, "ContractDetails", (*cdList)[i] );
 	}
 	
 	TwsXml::dumpAndFree( root );
