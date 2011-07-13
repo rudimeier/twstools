@@ -6,6 +6,8 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
+#include <QtCore/QHash>
+
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -286,7 +288,12 @@ void GenericRequest::close()
 
 
 
-HistTodo::HistTodo()
+HistTodo::HistTodo() :
+	histRequests(*(new QList<HistRequest*>())),
+	doneRequests(*(new QList<int>())),
+	leftRequests(*(new QList<int>())),
+	errorRequests(*(new QList<int>())),
+	checkedOutRequests(*(new QList<int>()))
 {
 }
 
@@ -296,6 +303,11 @@ HistTodo::~HistTodo()
 	foreach( HistRequest *hR, histRequests ) {
 		delete hR;
 	}
+	delete &histRequests;
+	delete &doneRequests;
+	delete &leftRequests;
+	delete &errorRequests;
+	delete &checkedOutRequests;
 }
 
 
@@ -488,6 +500,23 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
+ContractDetailsTodo::ContractDetailsTodo() :
+	contractDetailsRequests(*(new QList<ContractDetailsRequest>()))
+{
+}
+
+ContractDetailsTodo::~ContractDetailsTodo()
+{
+	delete &contractDetailsRequests;
+}
+
+
+
+
+
+
+
+
 WorkTodo::WorkTodo() :
 	reqType(GenericRequest::NONE),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
@@ -573,7 +602,8 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 
-PacketContractDetails::PacketContractDetails()
+PacketContractDetails::PacketContractDetails() :
+	cdList(new std::vector<IB::ContractDetails>())
 {
 	complete = false;
 	reqId = -1;
@@ -582,6 +612,7 @@ PacketContractDetails::PacketContractDetails()
 
 PacketContractDetails::~PacketContractDetails()
 {
+	delete cdList;
 	if( request != NULL ) {
 		delete request;
 	}
@@ -602,7 +633,7 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 						&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
 						IB::ContractDetails cd;
 						conv_xml2ib(&cd, q);
-						pcd->cdList.append(cd);
+						pcd->cdList->push_back(cd);
 					}
 				}
 			}
@@ -616,16 +647,11 @@ const ContractDetailsRequest& PacketContractDetails::getRequest() const
 	return *request;
 }
 
-const QList<IB::ContractDetails>& PacketContractDetails::constList() const
-{
-	return cdList;
-}
-
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
 	Q_ASSERT( !complete && this->reqId == -1 && request == NULL
-		&& cdList.isEmpty() );
+		&& cdList->empty() );
 	this->reqId = reqId;
 	this->request = new ContractDetailsRequest( cdr );
 }
@@ -647,7 +673,7 @@ void PacketContractDetails::clear()
 {
 	complete = false;
 	reqId = -1;
-	cdList.clear();
+	cdList->clear();
 	if( request != NULL ) {
 		delete request;
 		request = NULL;
@@ -657,13 +683,13 @@ void PacketContractDetails::clear()
 
 void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 {
-	if( cdList.isEmpty() ) {
+	if( cdList->empty() ) {
 		this->reqId = reqId;
 	}
 	Q_ASSERT( this->reqId == reqId );
 	Q_ASSERT( !complete );
 	
-	cdList.append(c);
+	cdList->push_back(c);
 }
 
 
@@ -677,8 +703,8 @@ void PacketContractDetails::dumpXml()
 	conv_ib2xml( nqry, "reqContract", request->ibContract() );
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
-	for( int i=0; i<cdList.size(); i++ ) {
-		conv_ib2xml( nrsp, "ContractDetails", cdList[i] );
+	for( size_t i=0; i<cdList->size(); i++ ) {
+		conv_ib2xml( nrsp, "ContractDetails", (*cdList)[i] );
 	}
 	
 	TwsXml::dumpAndFree( root );
@@ -705,7 +731,8 @@ void PacketHistData::Row::clear()
 }
 
 
-PacketHistData::PacketHistData()
+PacketHistData::PacketHistData() :
+		rows(*(new QList<Row>()))
 {
 	mode = CLEAN;
 	error = ERR_NONE;
@@ -715,6 +742,7 @@ PacketHistData::PacketHistData()
 
 PacketHistData::~PacketHistData()
 {
+	delete &rows;
 	if( request != NULL ) {
 		delete request;
 	}
@@ -945,6 +973,8 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
+	dateTimes(*(new QList<int64_t>())),
+	violations(*(new QList<bool>())),
 	maxRequests( r ),
 	checkInterval( i ),
 	minPacingTime( m ),
@@ -952,6 +982,11 @@ PacingControl::PacingControl( int r, int i, int m, int v ) :
 {
 }
 
+PacingControl::~PacingControl()
+{
+	delete &violations;
+	delete &dateTimes;
+}
 
 void PacingControl::setPacingTime( int r, int i, int m )
 {
@@ -1126,7 +1161,9 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 	minPacingTime( 1500 ),
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
-		maxRequests, checkInterval, minPacingTime, violationPause)) )
+		maxRequests, checkInterval, minPacingTime, violationPause)) ),
+	controlHmds(*(new QHash<const QString, PacingControl*>()) ),
+	controlLazy(*(new QHash<const QString, PacingControl*>()) )
 {
 }
 
@@ -1146,6 +1183,8 @@ PacingGod::~PacingGod()
 		delete *it;
 		it = controlLazy.erase(it);
 	}
+	delete &controlHmds;
+	delete &controlLazy;
 }
 
 
@@ -1369,10 +1408,21 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
+	mStates( *(new QHash<const QString, State>()) ),
+	hStates( *(new QHash<const QString, State>()) ),
+	mLearn( *(new QHash<const QString, QString>()) ),
+	hLearn( *(new QHash<const QString, QString>()) ),
 	lastMsgNumber(INT_MIN)
 {
 }
 
+DataFarmStates::~DataFarmStates()
+{
+	delete &hLearn;
+	delete &mLearn;
+	delete &hStates;
+	delete &mStates;
+}
 
 void DataFarmStates::setAllBroken()
 {
@@ -1444,7 +1494,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		return;
 	}
 	
-	lastChanged = farm;
+	lastChanged = toIBString(farm);
 	pHash->insert( farm, state );
 	qDebug() << *pHash;
 }
@@ -1499,6 +1549,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
+	QString lastChanged = toQString(this->lastChanged);
 	Q_ASSERT( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
 		QString lazyC = LAZY_CONTRACT_STR(c);
@@ -1543,20 +1594,20 @@ QStringList DataFarmStates::getActives() const
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
-	return mLearn[lazyC];
+	return mLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
-	return hLearn[lazyC];
+	return hLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
 {
-	return hLearn[lazyC];
+	return hLearn.value(lazyC);
 }
 
 

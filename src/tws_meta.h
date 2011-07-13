@@ -3,15 +3,14 @@
 
 #include "ibtws/Contract.h"
 
-#include <QtCore/QString>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include <QtCore/QtContainerFwd>
 #include <stdint.h>
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
-
+class QString;
+class QStringList;
 
 
 
@@ -183,11 +182,11 @@ class HistTodo
 		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
-		QList<HistRequest*> histRequests;
-		QList<int> doneRequests;
-		QList<int> leftRequests;
-		QList<int> errorRequests;
-		QList<int> checkedOutRequests;
+		QList<HistRequest*> &histRequests;
+		QList<int> &doneRequests;
+		QList<int> &leftRequests;
+		QList<int> &errorRequests;
+		QList<int> &checkedOutRequests;
 };
 
 
@@ -200,7 +199,10 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		QList<ContractDetailsRequest> contractDetailsRequests;
+		ContractDetailsTodo();
+		virtual ~ContractDetailsTodo();
+		
+		QList<ContractDetailsRequest> &contractDetailsRequests;
 };
 
 
@@ -245,7 +247,7 @@ class PacketContractDetails
 		static PacketContractDetails * fromXml( xmlNodePtr );
 		
 		const ContractDetailsRequest& getRequest() const;
-		const QList<IB::ContractDetails>& constList() const;
+		const std::vector<IB::ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
 		bool isFinished() const;
@@ -258,8 +260,15 @@ class PacketContractDetails
 		bool complete;
 		int reqId;
 		ContractDetailsRequest *request;
-		QList<IB::ContractDetails> cdList;
+		std::vector<IB::ContractDetails> * const cdList;
 };
+
+
+inline const std::vector<IB::ContractDetails>&
+PacketContractDetails::constList() const
+{
+	return *cdList;
+}
 
 
 
@@ -315,7 +324,7 @@ class PacketHistData
 		
 		int reqId;
 		HistRequest *request;
-		QList<Row> rows;
+		QList<Row> &rows;
 		Row finishRow;
 };
 
@@ -330,6 +339,7 @@ class PacingControl
 {
 	public:
 		PacingControl( int packets, int interval, int min, int vPause );
+		virtual ~PacingControl();
 		
 		void setPacingTime( int packets, int interval, int min );
 		void setViolationPause( int violationPause );
@@ -344,8 +354,8 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<int64_t> dateTimes;
-		QList<bool> violations;
+		QList<int64_t> &dateTimes;
+		QList<bool> &violations;
 		
 		int maxRequests;
 		int checkInterval;
@@ -384,8 +394,8 @@ class PacingGod
 		int violationPause;
 		
 		PacingControl &controlGlobal;
-		QHash<const QString, PacingControl*> controlHmds;
-		QHash<const QString, PacingControl*> controlLazy;
+		QHash<const QString, PacingControl*> &controlHmds;
+		QHash<const QString, PacingControl*> &controlLazy;
 };
 
 
@@ -400,6 +410,7 @@ class DataFarmStates
 		enum State { BROKEN, INACTIVE, OK };
 		
 		DataFarmStates();
+		virtual ~DataFarmStates();
 		
 		QStringList getInactives() const;
 		QStringList getActives() const;
@@ -416,14 +427,14 @@ class DataFarmStates
 	private:
 		static QString getFarm( const QString prefix, const QString& msg );
 		
-		QHash<const QString, State> mStates;
-		QHash<const QString, State> hStates;
+		QHash<const QString, State> &mStates;
+		QHash<const QString, State> &hStates;
 		
-		QHash<const QString, QString> mLearn;
-		QHash<const QString, QString> hLearn;
+		QHash<const QString, QString> &mLearn;
+		QHash<const QString, QString> &hLearn;
 		
 		int lastMsgNumber;
-		QString lastChanged;
+		std::string lastChanged;
 };
 
 
