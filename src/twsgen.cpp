@@ -23,6 +23,7 @@ static int useRTHp = 0;
 static int utcp = 0;
 static const char *includeExpiredp = "auto";
 static int to_csvp = 0;
+static int no_convp = 0;
 
 
 static char** wts_list = NULL;
@@ -83,6 +84,8 @@ static struct poptOption flow_opts[] = {
 		"Default is auto (dependent on secType).", NULL},
 	{"to-csv", 'C', POPT_ARG_NONE, &to_csvp, 0,
 		"Just convert xml to csv.", "FILE"},
+	{"no-conv", '\0', POPT_ARG_NONE, &no_convp, 0,
+		"For testing, output xml again.", NULL},
 	POPT_TABLEEND
 };
 
@@ -304,7 +307,11 @@ bool gen_csv()
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
 		PacketHistData *phd = PacketHistData::fromXml( xn );
-		phd->dump( true /* printFormatDates */);
+		if( !no_convp ) {
+			phd->dump( true /* printFormatDates */);
+		} else {
+			phd->dumpXml();
+		}
 		delete phd;
 	}
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
