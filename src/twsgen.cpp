@@ -241,25 +241,11 @@ void split_whatToShow()
 }
 
 
-int main(int argc, char *argv[])
+bool gen_hist_job()
 {
-	twsgen_parse_cl(argc, (const char **) argv);
-	
-	TwsXml::setSkipDefaults( !skipdefp );
-	if( !durationStrp ) {
-		durationStrp = max_durationStr( barSizeSettingp );
-	}
-	split_whatToShow();
-	set_includeExpired();
-	
-	if( !histjobp ) {
-		fprintf( stderr, "error, only -H is implemented\n" );
-		return 1;
-	}
-	
 	TwsXml file;
 	if( ! file.openFile(filep) ) {
-		return 1;
+		return false;
 	}
 	
 	xmlNodePtr xn;
@@ -298,6 +284,30 @@ int main(int argc, char *argv[])
 	histTodo.dumpLeft( stderr );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
+	
+	return true;
+}
+
+
+int main(int argc, char *argv[])
+{
+	twsgen_parse_cl(argc, (const char **) argv);
+	
+	TwsXml::setSkipDefaults( !skipdefp );
+	if( !durationStrp ) {
+		durationStrp = max_durationStr( barSizeSettingp );
+	}
+	split_whatToShow();
+	set_includeExpired();
+	
+	if( histjobp ) {
+		if( !gen_hist_job() ) {
+			return 1;
+		}
+	} else {
+		fprintf( stderr, "error, only -H is implemented\n" );
+		return 2;
+	}
 	
 	return 0;
 }
