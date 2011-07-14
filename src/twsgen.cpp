@@ -295,6 +295,21 @@ bool gen_hist_job()
 
 bool gen_csv()
 {
+	TwsXml file;
+	if( ! file.openFile(filep) ) {
+		return false;
+	}
+	xmlNodePtr xn;
+	int count_docs = 0;
+	while( (xn = file.nextXmlNode()) != NULL ) {
+		count_docs++;
+		PacketHistData *phd = PacketHistData::fromXml( xn );
+		phd->dump( true /* printFormatDates */);
+		delete phd;
+	}
+	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
+		count_docs, filep );
+	
 	return true;
 }
 
