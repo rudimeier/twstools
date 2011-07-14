@@ -48,6 +48,12 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 static struct poptOption flow_opts[] = {
 	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
 		"Never skip xml default values.", NULL},
+	{"host", 'h', POPT_ARG_STRING, &tws_hostp, 0,
+		"TWS host name or ip (default: localhost).", NULL},
+	{"port", 'p', POPT_ARG_INT, &tws_portp, 0,
+		"TWS port number (default: 7474).", NULL},
+	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
+		"TWS client connection id (default: 123).", NULL},
 	{"config", 'c', POPT_ARG_STRING, &configfilep, 0,
 		"Config file (default: twsDL.cfg).", "FILE"},
 	POPT_TABLEEND
