@@ -64,6 +64,22 @@ static struct poptOption flow_opts[] = {
 	POPT_TABLEEND
 };
 
+static struct poptOption tws_tweak_opts[] = {
+	{"conTimeout", '\0', POPT_ARG_INT, &tws_conTimeoutp, 0,
+	"Connection timeout (default: 1000).", "ms"},
+	{"reqTimeout", '\0', POPT_ARG_INT, &tws_reqTimeoutp, 0,
+	"Request timeout (default: 20000).", "ms"},
+	{"maxRequests", '\0', POPT_ARG_INT, &tws_maxRequestsp, 0,
+	"Max requests per pacing interval (default: 60).", NULL},
+	{"pacingInterval", '\0', POPT_ARG_INT, &tws_pacingIntervalp, 0,
+	"Pacing interval (default: 601000).", "ms"},
+	{"minPacingTime", '\0', POPT_ARG_INT, &tws_minPacingTimep, 0,
+	"Minimum time to wait between requests (default: 1500).", "ms"},
+	{"violationPause", '\0', POPT_ARG_INT, &tws_violationPausep, 0,
+	"Time to wait if pacing violation occurs (default: 60000).", "ms"},
+	POPT_TABLEEND
+};
+
 static struct poptOption help_opts[] = {
 	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
 	{"help", 'h', POPT_ARG_NONE, NULL, 0, "Show this help message.", NULL},
@@ -77,6 +93,8 @@ static struct poptOption help_opts[] = {
 static const struct poptOption twsDL_opts[] = {
 	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, flow_opts, 0,
 	 "Program advice:", NULL},
+	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, tws_tweak_opts, 0,
+	 "TWS tweaks:", NULL},
 	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, help_opts, 0,
 	 "Help options:", NULL},
 	POPT_TABLEEND
