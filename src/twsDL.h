@@ -1,7 +1,7 @@
 #ifndef TWS_DL_H
 #define TWS_DL_H
 
-#include "properties.h"
+#include <string>
 #include <stdint.h>
 
 
@@ -30,31 +30,9 @@ class PacketHistData;
 class PacingGod;
 class DataFarmStates;
 
-
-class PropTwsDL : public PropSub
-{
-	public:
-		PropTwsDL( const Properties& prop, const std::string& cName = "" );
-		
-		void initDefaults();
-		bool readProperties();
-		
-		// fields
-		std::string twsHost;
-		int twsPort;
-		int clientId;
-		
-		int conTimeout;
-		int reqTimeout;
-		int maxRequests;
-		int pacingInterval;
-		int minPacingTime;
-		int violationPause;
-};
-
-
-
 class TwsDlWrapper;
+
+
 
 
 class TwsDL
@@ -69,7 +47,7 @@ class TwsDL
 			QUIT_ERROR
 		};
 		
-		TwsDL( const std::string& confFile, const std::string& workFile );
+		TwsDL( const std::string& workFile );
 		~TwsDL();
 		
 		void start();
@@ -77,7 +55,6 @@ class TwsDL
 		State currentState() const;
 		
 	private:
-		void initProperties();
 		void initTwsClient();
 		void eventLoop();
 		
@@ -124,9 +101,7 @@ class TwsDL
 		bool connection_failed;
 		int curIdleTime;
 		
-		std::string confFile;
 		std::string workFile;
-		PropTwsDL *myProp;
 		
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
