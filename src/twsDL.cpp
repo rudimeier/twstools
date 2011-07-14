@@ -19,7 +19,6 @@
 
 static poptContext opt_ctx;
 static const char *workfilep = "";
-static const char *configfilep = "twsDL.cfg";
 static int skipdefp = 0;
 static const char *tws_hostp = "localhost";
 static int tws_portp = 7474;
@@ -62,8 +61,6 @@ static struct poptOption flow_opts[] = {
 		"TWS port number (default: 7474).", NULL},
 	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
 		"TWS client connection id (default: 123).", NULL},
-	{"config", 'c', POPT_ARG_STRING, &configfilep, 0,
-		"Config file (default: twsDL.cfg).", "FILE"},
 	POPT_TABLEEND
 };
 
@@ -209,14 +206,12 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 
 
 
-TwsDL::TwsDL( const std::string& confFile, const std::string& workFile ) :
+TwsDL::TwsDL( const std::string& workFile ) :
 	state(CONNECT),
 	lastConnectionTime(0),
 	connection_failed( false ),
 	curIdleTime(0),
-	confFile(confFile),
 	workFile(workFile),
-	myProp(NULL),
 	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
@@ -228,7 +223,6 @@ TwsDL::TwsDL( const std::string& confFile, const std::string& workFile ) :
 	dataFarms( *(new DataFarmStates()) ),
 	pacingControl( *(new PacingGod(dataFarms)) )
 {
-	initProperties();
 	pacingControl.setPacingTime( tws_maxRequestsp, tws_pacingIntervalp,
 		tws_minPacingTimep );
 	pacingControl.setViolationPause( tws_violationPausep );
@@ -246,9 +240,6 @@ TwsDL::~TwsDL()
 	}
 	if( twsWrapper != NULL ) {
 		delete twsWrapper;
-	}
-	if( myProp  != NULL ) {
-		delete myProp;
 	}
 	if( workTodo != NULL ) {
 		delete workTodo;
@@ -511,16 +502,6 @@ void TwsDL::finData()
 void TwsDL::onQuit( int /*ret*/ )
 {
 	curIdleTime = 0;
-}
-
-
-void TwsDL::initProperties()
-{
-	Properties prop;
-	prop.readConfigFile(confFile);
-	
-	myProp = new PropTwsDL(prop);
-	myProp->readProperties();
 }
 
 
@@ -913,7 +894,7 @@ int main(int argc, char *argv[])
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	
-	TwsDL twsDL( configfilep, workfilep );
+	TwsDL twsDL( workfilep );
 	twsDL.start();
 	
 	TwsDL::State state = twsDL.currentState();

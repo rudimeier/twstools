@@ -57,7 +57,7 @@ class TwsDL
 			QUIT_ERROR
 		};
 		
-		TwsDL( const std::string& confFile, const std::string& workFile );
+		TwsDL( const std::string& workFile );
 		~TwsDL();
 		
 		void start();
@@ -65,7 +65,6 @@ class TwsDL
 		State currentState() const;
 		
 	private:
-		void initProperties();
 		void initTwsClient();
 		void eventLoop();
 		
@@ -112,9 +111,7 @@ class TwsDL
 		bool connection_failed;
 		int curIdleTime;
 		
-		std::string confFile;
 		std::string workFile;
-		PropTwsDL *myProp;
 		
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
