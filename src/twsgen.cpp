@@ -22,6 +22,9 @@ static const char *whatToShowp = "TRADES";
 static int useRTHp = 0;
 static int utcp = 0;
 static const char *includeExpiredp = "auto";
+static int to_csvp = 0;
+static int no_convp = 0;
+
 
 static char** wts_list = NULL;
 static char* wts_split = NULL;
@@ -62,7 +65,7 @@ static struct poptOption flow_opts[] = {
 	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
 		"Never skip xml default values.", NULL},
 	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
-		"generate hist job", "FILE"},
+		"generate hist job", NULL},
 	{"endDateTime", 'e', POPT_ARG_STRING, &endDateTimep, 0,
 		"Query end date time, default is \"\" which means now.", "DATETIME"},
 	{"durationStr", 'd', POPT_ARG_STRING, &durationStrp, 0,
@@ -73,12 +76,16 @@ static struct poptOption flow_opts[] = {
 		"List of data types, valid types are: TRADES, BID, ASK, etc., "
 		"default: TRADES", "LIST"},
 	{"useRTH", '\0', POPT_ARG_NONE, &useRTHp, 0,
-		"Return only data within regular trading hours (useRTH=1).", "FILE"},
+		"Return only data within regular trading hours (useRTH=1).", NULL},
 	{"utc", '\0', POPT_ARG_NONE, &utcp, 0,
-		"Dates are returned as seconds since unix epoch (formatDate=2).", "FILE"},
+		"Dates are returned as seconds since unix epoch (formatDate=2).", NULL},
 	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
 		"How to set includeExpired, valid args: auto, always, never, keep. "
 		"Default is auto (dependent on secType).", NULL},
+	{"to-csv", 'C', POPT_ARG_NONE, &to_csvp, 0,
+		"Just convert xml to csv.", NULL},
+	{"no-conv", '\0', POPT_ARG_NONE, &no_convp, 0,
+		"For testing, output xml again.", NULL},
 	POPT_TABLEEND
 };
 
@@ -241,30 +248,17 @@ void split_whatToShow()
 }
 
 
-int main(int argc, char *argv[])
+bool gen_hist_job()
 {
-	twsgen_parse_cl(argc, (const char **) argv);
-	
-	TwsXml::setSkipDefaults( !skipdefp );
-	if( !durationStrp ) {
-		durationStrp = max_durationStr( barSizeSettingp );
-	}
-	split_whatToShow();
-	set_includeExpired();
-	
-	if( !histjobp ) {
-		fprintf( stderr, "error, only -H is implemented\n" );
-		return 1;
-	}
-	
 	TwsXml file;
 	if( ! file.openFile(filep) ) {
-		return 1;
+		return false;
 	}
 	
 	xmlNodePtr xn;
 	int count_docs = 0;
-	HistTodo histTodo;
+	/* NOTE We are dumping single HistRequests but we should build and dump
+	   a HistTodo object */
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
@@ -285,7 +279,6 @@ int main(int argc, char *argv[])
 				HistRequest hR;
 				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
 				               *wts, useRTHp, formatDate() );
-				histTodo.add( hR );
 				
 				PacketHistData phd;
 				phd.record( 0, hR );
@@ -294,10 +287,61 @@ int main(int argc, char *argv[])
 		}
 		delete pcd;
 	}
-	// TODO this should be xml dump
-	histTodo.dumpLeft( stderr );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
+	
+	return true;
+}
+
+
+bool gen_csv()
+{
+	TwsXml file;
+	if( ! file.openFile(filep) ) {
+		return false;
+	}
+	xmlNodePtr xn;
+	int count_docs = 0;
+	while( (xn = file.nextXmlNode()) != NULL ) {
+		count_docs++;
+		PacketHistData *phd = PacketHistData::fromXml( xn );
+		if( !no_convp ) {
+			phd->dump( true /* printFormatDates */);
+		} else {
+			phd->dumpXml();
+		}
+		delete phd;
+	}
+	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
+		count_docs, filep );
+	
+	return true;
+}
+
+
+int main(int argc, char *argv[])
+{
+	twsgen_parse_cl(argc, (const char **) argv);
+	
+	TwsXml::setSkipDefaults( !skipdefp );
+	if( !durationStrp ) {
+		durationStrp = max_durationStr( barSizeSettingp );
+	}
+	split_whatToShow();
+	set_includeExpired();
+	
+	if( histjobp ) {
+		if( !gen_hist_job() ) {
+			return 1;
+		}
+	} else if( to_csvp ) {
+		if( !gen_csv() ) {
+			return 1;
+		}
+	} else {
+		fprintf( stderr, "error, nothing to do, use -H or -C.\n" );
+		return 2;
+	}
 	
 	return 0;
 }

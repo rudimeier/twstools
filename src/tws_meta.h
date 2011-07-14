@@ -307,6 +307,7 @@ class PacketHistData
 		{
 			public:
 				void clear();
+				static Row * fromXml( xmlNodePtr );
 				
 				std::string date;
 				double open;

@@ -199,15 +199,25 @@ void HistRequest::clear()
 
 
 #define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
 	_struct_->_attr_ = tmp ? std::string(tmp) \
 		: dflt._attr_; \
 	free(tmp)
 
 #define GET_ATTR_INT( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) _name_ ); \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
 	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
 	free(tmp)
+
+#define GET_ATTR_DOUBLE( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
+	free(tmp)
+#define GET_ATTR_BOOL( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
 
 HistRequest * HistRequest::fromXml( xmlNodePtr node )
 {
@@ -730,6 +740,25 @@ void PacketHistData::Row::clear()
 	hasGaps = false;
 }
 
+PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
+{
+	char* tmp;
+	static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
+	Row *row = new Row();
+	
+	GET_ATTR_STRING( row, "date", date );
+	GET_ATTR_DOUBLE( row, "open", open );
+	GET_ATTR_DOUBLE( row, "high", high );
+	GET_ATTR_DOUBLE( row, "low", low );
+	GET_ATTR_DOUBLE( row, "close", close );
+	GET_ATTR_INT( row, "volume", volume );
+	GET_ATTR_INT( row, "count", count );
+	GET_ATTR_DOUBLE( row, "WAP", WAP );
+	GET_ATTR_BOOL( row, "hasGaps", hasGaps );
+	
+	return row;
+}
+
 
 PacketHistData::PacketHistData() :
 		rows(*(new QList<Row>()))
@@ -759,9 +788,18 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-					if( q->type == XML_ELEMENT_NODE
-						&& strcmp((char*)q->name, "row???????") == 0 )  {
-						// TODO
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+					if( strcmp((char*)q->name, "row") == 0 ) {
+						Row *row = Row::fromXml( q );
+						phd->rows.append(*row);
+						delete row;
+					} else if( strcmp((char*)q->name, "fin") == 0 ) {
+						Row *fin = Row::fromXml( q );
+						phd->finishRow = *fin;
+						phd->mode = CLOSED;
+						delete fin;
 					}
 				}
 			}
