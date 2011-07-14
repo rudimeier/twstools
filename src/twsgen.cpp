@@ -22,6 +22,8 @@ static const char *whatToShowp = "TRADES";
 static int useRTHp = 0;
 static int utcp = 0;
 static const char *includeExpiredp = "auto";
+static int to_csvp = 0;
+
 
 static char** wts_list = NULL;
 static char* wts_split = NULL;
@@ -79,6 +81,8 @@ static struct poptOption flow_opts[] = {
 	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
 		"How to set includeExpired, valid args: auto, always, never, keep. "
 		"Default is auto (dependent on secType).", NULL},
+	{"to-csv", 'C', POPT_ARG_NONE, &to_csvp, 0,
+		"Just convert xml to csv.", "FILE"},
 	POPT_TABLEEND
 };
 
@@ -289,6 +293,12 @@ bool gen_hist_job()
 }
 
 
+bool gen_csv()
+{
+	return true;
+}
+
+
 int main(int argc, char *argv[])
 {
 	twsgen_parse_cl(argc, (const char **) argv);
@@ -304,8 +314,12 @@ int main(int argc, char *argv[])
 		if( !gen_hist_job() ) {
 			return 1;
 		}
+	} else if( to_csvp ) {
+		if( !gen_csv() ) {
+			return 1;
+		}
 	} else {
-		fprintf( stderr, "error, only -H is implemented\n" );
+		fprintf( stderr, "error, nothing to do, use -H or -C.\n" );
 		return 2;
 	}
 	
