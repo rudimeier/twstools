@@ -1,7 +1,7 @@
 #ifndef TWS_DL_H
 #define TWS_DL_H
 
-#include "properties.h"
+#include <string>
 #include <stdint.h>
 
 
@@ -30,19 +30,9 @@ class PacketHistData;
 class PacingGod;
 class DataFarmStates;
 
-
-class PropTwsDL : public PropSub
-{
-	public:
-		PropTwsDL( const Properties& prop, const std::string& cName = "" );
-		
-		void initDefaults();
-		bool readProperties();
-};
-
-
-
 class TwsDlWrapper;
+
+
 
 
 class TwsDL

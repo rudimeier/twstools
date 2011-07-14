@@ -858,32 +858,6 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// PropTwsDL
-PropTwsDL::PropTwsDL( const Properties& prop, const std::string& cName ) :
-	PropSub(prop,cName)
-{
-	PROP_DEBUG( 2, "INITIALIZING" );
-	//initializing fields
-	initDefaults();
-}
-
-
-void PropTwsDL::initDefaults()
-{
-}
-
-
-bool PropTwsDL::readProperties()
-{
-	PROP_DEBUG( 2, "READ CONFIG" );
-	bool ok = true;
-	
-	return ok;
-}
-///////////////////////////////////////////////////////////////////////////////
-
-
 
 
 int main(int argc, char *argv[])
