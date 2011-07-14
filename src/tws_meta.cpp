@@ -584,22 +584,30 @@ int WorkTodo::read_file( const std::string & fileName )
 	retVal = 0;
 	xmlNodePtr xn;
 	while( (xn = file.nextXmlNode()) != NULL ) {
-		QByteArray line;
 		Q_ASSERT( xn->type == XML_ELEMENT_NODE  );
-		if( strcmp((char*)xn->name, "PacketContractDetails") == 0 ) {
-			reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
-			PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-			_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
-		} else if ( strcmp((char*)xn->name, "PacketHistData") == 0 ) {
-			reqType = GenericRequest::HIST_REQUEST;
-			PacketHistData *phd = PacketHistData::fromXml(xn);
-			_histTodo->add( phd->getRequest() );
+		if( strcmp((char*)xn->name, "request") == 0 ) {
+			char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
+			if( tmp == NULL ) {
+				fprintf(stderr, "Warning, no request type specified.\n");
+			} else if( strcmp( tmp, "contract_details") == 0 ) {
+				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
+				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
+				_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
+				retVal++;
+			} else if ( strcmp( tmp, "historical_data") == 0 ) {
+				reqType = GenericRequest::HIST_REQUEST;
+				PacketHistData *phd = PacketHistData::fromXml(xn);
+				_histTodo->add( phd->getRequest() );
+				retVal++;
+			} else {
+				fprintf(stderr, "Warning, unknown request type '%s' ignored.\n",
+					tmp );
+			}
+			free(tmp);
 		} else {
 			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
 				xn->name );
-			continue;
 		}
-		retVal++;
 	}
 	
 	return retVal;
@@ -707,7 +715,9 @@ void PacketContractDetails::dumpXml()
 {
 	xmlNodePtr root = TwsXml::newDocRoot();
 	xmlNodePtr npcd = xmlNewChild( root, NULL,
-		(const xmlChar*)"PacketContractDetails", NULL );
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"contract_details" );
 	
 	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
 	conv_ib2xml( nqry, "reqContract", request->ibContract() );
@@ -840,7 +850,9 @@ void PacketHistData::dumpXml()
 	
 	xmlNodePtr root = TwsXml::newDocRoot();
 	xmlNodePtr nphd = xmlNewChild( root, NULL,
-		(const xmlChar*)"PacketHistData", NULL );
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( nphd, (const xmlChar*)"type",
+		(const xmlChar*)"historical_data" );
 	
 	{
 		struct s_bla {
