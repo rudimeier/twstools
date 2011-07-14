@@ -21,6 +21,9 @@ static poptContext opt_ctx;
 static const char *workfilep = "";
 static const char *configfilep = "twsDL.cfg";
 static int skipdefp = 0;
+static const char *tws_hostp = "localhost";
+static int tws_portp = 7474;
+static int tws_client_idp = 123;
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -301,8 +304,7 @@ void TwsDL::connectTws()
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
-	twsClient->connectTWS(
-		myProp->twsHost, myProp->twsPort, myProp->clientId );
+	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
 	
 	if( !twsClient->isConnected() ) {
 		qDebug() << "Connection to TWS failed:"; //TODO print a specific error
@@ -874,10 +876,6 @@ PropTwsDL::PropTwsDL( const Properties& prop, const std::string& cName ) :
 
 void PropTwsDL::initDefaults()
 {
-	twsHost  = "localhost";
-	twsPort  = 6666;
-	clientId = 66;
-	
 	conTimeout = 1000;
 	reqTimeout = 20000;
 	maxRequests = 60;
@@ -891,10 +889,6 @@ bool PropTwsDL::readProperties()
 {
 	PROP_DEBUG( 2, "READ CONFIG" );
 	bool ok = true;
-	
-	ok = ok & get("twsHost",       twsHost);
-	ok = ok & get("twsPort",       twsPort);
-	ok = ok & get("clientId",      clientId);
 	
 	ok &= get("conTimeout", conTimeout);
 	ok &= get("reqTimeout", reqTimeout);

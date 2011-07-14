@@ -40,10 +40,6 @@ class PropTwsDL : public PropSub
 		bool readProperties();
 		
 		// fields
-		std::string twsHost;
-		int twsPort;
-		int clientId;
-		
 		int conTimeout;
 		int reqTimeout;
 		int maxRequests;
