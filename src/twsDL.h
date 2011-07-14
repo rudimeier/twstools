@@ -50,8 +50,6 @@ class PropTwsDL : public PropSub
 		int pacingInterval;
 		int minPacingTime;
 		int violationPause;
-		
-		bool printFormatDates;
 };
 
 

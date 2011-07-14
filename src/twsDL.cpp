@@ -470,7 +470,6 @@ void TwsDL::finData()
 	
 	switch( p_histData.getError() ) {
 	case PacketHistData::ERR_NONE:
-		p_histData.dump( myProp->printFormatDates );
 		p_histData.dumpXml();
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
@@ -885,8 +884,6 @@ void PropTwsDL::initDefaults()
 	pacingInterval = 601000;
 	minPacingTime = 1500;
 	violationPause = 60000;
-	
-	printFormatDates = true;
 }
 
 
@@ -905,8 +902,6 @@ bool PropTwsDL::readProperties()
 	ok &= get("pacingInterval", pacingInterval );
 	ok &= get("minPacingTime", minPacingTime);
 	ok &= get("violationPause", violationPause);
-	
-	ok = ok & get("printFormatDates", printFormatDates);
 	
 	return ok;
 }
