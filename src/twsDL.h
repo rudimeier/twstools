@@ -38,14 +38,6 @@ class PropTwsDL : public PropSub
 		
 		void initDefaults();
 		bool readProperties();
-		
-		// fields
-		int conTimeout;
-		int reqTimeout;
-		int maxRequests;
-		int pacingInterval;
-		int minPacingTime;
-		int violationPause;
 };
 
 

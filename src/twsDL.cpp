@@ -25,6 +25,14 @@ static const char *tws_hostp = "localhost";
 static int tws_portp = 7474;
 static int tws_client_idp = 123;
 
+static int tws_conTimeoutp = 1000;
+static int tws_reqTimeoutp = 20000;
+static int tws_maxRequestsp = 60;
+static int tws_pacingIntervalp = 601000;
+static int tws_minPacingTimep = 1500;
+static int tws_violationPausep = 60000;
+
+
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
 Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
@@ -221,9 +229,9 @@ TwsDL::TwsDL( const std::string& confFile, const std::string& workFile ) :
 	pacingControl( *(new PacingGod(dataFarms)) )
 {
 	initProperties();
-	pacingControl.setPacingTime( myProp->maxRequests,
-		myProp->pacingInterval, myProp->minPacingTime );
-	pacingControl.setViolationPause( myProp->violationPause );
+	pacingControl.setPacingTime( tws_maxRequestsp, tws_pacingIntervalp,
+		tws_minPacingTimep );
+	pacingControl.setViolationPause( tws_violationPausep );
 	initTwsClient();
 	initWork();
 }
@@ -299,10 +307,10 @@ void TwsDL::eventLoop()
 void TwsDL::connectTws()
 {
 	int64_t w = nowInMsecs() - lastConnectionTime;
-	if( w < myProp->conTimeout ) {
-		qDebug() << "Waiting" << (myProp->conTimeout - w)
+	if( w < tws_conTimeoutp ) {
+		qDebug() << "Waiting" << (tws_conTimeoutp - w)
 			<< "ms before connecting again.";
-		curIdleTime = myProp->conTimeout - w;
+		curIdleTime = tws_conTimeoutp - w;
 		return;
 	}
 	
@@ -331,7 +339,7 @@ void TwsDL::waitTwsCon()
 		if( connection_failed ) {
 			qDebug() << "Connecting TWS failed.";
 			changeState( CONNECT );
-		} else if( (nowInMsecs() - lastConnectionTime) > myProp->conTimeout ) {
+		} else if( (nowInMsecs() - lastConnectionTime) > tws_conTimeoutp ) {
 				qDebug() << "Timeout connecting TWS.";
 				twsClient->disconnectTWS();
 				curIdleTime = 1000;
@@ -447,7 +455,7 @@ void TwsDL::waitContracts()
 {
 	if( p_contractDetails.isFinished() ) {
 		finContracts();
-	} else if( currentRequest.age() > myProp->reqTimeout ) {
+	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		qDebug() << "Timeout waiting for data.";
 		// TODO repeat
 		changeState( QUIT_ERROR );
@@ -461,7 +469,7 @@ void TwsDL::waitHist()
 {
 	if( p_histData.isFinished() ) {
 		finData();
-	} else if( currentRequest.age() > myProp->reqTimeout ) {
+	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		qDebug() << "Timeout waiting for data.";
 		p_histData.closeError( PacketHistData::ERR_TIMEOUT );
 		finData();
@@ -562,7 +570,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	switch( errorCode ) {
 		case 1100:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been lost."));
-			curIdleTime = myProp->reqTimeout;
+			curIdleTime = tws_reqTimeoutp;
 			break;
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
@@ -658,7 +666,7 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	case 165:
 		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
-			curIdleTime = myProp->reqTimeout;
+			curIdleTime = tws_reqTimeoutp;
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
 			dataFarms.learnHmdsLastOk( msgCounter, curContract );
 		} else {
@@ -882,12 +890,6 @@ PropTwsDL::PropTwsDL( const Properties& prop, const std::string& cName ) :
 
 void PropTwsDL::initDefaults()
 {
-	conTimeout = 1000;
-	reqTimeout = 20000;
-	maxRequests = 60;
-	pacingInterval = 601000;
-	minPacingTime = 1500;
-	violationPause = 60000;
 }
 
 
@@ -895,13 +897,6 @@ bool PropTwsDL::readProperties()
 {
 	PROP_DEBUG( 2, "READ CONFIG" );
 	bool ok = true;
-	
-	ok &= get("conTimeout", conTimeout);
-	ok &= get("reqTimeout", reqTimeout);
-	ok &= get("maxRequests", maxRequests );
-	ok &= get("pacingInterval", pacingInterval );
-	ok &= get("minPacingTime", minPacingTime);
-	ok &= get("violationPause", violationPause);
 	
 	return ok;
 }
