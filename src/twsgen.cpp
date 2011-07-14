@@ -257,7 +257,8 @@ bool gen_hist_job()
 	
 	xmlNodePtr xn;
 	int count_docs = 0;
-	HistTodo histTodo;
+	/* NOTE We are dumping single HistRequests but we should build and dump
+	   a HistTodo object */
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
@@ -278,7 +279,6 @@ bool gen_hist_job()
 				HistRequest hR;
 				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
 				               *wts, useRTHp, formatDate() );
-				histTodo.add( hR );
 				
 				PacketHistData phd;
 				phd.record( 0, hR );
@@ -287,8 +287,6 @@ bool gen_hist_job()
 		}
 		delete pcd;
 	}
-	// TODO this should be xml dump
-	histTodo.dumpLeft( stderr );
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
 	
