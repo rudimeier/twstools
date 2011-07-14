@@ -65,7 +65,7 @@ static struct poptOption flow_opts[] = {
 	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
 		"Never skip xml default values.", NULL},
 	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
-		"generate hist job", "FILE"},
+		"generate hist job", NULL},
 	{"endDateTime", 'e', POPT_ARG_STRING, &endDateTimep, 0,
 		"Query end date time, default is \"\" which means now.", "DATETIME"},
 	{"durationStr", 'd', POPT_ARG_STRING, &durationStrp, 0,
@@ -76,14 +76,14 @@ static struct poptOption flow_opts[] = {
 		"List of data types, valid types are: TRADES, BID, ASK, etc., "
 		"default: TRADES", "LIST"},
 	{"useRTH", '\0', POPT_ARG_NONE, &useRTHp, 0,
-		"Return only data within regular trading hours (useRTH=1).", "FILE"},
+		"Return only data within regular trading hours (useRTH=1).", NULL},
 	{"utc", '\0', POPT_ARG_NONE, &utcp, 0,
-		"Dates are returned as seconds since unix epoch (formatDate=2).", "FILE"},
+		"Dates are returned as seconds since unix epoch (formatDate=2).", NULL},
 	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
 		"How to set includeExpired, valid args: auto, always, never, keep. "
 		"Default is auto (dependent on secType).", NULL},
 	{"to-csv", 'C', POPT_ARG_NONE, &to_csvp, 0,
-		"Just convert xml to csv.", "FILE"},
+		"Just convert xml to csv.", NULL},
 	{"no-conv", '\0', POPT_ARG_NONE, &no_convp, 0,
 		"For testing, output xml again.", NULL},
 	POPT_TABLEEND
