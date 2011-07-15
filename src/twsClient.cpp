@@ -153,7 +153,7 @@ void TWSClient::selectStuff( int msec )
 {
 	int fd = ePosixClient->fd();
 	
-	Q_ASSERT( fd >= 0 );
+	Q_ASSERT( fd >= 0 || ( fd == -1 && !isConnected()) );
 	
 	struct timeval tval;
 	tval.tv_usec = msec * 1000;
