@@ -1,9 +1,8 @@
 #ifndef TWS_DL_H
 #define TWS_DL_H
 
-#include "properties.h"
-
-#include <QtCore/QList>
+#include <string>
+#include <stdint.h>
 
 
 
@@ -31,46 +30,9 @@ class PacketHistData;
 class PacingGod;
 class DataFarmStates;
 
-
-class PropTwsDL : public PropSub
-{
-	public:
-		PropTwsDL( const Properties& prop, const QString& cName = "" );
-		
-		void initDefaults();
-		bool readProperties();
-		
-		// fields
-		QString twsHost;
-		quint16 twsPort;
-		int     clientId;
-		
-		int conTimeout;
-		int reqTimeout;
-		int maxRequests;
-		int pacingInterval;
-		int minPacingTime;
-		int violationPause;
-		
-		bool downloadData;
-		int reqMaxContracts;
-		int reqMaxContractsPerSpec;
-		
-		bool printFormatDates;
-		
-		bool includeExpired;
-		
-		QString endDateTime;
-		QString durationStr;
-		QString barSizeSetting;
-		QList<QString> whatToShow;
-		int useRTH;
-		int formatDate;
-};
-
-
-
 class TwsDlWrapper;
+
+
 
 
 class TwsDL
@@ -85,7 +47,7 @@ class TwsDL
 			QUIT_ERROR
 		};
 		
-		TwsDL( const QString& confFile, const QString& workFile );
+		TwsDL( const std::string& workFile );
 		~TwsDL();
 		
 		void start();
@@ -93,12 +55,8 @@ class TwsDL
 		State currentState() const;
 		
 	private:
-		void initProperties();
 		void initTwsClient();
 		void eventLoop();
-		
-		/// Returns the count of inserted rows or -1 on error.
-		int storage2stdout();
 		
 		void dumpWorkTodo() const;
 		
@@ -121,11 +79,11 @@ class TwsDL
 		void reqContractDetails( const ContractDetailsRequest& );
 		void reqHistoricalData( const HistRequest& );
 		
-		void errorContracts(int, int, const QString &);
-		void errorHistData(int, int, const QString &);
+		void errorContracts(int, int, const std::string &);
+		void errorHistData(int, int, const std::string &);
 		
 		// callbacks from our twsWrapper
-		void twsError(int, int, const QString &);
+		void twsError(int, int, const std::string &);
 		
 		void twsConnected( bool connected );
 		void twsContractDetails( int reqId,
@@ -133,18 +91,17 @@ class TwsDL
 		void twsBondContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void twsContractDetailsEnd( int reqId );
-		void twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
-			double close, int volume, int count, double WAP, bool hasGaps );
+		void twsHistoricalData( int reqId, const std::string &date, double open,
+			double high, double low, double close, int volume, int count,
+			double WAP, bool hasGaps );
 		
 		
 		State state;
-		qint64 lastConnectionTime;
+		int64_t lastConnectionTime;
 		bool connection_failed;
 		int curIdleTime;
 		
-		QString confFile;
-		QString workFile;
-		PropTwsDL *myProp;
+		std::string workFile;
 		
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
@@ -155,8 +112,6 @@ class TwsDL
 		int curIndexTodoContractDetails;
 		
 		WorkTodo *workTodo;
-		ContractDetailsTodo *contractDetailsTodo;
-		HistTodo *histTodo;
 		
 		PacketContractDetails &p_contractDetails;
 		PacketHistData &p_histData;

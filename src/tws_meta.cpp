@@ -1,11 +1,17 @@
 #include "tws_meta.h"
+#include "tws_xml.h"
 
 #include "twsUtil.h"
 #include "debug.h"
 
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
-#include <QtCore/QFile>
+#include <QtCore/QHash>
+
+
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include <limits.h>
 
@@ -16,88 +22,116 @@
 
 
 
-qint64 nowInMsecs()
+int64_t nowInMsecs()
 {
 	const QDateTime now = QDateTime::currentDateTime();
-	const qint64 now_s = now.toTime_t();
-	const qint64 now_ms = now_s * 1000 + now.time().msec();
+	const int64_t now_s = now.toTime_t();
+	const int64_t now_ms = now_s * 1000 + now.time().msec();
 	return now_ms;
 }
 
 
 /// stupid static helper
-QString ibDate2ISO( const QString &ibDate )
+std::string ibDate2ISO( const std::string &ibDate )
 {
 	QDateTime dt;
 	
-	dt = QDateTime::fromString( ibDate, "yyyyMMdd  hh:mm:ss");
+	dt = QDateTime::fromString( toQString(ibDate), "yyyyMMdd  hh:mm:ss");
 	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
+		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
 	}
 	
-	dt.setDate( QDate::fromString( ibDate, "yyyyMMdd") );
+	dt.setDate( QDate::fromString( toQString(ibDate), "yyyyMMdd") );
 	if( dt.isValid() ) {
-		return dt.toString("yyyy-MM-dd");
+		return toIBString(dt.toString("yyyy-MM-dd"));
 	}
 	
 	bool ok = false;
-	uint t = ibDate.toUInt( &ok );
+	uint t = toQString(ibDate).toUInt( &ok );
 	if( ok ) {
 		dt.setTime_t( t );
-		return dt.toString("yyyy-MM-dd hh:mm:ss");
+		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
 	}
 	
-	return QString();
+	return std::string();
 }
 
+typedef const char* string_pair[2];
 
-QHash<QString, const char*> init_short_wts()
+const string_pair short_wts_[]= {
+	{"TRADES", "T"},
+	{"MIDPOINT", "M"},
+	{"BID", "B"},
+	{"ASK", "A"},
+	{"BID_ASK", "BA"},
+	{"HISTORICAL_VOLATILITY", "HV"},
+	{"OPTION_IMPLIED_VOLATILITY", "OIV"},
+	{"OPTION_VOLUME", "OV"},
+	{NULL, "NNN"}
+};
+
+const string_pair short_bar_size_[]= {
+	{"1 secs",   "s01"},
+	{"5 secs",   "s05"},
+	{"15 secs",  "s15"},
+	{"30 secs",  "s30"},
+	{"1 min",    "m01"},
+	{"2 mins",   "m02"},
+	{"3 mins",   "m03"},
+	{"5 mins",   "m05"},
+	{"15 mins",  "m15"},
+	{"30 mins",  "m30"},
+	{"1 hour",   "h01"},
+	{"4 hour",   "h04"},
+	{"1 day",    "eod"},
+	{"1 week",   "w01"},
+	{"1 month",  "x01"},
+	{"3 months", "x03"},
+	{"1 year",   "y01"},
+	{NULL, "00N"}
+};
+
+const char* short_string( const string_pair* pairs, const char* s_short )
 {
-	QHash<QString, const char*> ht;
-	ht.insert("TRADES", "T");
-	ht.insert("MIDPOINT", "M");
-	ht.insert("BID", "B");
-	ht.insert("ASK", "A");
-	ht.insert("BID_ASK", "BA");
-	ht.insert("HISTORICAL_VOLATILITY", "HV");
-	ht.insert("OPTION_IMPLIED_VOLATILITY", "OIV");
-	ht.insert("OPTION_VOLUME", "OV");
-	return ht;
+	const string_pair *i = pairs;
+	while( (*i)[0] != 0 ) {
+		if( strcmp((*i)[0], s_short)==0 ) {
+			return (*i)[1];
+		}
+		i++;
+	}
+	return (*i)[1];
 }
 
-const QHash<QString, const char*> short_wts = init_short_wts();
-
-
-QHash<QString, const char*> init_short_bar_size()
+const char* short_wts( const char* wts )
 {
-	QHash<QString, const char*> ht;
-	ht.insert("1 secs",   "s01");
-	ht.insert("5 secs",   "s05");
-	ht.insert("15 secs",  "s15");
-	ht.insert("30 secs",  "s30");
-	ht.insert("1 min",    "m01");
-	ht.insert("2 mins",   "m02");
-	ht.insert("3 mins",   "m03");
-	ht.insert("5 mins",   "m05");
-	ht.insert("15 mins",  "m15");
-	ht.insert("30 mins",  "m30");
-	ht.insert("1 hour",   "h01");
-	ht.insert("1 day",    "eod");
-	ht.insert("1 week",   "w01");
-	ht.insert("1 month",  "x01");
-	ht.insert("3 months", "x03");
-	ht.insert("1 year",   "y01");
-	return ht;
+	return short_string( short_wts_, wts );
 }
 
-const QHash<QString, const char*> short_bar_size = init_short_bar_size();
+const char* short_bar_size( const char* bar_size )
+{
+	return short_string( short_bar_size_, bar_size );
+}
 
 
 
 
 
-
-
+ContractDetailsRequest * ContractDetailsRequest::fromXml( xmlNodePtr xn )
+{
+	ContractDetailsRequest *cdr = new ContractDetailsRequest();
+	
+	for( xmlNodePtr p = xn->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			IB::Contract c;
+			conv_xml2ib( &c, p);
+			cdr->initialize(c);
+		}
+	}
+	
+	return cdr;
+}
 
 const IB::Contract& ContractDetailsRequest::ibContract() const
 {
@@ -111,29 +145,15 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 }
 
 
-bool ContractDetailsRequest::fromStringList( const QList<QString>& sl,
-	bool includeExpired )
-{
-	_ibContract.symbol = toIBString( sl[0] );
-	_ibContract.secType = toIBString( sl[1]);
-	// optional filter for exchange
-	_ibContract.exchange= toIBString( sl.size() > 2 ? sl[2] : "" );
-	// optional filter for a single expiry
-	_ibContract.expiry = toIBString( sl.size() > 3 ? sl[3] : "" );
-	_ibContract.includeExpired = includeExpired;
-	return true;
-}
 
 
 
 
 
 
-
-
-bool HistRequest::initialize( const IB::Contract& c, const QString &e,
-	const QString &d, const QString &b,
-	const QString &w, int u, int f )
+bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
+	const std::string &d, const std::string &b,
+	const std::string &w, int u, int f )
 {
 	_ibContract = c;
 	_endDateTime = e;
@@ -146,46 +166,7 @@ bool HistRequest::initialize( const IB::Contract& c, const QString &e,
 }
 
 
-bool HistRequest::fromString( const QString& s, bool includeExpired )
-{
-	bool ok = false;
-	QStringList sl = s.split('\t');
-	
-	if( sl.size() < 13 ) {
-		return ok;
-	}
-	
-	int i = 0;
-	_endDateTime = sl.at(i++);
-	_durationStr = sl.at(i++);
-	_barSizeSetting = sl.at(i++);
-	_whatToShow = sl.at(i++);
-	_useRTH = sl.at(i++).toInt( &ok );
-	if( !ok ) {
-		return false;
-	}
-	_formatDate = sl.at(i++).toInt( &ok );
-	if( !ok ) {
-		return false;
-	}
-	
-	_ibContract.symbol = toIBString(sl.at(i++));
-	_ibContract.secType = toIBString(sl.at(i++));
-	_ibContract.exchange = toIBString(sl.at(i++));
-	_ibContract.currency = toIBString(sl.at(i++));
-	_ibContract.expiry = toIBString(sl.at(i++));
-	_ibContract.strike = sl.at(i++).toDouble( &ok );
-	if( !ok ) {
-		return false;
-	}
-	_ibContract.right = toIBString(sl.at(i++));
-	_ibContract.includeExpired = includeExpired;
-	
-	return ok;
-}
-
-
-QString HistRequest::toString() const
+std::string HistRequest::toString() const
 {
 	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 		.arg(toQString(_ibContract.symbol))
@@ -197,15 +178,15 @@ QString HistRequest::toString() const
 		.arg(toQString(_ibContract.right));
 	
 	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(_endDateTime)
-		.arg(_durationStr)
-		.arg(_barSizeSetting)
-		.arg(_whatToShow)
+		.arg(toQString(_endDateTime))
+		.arg(toQString(_durationStr))
+		.arg(toQString(_barSizeSetting))
+		.arg(toQString(_whatToShow))
 		.arg(_useRTH)
 		.arg(_formatDate)
 		.arg(c_str);
 	
-	return retVal;
+	return retVal.toStdString();
 }
 
 
@@ -213,6 +194,53 @@ void HistRequest::clear()
 {
 	_ibContract = IB::Contract();
 	_whatToShow.clear();
+}
+
+
+
+#define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? std::string(tmp) \
+		: dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_INT( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_DOUBLE( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
+	free(tmp)
+#define GET_ATTR_BOOL( _struct_, _name_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
+
+HistRequest * HistRequest::fromXml( xmlNodePtr node )
+{
+	char* tmp;
+	static const HistRequest dflt;
+	
+	HistRequest *hR = new HistRequest();
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &hR->_ibContract, p);
+		}
+	}
+	
+	GET_ATTR_STRING( hR, "endDateTime", _endDateTime );
+	GET_ATTR_STRING( hR, "durationStr", _durationStr );
+	GET_ATTR_STRING( hR, "barSizeSetting", _barSizeSetting );
+	GET_ATTR_STRING( hR, "whatToShow", _whatToShow );
+	GET_ATTR_INT( hR, "useRTH", _useRTH );
+	GET_ATTR_INT( hR, "formatDate", _formatDate );
+	
+	return hR;
 }
 
 
@@ -270,7 +298,12 @@ void GenericRequest::close()
 
 
 
-HistTodo::HistTodo()
+HistTodo::HistTodo() :
+	histRequests(*(new QList<HistRequest*>())),
+	doneRequests(*(new QList<int>())),
+	leftRequests(*(new QList<int>())),
+	errorRequests(*(new QList<int>())),
+	checkedOutRequests(*(new QList<int>()))
 {
 }
 
@@ -280,28 +313,11 @@ HistTodo::~HistTodo()
 	foreach( HistRequest *hR, histRequests ) {
 		delete hR;
 	}
-}
-
-
-int HistTodo::fromFile( const QList<QByteArray> &rows, bool includeExpired )
-{
-	histRequests.clear();
-	
-	int retVal = rows.size();
-	
-	foreach( QByteArray row, rows ) {
-		if( row.startsWith('[') ) {
-			int firstTab = row.indexOf('\t');
-			Q_ASSERT( row.size() > firstTab );
-			Q_ASSERT( firstTab >= 0 ); //TODO
-			row.remove(0, firstTab+1 );
-		}
-		HistRequest hR;
-		bool ok = hR.fromString( row, includeExpired );
-		Q_ASSERT(ok); //TODO
-		add( hR );
-	}
-	return retVal;
+	delete &histRequests;
+	delete &doneRequests;
+	delete &leftRequests;
+	delete &errorRequests;
+	delete &checkedOutRequests;
 }
 
 
@@ -310,7 +326,7 @@ void HistTodo::dump( FILE *stream ) const
 	for(int i=0; i < histRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         i,
-		         histRequests.at(i)->toString().toUtf8().constData() );
+		         histRequests.at(i)->toString().c_str() );
 	}
 }
 
@@ -320,7 +336,7 @@ void HistTodo::dumpLeft( FILE *stream ) const
 	for(int i=0; i < leftRequests.size(); i++ ) {
 		fprintf( stream, "[%d]\t%s\n",
 		         leftRequests[i],
-		         histRequests.at(leftRequests[i])->toString().toUtf8().constData() );
+		         histRequests.at(leftRequests[i])->toString().c_str() );
 	}
 }
 
@@ -494,26 +510,14 @@ void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
 
 
 
-int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
-	bool includeExpired )
+ContractDetailsTodo::ContractDetailsTodo() :
+	contractDetailsRequests(*(new QList<ContractDetailsRequest>()))
 {
-	int retVal = 0;
-	QRegExp regExp("^REQ_CD:?");
-	
-	foreach( QByteArray row, rows ) {
-		QString s(row);
-		Q_ASSERT( s.contains( regExp ) );
-		s.remove( regExp );
-		QList<QString> sl = s.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-		Q_ASSERT( sl.size() >= 2 && sl.size() <= 4 ); // TODO handle that
-		
-		ContractDetailsRequest cdR;
-		bool ok = cdR.fromStringList( sl, includeExpired );
-		Q_ASSERT(ok); //TODO
-		contractDetailsRequests.append( cdR );
-		retVal++;
-	}
-	return retVal;
+}
+
+ContractDetailsTodo::~ContractDetailsTodo()
+{
+	delete &contractDetailsRequests;
 }
 
 
@@ -525,14 +529,20 @@ int ContractDetailsTodo::fromFile( const QList<QByteArray> &rows,
 
 WorkTodo::WorkTodo() :
 	reqType(GenericRequest::NONE),
-	rows(new QList<QByteArray>())
+	_contractDetailsTodo( new ContractDetailsTodo() ),
+	_histTodo( new HistTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
-	delete rows;
+	if( _histTodo != NULL ) {
+		delete _histTodo;
+	}
+	if( _contractDetailsTodo != NULL ) {
+		delete _contractDetailsTodo;
+	}
 }
 
 
@@ -541,42 +551,65 @@ GenericRequest::ReqType WorkTodo::getType() const
 	return reqType;
 }
 
-
-const QList<QByteArray>& WorkTodo::getRows() const
+ContractDetailsTodo* WorkTodo::contractDetailsTodo() const
 {
-	return *rows;
+	return _contractDetailsTodo;
+}
+
+const ContractDetailsTodo& WorkTodo::getContractDetailsTodo() const
+{
+	return *_contractDetailsTodo;
+}
+
+HistTodo* WorkTodo::histTodo() const
+{
+	return _histTodo;
+}
+
+const HistTodo& WorkTodo::getHistTodo() const
+{
+	return *_histTodo;
 }
 
 
-int WorkTodo::read_file( const QString & fileName )
+int WorkTodo::read_file( const std::string & fileName )
 {
 	int retVal = -1;
-	QFile f( fileName );
-	
 	reqType = GenericRequest::NONE;
-	rows->clear();
-	if (f.open(QFile::ReadOnly)) {
-		retVal = 0;
-		while (!f.atEnd()) {
-			QByteArray line = f.readLine();
-			line.chop(1); //remove line feed
-			if( line.startsWith('#') || line.isEmpty() ) {
-				continue;
-			}
-			// TODO for now first line defines whole file's reqType
-			if( reqType == GenericRequest::NONE ) {
-				if( ! line.startsWith("REQ_CD") ) {
-					reqType = GenericRequest::HIST_REQUEST;
-				} else {
-					reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
-				}
-			}
-			rows->append(line);
-			retVal++;
-		}
-	} else {
-// 		_lastError = QString("can't read file '%1'").arg(fileName);
+	
+	TwsXml file;
+	if( ! file.openFile(fileName.c_str()) ) {
+		return retVal;
 	}
+	retVal = 0;
+	xmlNodePtr xn;
+	while( (xn = file.nextXmlNode()) != NULL ) {
+		Q_ASSERT( xn->type == XML_ELEMENT_NODE  );
+		if( strcmp((char*)xn->name, "request") == 0 ) {
+			char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
+			if( tmp == NULL ) {
+				fprintf(stderr, "Warning, no request type specified.\n");
+			} else if( strcmp( tmp, "contract_details") == 0 ) {
+				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
+				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
+				_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
+				retVal++;
+			} else if ( strcmp( tmp, "historical_data") == 0 ) {
+				reqType = GenericRequest::HIST_REQUEST;
+				PacketHistData *phd = PacketHistData::fromXml(xn);
+				_histTodo->add( phd->getRequest() );
+				retVal++;
+			} else {
+				fprintf(stderr, "Warning, unknown request type '%s' ignored.\n",
+					tmp );
+			}
+			free(tmp);
+		} else {
+			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
+				xn->name );
+		}
+	}
+	
 	return retVal;
 }
 
@@ -587,16 +620,58 @@ int WorkTodo::read_file( const QString & fileName )
 
 
 
-PacketContractDetails::PacketContractDetails()
+PacketContractDetails::PacketContractDetails() :
+	cdList(new std::vector<IB::ContractDetails>())
 {
 	complete = false;
 	reqId = -1;
+	request = NULL;
 }
 
-
-const QList<IB::ContractDetails>& PacketContractDetails::constList() const
+PacketContractDetails::~PacketContractDetails()
 {
-	return cdList;
+	delete cdList;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
+{
+	PacketContractDetails *pcd = new PacketContractDetails();
+	
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				pcd->request = ContractDetailsRequest::fromXml(p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type == XML_ELEMENT_NODE
+						&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
+						IB::ContractDetails cd;
+						conv_xml2ib(&cd, q);
+						pcd->cdList->push_back(cd);
+					}
+				}
+			}
+		}
+	}
+	return pcd;
+}
+
+const ContractDetailsRequest& PacketContractDetails::getRequest() const
+{
+	return *request;
+}
+
+void PacketContractDetails::record( int reqId,
+	const ContractDetailsRequest& cdr )
+{
+	Q_ASSERT( !complete && this->reqId == -1 && request == NULL
+		&& cdList->empty() );
+	this->reqId = reqId;
+	this->request = new ContractDetailsRequest( cdr );
 }
 
 void PacketContractDetails::setFinished()
@@ -616,19 +691,43 @@ void PacketContractDetails::clear()
 {
 	complete = false;
 	reqId = -1;
-	cdList.clear();
+	cdList->clear();
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
 }
 
 
 void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 {
-	if( cdList.isEmpty() ) {
+	if( cdList->empty() ) {
 		this->reqId = reqId;
 	}
 	Q_ASSERT( this->reqId == reqId );
 	Q_ASSERT( !complete );
 	
-	cdList.append(c);
+	cdList->push_back(c);
+}
+
+
+void PacketContractDetails::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"contract_details" );
+	
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "reqContract", request->ibContract() );
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	for( size_t i=0; i<cdList->size(); i++ ) {
+		conv_ib2xml( nrsp, "ContractDetails", (*cdList)[i] );
+	}
+	
+	TwsXml::dumpAndFree( root );
 }
 
 
@@ -651,14 +750,170 @@ void PacketHistData::Row::clear()
 	hasGaps = false;
 }
 
+PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
+{
+	char* tmp;
+	static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
+	Row *row = new Row();
+	
+	GET_ATTR_STRING( row, "date", date );
+	GET_ATTR_DOUBLE( row, "open", open );
+	GET_ATTR_DOUBLE( row, "high", high );
+	GET_ATTR_DOUBLE( row, "low", low );
+	GET_ATTR_DOUBLE( row, "close", close );
+	GET_ATTR_INT( row, "volume", volume );
+	GET_ATTR_INT( row, "count", count );
+	GET_ATTR_DOUBLE( row, "WAP", WAP );
+	GET_ATTR_BOOL( row, "hasGaps", hasGaps );
+	
+	return row;
+}
 
-PacketHistData::PacketHistData()
+
+PacketHistData::PacketHistData() :
+		rows(*(new QList<Row>()))
 {
 	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
+	request = NULL;
 }
 
+PacketHistData::~PacketHistData()
+{
+	delete &rows;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
+{
+	PacketHistData *phd = new PacketHistData();
+	
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				phd->request = HistRequest::fromXml(p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+					if( strcmp((char*)q->name, "row") == 0 ) {
+						Row *row = Row::fromXml( q );
+						phd->rows.append(*row);
+						delete row;
+					} else if( strcmp((char*)q->name, "fin") == 0 ) {
+						Row *fin = Row::fromXml( q );
+						phd->finishRow = *fin;
+						phd->mode = CLOSED;
+						delete fin;
+					}
+				}
+			}
+		}
+	}
+	
+	return phd;
+}
+
+
+#define ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+			(xmlChar*) _struct_._attr_.c_str() ); \
+	}
+
+#define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_BOOL( _ne_, _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
+	}
+
+void PacketHistData::dumpXml()
+{
+	char tmp[128];
+	
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr nphd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( nphd, (const xmlChar*)"type",
+		(const xmlChar*)"historical_data" );
+	
+	{
+		struct s_bla {
+			const std::string endDateTime;
+			const std::string durationStr;
+			const std::string barSizeSetting;
+			const std::string whatToShow;
+			int useRTH;
+			int formatDate;
+		};
+		static const s_bla dflt = {"", "", "", "", 0, 0 };
+		const IB::Contract &c = request->ibContract();
+		s_bla bla = { request->endDateTime(), request->durationStr(),
+			request->barSizeSetting(), request->whatToShow(), request->useRTH(),
+			request->formatDate() };
+		
+		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
+		conv_ib2xml( nqry, "reqContract", c );
+		ADD_ATTR_STRING( nqry, bla, endDateTime );
+		ADD_ATTR_STRING( nqry, bla, durationStr );
+		ADD_ATTR_STRING( nqry, bla, barSizeSetting );
+		ADD_ATTR_STRING( nqry, bla, whatToShow );
+		ADD_ATTR_INT( nqry, bla, useRTH );
+		ADD_ATTR_INT( nqry, bla, formatDate );
+	}
+	
+	if( mode == CLOSED ) {
+	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
+	{
+		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
+		for( int i=0; i<rows.size(); i++ ) {
+			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
+			ADD_ATTR_STRING( nrow, rows[i], date );
+			ADD_ATTR_DOUBLE( nrow, rows[i], open );
+			ADD_ATTR_DOUBLE( nrow, rows[i], high );
+			ADD_ATTR_DOUBLE( nrow, rows[i], low );
+			ADD_ATTR_DOUBLE( nrow, rows[i], close );
+			ADD_ATTR_INT( nrow, rows[i], volume );
+			ADD_ATTR_INT( nrow, rows[i], count );
+			ADD_ATTR_DOUBLE( nrow, rows[i], WAP );
+			ADD_ATTR_BOOL( nrow, rows[i], hasGaps );
+		}
+		xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
+		ADD_ATTR_STRING( nrow, finishRow, date );
+		ADD_ATTR_DOUBLE( nrow, finishRow, open );
+		ADD_ATTR_DOUBLE( nrow, finishRow, high );
+		ADD_ATTR_DOUBLE( nrow, finishRow, low );
+		ADD_ATTR_DOUBLE( nrow, finishRow, close );
+		ADD_ATTR_INT( nrow, finishRow, volume );
+		ADD_ATTR_INT( nrow, finishRow, count );
+		ADD_ATTR_DOUBLE( nrow, finishRow, WAP );
+		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
+	}
+	}
+	TwsXml::dumpAndFree( root );
+}
+
+const HistRequest& PacketHistData::getRequest() const
+{
+	return *request;
+}
 
 bool PacketHistData::isFinished() const
 {
@@ -677,20 +932,25 @@ void PacketHistData::clear()
 	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
 	rows.clear();
 	finishRow.clear();
 }
 
 
-void PacketHistData::record( int reqId )
+void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	Q_ASSERT( mode == CLEAN && error == ERR_NONE );
+	Q_ASSERT( mode == CLEAN && error == ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
+	this->request = new HistRequest( hR );
 }
 
 
-void PacketHistData::append( int reqId, const QString &date,
+void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
@@ -700,7 +960,7 @@ void PacketHistData::append( int reqId, const QString &date,
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
-	if( date.startsWith("finished") ) {
+	if( strncmp(date.c_str(), "finished", 8) == 0) {
 		mode = CLOSED;
 		finishRow = row;
 	} else {
@@ -717,38 +977,38 @@ void PacketHistData::closeError( Error e )
 }
 
 
-void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
+void PacketHistData::dump( bool printFormatDates )
 {
 	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
-	const IB::Contract &c = hR.ibContract();
-	const QString &wts = hR.whatToShow();
-	const QString &barSizeSetting = hR.barSizeSetting();
+	const IB::Contract &c = request->ibContract();
+	const char *wts = short_wts( request->whatToShow().c_str() );
+	const char *bss = short_bar_size( request->barSizeSetting().c_str());
 	
 	foreach( Row r, rows ) {
-		QString expiry = toQString(c.expiry);
-		QString dateTime = r.date;
+		std::string expiry = c.expiry;
+		std::string dateTime = r.date;
 		if( printFormatDates ) {
-			if( expiry.isEmpty() ) {
+			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
-				expiry = ibDate2ISO( toQString(c.expiry) );
+				expiry = ibDate2ISO( c.expiry );
 			}
 			dateTime = ibDate2ISO(r.date);
-			Q_ASSERT( !expiry.isEmpty() && !dateTime.isEmpty() ); //TODO
+			Q_ASSERT( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
 			.arg(toQString(c.secType))
 			.arg(toQString(c.exchange))
 			.arg(toQString(c.currency))
-			.arg(expiry)
+			.arg(toQString(expiry))
 			.arg(c.strike)
 			.arg(toQString(c.right));
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
-		       short_wts.value( wts, "NNN" ),
-		       short_bar_size.value( barSizeSetting, "00N" ),
+		       wts,
+		       bss,
 		       c_str.toUtf8().constData(),
-		       dateTime.toUtf8().constData(),
+		       dateTime.c_str(),
 		       r.open, r.high, r.low, r.close,
 		       r.volume, r.count, r.WAP, r.hasGaps);
 		fflush(stdout);
@@ -763,6 +1023,8 @@ void PacketHistData::dump( const HistRequest& hR, bool printFormatDates )
 
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
+	dateTimes(*(new QList<int64_t>())),
+	violations(*(new QList<bool>())),
 	maxRequests( r ),
 	checkInterval( i ),
 	minPacingTime( m ),
@@ -770,6 +1032,11 @@ PacingControl::PacingControl( int r, int i, int m, int v ) :
 {
 }
 
+PacingControl::~PacingControl()
+{
+	delete &violations;
+	delete &dateTimes;
+}
 
 void PacingControl::setPacingTime( int r, int i, int m )
 {
@@ -794,7 +1061,7 @@ bool PacingControl::isEmpty() const
 void PacingControl::clear()
 {
 	if( !dateTimes.isEmpty() ) {
-		qint64 now = nowInMsecs();
+		int64_t now = nowInMsecs();
 		if( now - dateTimes.last() < 5000  ) {
 			// HACK race condition might cause assert in notifyViolation(),
 			// to avoid this we would need to ack each request
@@ -812,7 +1079,7 @@ void PacingControl::clear()
 
 void PacingControl::addRequest()
 {
-	const qint64 now_t = nowInMsecs();
+	const int64_t now_t = nowInMsecs();
 	dateTimes.append( now_t );
 	violations.append( false );
 }
@@ -833,7 +1100,7 @@ void PacingControl::notifyViolation()
 
 int PacingControl::goodTime(const char** ddd) const
 {
-	const qint64 now = nowInMsecs();
+	const int64_t now = nowInMsecs();
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
@@ -856,7 +1123,7 @@ int PacingControl::goodTime(const char** ddd) const
 	int waitBurst = INT_MIN;
 	int p_index = dateTimes.size() - maxRequests;
 	if( p_index >= 0 ) {
-		qint64 p_time = dateTimes.at( p_index );
+		int64_t p_time = dateTimes.at( p_index );
 		waitBurst = p_time + checkInterval - now;
 	}
 	SWAP_MAX( waitBurst, "wait burst" );
@@ -870,7 +1137,7 @@ int PacingControl::goodTime(const char** ddd) const
 
 int PacingControl::countLeft() const
 {
-	const qint64 now = nowInMsecs();
+	const int64_t now = nowInMsecs();
 	
 	if( (dateTimes.size() > 0) && violations.last() ) {
 		int waitViol = dateTimes.last() + violationPause - now;
@@ -880,7 +1147,7 @@ int PacingControl::countLeft() const
 	}
 	
 	int retVal = maxRequests;
-	QList<qint64>::const_iterator it = dateTimes.constEnd();
+	QList<int64_t>::const_iterator it = dateTimes.constEnd();
 	while( it != dateTimes.constBegin() ) {
 		it--;
 		int waitBurst = *it + checkInterval - now;
@@ -898,9 +1165,9 @@ void PacingControl::merge( const PacingControl& other )
 {
 	qDebug() << dateTimes;
 	qDebug() << other.dateTimes;
-	QList<qint64>::iterator t_d = dateTimes.begin();
+	QList<int64_t>::iterator t_d = dateTimes.begin();
 	QList<bool>::iterator t_v = violations.begin();
-	QList<qint64>::const_iterator o_d = other.dateTimes.constBegin();
+	QList<int64_t>::const_iterator o_d = other.dateTimes.constBegin();
 	QList<bool>::const_iterator o_v = other.violations.constBegin();
 	
 	while( t_d != dateTimes.end() && o_d != other.dateTimes.constEnd() ) {
@@ -944,7 +1211,9 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 	minPacingTime( 1500 ),
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
-		maxRequests, checkInterval, minPacingTime, violationPause)) )
+		maxRequests, checkInterval, minPacingTime, violationPause)) ),
+	controlHmds(*(new QHash<const QString, PacingControl*>()) ),
+	controlLazy(*(new QHash<const QString, PacingControl*>()) )
 {
 }
 
@@ -964,6 +1233,8 @@ PacingGod::~PacingGod()
 		delete *it;
 		it = controlLazy.erase(it);
 	}
+	delete &controlHmds;
+	delete &controlLazy;
 }
 
 
@@ -1187,10 +1458,21 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
-	lastChanged(INT_MIN)
+	mStates( *(new QHash<const QString, State>()) ),
+	hStates( *(new QHash<const QString, State>()) ),
+	mLearn( *(new QHash<const QString, QString>()) ),
+	hLearn( *(new QHash<const QString, QString>()) ),
+	lastMsgNumber(INT_MIN)
 {
 }
 
+DataFarmStates::~DataFarmStates()
+{
+	delete &hLearn;
+	delete &mLearn;
+	delete &hStates;
+	delete &mStates;
+}
 
 void DataFarmStates::setAllBroken()
 {
@@ -1210,8 +1492,10 @@ void DataFarmStates::setAllBroken()
 }
 
 
-void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
+void DataFarmStates::notify(int msgNumber, int errorCode,
+	const std::string &_msg)
 {
+	QString msg = toQString(_msg); // just convert to QString
 	lastMsgNumber = msgNumber;
 	QString farm;
 	State state;
@@ -1260,7 +1544,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode, const QString &msg)
 		return;
 	}
 	
-	lastChanged = farm;
+	lastChanged = toIBString(farm);
 	pHash->insert( farm, state );
 	qDebug() << *pHash;
 }
@@ -1315,6 +1599,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
+	QString lastChanged = toQString(this->lastChanged);
 	Q_ASSERT( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
 		QString lazyC = LAZY_CONTRACT_STR(c);
@@ -1359,20 +1644,20 @@ QStringList DataFarmStates::getActives() const
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
-	return mLearn[lazyC];
+	return mLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
 	QString lazyC = LAZY_CONTRACT_STR(c);
-	return hLearn[lazyC];
+	return hLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
 {
-	return hLearn[lazyC];
+	return hLearn.value(lazyC);
 }
 
 

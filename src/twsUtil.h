@@ -1,8 +1,9 @@
 #ifndef TWS_UTIL_H
 #define TWS_UTIL_H
 
-#include <QtCore/QString>
+#include <string>
 
+class QString;
 
 namespace IB {
 	class Execution;

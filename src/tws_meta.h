@@ -3,26 +3,25 @@
 
 #include "ibtws/Contract.h"
 
-#include <QtCore/QString>
-#include <QtCore/QList>
-#include <QtCore/QHash>
-#include <QtCore/QDateTime>
+#include <QtCore/QtContainerFwd>
+#include <stdint.h>
+
+typedef struct _xmlNode * xmlNodePtr;
+typedef struct _xmlDoc * xmlDocPtr;
+
+class QString;
+class QStringList;
 
 
 
 
-
-
-
-
-qint64 nowInMsecs();
+int64_t nowInMsecs();
 
 /// stupid static helper
-QString ibDate2ISO( const QString &ibDate );
+std::string ibDate2ISO( const std::string &ibDate );
 
-extern const QHash<QString, const char*> short_wts;
-extern const QHash<QString, const char*> short_bar_size;
-
+const char* short_wts( const char* wts );
+const char* short_bar_size( const char* bar_size );
 
 
 
@@ -33,9 +32,10 @@ extern const QHash<QString, const char*> short_bar_size;
 class ContractDetailsRequest
 {
 	public:
+		static ContractDetailsRequest * fromXml( xmlNodePtr );
+		
 		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
-		bool fromStringList( const QList<QString>&, bool includeExpired );
 		
 	private:
 		IB::Contract _ibContract;
@@ -51,27 +51,28 @@ class ContractDetailsRequest
 class HistRequest
 {
 	public:
+		static HistRequest * fromXml( xmlNodePtr );
+		
 		const IB::Contract& ibContract() const;
-		const QString& endDateTime() const;
-		const QString& durationStr() const;
-		const QString& barSizeSetting() const;
-		const QString& whatToShow() const;
+		const std::string& endDateTime() const;
+		const std::string& durationStr() const;
+		const std::string& barSizeSetting() const;
+		const std::string& whatToShow() const;
 		int useRTH() const;
 		int formatDate() const;
 		
-		bool initialize( const IB::Contract&, const QString &endDateTime,
-			const QString &durationStr, const QString &barSizeSetting,
-			const QString &whatToShow, int useRTH, int formatDate );
-		bool fromString( const QString&, bool includeExpired );
-		QString toString() const;
+		bool initialize( const IB::Contract&, const std::string &endDateTime,
+			const std::string &durationStr, const std::string &barSizeSetting,
+			const std::string &whatToShow, int useRTH, int formatDate );
+		std::string toString() const;
 		void clear();
 		
 	private:
 		IB::Contract _ibContract;
-		QString _endDateTime;
-		QString _durationStr;
-		QString _barSizeSetting;
-		QString _whatToShow;
+		std::string _endDateTime;
+		std::string _durationStr;
+		std::string _barSizeSetting;
+		std::string _whatToShow;
 		int _useRTH;
 		int _formatDate;
 };
@@ -83,25 +84,25 @@ inline const IB::Contract& HistRequest::ibContract() const
 }
 
 
-inline const QString& HistRequest::endDateTime() const
+inline const std::string& HistRequest::endDateTime() const
 {
 	return _endDateTime;
 }
 
 
-inline const QString& HistRequest::durationStr() const
+inline const std::string& HistRequest::durationStr() const
 {
 	return _durationStr;
 }
 
 
-inline const QString& HistRequest::barSizeSetting() const
+inline const std::string& HistRequest::barSizeSetting() const
 {
 	return _barSizeSetting;
 }
 
 
-inline const QString& HistRequest::whatToShow() const
+inline const std::string& HistRequest::whatToShow() const
 {
 	return _whatToShow;
 }
@@ -146,7 +147,7 @@ class GenericRequest
 		ReqType _reqType;
 		int _reqId;
 		
-		qint64 _ctime;
+		int64_t _ctime;
 };
 
 
@@ -166,7 +167,6 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
 		void dump( FILE *stream ) const;
 		void dumpLeft( FILE *stream ) const;
 		
@@ -182,11 +182,11 @@ class HistTodo
 		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
-		QList<HistRequest*> histRequests;
-		QList<int> doneRequests;
-		QList<int> leftRequests;
-		QList<int> errorRequests;
-		QList<int> checkedOutRequests;
+		QList<HistRequest*> &histRequests;
+		QList<int> &doneRequests;
+		QList<int> &leftRequests;
+		QList<int> &errorRequests;
+		QList<int> &checkedOutRequests;
 };
 
 
@@ -199,9 +199,10 @@ class HistTodo
 class ContractDetailsTodo
 {
 	public:
-		int fromFile( const QList<QByteArray> &rows, bool includeExpired );
+		ContractDetailsTodo();
+		virtual ~ContractDetailsTodo();
 		
-		QList<ContractDetailsRequest> contractDetailsRequests;
+		QList<ContractDetailsRequest> &contractDetailsRequests;
 };
 
 
@@ -218,12 +219,16 @@ class WorkTodo
 		virtual ~WorkTodo();
 		
 		GenericRequest::ReqType getType() const;
-		const QList<QByteArray>& getRows() const;
-		int read_file( const QString & fileName);
+		ContractDetailsTodo* contractDetailsTodo() const;
+		const ContractDetailsTodo& getContractDetailsTodo() const;
+		HistTodo* histTodo() const;
+		const HistTodo& getHistTodo() const;
+		int read_file( const std::string & fileName);
 		
 	private:
 		GenericRequest::ReqType reqType;
-		QList<QByteArray> *rows;
+		ContractDetailsTodo *_contractDetailsTodo;
+		HistTodo *_histTodo;
 };
 
 
@@ -237,18 +242,33 @@ class PacketContractDetails
 {
 	public:
 		PacketContractDetails();
+		virtual ~PacketContractDetails();
 		
-		const QList<IB::ContractDetails>& constList() const;
+		static PacketContractDetails * fromXml( xmlNodePtr );
+		
+		const ContractDetailsRequest& getRequest() const;
+		const std::vector<IB::ContractDetails>& constList() const;
+		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
 		bool isFinished() const;
 		void clear();
 		void append( int reqId, const IB::ContractDetails& );
 		
+		void dumpXml();
+		
 	private:
 		bool complete;
 		int reqId;
-		QList<IB::ContractDetails> cdList;
+		ContractDetailsRequest *request;
+		std::vector<IB::ContractDetails> * const cdList;
 };
+
+
+inline const std::vector<IB::ContractDetails>&
+PacketContractDetails::constList() const
+{
+	return *cdList;
+}
 
 
 
@@ -265,24 +285,31 @@ class PacketHistData
 			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
 		
 		PacketHistData();
+		virtual ~PacketHistData();
 		
+		static PacketHistData * fromXml( xmlNodePtr );
+		
+		const HistRequest& getRequest() const;
 		bool isFinished() const;
 		Error getError() const;
 		void clear();
-		void record( int reqId );
-		void append( int reqId, const QString &date,
+		void record( int reqId, const HistRequest& );
+		void append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
 		void closeError( Error );
-		void dump( const HistRequest&, bool printFormatDates );
+		void dump( bool printFormatDates );
+		
+		void dumpXml();
 		
 	private:
 		class Row
 		{
 			public:
 				void clear();
+				static Row * fromXml( xmlNodePtr );
 				
-				QString date;
+				std::string date;
 				double open;
 				double high;
 				double low;
@@ -297,7 +324,8 @@ class PacketHistData
 		Error error;
 		
 		int reqId;
-		QList<Row> rows;
+		HistRequest *request;
+		QList<Row> &rows;
 		Row finishRow;
 };
 
@@ -312,6 +340,7 @@ class PacingControl
 {
 	public:
 		PacingControl( int packets, int interval, int min, int vPause );
+		virtual ~PacingControl();
 		
 		void setPacingTime( int packets, int interval, int min );
 		void setViolationPause( int violationPause );
@@ -326,8 +355,8 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<qint64> dateTimes;
-		QList<bool> violations;
+		QList<int64_t> &dateTimes;
+		QList<bool> &violations;
 		
 		int maxRequests;
 		int checkInterval;
@@ -366,8 +395,8 @@ class PacingGod
 		int violationPause;
 		
 		PacingControl &controlGlobal;
-		QHash<const QString, PacingControl*> controlHmds;
-		QHash<const QString, PacingControl*> controlLazy;
+		QHash<const QString, PacingControl*> &controlHmds;
+		QHash<const QString, PacingControl*> &controlLazy;
 };
 
 
@@ -382,6 +411,7 @@ class DataFarmStates
 		enum State { BROKEN, INACTIVE, OK };
 		
 		DataFarmStates();
+		virtual ~DataFarmStates();
 		
 		QStringList getInactives() const;
 		QStringList getActives() const;
@@ -390,7 +420,7 @@ class DataFarmStates
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
 		void setAllBroken();
-		void notify(int msgNumber, int errorCode, const QString &msg);
+		void notify(int msgNumber, int errorCode, const std::string &msg);
 		void learnMarket( const IB::Contract& );
 		void learnHmds( const IB::Contract& );
 		void learnHmdsLastOk(int msgNumber, const IB::Contract& );
@@ -398,14 +428,14 @@ class DataFarmStates
 	private:
 		static QString getFarm( const QString prefix, const QString& msg );
 		
-		QHash<const QString, State> mStates;
-		QHash<const QString, State> hStates;
+		QHash<const QString, State> &mStates;
+		QHash<const QString, State> &hStates;
 		
-		QHash<const QString, QString> mLearn;
-		QHash<const QString, QString> hLearn;
+		QHash<const QString, QString> &mLearn;
+		QHash<const QString, QString> &hLearn;
 		
 		int lastMsgNumber;
-		QString lastChanged;
+		std::string lastChanged;
 };
 
 

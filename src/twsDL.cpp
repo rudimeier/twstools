@@ -11,10 +11,7 @@
 // from global installed ibtws
 #include "ibtws/Contract.h"
 
-#include <QtCore/QVariant>
-#include <QtCore/QRegExp>
 #include <QtCore/QStringList>
-#include <QtCore/QFile>
 #include <QtCore/QCoreApplication>
 #include <popt.h>
 #include <stdio.h>
@@ -22,7 +19,18 @@
 
 static poptContext opt_ctx;
 static const char *workfilep = "";
-static const char *configfilep = "twsDL.cfg";
+static int skipdefp = 0;
+static const char *tws_hostp = "localhost";
+static int tws_portp = 7474;
+static int tws_client_idp = 123;
+
+static int tws_conTimeoutp = 30000;
+static int tws_reqTimeoutp = 1200000;
+static int tws_maxRequestsp = 60;
+static int tws_pacingIntervalp = 605000;
+static int tws_minPacingTimep = 1000;
+static int tws_violationPausep = 60000;
+
 
 #define VERSION_MSG \
 PACKAGE_NAME " " PACKAGE_VERSION "\n\
@@ -45,8 +53,30 @@ static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 }
 
 static struct poptOption flow_opts[] = {
-	{"config", 'c', POPT_ARG_STRING, &configfilep, 0,
-		"Config file (default: twsDL.cfg).", "FILE"},
+	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
+		"Never skip xml default values.", NULL},
+	{"host", 'h', POPT_ARG_STRING, &tws_hostp, 0,
+		"TWS host name or ip (default: localhost).", NULL},
+	{"port", 'p', POPT_ARG_INT, &tws_portp, 0,
+		"TWS port number (default: 7474).", NULL},
+	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
+		"TWS client connection id (default: 123).", NULL},
+	POPT_TABLEEND
+};
+
+static struct poptOption tws_tweak_opts[] = {
+	{"conTimeout", '\0', POPT_ARG_INT, &tws_conTimeoutp, 0,
+	"Connection timeout (default: 30000).", "ms"},
+	{"reqTimeout", '\0', POPT_ARG_INT, &tws_reqTimeoutp, 0,
+	"Request timeout (default: 1200000).", "ms"},
+	{"maxRequests", '\0', POPT_ARG_INT, &tws_maxRequestsp, 0,
+	"Max requests per pacing interval (default: 60).", NULL},
+	{"pacingInterval", '\0', POPT_ARG_INT, &tws_pacingIntervalp, 0,
+	"Pacing interval (default: 605000).", "ms"},
+	{"minPacingTime", '\0', POPT_ARG_INT, &tws_minPacingTimep, 0,
+	"Minimum time to wait between requests (default: 1000).", "ms"},
+	{"violationPause", '\0', POPT_ARG_INT, &tws_violationPausep, 0,
+	"Time to wait if pacing violation occurs (default: 60000).", "ms"},
 	POPT_TABLEEND
 };
 
@@ -63,6 +93,8 @@ static struct poptOption help_opts[] = {
 static const struct poptOption twsDL_opts[] = {
 	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, flow_opts, 0,
 	 "Program advice:", NULL},
+	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, tws_tweak_opts, 0,
+	 "TWS tweaks:", NULL},
 	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, help_opts, 0,
 	 "Help options:", NULL},
 	POPT_TABLEEND
@@ -153,8 +185,7 @@ void TwsDlWrapper::connectionClosed()
 void TwsDlWrapper::error( const int id, const int errorCode,
 	const IB::IBString errorString )
 {
-	parentTwsDL->twsError(
-		id, errorCode, toQString(errorString) );
+	parentTwsDL->twsError( id, errorCode, errorString );
 }
 
 
@@ -186,38 +217,33 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 	int barCount, double WAP, int hasGaps )
 {
 	parentTwsDL->twsHistoricalData(
-		reqId, toQString(date), open, high, low, close, volume,
+		reqId, date, open, high, low, close, volume,
 		barCount, WAP, hasGaps);
 }
 
 
 
 
-TwsDL::TwsDL( const QString& confFile, const QString& workFile ) :
+TwsDL::TwsDL( const std::string& workFile ) :
 	state(CONNECT),
 	lastConnectionTime(0),
 	connection_failed( false ),
 	curIdleTime(0),
-	confFile(confFile),
 	workFile(workFile),
-	myProp(NULL),
 	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
 	workTodo( new WorkTodo() ),
-	contractDetailsTodo( new ContractDetailsTodo() ),
-	histTodo( new HistTodo() ),
 	p_contractDetails( *(new PacketContractDetails()) ),
 	p_histData( *(new PacketHistData()) ),
 	dataFarms( *(new DataFarmStates()) ),
 	pacingControl( *(new PacingGod(dataFarms)) )
 {
-	initProperties();
-	pacingControl.setPacingTime( myProp->maxRequests,
-		myProp->pacingInterval, myProp->minPacingTime );
-	pacingControl.setViolationPause( myProp->violationPause );
+	pacingControl.setPacingTime( tws_maxRequestsp, tws_pacingIntervalp,
+		tws_minPacingTimep );
+	pacingControl.setViolationPause( tws_violationPausep );
 	initTwsClient();
 	initWork();
 }
@@ -233,17 +259,8 @@ TwsDL::~TwsDL()
 	if( twsWrapper != NULL ) {
 		delete twsWrapper;
 	}
-	if( myProp  != NULL ) {
-		delete myProp;
-	}
 	if( workTodo != NULL ) {
 		delete workTodo;
-	}
-	if( histTodo != NULL ) {
-		delete histTodo;
-	}
-	if( contractDetailsTodo != NULL ) {
-		delete contractDetailsTodo;
 	}
 	delete &p_contractDetails;
 	delete &p_histData;
@@ -298,11 +315,11 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
-	qint64 w = nowInMsecs() - lastConnectionTime;
-	if( w < myProp->conTimeout ) {
-		qDebug() << "Waiting" << (myProp->conTimeout - w)
+	int64_t w = nowInMsecs() - lastConnectionTime;
+	if( w < tws_conTimeoutp ) {
+		qDebug() << "Waiting" << (tws_conTimeoutp - w)
 			<< "ms before connecting again.";
-		curIdleTime = myProp->conTimeout - w;
+		curIdleTime = tws_conTimeoutp - w;
 		return;
 	}
 	
@@ -310,8 +327,7 @@ void TwsDL::connectTws()
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
-	twsClient->connectTWS(
-		myProp->twsHost, myProp->twsPort, myProp->clientId );
+	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
 	
 	if( !twsClient->isConnected() ) {
 		qDebug() << "Connection to TWS failed:"; //TODO print a specific error
@@ -332,7 +348,7 @@ void TwsDL::waitTwsCon()
 		if( connection_failed ) {
 			qDebug() << "Connecting TWS failed.";
 			changeState( CONNECT );
-		} else if( (nowInMsecs() - lastConnectionTime) > myProp->conTimeout ) {
+		} else if( (nowInMsecs() - lastConnectionTime) > tws_conTimeoutp ) {
 				qDebug() << "Timeout connecting TWS.";
 				twsClient->disconnectTWS();
 				curIdleTime = 1000;
@@ -352,28 +368,32 @@ void TwsDL::idle()
 		return;
 	}
 	
-	if( curIndexTodoContractDetails < contractDetailsTodo->contractDetailsRequests.size() ) {
-		currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
-		getContracts();
-		return;
+	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		if( curIndexTodoContractDetails < workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
+			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
+			getContracts();
+			return;
+		}
 	}
 	
 	// TODO we want to dump only one time
 	dumpWorkTodo();
 	
-	if( myProp->downloadData  && histTodo->countLeft() > 0
-	    && ( myProp->reqMaxContracts <= 0 || histTodo->countDone() <= myProp->reqMaxContracts ) ) {
-		getData();
-	} else {
-		changeState( QUIT_READY );
+	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
+		if(  workTodo->getHistTodo().countLeft() > 0 ) {
+			getData();
+			return;
+		}
 	}
+	
+	changeState( QUIT_READY );
 }
 
 
 void TwsDL::getContracts()
 {
 	const ContractDetailsRequest &cdR =
-		contractDetailsTodo->contractDetailsRequests.at( curIndexTodoContractDetails );
+		workTodo->getContractDetailsTodo().contractDetailsRequests.at( curIndexTodoContractDetails );
 	reqContractDetails( cdR );
 	
 	changeState( WAIT_DATA );
@@ -382,31 +402,11 @@ void TwsDL::getContracts()
 
 void TwsDL::finContracts()
 {
-	int inserted;
-	inserted = storage2stdout();
+	qDebug() << QString( "Contracts received: %1")
+		.arg(p_contractDetails.constList().size() );
 	
-	for( int i = 0; i<p_contractDetails.constList().size(); i++ ) {
-		const IB::ContractDetails &cd = p_contractDetails.constList().at(i);
-		IB::Contract c = cd.summary;
-		c.includeExpired = myProp->includeExpired;
-		
-		if( myProp->reqMaxContractsPerSpec > 0 && myProp->reqMaxContractsPerSpec <= i ) {
-			break;
-		}
-		
-		foreach( QString wts, myProp->whatToShow ) {
-			HistRequest hR;
-			hR.initialize( c, myProp->endDateTime, myProp->durationStr,
-			               myProp->barSizeSetting, wts, myProp->useRTH, myProp->formatDate );
-			histTodo->add( hR );
-		}
-	}
-	
+	p_contractDetails.dumpXml();
 	p_contractDetails.clear();
-	if( inserted == -1 ) {
-		changeState( QUIT_ERROR );
-		return;
-	}
 	
 	curIndexTodoContractDetails++;
 	currentRequest.close();
@@ -416,9 +416,9 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( histTodo->countLeft() > 0 );
+	Q_ASSERT( workTodo->getHistTodo().countLeft() > 0 );
 	
-	int wait = histTodo->checkoutOpt( &pacingControl, &dataFarms );
+	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
 	
 	if( wait > 0 ) {
 		curIdleTime = qMin( 1000, wait );
@@ -429,13 +429,13 @@ void TwsDL::getData()
 		qDebug() << "late timeout:" << wait;
 	}
 	
-	const HistRequest &hR = histTodo->current();
+	const HistRequest &hR = workTodo->getHistTodo().current();
 	
 	pacingControl.addRequest( hR.ibContract() );
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	
-	qDebug() << "DOWNLOAD DATA" << histTodo->currentIndex()
+	qDebug() << "DOWNLOAD DATA" << workTodo->getHistTodo().currentIndex()
 		<< currentRequest.reqId() << ibToString(hR.ibContract());
 	
 	reqHistoricalData( hR );
@@ -464,7 +464,7 @@ void TwsDL::waitContracts()
 {
 	if( p_contractDetails.isFinished() ) {
 		finContracts();
-	} else if( currentRequest.age() > myProp->reqTimeout ) {
+	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		qDebug() << "Timeout waiting for data.";
 		// TODO repeat
 		changeState( QUIT_ERROR );
@@ -478,7 +478,7 @@ void TwsDL::waitHist()
 {
 	if( p_histData.isFinished() ) {
 		finData();
-	} else if( currentRequest.age() > myProp->reqTimeout ) {
+	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		qDebug() << "Timeout waiting for data.";
 		p_histData.closeError( PacketHistData::ERR_TIMEOUT );
 		finData();
@@ -491,10 +491,11 @@ void TwsDL::waitHist()
 void TwsDL::finData()
 {
 	Q_ASSERT( p_histData.isFinished() );
+	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( p_histData.getError() ) {
 	case PacketHistData::ERR_NONE:
-		p_histData.dump( histTodo->current(), myProp->printFormatDates );
+		p_histData.dumpXml();
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();
@@ -522,16 +523,6 @@ void TwsDL::onQuit( int /*ret*/ )
 }
 
 
-void TwsDL::initProperties()
-{
-	Properties prop;
-	prop.readConfigFile(confFile);
-	
-	myProp = new PropTwsDL(prop);
-	myProp->readProperties();
-}
-
-
 void TwsDL::initTwsClient()
 {
 	Q_ASSERT( twsClient == NULL && twsWrapper == NULL );
@@ -542,14 +533,15 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	errorMsg.contains( QString(_strg_), Qt::CaseInsensitive )
+	toQString(errorMsg).contains( QString(_strg_), Qt::CaseInsensitive )
 
-void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
+void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
 	msgCounter++;
 	
 	if( id == currentRequest.reqId() ) {
-		qDebug() << "ERROR for request" << id << errorCode <<errorMsg;
+		qDebug() << "ERROR for request" << id << errorCode
+			<< toQString(errorMsg);
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
@@ -577,7 +569,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 	switch( errorCode ) {
 		case 1100:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been lost."));
-			curIdleTime = myProp->reqTimeout;
+			curIdleTime = tws_reqTimeoutp;
 			break;
 		case 1101:
 			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
@@ -609,7 +601,7 @@ void TwsDL::twsError(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
+void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 {
 	// TODO
 	switch( errorCode ) {
@@ -624,43 +616,44 @@ void TwsDL::errorContracts(int id, int errorCode, const QString &errorMsg)
 }
 
 
-void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
+void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
+	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
+	int curIndex = workTodo->getHistTodo().currentIndex();
 	switch( errorCode ) {
 	// Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( PacketHistData::ERR_TWSCON );
-			pacingControl.notifyViolation(
-				histTodo->current().ibContract() );
+			pacingControl.notifyViolation( curContract );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
-			qDebug() << "READY - NO DATA" << histTodo->currentIndex() << id;
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+			qDebug() << "READY - NO DATA" << curIndex << id;
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - DATA IS NOT AVAILABLE on HMDS server."
-				<< histTodo->currentIndex() << id;
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+				<< curIndex << id;
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			qDebug() << "WARNING - DATA IS NOT AVAILABLE (no HMDS route)."
-				<< histTodo->currentIndex() << id;
+				<< curIndex << id;
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
-			dataFarms.learnHmds( histTodo->current().ibContract() );
+			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
 			curIdleTime = 0;
 		} else {
@@ -672,9 +665,9 @@ void TwsDL::errorHistData(int id, int errorCode, const QString &errorMsg)
 	case 165:
 		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
-			curIdleTime = myProp->reqTimeout;
+			curIdleTime = tws_reqTimeoutp;
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
-			dataFarms.learnHmdsLastOk( msgCounter, histTodo->current().ibContract() );
+			dataFarms.learnHmdsLastOk( msgCounter, curContract );
 		} else {
 			qDebug() << "Warning, unhandled error message.";
 		}
@@ -785,7 +778,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 }
 
 
-void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, double high, double low,
+void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
 	if( currentRequest.reqId() != reqId ) {
@@ -795,7 +788,7 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	}
 	
 	// TODO we shouldn't do this each row
-	dataFarms.learnHmds( histTodo->current().ibContract() );
+	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
 	
 	Q_ASSERT( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,
@@ -803,132 +796,26 @@ void TwsDL::twsHistoricalData( int reqId, const QString &date, double open, doub
 	
 	if( p_histData.isFinished() ) {
 		curIdleTime = 0;
-		qDebug() << "READY" << histTodo->currentIndex() << reqId;
+		qDebug() << "READY" << workTodo->getHistTodo().currentIndex() << reqId;
 	}
-}
-
-
-int TwsDL::storage2stdout()
-{
-	IbXml ibXml;
-	QTime  stopWatch;
-	stopWatch.start();
-	
-	int countReceived = p_contractDetails.constList().size();
-	
-	for( int i=0; i<countReceived; i++ ) {
-		
-		const IB::ContractDetails &cD = p_contractDetails.constList()[i];
-		const IB::Contract &c = cD.summary;
-		
-		ibXml.add(cD);
-		
-		QString c1_str = QString()
-			+ QString::number(c.conId) + "\t"
-			+ toQString(c.symbol) + "\t"
-			+ toQString(c.secType)  + "\t"
-			+ toQString(c.exchange) + "\t"
-			+ toQString(c.currency) + "\t"
-			+ toQString(c.expiry) + "\t"
-			+ QString::number(c.strike) + "\t"
-			+ toQString(c.right);
-		
-		QString c2_str = QString()
-			+ QString::number(c.conId) + "\t"
-			+ toQString(c.multiplier) + "\t"
-			+ toQString(c.primaryExchange) + "\t"
-			+ toQString(c.localSymbol) + "\t"
-			+ (c.includeExpired ? "1" : "0") + "\t"
-			+ toQString(c.secIdType) + "\t"
-			+ toQString(c.secId);
-		
-		// IBString c.comboLegsDescrip;
-		// ComboLegList* comboLegs;
-		// UnderComp* underComp;
-		
-		
-		QString cD1_str = QString()
-			+ QString::number(c.conId) + "\t"
-			+ toQString(cD.marketName) + "\t"
-			+ toQString(cD.tradingClass) + "\t"
-			+ QString::number(cD.minTick) + "\t"
-			+ toQString(cD.orderTypes) + "\t"
-			+ toQString(cD.validExchanges) + "\t"
-			+ QString::number(cD.priceMagnifier) + "\t"
-			+ QString::number(cD.underConId) + "\t"
-			+ toQString(cD.longName) + "\t"
-			+ toQString(cD.contractMonth) + "\t"
-			+ toQString(cD.industry) + "\t"
-			+ toQString(cD.category) + "\t"
-			+ toQString(cD.subcategory) + "\t"
-			+ toQString(cD.timeZoneId) + "\t"
-			+ toQString(cD.tradingHours) + "\t"
-			+ toQString(cD.liquidHours);
-		
-		// BOND values
-		QString cD2_str = QString()
-			+ QString::number(c.conId) + "\t"
-			+ toQString(cD.cusip) + "\t"
-			+ toQString(cD.ratings) + "\t"
-			+ toQString(cD.descAppend) + "\t"
-			+ toQString(cD.bondType) + "\t"
-			+ toQString(cD.couponType) + "\t"
-			+ (cD.callable ? "1" : "0") + "\t"
-			+ (cD.putable ? "1" : "0") + "\t"
-			+ QString::number(cD.coupon) + "\t"
-			+ (cD.convertible ? "1" : "0") + "\t"
-			+ toQString(cD.maturity) + "\t"
-			+ toQString(cD.issueDate) + "\t"
-			+ toQString(cD.nextOptionDate) + "\t"
-			+ toQString(cD.nextOptionType) + "\t"
-			+ (cD.nextOptionPartial ? "1" : "0") + "\t"
-			+ toQString(cD.notes);
-		
-		
-		fprintf( stderr, "_CD_SUM_A_:%s\n",
-		         c1_str.toUtf8().constData() );
-		fprintf( stderr, "_CD_SUM_B_:%s\n",
-		         c2_str.toUtf8().constData() );
-		
-		fprintf( stderr, "_CD_DET_A_:%s\n",
-		         cD1_str.toUtf8().constData() );
-		fprintf( stderr, "_CD_DET_B_:%s\n",
-		         cD2_str.toUtf8().constData() );
-
-
-	}
-	qDebug() << QString(
-		"Contracts received: %1 (%2ms)")
-		.arg(countReceived).arg(stopWatch.elapsed());
-	
-	ibXml.dump();
-	
-	return countReceived;
 }
 
 
 void TwsDL::initWork()
 {
 	int cnt = workTodo->read_file(workFile);
-	const QList<QByteArray> &rows = workTodo->getRows();
-	qDebug() << QString("got %1, %2 rows from workFile %3")
-		.arg(cnt).arg(rows.size()).arg(workFile);
+	qDebug() << QString("got %1 jobs from workFile %2")
+		.arg(cnt).arg(toQString(workFile));
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		qDebug() << "getting contracts from TWS";
-		int i = contractDetailsTodo->fromFile( rows, myProp->includeExpired );
-		Q_ASSERT( i>=0 );
+		Q_ASSERT( workTodo->getContractDetailsTodo().contractDetailsRequests.size() >= 0 );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if( myProp->downloadData ) {
-			qDebug() << "read work from file";
-			int i = histTodo->fromFile(rows, myProp->includeExpired);
-			Q_ASSERT( i>=0 );
-			dumpWorkTodo();
-// 			state = IDLE;;
-		} else {
-// 			state = QUIT_READY;
-		}
+		qDebug() << "getting hist data from TWS";
+		Q_ASSERT( workTodo->getHistTodo().countLeft() >= 0 );
+		dumpWorkTodo();
+// 		state = IDLE;;
 	}
 }
 
@@ -939,7 +826,7 @@ void TwsDL::dumpWorkTodo() const
 	static bool firstTime = true;
 	if( firstTime ) {
 		firstTime = false;
-		histTodo->dumpLeft( stderr );
+		workTodo->getHistTodo().dumpLeft( stderr );
 	}
 }
 
@@ -970,13 +857,14 @@ void TwsDL::changeState( State s )
 
 void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 {
+	p_contractDetails.record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
 }
 
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
-	p_histData.record( currentRequest.reqId() );
+	p_histData.record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
 	                              hR.endDateTime(),
@@ -988,87 +876,6 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// PropTwsDL
-PropTwsDL::PropTwsDL( const Properties& prop, const QString& cName ) :
-	PropSub(prop,cName)
-{
-	PROP_DEBUG( 2, "INITIALIZING" );
-	//initializing fields
-	initDefaults();
-}
-
-
-void PropTwsDL::initDefaults()
-{
-	twsHost  = "localhost";
-	twsPort  = 6666;
-	clientId = 66;
-	
-	conTimeout = 1000;
-	reqTimeout = 20000;
-	maxRequests = 60;
-	pacingInterval = 601000;
-	minPacingTime = 1500;
-	violationPause = 60000;
-	
-	downloadData = false;
-	reqMaxContracts = -1;
-	reqMaxContractsPerSpec = -1;
-	
-	printFormatDates = true;
-	
-	includeExpired = false;
-	
-	endDateTime = "20100514 22:15:00 GMT";
-	durationStr = "1 W";
-	barSizeSetting = "1 hour";
-	whatToShow = QList<QString>() << "TRADES";
-	useRTH = 1;
-	formatDate = 1;
-}
-
-
-bool PropTwsDL::readProperties()
-{
-	PROP_DEBUG( 2, "READ CONFIG" );
-	bool ok = true;
-	
-	ok = ok & get("twsHost",       twsHost);
-	ok = ok & get("twsPort",       twsPort);
-	ok = ok & get("clientId",      clientId);
-	
-	ok &= get("conTimeout", conTimeout);
-	ok &= get("reqTimeout", reqTimeout);
-	ok &= get("maxRequests", maxRequests );
-	ok &= get("pacingInterval", pacingInterval );
-	ok &= get("minPacingTime", minPacingTime);
-	ok &= get("violationPause", violationPause);
-	
-	ok = ok & get("downloadData", downloadData);
-	ok = ok & get("reqMaxContracts", reqMaxContracts);
-	ok = ok & get("reqMaxContractsPerSpec", reqMaxContractsPerSpec);
-	
-	ok = ok & get("printFormatDates", printFormatDates);
-	
-	ok = ok & get("includeExpired", includeExpired);
-	
-	ok = ok & get("endDateTime", endDateTime);
-	ok = ok & get("durationStr", durationStr);
-	ok = ok & get("barSizeSetting", barSizeSetting);
-	
-	QString wtsStr;
-	ok = ok & get("whatToShow", wtsStr);
-	whatToShow = wtsStr.trimmed().split(QRegExp("[ \t\r\n]*,[ \t\r\n]*"));
-	
-	ok = ok & get("useRTH", useRTH);
-	ok = ok & get("formatDate", formatDate);
-	
-	return ok;
-}
-///////////////////////////////////////////////////////////////////////////////
-
-
 
 
 int main(int argc, char *argv[])
@@ -1077,7 +884,9 @@ int main(int argc, char *argv[])
 	
 	twsDL_parse_cl(argc, (const char **) argv);
 	
-	TwsDL twsDL( configfilep, workfilep );
+	TwsXml::setSkipDefaults( !skipdefp );
+	
+	TwsDL twsDL( workfilep );
 	twsDL.start();
 	
 	TwsDL::State state = twsDL.currentState();
