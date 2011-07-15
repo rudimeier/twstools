@@ -24,11 +24,11 @@ static const char *tws_hostp = "localhost";
 static int tws_portp = 7474;
 static int tws_client_idp = 123;
 
-static int tws_conTimeoutp = 1000;
-static int tws_reqTimeoutp = 20000;
+static int tws_conTimeoutp = 30000;
+static int tws_reqTimeoutp = 1200000;
 static int tws_maxRequestsp = 60;
-static int tws_pacingIntervalp = 601000;
-static int tws_minPacingTimep = 1500;
+static int tws_pacingIntervalp = 605000;
+static int tws_minPacingTimep = 1000;
 static int tws_violationPausep = 60000;
 
 
@@ -66,15 +66,15 @@ static struct poptOption flow_opts[] = {
 
 static struct poptOption tws_tweak_opts[] = {
 	{"conTimeout", '\0', POPT_ARG_INT, &tws_conTimeoutp, 0,
-	"Connection timeout (default: 1000).", "ms"},
+	"Connection timeout (default: 30000).", "ms"},
 	{"reqTimeout", '\0', POPT_ARG_INT, &tws_reqTimeoutp, 0,
-	"Request timeout (default: 20000).", "ms"},
+	"Request timeout (default: 1200000).", "ms"},
 	{"maxRequests", '\0', POPT_ARG_INT, &tws_maxRequestsp, 0,
 	"Max requests per pacing interval (default: 60).", NULL},
 	{"pacingInterval", '\0', POPT_ARG_INT, &tws_pacingIntervalp, 0,
-	"Pacing interval (default: 601000).", "ms"},
+	"Pacing interval (default: 605000).", "ms"},
 	{"minPacingTime", '\0', POPT_ARG_INT, &tws_minPacingTimep, 0,
-	"Minimum time to wait between requests (default: 1500).", "ms"},
+	"Minimum time to wait between requests (default: 1000).", "ms"},
 	{"violationPause", '\0', POPT_ARG_INT, &tws_violationPausep, 0,
 	"Time to wait if pacing violation occurs (default: 60000).", "ms"},
 	POPT_TABLEEND
