@@ -408,7 +408,7 @@ xmlNodePtr TwsXml::nextXmlRoot()
 		if( root != NULL ) {
 			assert( root->type == XML_ELEMENT_NODE );
 			if( strcmp((char*)root->name, "TWSXML") == 0 ) {
-				fprintf(stderr, "Notice, return root '%s'.\n", root->name);
+// 				fprintf(stderr, "Notice, return root '%s'.\n", root->name);
 				return root;
 			} else {
 				fprintf(stderr, "Warning, ignore unknown root '%s'.\n",
@@ -419,7 +419,7 @@ xmlNodePtr TwsXml::nextXmlRoot()
 		}
 		xmlFreeDoc(curDoc);
 	}
-	fprintf(stderr, "Notice, all roots parsed.\n");
+// 	fprintf(stderr, "Notice, all roots parsed.\n");
 	return NULL;
 }
 
@@ -430,11 +430,10 @@ xmlNodePtr TwsXml::nextXmlNode()
 	}
 	for( ; curNode!= NULL; curNode = curNode->next ) {
 		if( curNode->type == XML_ELEMENT_NODE ) {
-			fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
+// 			fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
 			return curNode;
 		} else {
-			fprintf(stderr, "Warning, ignore element '%s'.\n",
-				curNode->name);
+// 			fprintf(stderr, "Warning, ignore element '%s'.\n", curNode->name);
 		}
 	}	
 	assert( curNode == NULL );
@@ -446,8 +445,7 @@ xmlNodePtr TwsXml::nextXmlNode()
 				curNode = p;
 				break;
 			} else {
-				fprintf(stderr, "Warning, ignore element '%s'.\n",
-					p->name);
+// 				fprintf(stderr, "Warning, ignore element '%s'.\n", p->name);
 			}
 		}
 		if( curNode != NULL ) {
@@ -458,9 +456,9 @@ xmlNodePtr TwsXml::nextXmlNode()
 	}
 	
 	if( curNode != NULL ) {
-		fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
+// 		fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
 	} else {
-		fprintf(stderr, "Notice, all elements parsed.\n");
+// 		fprintf(stderr, "Notice, all elements parsed.\n");
 	}
 	
 	return curNode;
