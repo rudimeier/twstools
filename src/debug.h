@@ -1,6 +1,7 @@
 #ifndef GA_DEBUG_H
 #define GA_DEBUG_H
 
+#include "twsUtil.h"
 #include <QtCore/QDebug>
 #include <QtCore/QDateTime>
 
@@ -27,6 +28,9 @@ inline QDebug debugGA(QDateTime dt,QString cls)
 	return QDebug(QtDebugMsg)<<dstr.leftJustified(DEBUG_HEADER_LENGTH).toAscii().data();
 }
 
+
+#define DEBUG_PRINTF(_format_, _args_...)  \
+	fprintf (stderr, "%ld " _format_ "\n" , nowInMsecs(), ## _args_)
 
 
 
