@@ -22,15 +22,6 @@
 
 
 
-int64_t nowInMsecs()
-{
-	const QDateTime now = QDateTime::currentDateTime();
-	const int64_t now_s = now.toTime_t();
-	const int64_t now_ms = now_s * 1000 + now.time().msec();
-	return now_ms;
-}
-
-
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate )
 {

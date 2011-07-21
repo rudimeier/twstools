@@ -15,8 +15,6 @@ class QStringList;
 
 
 
-int64_t nowInMsecs();
-
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate );
 

@@ -6,6 +6,21 @@
 #include "ibtws/Execution.h"
 #include "ibtws/Contract.h"
 
+#include <sys/time.h>
+#include <assert.h>
+
+
+
+
+int64_t nowInMsecs()
+{
+	timeval tv;
+	int err = gettimeofday( &tv, NULL );
+	assert( err == 0 );
+	
+	const uint64_t now_ms = tv.tv_sec*1000 + tv.tv_usec/1000;
+	return now_ms;
+}
 
 
 QString toQString( const std::string &ibString )

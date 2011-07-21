@@ -2,6 +2,7 @@
 #define TWS_UTIL_H
 
 #include <string>
+#include <stdint.h>
 
 class QString;
 
@@ -10,6 +11,7 @@ namespace IB {
 	class Contract;
 }
 
+int64_t nowInMsecs();
 
 QString toQString( const std::string &ibString );
 std::string toIBString( const QString &qString );
