@@ -995,8 +995,8 @@ void PacingControl::clear()
 		if( now - dateTimes.last() < 5000  ) {
 			// HACK race condition might cause assert in notifyViolation(),
 			// to avoid this we would need to ack each request
-			qDebug() << "Warning, keep last pacing date time "
-				"because it looks too new.";
+			DEBUG_PRINTF( "Warning, keep last pacing date time "
+				"because it looks too new." );
 			dateTimes.erase( dateTimes.begin(), --(dateTimes.end()) );
 			violations.erase( violations.begin(), --(violations.end()) );
 		} else {
@@ -1200,7 +1200,7 @@ void PacingGod::clear()
 {
 	if( dataFarms.getActives().isEmpty() ) {
 		// clear all PacingControls
-		qDebug() << "clear all pacing controls";
+		DEBUG_PRINTF( "clear all pacing controls" );
 		controlGlobal.clear();
 		foreach( PacingControl *pC, controlHmds ) {
 			pC->clear();
@@ -1212,7 +1212,8 @@ void PacingGod::clear()
 		// clear only PacingControls of inactive farms
 		foreach( QString farm, dataFarms.getInactives() ) {
 			if( controlHmds.contains(farm) ) {
-				qDebug() << "clear pacing control of inactive farm" << farm;
+				DEBUG_PRINTF( "clear pacing control of inactive farm %s",
+					toIBString(farm).c_str() );
 				controlHmds.value(farm)->clear();
 			}
 		}
@@ -1229,11 +1230,11 @@ void PacingGod::addRequest( const IB::Contract& c )
 	controlGlobal.addRequest();
 	
 	if( farm.isEmpty() ) {
-		qDebug() << "add request lazy";
+		DEBUG_PRINTF( "add request lazy" );
 		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->addRequest();
 	} else {
-		qDebug() << "add request farm" << farm;
+		DEBUG_PRINTF( "add request farm %s", toIBString(farm).c_str() );
 		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->addRequest();
 	}
@@ -1249,11 +1250,11 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 	controlGlobal.notifyViolation();
 	
 	if( farm.isEmpty() ) {
-		qDebug() << "set violation lazy";
+		DEBUG_PRINTF( "set violation lazy" );
 		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->notifyViolation();
 	} else {
-		qDebug() << "set violation farm" << farm;
+		DEBUG_PRINTF( "set violation farm %s", toIBString(farm).c_str() );
 		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->notifyViolation();
 	}
@@ -1273,13 +1274,14 @@ int PacingGod::goodTime( const IB::Contract& c )
 		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
 			|| !laziesCleared );
 		int t = controlGlobal.goodTime(&dbg);
-		qDebug() << "get good time global" << dbg << t;
+		DEBUG_PRINTF( "get good time global %s %d", dbg, t );
 		return t;
 	} else {
 		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
 		int t = controlHmds.value(farm)->goodTime(&dbg);
-		qDebug() << "get good time farm" << farm << dbg << t;
+		DEBUG_PRINTF( "get good time farm %s %s %d",
+			toIBString(farm).c_str(), dbg, t );
 		return t;
 	}
 }
@@ -1297,13 +1299,14 @@ int PacingGod::countLeft( const IB::Contract& c )
 		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
 			|| !laziesCleared );
 		int left = controlGlobal.countLeft();
-		qDebug() << "get count left global" << left;
+		DEBUG_PRINTF( "get count left global %d", left );
 		return left;
 	} else {
 		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
 		int left = controlHmds.value(farm)->countLeft();
-		qDebug() << "get count left farm" << farm << left;
+		DEBUG_PRINTF( "get count left farm %s %d",
+			toIBString(farm).c_str(), left );
 		return controlHmds.value(farm)->countLeft();
 	}
 }
@@ -1334,11 +1337,12 @@ void PacingGod::checkAdd( const IB::Contract& c,
 		if( !controlHmds.contains(farm) ) {
 			PacingControl *pC;
 			if( controlLazy.contains(lazyC) ) {
-				qDebug() << "move pacing control lazy to farm"
-					<< lazyC << farm;
+				DEBUG_PRINTF( "move pacing control lazy to farm %s, %s",
+					toIBString(lazyC).c_str(), toIBString(farm).c_str() );
 				pC = controlLazy.take(lazyC);
 			} else {
-				qDebug() << "create pacing control for farm" << farm;
+				DEBUG_PRINTF( "create pacing control for farm %s",
+					toIBString(farm).c_str() );
 				pC = new PacingControl(
 					maxRequests, checkInterval, minPacingTime, violationPause);
 			}
@@ -1347,8 +1351,8 @@ void PacingGod::checkAdd( const IB::Contract& c,
 			if( !controlLazy.contains(lazyC) ) {
 				// fine - no history about that
 			} else {
-				qDebug() << "merge pacing control lazy into farm"
-					<< lazyC << farm;
+				DEBUG_PRINTF( "merge pacing control lazy into farm %s %s",
+					toIBString(lazyC).c_str(), toIBString(farm).c_str() );
 				PacingControl *pC = controlLazy.take(lazyC);
 				controlHmds.value(farm)->merge(*pC);
 				delete pC;
@@ -1358,7 +1362,8 @@ void PacingGod::checkAdd( const IB::Contract& c,
 		Q_ASSERT( !controlLazy.contains(lazyC) );
 		
 	} else if( !controlLazy.contains(lazyC) ) {
-			qDebug() << "create pacing control for lazy" << lazyC;
+			DEBUG_PRINTF( "create pacing control for lazy %s",
+				toIBString(lazyC).c_str() );
 			PacingControl *pC = new PacingControl(
 				maxRequests, checkInterval, minPacingTime, violationPause);
 			controlLazy.insert( lazyC, pC );
@@ -1605,7 +1610,8 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 			Q_ASSERT( hLearn.value( lazyC ) == sl.first() );
 		} else {
 			hLearn.insert( lazyC, sl.first() );
-			qDebug() << "learn HMDS farm (unique):" << lazyC << sl.first();
+			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
+				toIBString(lazyC).c_str(), toIBString(sl.first()).c_str() );
 		}
 	} else {
 		if( hLearn.contains(lazyC) ) {
@@ -1628,7 +1634,8 @@ void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 			Q_ASSERT( hLearn.value( lazyC ) == lastChanged );
 		} else {
 			hLearn.insert( lazyC, lastChanged );
-			qDebug() << "learn HMDS farm (last ok):" << lazyC << lastChanged;
+			DEBUG_PRINTF( "learn HMDS farm (last ok): %s %s",
+				toIBString(lazyC).c_str(), toIBString(lastChanged).c_str() );
 		}
 	}
 }
