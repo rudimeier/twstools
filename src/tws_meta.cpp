@@ -4,7 +4,6 @@
 #include "twsUtil.h"
 #include "debug.h"
 
-#include <QtCore/QDateTime>
 #include <QtCore/QStringList>
 #include <QtCore/QHash>
 
@@ -25,26 +24,25 @@
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate )
 {
-	QDateTime dt;
+	struct tm tm;
+	char buf[255];
+	char *tmp;
 	
-	dt = QDateTime::fromString( toQString(ibDate), "yyyyMMdd  hh:mm:ss");
-	if( dt.isValid() ) {
-		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d", &tm);
+	if( tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F", &tm);
+		return buf;
 	}
 	
-	dt.setDate( QDate::fromString( toQString(ibDate), "yyyyMMdd") );
-	if( dt.isValid() ) {
-		return toIBString(dt.toString("yyyy-MM-dd"));
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d%t%H:%M:%S", &tm);
+	if(  tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F %T", &tm);
+		return buf;
 	}
 	
-	bool ok = false;
-	uint t = toQString(ibDate).toUInt( &ok );
-	if( ok ) {
-		dt.setTime_t( t );
-		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
-	}
-	
-	return std::string();
+	return "";
 }
 
 typedef const char* string_pair[2];
