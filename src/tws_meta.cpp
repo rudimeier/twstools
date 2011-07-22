@@ -1093,8 +1093,8 @@ int PacingControl::countLeft() const
 
 void PacingControl::merge( const PacingControl& other )
 {
-	qDebug() << dateTimes;
-	qDebug() << other.dateTimes;
+// 	qDebug() << dateTimes;
+// 	qDebug() << other.dateTimes;
 	QList<int64_t>::iterator t_d = dateTimes.begin();
 	QList<bool>::iterator t_v = violations.begin();
 	QList<int64_t>::const_iterator o_d = other.dateTimes.constBegin();
@@ -1120,7 +1120,7 @@ void PacingControl::merge( const PacingControl& other )
 		o_d++;
 		o_v++;
 	}
-	qDebug() << dateTimes;
+// 	qDebug() << dateTimes;
 }
 
 
@@ -1572,7 +1572,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 	
 	lastChanged = toIBString(farm);
 	pHash->insert( farm, state );
-	qDebug() << *pHash;
+// 	qDebug() << *pHash; // TODO print farms with states
 }
 
 
@@ -1618,7 +1618,8 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 			Q_ASSERT( sl.contains(hLearn.value(lazyC)) );
 		} else {
 			//but doing nothing
-			qDebug() << "learn HMDS farm (ambiguous):" << lazyC << sl;
+			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
+				toIBString(lazyC).c_str(), toIBString(sl.join(",")).c_str() );
 		}
 	}
 }
