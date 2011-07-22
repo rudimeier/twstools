@@ -13,7 +13,6 @@ namespace IB {
 
 int64_t nowInMsecs();
 
-QString toQString( const std::string &ibString );
 std::string toIBString( const QString &qString );
 
 std::string ibToString( int ibTickType);

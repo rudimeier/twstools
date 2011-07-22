@@ -1136,7 +1136,7 @@ void PacingControl::merge( const PacingControl& other )
 
 
 #define LAZY_CONTRACT_STR( _c_ ) \
-	toQString(_c_.exchange) + QString("\t") + toQString(_c_.secType);
+	std::string(_c_.exchange).append("\t").append(_c_.secType)
 
 
 PacingGod::PacingGod( const DataFarmStates &dfs ) :
@@ -1321,7 +1321,7 @@ int PacingGod::countLeft( const IB::Contract& c )
 void PacingGod::checkAdd( const IB::Contract& c,
 	QString *lazyC_, QString *farm_ )
 {
-	*lazyC_ = LAZY_CONTRACT_STR(c);
+	*lazyC_ = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	*farm_ = dataFarms.getHmdsFarm(c);
 	
 	// controlLazy.keys() does not work for QHash<const QString, PacingControl*>
@@ -1526,7 +1526,7 @@ void DataFarmStates::setAllBroken()
 void DataFarmStates::notify(int msgNumber, int errorCode,
 	const std::string &_msg)
 {
-	QString msg = toQString(_msg); // just convert to QString
+	QString msg = QString::fromStdString(_msg); // just convert to QString
 	lastMsgNumber = msgNumber;
 	QString farm;
 	State state;
@@ -1598,7 +1598,7 @@ void DataFarmStates::learnMarket( const IB::Contract& )
 
 void DataFarmStates::learnHmds( const IB::Contract& c )
 {
-	QString lazyC = LAZY_CONTRACT_STR(c);
+	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	
 	QStringList sl;
 	QHash<const QString, State>::const_iterator it = hStates.constBegin();
@@ -1632,10 +1632,10 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
-	QString lastChanged = toQString(this->lastChanged);
+	QString lastChanged = QString::fromStdString(this->lastChanged);
 	assert( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
-		QString lazyC = LAZY_CONTRACT_STR(c);
+		QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
 		if( hLearn.contains(lazyC) ) {
 			assert( hLearn.value( lazyC ) == lastChanged );
 		} else {
@@ -1677,14 +1677,14 @@ QStringList DataFarmStates::getActives() const
 
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
-	QString lazyC = LAZY_CONTRACT_STR(c);
+	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	return mLearn.value(lazyC);
 }
 
 
 QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
-	QString lazyC = LAZY_CONTRACT_STR(c);
+	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	return hLearn.value(lazyC);
 }
 

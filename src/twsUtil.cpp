@@ -23,13 +23,6 @@ int64_t nowInMsecs()
 }
 
 
-QString toQString( const std::string &ibString )
-{
-	QString retVal = QString::fromUtf8(ibString.c_str());
-	return retVal;
-}
-
-
 std::string toIBString( const QString &qString )
 {
 	std::string retVal(qString.toUtf8());

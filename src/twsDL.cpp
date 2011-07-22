@@ -545,7 +545,8 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	toQString(errorMsg).contains( QString(_strg_), Qt::CaseInsensitive )
+	QString::fromStdString(errorMsg).contains( QString(_strg_), \
+	Qt::CaseInsensitive )
 
 void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
