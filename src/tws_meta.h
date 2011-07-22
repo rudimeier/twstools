@@ -198,7 +198,7 @@ class ContractDetailsTodo
 		ContractDetailsTodo();
 		virtual ~ContractDetailsTodo();
 		
-		QList<ContractDetailsRequest> &contractDetailsRequests;
+		std::vector<ContractDetailsRequest> &contractDetailsRequests;
 };
 
 

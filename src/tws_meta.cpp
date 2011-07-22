@@ -443,7 +443,7 @@ void HistTodo::add( const HistRequest& hR )
 
 
 ContractDetailsTodo::ContractDetailsTodo() :
-	contractDetailsRequests(*(new QList<ContractDetailsRequest>()))
+	contractDetailsRequests(*(new std::vector<ContractDetailsRequest>()))
 {
 }
 
@@ -524,7 +524,7 @@ int WorkTodo::read_file( const std::string & fileName )
 			} else if( strcmp( tmp, "contract_details") == 0 ) {
 				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-				_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
+				_contractDetailsTodo->contractDetailsRequests.push_back(pcd->getRequest());
 				retVal++;
 			} else if ( strcmp( tmp, "historical_data") == 0 ) {
 				reqType = GenericRequest::HIST_REQUEST;
