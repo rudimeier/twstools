@@ -23,7 +23,7 @@ void DebugTwsWrapper::tickPrice( IB::TickerId tickerId, IB::TickType field,
 	double price, int canAutoExecute )
 {
 	DEBUG_PRINTF( "TICK_PRICE: %ld %s %g %d",
-		tickerId, toIBString(ibToString(field)).c_str(), price, canAutoExecute);
+		tickerId, ibToString(field).c_str(), price, canAutoExecute);
 }
 
 
@@ -31,7 +31,7 @@ void DebugTwsWrapper::tickSize( IB::TickerId tickerId, IB::TickType field,
 	int size )
 {
 	DEBUG_PRINTF( "TICK_SIZE: %ld %s %d",
-		tickerId, toIBString(ibToString(field)).c_str(), size );
+		tickerId, ibToString(field).c_str(), size );
 }
 
 
@@ -41,7 +41,7 @@ void DebugTwsWrapper::tickOptionComputation ( IB::TickerId tickerId,
 	double undPrice )
 {
 	DEBUG_PRINTF( "TICK_OPTION_COMPUTATION: %ld %s %g %g %g %g %g %g %g %g",
-		tickerId, toIBString(ibToString(tickType)).c_str(), impliedVol, delta,
+		tickerId, ibToString(tickType).c_str(), impliedVol, delta,
 		optPrice, pvDividend, gamma, vega, theta, undPrice );
 }
 
@@ -50,7 +50,7 @@ void DebugTwsWrapper::tickGeneric( IB::TickerId tickerId, IB::TickType tickType,
 	double value )
 {
 	DEBUG_PRINTF( "TICK_GENERIC: %ld %s %g",
-		tickerId, toIBString(ibToString(tickType)).c_str(), value );
+		tickerId, ibToString(tickType).c_str(), value );
 }
 
 
@@ -62,8 +62,7 @@ void DebugTwsWrapper::tickString( IB::TickerId tickerId, IB::TickType tickType,
 		_val = QDateTime::fromTime_t(_val.toInt()).toString();
 	}
 	DEBUG_PRINTF( "TICK_STRING: %ld %s %s",
-		tickerId, toIBString(ibToString(tickType)).c_str(),
-		toIBString(_val).c_str());
+		tickerId, ibToString(tickType).c_str(), toIBString(_val).c_str());
 }
 
 
@@ -73,8 +72,7 @@ void DebugTwsWrapper::tickEFP( IB::TickerId tickerId, IB::TickType tickType,
 	double dividendImpact, double dividendsToExpiry )
 {
 	// TODO
-	DEBUG_PRINTF( "TICK_EFP: %ld %s",
-		tickerId, toIBString(ibToString(tickType)).c_str() );
+	DEBUG_PRINTF( "TICK_EFP: %ld %s", tickerId, ibToString(tickType).c_str() );
 }
 
 
@@ -213,7 +211,7 @@ void DebugTwsWrapper::execDetails ( int orderId, const IB::Contract& contract,
 	const IB::Execution& execution )
 {
 	DEBUG_PRINTF( "EXECUTION_DATA: %d %s %s", orderId,
-		contract.localSymbol.c_str(),toIBString(ibToString(execution)).c_str());
+		contract.localSymbol.c_str(), ibToString(execution).c_str());
 }
 
 

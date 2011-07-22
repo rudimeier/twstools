@@ -37,7 +37,7 @@ std::string toIBString( const QString &qString )
 }
 
 
-QString ibToString( int tickType) {
+std::string ibToString( int tickType) {
 	switch ( tickType) {
 		case IB::BID_SIZE:                    return "bidSize";
 		case IB::BID:                         return "bidPrice";
@@ -94,7 +94,7 @@ QString ibToString( int tickType) {
 }
 
 
-QString ibToString( const IB::Execution& ex )
+std::string ibToString( const IB::Execution& ex )
 {
 	QString retVal = QString()
 		+ "orderId:%1: ,clientId:%2, execId:%3, time:%4, acctNumber:%5, exchange:%6, side:%7, "
@@ -103,11 +103,11 @@ QString ibToString( const IB::Execution& ex )
 		.arg(ex.orderId).arg(ex.clientId).arg(toQString(ex.execId)).arg(toQString(ex.time))
 		.arg(toQString(ex.acctNumber)).arg(toQString(ex.exchange)).arg(toQString(ex.side))
 		.arg(ex.shares).arg(ex.price).arg(ex.permId).arg(ex.liquidation).arg(ex.cumQty).arg(ex.avgPrice);
-	return retVal;
+	return toIBString(retVal);
 }
 
 
-QString ibToString( const IB::Contract &c, bool showFields )
+std::string ibToString( const IB::Contract &c, bool showFields )
 {
 	QString retString;
 	retString = showFields ?
@@ -118,7 +118,7 @@ QString ibToString( const IB::Contract &c, bool showFields )
 		.arg(toQString(c.multiplier)).arg(toQString(c.exchange)).arg(toQString(c.currency))
 		.arg(toQString(c.localSymbol));
 
-	return retString;
+	return toIBString(retString);
 }
 
 

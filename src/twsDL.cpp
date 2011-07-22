@@ -448,7 +448,7 @@ void TwsDL::getData()
 	DEBUG_PRINTF( "DOWNLOAD DATA %d %d %s",
 		workTodo->getHistTodo().currentIndex(),
 		currentRequest.reqId(),
-		toIBString(ibToString(hR.ibContract())).c_str() );
+		ibToString(hR.ibContract()).c_str() );
 	
 	reqHistoricalData( hR );
 	
