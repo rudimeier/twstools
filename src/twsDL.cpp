@@ -11,7 +11,6 @@
 // from global installed ibtws
 #include "ibtws/Contract.h"
 
-#include <QtCore/QString>
 #include <QtCore/QList>
 #include <popt.h>
 #include <stdio.h>
@@ -545,8 +544,7 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	QString::fromStdString(errorMsg).contains( QString(_strg_), \
-	Qt::CaseInsensitive )
+	( errorMsg.find(_strg_) != std::string::npos )
 
 void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
