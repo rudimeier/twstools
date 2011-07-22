@@ -377,7 +377,7 @@ void TwsDL::idle()
 	}
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		if( curIndexTodoContractDetails < workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
+		if( curIndexTodoContractDetails < (int)workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
 			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 			getContracts();
 			return;
@@ -818,12 +818,12 @@ void TwsDL::initWork()
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, workFile.c_str() );
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		DEBUG_PRINTF( "getting contracts from TWS" );
-		assert( workTodo->getContractDetailsTodo().contractDetailsRequests.size() >= 0 );
+		DEBUG_PRINTF( "getting contracts from TWS, %zu",
+			workTodo->getContractDetailsTodo().contractDetailsRequests.size() );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		DEBUG_PRINTF( "getting hist data from TWS" );
-		assert( workTodo->getHistTodo().countLeft() >= 0 );
+		DEBUG_PRINTF( "getting hist data from TWS, %d",
+			workTodo->getHistTodo().countLeft());
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}
