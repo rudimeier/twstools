@@ -157,25 +157,27 @@ bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
 
 std::string HistRequest::toString() const
 {
-	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(toQString(_ibContract.symbol))
-		.arg(toQString(_ibContract.secType))
-		.arg(toQString(_ibContract.exchange))
-		.arg(toQString(_ibContract.currency))
-		.arg(toQString(_ibContract.expiry))
-		.arg(_ibContract.strike)
-		.arg(toQString(_ibContract.right));
+	char buf_c[512];
+	char buf_a[1024];
+	snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
+		_ibContract.symbol.c_str(),
+		_ibContract.secType.c_str(),
+		_ibContract.exchange.c_str(),
+		_ibContract.currency.c_str(),
+		_ibContract.expiry.c_str(),
+		_ibContract.strike,
+		_ibContract.right.c_str() );
 	
-	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(toQString(_endDateTime))
-		.arg(toQString(_durationStr))
-		.arg(toQString(_barSizeSetting))
-		.arg(toQString(_whatToShow))
-		.arg(_useRTH)
-		.arg(_formatDate)
-		.arg(c_str);
+	snprintf( buf_a, sizeof(buf_a), "%s\t%s\t%s\t%s\t%d\t%d\t%s",
+		_endDateTime.c_str(),
+		_durationStr.c_str(),
+		_barSizeSetting.c_str(),
+		_whatToShow.c_str(),
+		_useRTH,
+		_formatDate,
+		buf_c );
 	
-	return retVal.toStdString();
+	return std::string(buf_a);
 }
 
 
