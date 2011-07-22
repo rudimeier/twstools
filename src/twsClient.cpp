@@ -70,7 +70,7 @@ int     TWSClient::getClientId() const
 void TWSClient::setTWSHost( const std::string &host )
 {
 	if ( isConnected() ) {
-		Q_ASSERT(false); // TODO handle that
+		assert(false); // TODO handle that
 	}
 	this->twsHost = host;
 }
@@ -79,7 +79,7 @@ void TWSClient::setTWSHost( const std::string &host )
 void TWSClient::setTWSPort( const int port )
 {
 	if ( isConnected() ) {
-		Q_ASSERT(false); // TODO handle that
+		assert(false); // TODO handle that
 	}
 	this->twsPort  = port;
 }
@@ -88,7 +88,7 @@ void TWSClient::setTWSPort( const int port )
 void TWSClient::setClientId( const int clientId )
 {
 	if ( isConnected() ) {
-		Q_ASSERT(false); // TODO handle that
+		assert(false); // TODO handle that
 	}
 	this->clientId = clientId;
 }
@@ -138,7 +138,7 @@ void TWSClient::disconnectTWS()
 
 void TWSClient::disconnected()
 {
-	Q_ASSERT( !isConnected() );
+	assert( !isConnected() );
 	myEWrapper->connectionClosed();
 	DEBUG_PRINTF("We are disconnected");
 }
@@ -148,7 +148,7 @@ void TWSClient::selectStuff( int msec )
 {
 	int fd = ePosixClient->fd();
 	
-	Q_ASSERT( fd >= 0 || ( fd == -1 && !isConnected()) );
+	assert( fd >= 0 || ( fd == -1 && !isConnected()) );
 	
 	struct timeval tval;
 	tval.tv_usec = msec * 1000;

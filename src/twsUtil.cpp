@@ -7,7 +7,6 @@
 #include "ibtws/Contract.h"
 
 #include <sys/time.h>
-#include <assert.h>
 
 
 

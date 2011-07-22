@@ -125,7 +125,7 @@ void twsDL_parse_cl(size_t argc, const char *argv[])
 	int rc;
 	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
 		// handle options when we have returning ones
-		Q_ASSERT(false);
+		assert(false);
 	}
 	
 	if( rc != -1 ) {
@@ -281,7 +281,7 @@ TwsDL::~TwsDL()
 
 void TwsDL::start()
 {
-	Q_ASSERT( (state == CONNECT) ||
+	assert( (state == CONNECT) ||
 		(state == QUIT_READY) || (state == QUIT_ERROR) );
 	
 	state = CONNECT;
@@ -371,7 +371,7 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
-	Q_ASSERT(currentRequest.reqType() == GenericRequest::NONE);
+	assert(currentRequest.reqType() == GenericRequest::NONE);
 	
 	if( !twsClient->isConnected() ) {
 		changeState( CONNECT );
@@ -426,7 +426,7 @@ void TwsDL::finContracts()
 
 void TwsDL::getData()
 {
-	Q_ASSERT( workTodo->getHistTodo().countLeft() > 0 );
+	assert( workTodo->getHistTodo().countLeft() > 0 );
 	
 	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
 	
@@ -466,7 +466,7 @@ void TwsDL::waitData()
 		waitHist();
 		break;
 	case GenericRequest::NONE:
-		Q_ASSERT( false );
+		assert( false );
 		break;
 	}
 }
@@ -502,7 +502,7 @@ void TwsDL::waitHist()
 
 void TwsDL::finData()
 {
-	Q_ASSERT( p_histData.isFinished() );
+	assert( p_histData.isFinished() );
 	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( p_histData.getError() ) {
@@ -537,7 +537,7 @@ void TwsDL::onQuit( int /*ret*/ )
 
 void TwsDL::initTwsClient()
 {
-	Q_ASSERT( twsClient == NULL && twsWrapper == NULL );
+	assert( twsClient == NULL && twsWrapper == NULL );
 	
 	twsWrapper = new TwsDlWrapper(this);
 	twsClient = new TWSClient( twsWrapper );
@@ -563,7 +563,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 				errorHistData( id, errorCode, errorMsg );
 				break;
 			case GenericRequest::NONE:
-				Q_ASSERT( false );
+				assert( false );
 				break;
 			}
 		} else {
@@ -580,25 +580,25 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	// TODO do better
 	switch( errorCode ) {
 		case 1100:
-			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been lost."));
+			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
 			curIdleTime = tws_reqTimeoutp;
 			break;
 		case 1101:
-			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
+			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				p_histData.closeError( PacketHistData::ERR_TWSCON );
 				curIdleTime = 0;
 			}
 			break;
 		case 1102:
-			Q_ASSERT(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
+			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				p_histData.closeError( PacketHistData::ERR_TWSCON );
 				curIdleTime = 0;
 			}
 			break;
 		case 1300:
-			Q_ASSERT(ERR_MATCH("TWS socket port has been reset and this connection is being dropped."));
+			assert(ERR_MATCH("TWS socket port has been reset and this connection is being dropped."));
 			break;
 		case 2103:
 		case 2104:
@@ -720,11 +720,11 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 void TwsDL::twsConnected( bool connected )
 {
 	if( connected ) {
-		Q_ASSERT( state == WAIT_TWS_CON );
+		assert( state == WAIT_TWS_CON );
 		curIdleTime = 1000; //TODO wait for first tws messages
 	} else {
 		DEBUG_PRINTF( "disconnected in state %d", state );
-		Q_ASSERT( state != CONNECT );
+		assert( state != CONNECT );
 		
 		if( state == WAIT_TWS_CON ) {
 			connection_failed = true;
@@ -732,7 +732,7 @@ void TwsDL::twsConnected( bool connected )
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
 				if( !p_contractDetails.isFinished() ) {
-					Q_ASSERT(false); // TODO repeat
+					assert(false); // TODO repeat
 				}
 				break;
 			case GenericRequest::HIST_REQUEST:
@@ -741,7 +741,7 @@ void TwsDL::twsConnected( bool connected )
 				}
 				break;
 			case GenericRequest::NONE:
-				Q_ASSERT(false);
+				assert(false);
 				break;
 			}
 		}
@@ -758,7 +758,7 @@ void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContract
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		Q_ASSERT( false );
+		assert( false );
 	}
 	
 	p_contractDetails.append(reqId, ibContractDetails);
@@ -770,7 +770,7 @@ void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibCont
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		Q_ASSERT( false );
+		assert( false );
 	}
 	
 	p_contractDetails.append(reqId, ibContractDetails);
@@ -782,7 +782,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		Q_ASSERT( false );
+		assert( false );
 	}
 	
 	curIdleTime = 0;
@@ -802,7 +802,7 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	// TODO we shouldn't do this each row
 	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
 	
-	Q_ASSERT( !p_histData.isFinished() );
+	assert( !p_histData.isFinished() );
 	p_histData.append( reqId, date, open, high, low,
 		close, volume, count, WAP, hasGaps );
 	
@@ -821,11 +821,11 @@ void TwsDL::initWork()
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		DEBUG_PRINTF( "getting contracts from TWS" );
-		Q_ASSERT( workTodo->getContractDetailsTodo().contractDetailsRequests.size() >= 0 );
+		assert( workTodo->getContractDetailsTodo().contractDetailsRequests.size() >= 0 );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
 		DEBUG_PRINTF( "getting hist data from TWS" );
-		Q_ASSERT( workTodo->getHistTodo().countLeft() >= 0 );
+		assert( workTodo->getHistTodo().countLeft() >= 0 );
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}
@@ -851,7 +851,7 @@ TwsDL::State TwsDL::currentState() const
 
 void TwsDL::changeState( State s )
 {
-	Q_ASSERT( state != s );
+	assert( state != s );
 	state = s;
 	
 	if( state == WAIT_TWS_CON ) {
@@ -902,7 +902,7 @@ int main(int argc, char *argv[])
 	twsDL.start();
 	
 	TwsDL::State state = twsDL.currentState();
-	Q_ASSERT( (state == TwsDL::QUIT_READY) ||
+	assert( (state == TwsDL::QUIT_READY) ||
 		(state == TwsDL::QUIT_ERROR) );
 	if( state == TwsDL::QUIT_READY ) {
 		return 0;

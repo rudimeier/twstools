@@ -334,7 +334,7 @@ int HistTodo::countLeft() const
 
 void HistTodo::checkout()
 {
-	Q_ASSERT( checkedOutRequests.isEmpty() );
+	assert( checkedOutRequests.isEmpty() );
 	int id = leftRequests.takeFirst();
 	checkedOutRequests.append(id);
 }
@@ -342,7 +342,7 @@ void HistTodo::checkout()
 
 int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
-	Q_ASSERT( checkedOutRequests.isEmpty() );
+	assert( checkedOutRequests.isEmpty() );
 	
 	QHash< QString, int > hashByFarm;
 	QHash<QString, int> countByFarm;
@@ -361,9 +361,9 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	int todoId = leftRequests.first();
 	int countTodo = 0;
 	foreach( QString farm, farms ) {
-		Q_ASSERT( hashByFarm.contains(farm) );
+		assert( hashByFarm.contains(farm) );
 		int tmpid = hashByFarm[farm];
-		Q_ASSERT( histRequests.size() > tmpid );
+		assert( histRequests.size() > tmpid );
 		const IB::Contract& c = histRequests.at(tmpid)->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.isEmpty() ) {
@@ -379,7 +379,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	}
 	
 	int i = leftRequests.indexOf( todoId );
-	Q_ASSERT( i>=0 );
+	assert( i>=0 );
 	int wait = pG->goodTime( histRequests[todoId]->ibContract() );
 	if( wait <= 0 ) {
 		leftRequests.removeAt( i );
@@ -392,7 +392,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 
 void HistTodo::cancelForRepeat( int priority )
 {
-	Q_ASSERT( checkedOutRequests.size() == 1 );
+	assert( checkedOutRequests.size() == 1 );
 	int id = checkedOutRequests.takeFirst();
 	if( priority <= 0 ) {
 		leftRequests.prepend(id);
@@ -406,21 +406,21 @@ void HistTodo::cancelForRepeat( int priority )
 
 int HistTodo::currentIndex() const
 {
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	assert( !checkedOutRequests.isEmpty() );
 	return checkedOutRequests.first();
 }
 
 
 const HistRequest& HistTodo::current() const
 {
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	assert( !checkedOutRequests.isEmpty() );
 	return *histRequests[checkedOutRequests.first()];
 }
 
 
 void HistTodo::tellDone()
 {
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
+	assert( !checkedOutRequests.isEmpty() );
 	int doneId = checkedOutRequests.takeFirst();
 	doneRequests.append(doneId);
 }
@@ -514,7 +514,7 @@ int WorkTodo::read_file( const std::string & fileName )
 	retVal = 0;
 	xmlNodePtr xn;
 	while( (xn = file.nextXmlNode()) != NULL ) {
-		Q_ASSERT( xn->type == XML_ELEMENT_NODE  );
+		assert( xn->type == XML_ELEMENT_NODE  );
 		if( strcmp((char*)xn->name, "request") == 0 ) {
 			char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
 			if( tmp == NULL ) {
@@ -598,7 +598,7 @@ const ContractDetailsRequest& PacketContractDetails::getRequest() const
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
-	Q_ASSERT( !complete && this->reqId == -1 && request == NULL
+	assert( !complete && this->reqId == -1 && request == NULL
 		&& cdList->empty() );
 	this->reqId = reqId;
 	this->request = new ContractDetailsRequest( cdr );
@@ -606,7 +606,7 @@ void PacketContractDetails::record( int reqId,
 
 void PacketContractDetails::setFinished()
 {
-	Q_ASSERT( !complete );
+	assert( !complete );
 	complete = true;
 }
 
@@ -634,8 +634,8 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 	if( cdList->empty() ) {
 		this->reqId = reqId;
 	}
-	Q_ASSERT( this->reqId == reqId );
-	Q_ASSERT( !complete );
+	assert( this->reqId == reqId );
+	assert( !complete );
 	
 	cdList->push_back(c);
 }
@@ -873,7 +873,7 @@ void PacketHistData::clear()
 
 void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	Q_ASSERT( mode == CLEAN && error == ERR_NONE && request == NULL );
+	assert( mode == CLEAN && error == ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
 	this->request = new HistRequest( hR );
@@ -884,8 +884,8 @@ void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
-	Q_ASSERT( mode == RECORD && error == ERR_NONE );
-	Q_ASSERT( this->reqId == reqId );
+	assert( mode == RECORD && error == ERR_NONE );
+	assert( this->reqId == reqId );
 	
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
@@ -901,7 +901,7 @@ void PacketHistData::append( int reqId, const std::string &date,
 
 void PacketHistData::closeError( Error e )
 {
-	Q_ASSERT( mode == RECORD);
+	assert( mode == RECORD);
 	mode = CLOSED;
 	error = e;
 }
@@ -909,7 +909,7 @@ void PacketHistData::closeError( Error e )
 
 void PacketHistData::dump( bool printFormatDates )
 {
-	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
+	assert( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = request->ibContract();
 	const char *wts = short_wts( request->whatToShow().c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting().c_str());
@@ -924,7 +924,7 @@ void PacketHistData::dump( bool printFormatDates )
 				expiry = ibDate2ISO( c.expiry );
 			}
 			dateTime = ibDate2ISO(r.date);
-			Q_ASSERT( !expiry.empty() && !dateTime.empty() ); //TODO
+			assert( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
 		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
 			.arg(toQString(c.symbol))
@@ -1017,7 +1017,7 @@ void PacingControl::addRequest()
 
 void PacingControl::notifyViolation()
 {
-	Q_ASSERT( !violations.isEmpty() );
+	assert( !violations.isEmpty() );
 	violations.last() = true;
 }
 
@@ -1112,7 +1112,7 @@ void PacingControl::merge( const PacingControl& other )
 		}
 	}
 	while( o_d != other.dateTimes.constEnd() ) {
-		Q_ASSERT( t_d == dateTimes.end() );
+		assert( t_d == dateTimes.end() );
 		t_d = dateTimes.insert( t_d, *o_d );
 		t_v = violations.insert( t_v, *o_v );
 		t_d++;
@@ -1231,11 +1231,11 @@ void PacingGod::addRequest( const IB::Contract& c )
 	
 	if( farm.isEmpty() ) {
 		DEBUG_PRINTF( "add request lazy" );
-		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
+		assert( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->addRequest();
 	} else {
 		DEBUG_PRINTF( "add request farm %s", toIBString(farm).c_str() );
-		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		assert( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->addRequest();
 	}
 }
@@ -1251,11 +1251,11 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 	
 	if( farm.isEmpty() ) {
 		DEBUG_PRINTF( "set violation lazy" );
-		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
+		assert( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->notifyViolation();
 	} else {
 		DEBUG_PRINTF( "set violation farm %s", toIBString(farm).c_str() );
-		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		assert( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->notifyViolation();
 	}
 }
@@ -1271,13 +1271,13 @@ int PacingGod::goodTime( const IB::Contract& c )
 	
 	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+		assert( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
 			|| !laziesCleared );
 		int t = controlGlobal.goodTime(&dbg);
 		DEBUG_PRINTF( "get good time global %s %d", dbg, t );
 		return t;
 	} else {
-		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
+		assert( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
 		int t = controlHmds.value(farm)->goodTime(&dbg);
 		DEBUG_PRINTF( "get good time farm %s %s %d",
@@ -1296,13 +1296,13 @@ int PacingGod::countLeft( const IB::Contract& c )
 	
 	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+		assert( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
 			|| !laziesCleared );
 		int left = controlGlobal.countLeft();
 		DEBUG_PRINTF( "get count left global %d", left );
 		return left;
 	} else {
-		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
+		assert( (controlHmds.contains(farm) && controlLazy.isEmpty())
 			|| laziesCleared );
 		int left = controlHmds.value(farm)->countLeft();
 		DEBUG_PRINTF( "get count left farm %s %d",
@@ -1358,8 +1358,8 @@ void PacingGod::checkAdd( const IB::Contract& c,
 				delete pC;
 			}
 		}
-		Q_ASSERT( controlHmds.contains(farm) );
-		Q_ASSERT( !controlLazy.contains(lazyC) );
+		assert( controlHmds.contains(farm) );
+		assert( !controlLazy.contains(lazyC) );
 		
 	} else if( !controlLazy.contains(lazyC) ) {
 			DEBUG_PRINTF( "create pacing control for lazy %s",
@@ -1368,8 +1368,8 @@ void PacingGod::checkAdd( const IB::Contract& c,
 				maxRequests, checkInterval, minPacingTime, violationPause);
 			controlLazy.insert( lazyC, pC );
 			
-			Q_ASSERT( !controlHmds.contains(farm) );
-			Q_ASSERT( controlLazy.contains(lazyC) );
+			assert( !controlHmds.contains(farm) );
+			assert( controlLazy.contains(lazyC) );
 	}
 	}
 }
@@ -1566,7 +1566,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		farm = getFarm("Market data farm connection is inactive but should be available upon demand.", msg);
 		break;
 	default:
-		Q_ASSERT(false);
+		assert(false);
 		return;
 	}
 	
@@ -1579,7 +1579,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 /// static member
 QString DataFarmStates::getFarm( const QString prefix, const QString& msg )
 {
-	Q_ASSERT( msg.startsWith(prefix, Qt::CaseInsensitive) );
+	assert( msg.startsWith(prefix, Qt::CaseInsensitive) );
 	
 	return msg.right( msg.size() - prefix.size() );
 }
@@ -1587,7 +1587,7 @@ QString DataFarmStates::getFarm( const QString prefix, const QString& msg )
 
 void DataFarmStates::learnMarket( const IB::Contract& )
 {
-	Q_ASSERT( false ); //not implemented
+	assert( false ); //not implemented
 }
 
 
@@ -1604,10 +1604,10 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 		it++;
 	}
 	if( sl.size() <= 0 ) {
-		Q_ASSERT(false); // assuming at least one farm must be active
+		assert(false); // assuming at least one farm must be active
 	} else if( sl.size() == 1 ) {
 		if( hLearn.contains(lazyC) ) {
-			Q_ASSERT( hLearn.value( lazyC ) == sl.first() );
+			assert( hLearn.value( lazyC ) == sl.first() );
 		} else {
 			hLearn.insert( lazyC, sl.first() );
 			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
@@ -1615,7 +1615,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 		}
 	} else {
 		if( hLearn.contains(lazyC) ) {
-			Q_ASSERT( sl.contains(hLearn.value(lazyC)) );
+			assert( sl.contains(hLearn.value(lazyC)) );
 		} else {
 			//but doing nothing
 			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
@@ -1628,11 +1628,11 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
 	QString lastChanged = toQString(this->lastChanged);
-	Q_ASSERT( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
+	assert( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
 		QString lazyC = LAZY_CONTRACT_STR(c);
 		if( hLearn.contains(lazyC) ) {
-			Q_ASSERT( hLearn.value( lazyC ) == lastChanged );
+			assert( hLearn.value( lazyC ) == lastChanged );
 		} else {
 			hLearn.insert( lazyC, lastChanged );
 			DEBUG_PRINTF( "learn HMDS farm (last ok): %s %s",

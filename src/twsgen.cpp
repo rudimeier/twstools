@@ -1,13 +1,13 @@
 #include "twsgen.h"
 #include "tws_xml.h"
 #include "tws_meta.h"
+#include "debug.h"
 #include "config.h"
 
 #include <popt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <libxml/tree.h>
 
 

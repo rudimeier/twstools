@@ -2,6 +2,7 @@
 #define GA_DEBUG_H
 
 #include "twsUtil.h"
+#include <assert.h>
 #include <QtCore/QDebug>
 #include <QtCore/QDateTime>
 
