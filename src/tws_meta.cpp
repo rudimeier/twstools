@@ -928,18 +928,21 @@ void PacketHistData::dump( bool printFormatDates )
 			dateTime = ibDate2ISO(r.date);
 			assert( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
-		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-			.arg(toQString(c.symbol))
-			.arg(toQString(c.secType))
-			.arg(toQString(c.exchange))
-			.arg(toQString(c.currency))
-			.arg(toQString(expiry))
-			.arg(c.strike)
-			.arg(toQString(c.right));
+		
+		char buf_c[512];
+		snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
+			c.symbol.c_str(),
+			c.secType.c_str(),
+			c.exchange.c_str(),
+			c.currency.c_str(),
+			expiry.c_str(),
+			c.strike,
+			c.right.c_str() );
+		
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       wts,
 		       bss,
-		       c_str.toUtf8().constData(),
+		       buf_c,
 		       dateTime.c_str(),
 		       r.open, r.high, r.low, r.close,
 		       r.volume, r.count, r.WAP, r.hasGaps);
