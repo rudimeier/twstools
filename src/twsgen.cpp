@@ -328,9 +328,9 @@ bool gen_csv()
 }
 
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-	twsgen_parse_cl(argc, (const char **) argv);
+	twsgen_parse_cl(argc, argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	if( !durationStrp ) {

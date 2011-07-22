@@ -11,8 +11,8 @@
 // from global installed ibtws
 #include "ibtws/Contract.h"
 
-#include <QtCore/QStringList>
-#include <QtCore/QCoreApplication>
+#include <QtCore/QString>
+#include <QtCore/QList>
 #include <popt.h>
 #include <stdio.h>
 #include <string.h>
@@ -891,11 +891,9 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 
 
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-	QCoreApplication app( argc, argv );
-	
-	twsDL_parse_cl(argc, (const char **) argv);
+	twsDL_parse_cl(argc, argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	
