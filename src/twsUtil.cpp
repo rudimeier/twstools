@@ -6,6 +6,7 @@
 #include "ibtws/Execution.h"
 #include "ibtws/Contract.h"
 
+#include <QtCore/QString>
 #include <sys/time.h>
 
 

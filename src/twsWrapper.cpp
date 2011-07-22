@@ -7,6 +7,9 @@
 #include "ibtws/Order.h"
 #include "ibtws/OrderState.h"
 
+#include <QtCore/QString>
+#include <QtCore/QDateTime>
+
 
 DebugTwsWrapper::~DebugTwsWrapper()
 {

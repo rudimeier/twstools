@@ -13,6 +13,7 @@
 
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 
 // debug verbosity 0...n

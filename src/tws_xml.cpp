@@ -4,7 +4,6 @@
 #include "twsUtil.h"
 #include "ibtws/Contract.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
