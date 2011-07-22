@@ -1218,7 +1218,7 @@ void PacingGod::clear()
 		foreach( QString farm, dataFarms.getInactives() ) {
 			if( controlHmds.contains(farm) ) {
 				DEBUG_PRINTF( "clear pacing control of inactive farm %s",
-					toIBString(farm).c_str() );
+					farm.toStdString().c_str() );
 				controlHmds.value(farm)->clear();
 			}
 		}
@@ -1239,7 +1239,7 @@ void PacingGod::addRequest( const IB::Contract& c )
 		assert( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->addRequest();
 	} else {
-		DEBUG_PRINTF( "add request farm %s", toIBString(farm).c_str() );
+		DEBUG_PRINTF( "add request farm %s", farm.toStdString().c_str() );
 		assert( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->addRequest();
 	}
@@ -1259,7 +1259,7 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 		assert( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
 		controlLazy[lazyC]->notifyViolation();
 	} else {
-		DEBUG_PRINTF( "set violation farm %s", toIBString(farm).c_str() );
+		DEBUG_PRINTF( "set violation farm %s", farm.toStdString().c_str() );
 		assert( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
 		controlHmds[farm]->notifyViolation();
 	}
@@ -1286,7 +1286,7 @@ int PacingGod::goodTime( const IB::Contract& c )
 			|| laziesCleared );
 		int t = controlHmds.value(farm)->goodTime(&dbg);
 		DEBUG_PRINTF( "get good time farm %s %s %d",
-			toIBString(farm).c_str(), dbg, t );
+			farm.toStdString().c_str(), dbg, t );
 		return t;
 	}
 }
@@ -1311,7 +1311,7 @@ int PacingGod::countLeft( const IB::Contract& c )
 			|| laziesCleared );
 		int left = controlHmds.value(farm)->countLeft();
 		DEBUG_PRINTF( "get count left farm %s %d",
-			toIBString(farm).c_str(), left );
+			farm.toStdString().c_str(), left );
 		return controlHmds.value(farm)->countLeft();
 	}
 }
@@ -1343,11 +1343,11 @@ void PacingGod::checkAdd( const IB::Contract& c,
 			PacingControl *pC;
 			if( controlLazy.contains(lazyC) ) {
 				DEBUG_PRINTF( "move pacing control lazy to farm %s, %s",
-					toIBString(lazyC).c_str(), toIBString(farm).c_str() );
+					lazyC.toStdString().c_str(), farm.toStdString().c_str() );
 				pC = controlLazy.take(lazyC);
 			} else {
 				DEBUG_PRINTF( "create pacing control for farm %s",
-					toIBString(farm).c_str() );
+					farm.toStdString().c_str() );
 				pC = new PacingControl(
 					maxRequests, checkInterval, minPacingTime, violationPause);
 			}
@@ -1357,7 +1357,7 @@ void PacingGod::checkAdd( const IB::Contract& c,
 				// fine - no history about that
 			} else {
 				DEBUG_PRINTF( "merge pacing control lazy into farm %s %s",
-					toIBString(lazyC).c_str(), toIBString(farm).c_str() );
+					lazyC.toStdString().c_str(), farm.toStdString().c_str() );
 				PacingControl *pC = controlLazy.take(lazyC);
 				controlHmds.value(farm)->merge(*pC);
 				delete pC;
@@ -1368,7 +1368,7 @@ void PacingGod::checkAdd( const IB::Contract& c,
 		
 	} else if( !controlLazy.contains(lazyC) ) {
 			DEBUG_PRINTF( "create pacing control for lazy %s",
-				toIBString(lazyC).c_str() );
+				lazyC.toStdString().c_str() );
 			PacingControl *pC = new PacingControl(
 				maxRequests, checkInterval, minPacingTime, violationPause);
 			controlLazy.insert( lazyC, pC );
@@ -1575,7 +1575,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		return;
 	}
 	
-	lastChanged = toIBString(farm);
+	lastChanged = farm.toStdString();
 	pHash->insert( farm, state );
 // 	qDebug() << *pHash; // TODO print farms with states
 }
@@ -1616,7 +1616,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 		} else {
 			hLearn.insert( lazyC, sl.first() );
 			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
-				toIBString(lazyC).c_str(), toIBString(sl.first()).c_str() );
+				lazyC.toStdString().c_str(), sl.first().toStdString().c_str() );
 		}
 	} else {
 		if( hLearn.contains(lazyC) ) {
@@ -1624,7 +1624,8 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 		} else {
 			//but doing nothing
 			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
-				toIBString(lazyC).c_str(), toIBString(sl.join(",")).c_str() );
+				lazyC.toStdString().c_str(),
+				sl.join(",").toStdString().c_str() );
 		}
 	}
 }
@@ -1641,7 +1642,7 @@ void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 		} else {
 			hLearn.insert( lazyC, lastChanged );
 			DEBUG_PRINTF( "learn HMDS farm (last ok): %s %s",
-				toIBString(lazyC).c_str(), toIBString(lastChanged).c_str() );
+				lazyC.toStdString().c_str(), lastChanged.toStdString().c_str());
 		}
 	}
 }

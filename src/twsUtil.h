@@ -4,7 +4,6 @@
 #include <string>
 #include <stdint.h>
 
-class QString;
 
 namespace IB {
 	class Execution;
@@ -12,8 +11,6 @@ namespace IB {
 }
 
 int64_t nowInMsecs();
-
-std::string toIBString( const QString &qString );
 
 std::string ibToString( int ibTickType);
 std::string ibToString( const IB::Execution& );

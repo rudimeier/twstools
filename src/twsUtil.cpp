@@ -6,7 +6,6 @@
 #include "ibtws/Execution.h"
 #include "ibtws/Contract.h"
 
-#include <QtCore/QString>
 #include <sys/time.h>
 
 
@@ -20,13 +19,6 @@ int64_t nowInMsecs()
 	
 	const uint64_t now_ms = tv.tv_sec*1000 + tv.tv_usec/1000;
 	return now_ms;
-}
-
-
-std::string toIBString( const QString &qString )
-{
-	std::string retVal(qString.toUtf8());
-	return retVal;
 }
 
 
@@ -119,7 +111,4 @@ std::string ibToString( const IB::Contract &c, bool showFields )
 	
 	return std::string(buf);
 }
-
-
-const QString ibExpiryDateFormat("yyyyMMdd");
 
