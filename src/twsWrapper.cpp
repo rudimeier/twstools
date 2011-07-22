@@ -7,8 +7,7 @@
 #include "ibtws/Order.h"
 #include "ibtws/OrderState.h"
 
-#include <QtCore/QString>
-#include <QtCore/QDateTime>
+
 
 
 DebugTwsWrapper::~DebugTwsWrapper()
@@ -57,12 +56,11 @@ void DebugTwsWrapper::tickGeneric( IB::TickerId tickerId, IB::TickType tickType,
 void DebugTwsWrapper::tickString( IB::TickerId tickerId, IB::TickType tickType,
 	const IB::IBString& value )
 {
-	QString _val = toQString(value);
 	if( tickType == IB::LAST_TIMESTAMP ) {
-		_val = QDateTime::fromTime_t(_val.toInt()).toString();
+		// here we format unix timestamp value
 	}
 	DEBUG_PRINTF( "TICK_STRING: %ld %s %s",
-		tickerId, ibToString(tickType).c_str(), toIBString(_val).c_str());
+		tickerId, ibToString(tickType).c_str(), value.c_str() );
 }
 
 
