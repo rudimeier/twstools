@@ -6,6 +6,8 @@
 #include <QtCore/QtContainerFwd>
 #include <stdint.h>
 #include <list>
+#include <map>
+
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;

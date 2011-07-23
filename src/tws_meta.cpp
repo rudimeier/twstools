@@ -355,26 +355,25 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
 	assert( checkedOutRequest == NULL );
 	
-	QHash< QString, HistRequest* > hashByFarm;
-	QHash<QString, int> countByFarm;
+	std::map<QString, HistRequest*> hashByFarm;
+	std::map<QString, int> countByFarm;
 	for( std::list<HistRequest*>::const_iterator it = leftRequests.begin();
 		it != leftRequests.end(); it++ ) {
 		QString farm = dfs->getHmdsFarm((*it)->ibContract());
-		if( !hashByFarm.contains(farm) ) {
-			hashByFarm.insert(farm, *it);
-			countByFarm.insert(farm, 1);
+		if( hashByFarm.find(farm) == hashByFarm.end() ) {
+			hashByFarm[farm] = *it;
+			countByFarm[farm] = 1;
 		} else {
 			countByFarm[farm]++;
 		}
 	}
 	
-	QStringList farms = hashByFarm.keys();
-	
 	HistRequest *todo_hR = leftRequests.front();
 	int countTodo = 0;
-	foreach( QString farm, farms ) {
-		assert( hashByFarm.contains(farm) );
-		 HistRequest *tmp_hR = hashByFarm[farm];
+	for( std::map<QString, HistRequest*>::const_iterator it =hashByFarm.begin();
+		it != hashByFarm.end(); it++ ) {
+		const QString &farm = it->first;
+		HistRequest *tmp_hR = it->second;
 		const IB::Contract& c = tmp_hR->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.isEmpty() ) {
