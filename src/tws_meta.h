@@ -11,8 +11,6 @@
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
-class QString;
-
 
 
 
@@ -379,7 +377,7 @@ class PacingGod
 	
 	private:
 		void checkAdd( const IB::Contract&,
-			QString *lazyContract, QString *farm );
+			std::string *lazyContract, std::string *farm );
 		bool laziesAreCleared() const;
 		
 		const DataFarmStates& dataFarms;
@@ -390,8 +388,8 @@ class PacingGod
 		int violationPause;
 		
 		PacingControl &controlGlobal;
-		std::map<const QString, PacingControl*> &controlHmds;
-		std::map<const QString, PacingControl*> &controlLazy;
+		std::map<const std::string, PacingControl*> &controlHmds;
+		std::map<const std::string, PacingControl*> &controlLazy;
 };
 
 
@@ -410,9 +408,9 @@ class DataFarmStates
 		
 		std::vector<std::string> getInactives() const;
 		std::vector<std::string>  getActives() const;
-		QString getMarketFarm( const IB::Contract& ) const;
-		QString getHmdsFarm( const QString& lazyC ) const;
-		QString getHmdsFarm( const IB::Contract& ) const;
+		std::string getMarketFarm( const IB::Contract& ) const;
+		std::string getHmdsFarm( const std::string& lazyC ) const;
+		std::string getHmdsFarm( const IB::Contract& ) const;
 		
 		void initHardCodedFarms();
 		void setAllBroken();
@@ -425,11 +423,11 @@ class DataFarmStates
 		static std::string getFarm( const std::string &prefix,
 			const std::string &msg );
 		
-		std::map<const QString, State> &mStates;
-		std::map<const QString, State> &hStates;
+		std::map<const std::string, State> &mStates;
+		std::map<const std::string, State> &hStates;
 		
-		std::map<const QString, QString> &mLearn;
-		std::map<const QString, QString> &hLearn;
+		std::map<const std::string, std::string> &mLearn;
+		std::map<const std::string, std::string> &hLearn;
 		
 		int lastMsgNumber;
 		std::string lastChanged;
