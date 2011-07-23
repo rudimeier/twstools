@@ -15,11 +15,6 @@ AC_PROG_RANLIB
 DEFAULT_CXXFLAGS="-Wall -W"
 AC_SUBST([DEFAULT_CXXFLAGS])
 
-PKG_CHECK_MODULES([QtCore_DEPS], [QtCore >= 4.3])
-## use rpath if qt4 is not the global installed one
-QtCore_DEPS_LIBS=$( echo ${QtCore_DEPS_LIBS} \
-	| sed 's/\(^\| \|\t\)-L\([[^\t ]]*\)/\1-Wl,-rpath,\2 -L\2/g' )
-
 PKG_CHECK_MODULES([libxml2_DEPS], [libxml-2.0 >= 2.7])
 
 ## output
