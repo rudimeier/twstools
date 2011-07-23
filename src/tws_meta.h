@@ -422,7 +422,8 @@ class DataFarmStates
 		void learnHmdsLastOk(int msgNumber, const IB::Contract& );
 		
 	private:
-		static QString getFarm( const QString prefix, const QString& msg );
+		static std::string getFarm( const std::string &prefix,
+			const std::string &msg );
 		
 		std::map<const QString, State> &mStates;
 		std::map<const QString, State> &hStates;

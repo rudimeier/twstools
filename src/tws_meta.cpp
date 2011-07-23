@@ -1547,11 +1547,10 @@ void DataFarmStates::setAllBroken()
 
 
 void DataFarmStates::notify(int msgNumber, int errorCode,
-	const std::string &_msg)
+	const std::string &msg)
 {
-	QString msg = QString::fromStdString(_msg); // just convert to QString
 	lastMsgNumber = msgNumber;
-	QString farm;
+	std::string farm;
 	State state;
 	std::map<const QString, State> *pHash = NULL;
 	
@@ -1598,18 +1597,19 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		return;
 	}
 	
-	lastChanged = farm.toStdString();
-	(*pHash)[farm] = state;
+	lastChanged = farm;
+	(*pHash)[QString::fromStdString(farm)] = state;
 // 	qDebug() << *pHash; // TODO print farms with states
 }
 
 
 /// static member
-QString DataFarmStates::getFarm( const QString prefix, const QString& msg )
+std::string DataFarmStates::getFarm( const std::string &prefix,
+	const std::string& msg )
 {
-	assert( msg.startsWith(prefix, Qt::CaseInsensitive) );
+	assert( prefix == msg.substr(0, prefix.size()) );
 	
-	return msg.right( msg.size() - prefix.size() );
+	return msg.substr( prefix.size() );
 }
 
 
