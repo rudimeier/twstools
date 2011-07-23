@@ -355,11 +355,11 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
 	assert( checkedOutRequest == NULL );
 	
-	std::map<QString, HistRequest*> hashByFarm;
-	std::map<QString, int> countByFarm;
+	std::map<std::string, HistRequest*> hashByFarm;
+	std::map<std::string, int> countByFarm;
 	for( std::list<HistRequest*>::const_iterator it = leftRequests.begin();
 		it != leftRequests.end(); it++ ) {
-		QString farm = dfs->getHmdsFarm((*it)->ibContract());
+		std::string farm = dfs->getHmdsFarm((*it)->ibContract()).toStdString();
 		if( hashByFarm.find(farm) == hashByFarm.end() ) {
 			hashByFarm[farm] = *it;
 			countByFarm[farm] = 1;
@@ -370,13 +370,13 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	
 	HistRequest *todo_hR = leftRequests.front();
 	int countTodo = 0;
-	for( std::map<QString, HistRequest*>::const_iterator it =hashByFarm.begin();
-		it != hashByFarm.end(); it++ ) {
-		const QString &farm = it->first;
+	for( std::map<std::string, HistRequest*>::const_iterator
+		    it = hashByFarm.begin(); it != hashByFarm.end(); it++ ) {
+		const std::string &farm = it->first;
 		HistRequest *tmp_hR = it->second;
 		const IB::Contract& c = tmp_hR->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
-			if( farm.isEmpty() ) {
+			if( farm.empty() ) {
 				// 1. the unknown ones to learn farm quickly
 				todo_hR = tmp_hR;
 				break;
