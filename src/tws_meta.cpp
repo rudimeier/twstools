@@ -1405,10 +1405,10 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
-	mStates( *(new QHash<const QString, State>()) ),
-	hStates( *(new QHash<const QString, State>()) ),
-	mLearn( *(new QHash<const QString, QString>()) ),
-	hLearn( *(new QHash<const QString, QString>()) ),
+	mStates( *(new std::map<const QString, State>()) ),
+	hStates( *(new std::map<const QString, State>()) ),
+	mLearn( *(new std::map<const QString, QString>()) ),
+	hLearn( *(new std::map<const QString, QString>()) ),
 	lastMsgNumber(INT_MIN)
 {
 	initHardCodedFarms();
@@ -1514,17 +1514,17 @@ void DataFarmStates::initHardCodedFarms()
 
 void DataFarmStates::setAllBroken()
 {
-	QHash<const QString, State>::iterator it;
+	std::map<const QString, State>::iterator it;
 	
 	it = mStates.begin();
 	while( it != mStates.end() ) {
-		*it = BROKEN;
+		it->second = BROKEN;
 		it++;
 	}
 	
 	it = hStates.begin();
 	while( it != hStates.end() ) {
-		*it = BROKEN;
+		it->second = BROKEN;
 		it++;
 	}
 }
@@ -1537,7 +1537,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 	lastMsgNumber = msgNumber;
 	QString farm;
 	State state;
-	QHash<const QString, State> *pHash = NULL;
+	std::map<const QString, State> *pHash = NULL;
 	
 	// prefixes used for getFarm() are taken from past logs
 	switch( errorCode ) {
@@ -1583,7 +1583,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 	}
 	
 	lastChanged = farm.toStdString();
-	pHash->insert( farm, state );
+	(*pHash)[farm] = state;
 // 	qDebug() << *pHash; // TODO print farms with states
 }
 
@@ -1608,26 +1608,26 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	
 	QStringList sl;
-	QHash<const QString, State>::const_iterator it = hStates.constBegin();
-	while( it != hStates.constEnd() ) {
-		if( *it == OK ) {
-			sl.append( it.key() );
+	std::map<const QString, State>::const_iterator it = hStates.begin();
+	while( it != hStates.end() ) {
+		if( it->second == OK ) {
+			sl.append( it->first );
 		}
 		it++;
 	}
 	if( sl.size() <= 0 ) {
 		assert(false); // assuming at least one farm must be active
 	} else if( sl.size() == 1 ) {
-		if( hLearn.contains(lazyC) ) {
-			assert( hLearn.value( lazyC ) == sl.first() );
+		if( hLearn.find(lazyC) != hLearn.end() ) {
+			assert( hLearn.find( lazyC )->second == sl.first() );
 		} else {
-			hLearn.insert( lazyC, sl.first() );
+			hLearn[lazyC] = sl.first();
 			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
 				lazyC.toStdString().c_str(), sl.first().toStdString().c_str() );
 		}
 	} else {
-		if( hLearn.contains(lazyC) ) {
-			assert( sl.contains(hLearn.value(lazyC)) );
+		if( hLearn.find(lazyC) != hLearn.end() ) {
+			assert( sl.contains( hLearn.find(lazyC)->second) );
 		} else {
 			//but doing nothing
 			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
@@ -1641,13 +1641,14 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
 	QString lastChanged = QString::fromStdString(this->lastChanged);
-	assert( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
+	assert( !lastChanged.isEmpty()
+		&& (hStates.find(lastChanged) != hStates.end()) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
 		QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
-		if( hLearn.contains(lazyC) ) {
-			assert( hLearn.value( lazyC ) == lastChanged );
+		if( hLearn.find(lazyC) != hLearn.end() ) {
+			assert( hLearn.find(lazyC)->second == lastChanged );
 		} else {
-			hLearn.insert( lazyC, lastChanged );
+			hLearn[lazyC] = lastChanged;
 			DEBUG_PRINTF( "learn HMDS farm (last ok): %s %s",
 				lazyC.toStdString().c_str(), lastChanged.toStdString().c_str());
 		}
@@ -1658,10 +1659,10 @@ void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 std::vector<std::string> DataFarmStates::getInactives() const
 {
 	std::vector<std::string> sl;
-	QHash<const QString, State>::const_iterator it = hStates.constBegin();
-	while( it != hStates.constEnd() ) {
-		if( *it == INACTIVE || *it == BROKEN ) {
-			sl.push_back( it.key().toStdString() );
+	std::map<const QString, State>::const_iterator it = hStates.begin();
+	while( it != hStates.end() ) {
+		if( it->second == INACTIVE || it->second == BROKEN ) {
+			sl.push_back( it->first.toStdString() );
 		}
 		it++;
 	}
@@ -1672,10 +1673,10 @@ std::vector<std::string> DataFarmStates::getInactives() const
 std::vector<std::string> DataFarmStates::getActives() const
 {
 	std::vector<std::string> sl;
-	QHash<const QString, State>::const_iterator it = hStates.constBegin();
-	while( it != hStates.constEnd() ) {
-		if( *it == OK ) {
-			sl.push_back( it.key().toStdString() );
+	std::map<const QString, State>::const_iterator it = hStates.begin();
+	while( it != hStates.end() ) {
+		if( it->second == OK ) {
+			sl.push_back( it->first.toStdString() );
 		}
 		it++;
 	}
@@ -1686,20 +1687,23 @@ std::vector<std::string> DataFarmStates::getActives() const
 QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
 	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
-	return mLearn.value(lazyC);
+	std::map<const QString, QString>::const_iterator it = mLearn.find(lazyC);
+	return (it != mLearn.end()) ? it->second : "";
 }
 
 
 QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
 	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
-	return hLearn.value(lazyC);
+	std::map<const QString, QString>::const_iterator it = hLearn.find(lazyC);
+	return (it != hLearn.end()) ? it->second : "";
 }
 
 
 QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
 {
-	return hLearn.value(lazyC);
+	std::map<const QString, QString>::const_iterator it = hLearn.find(lazyC);
+	return (it != hLearn.end()) ? it->second : "";
 }
 
 

@@ -425,11 +425,11 @@ class DataFarmStates
 	private:
 		static QString getFarm( const QString prefix, const QString& msg );
 		
-		QHash<const QString, State> &mStates;
-		QHash<const QString, State> &hStates;
+		std::map<const QString, State> &mStates;
+		std::map<const QString, State> &hStates;
 		
-		QHash<const QString, QString> &mLearn;
-		QHash<const QString, QString> &hLearn;
+		std::map<const QString, QString> &mLearn;
+		std::map<const QString, QString> &hLearn;
 		
 		int lastMsgNumber;
 		std::string lastChanged;
