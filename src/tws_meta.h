@@ -13,7 +13,6 @@ typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
 class QString;
-class QStringList;
 
 
 
@@ -410,8 +409,8 @@ class DataFarmStates
 		DataFarmStates();
 		virtual ~DataFarmStates();
 		
-		QStringList getInactives() const;
-		QStringList getActives() const;
+		std::vector<QString> getInactives() const;
+		std::vector<QString>  getActives() const;
 		QString getMarketFarm( const IB::Contract& ) const;
 		QString getHmdsFarm( const QString& lazyC ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;

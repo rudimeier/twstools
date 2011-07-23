@@ -1210,7 +1210,7 @@ void PacingGod::setViolationPause( int vP )
 
 void PacingGod::clear()
 {
-	if( dataFarms.getActives().isEmpty() ) {
+	if( dataFarms.getActives().empty() ) {
 		// clear all PacingControls
 		DEBUG_PRINTF( "clear all pacing controls" );
 		controlGlobal.clear();
@@ -1655,13 +1655,13 @@ void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 }
 
 
-QStringList DataFarmStates::getInactives() const
+std::vector<QString> DataFarmStates::getInactives() const
 {
-	QStringList sl;
+	std::vector<QString> sl;
 	QHash<const QString, State>::const_iterator it = hStates.constBegin();
 	while( it != hStates.constEnd() ) {
 		if( *it == INACTIVE || *it == BROKEN ) {
-			sl.append( it.key() );
+			sl.push_back( it.key() );
 		}
 		it++;
 	}
@@ -1669,13 +1669,13 @@ QStringList DataFarmStates::getInactives() const
 }
 
 
-QStringList DataFarmStates::getActives() const
+std::vector<QString> DataFarmStates::getActives() const
 {
-	QStringList sl;
+	std::vector<QString> sl;
 	QHash<const QString, State>::const_iterator it = hStates.constBegin();
 	while( it != hStates.constEnd() ) {
 		if( *it == OK ) {
-			sl.append( it.key() );
+			sl.push_back( it.key() );
 		}
 		it++;
 	}
