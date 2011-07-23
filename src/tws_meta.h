@@ -350,8 +350,8 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<int64_t> &dateTimes;
-		QList<bool> &violations;
+		std::vector<int64_t> &dateTimes;
+		std::vector<bool> &violations;
 		
 		int maxRequests;
 		int checkInterval;

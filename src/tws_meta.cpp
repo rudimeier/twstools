@@ -963,8 +963,8 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
-	dateTimes(*(new QList<int64_t>())),
-	violations(*(new QList<bool>())),
+	dateTimes(*(new std::vector<int64_t>())),
+	violations(*(new std::vector<bool>())),
 	maxRequests( r ),
 	checkInterval( i ),
 	minPacingTime( m ),
@@ -994,15 +994,15 @@ void PacingControl::setViolationPause( int vP )
 
 bool PacingControl::isEmpty() const
 {
-	return dateTimes.isEmpty();
+	return dateTimes.empty();
 }
 
 
 void PacingControl::clear()
 {
-	if( !dateTimes.isEmpty() ) {
+	if( !dateTimes.empty() ) {
 		int64_t now = nowInMsecs();
-		if( now - dateTimes.last() < 5000  ) {
+		if( now - dateTimes.back() < 5000  ) {
 			// HACK race condition might cause assert in notifyViolation(),
 			// to avoid this we would need to ack each request
 			DEBUG_PRINTF( "Warning, keep last pacing date time "
@@ -1020,15 +1020,15 @@ void PacingControl::clear()
 void PacingControl::addRequest()
 {
 	const int64_t now_t = nowInMsecs();
-	dateTimes.append( now_t );
-	violations.append( false );
+	dateTimes.push_back( now_t );
+	violations.push_back( false );
 }
 
 
 void PacingControl::notifyViolation()
 {
-	assert( !violations.isEmpty() );
-	violations.last() = true;
+	assert( !violations.empty() );
+	violations.back() = true;
 }
 
 
@@ -1044,20 +1044,20 @@ int PacingControl::goodTime(const char** ddd) const
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
-	if( dateTimes.isEmpty() ) {
+	if( dateTimes.empty() ) {
 		*ddd = dbg;
 		return retVal;
 	}
 	
 	
-	int waitMin = dateTimes.last() + minPacingTime - now;
+	int waitMin = dateTimes.back() + minPacingTime - now;
 	SWAP_MAX( waitMin, "wait min" );
 	
 // 	int waitAvg =  dateTimes.last() + avgPacingTime - now;
 // 	SWAP_MAX( waitAvg, "wait avg" );
 	
-	int waitViol = violations.last() ?
-		(dateTimes.last() + violationPause - now) : INT_MIN;
+	int waitViol = violations.back() ?
+		(dateTimes.back() + violationPause - now) : INT_MIN;
 	SWAP_MAX( waitViol, "wait violation" );
 	
 	int waitBurst = INT_MIN;
@@ -1079,16 +1079,16 @@ int PacingControl::countLeft() const
 {
 	const int64_t now = nowInMsecs();
 	
-	if( (dateTimes.size() > 0) && violations.last() ) {
-		int waitViol = dateTimes.last() + violationPause - now;
+	if( (dateTimes.size() > 0) && violations.back() ) {
+		int waitViol = dateTimes.back() + violationPause - now;
 		if( waitViol > 0 ) {
 			return 0;
 		}
 	}
 	
 	int retVal = maxRequests;
-	QList<int64_t>::const_iterator it = dateTimes.constEnd();
-	while( it != dateTimes.constBegin() ) {
+	std::vector<int64_t>::const_iterator it = dateTimes.end();
+	while( it != dateTimes.begin() ) {
 		it--;
 		int waitBurst = *it + checkInterval - now;
 		if( waitBurst > 0 ) {
@@ -1105,12 +1105,12 @@ void PacingControl::merge( const PacingControl& other )
 {
 // 	qDebug() << dateTimes;
 // 	qDebug() << other.dateTimes;
-	QList<int64_t>::iterator t_d = dateTimes.begin();
-	QList<bool>::iterator t_v = violations.begin();
-	QList<int64_t>::const_iterator o_d = other.dateTimes.constBegin();
-	QList<bool>::const_iterator o_v = other.violations.constBegin();
+	std::vector<int64_t>::iterator t_d = dateTimes.begin();
+	std::vector<bool>::iterator t_v = violations.begin();
+	std::vector<int64_t>::const_iterator o_d = other.dateTimes.begin();
+	std::vector<bool>::const_iterator o_v = other.violations.begin();
 	
-	while( t_d != dateTimes.end() && o_d != other.dateTimes.constEnd() ) {
+	while( t_d != dateTimes.end() && o_d != other.dateTimes.end() ) {
 		if( *o_d < *t_d ) {
 			t_d = dateTimes.insert( t_d, *o_d );
 			t_v = violations.insert( t_v, *o_v );
@@ -1121,7 +1121,7 @@ void PacingControl::merge( const PacingControl& other )
 			t_v++;
 		}
 	}
-	while( o_d != other.dateTimes.constEnd() ) {
+	while( o_d != other.dateTimes.end() ) {
 		assert( t_d == dateTimes.end() );
 		t_d = dateTimes.insert( t_d, *o_d );
 		t_v = violations.insert( t_v, *o_v );
