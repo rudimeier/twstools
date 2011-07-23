@@ -5,6 +5,7 @@
 
 #include <QtCore/QtContainerFwd>
 #include <stdint.h>
+#include <list>
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
@@ -177,9 +178,9 @@ class HistTodo
 		void add( const HistRequest& );
 		
 	private:
-		QList<HistRequest*> &doneRequests;
-		QList<HistRequest*> &leftRequests;
-		QList<HistRequest*> &errorRequests;
+		std::list<HistRequest*> &doneRequests;
+		std::list<HistRequest*> &leftRequests;
+		std::list<HistRequest*> &errorRequests;
 		HistRequest *checkedOutRequest;
 };
 

@@ -290,9 +290,9 @@ void GenericRequest::close()
 
 
 HistTodo::HistTodo() :
-	doneRequests(*(new QList<HistRequest*>())),
-	leftRequests(*(new QList<HistRequest*>())),
-	errorRequests(*(new QList<HistRequest*>())),
+	doneRequests(*(new std::list<HistRequest*>())),
+	leftRequests(*(new std::list<HistRequest*>())),
+	errorRequests(*(new std::list<HistRequest*>())),
 	checkedOutRequest(NULL)
 {
 }
@@ -320,10 +320,12 @@ HistTodo::~HistTodo()
 
 void HistTodo::dumpLeft( FILE *stream ) const
 {
-	for(int i=0; i < leftRequests.size(); i++ ) {
+	std::list<HistRequest*>::const_iterator it = leftRequests.begin();
+	while( it != leftRequests.end() ) {
 		fprintf( stream, "[%p]\t%s\n",
-		         leftRequests[i],
-		         leftRequests[i]->toString().c_str() );
+		         *it,
+		         (*it)->toString().c_str() );
+		it++;
 	}
 }
 
@@ -343,7 +345,8 @@ int HistTodo::countLeft() const
 void HistTodo::checkout()
 {
 	assert( checkedOutRequest == NULL );
-	checkedOutRequest = leftRequests.takeFirst();
+	checkedOutRequest = leftRequests.front();
+	leftRequests.pop_front();
 }
 
 
@@ -365,7 +368,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	
 	QStringList farms = hashByFarm.keys();
 	
-	HistRequest *todo_hR = leftRequests.first();
+	HistRequest *todo_hR = leftRequests.front();
 	int countTodo = 0;
 	foreach( QString farm, farms ) {
 		assert( hashByFarm.contains(farm) );
@@ -384,11 +387,17 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		}
 	}
 	
-	int i = leftRequests.indexOf( todo_hR );
-	assert( i>=0 );
+	std::list<HistRequest*>::iterator it = leftRequests.begin();
+	while( it != leftRequests.end() ) {
+		if( *it == todo_hR ) {
+			break;
+		}
+		it++;
+	}
+	assert( it != leftRequests.end() );
 	int wait = pG->goodTime( todo_hR->ibContract() );
 	if( wait <= 0 ) {
-		leftRequests.removeAt( i );
+		leftRequests.erase( it );
 		checkedOutRequest = todo_hR;
 	}
 	
@@ -400,11 +409,11 @@ void HistTodo::cancelForRepeat( int priority )
 {
 	assert( checkedOutRequest != NULL );
 	if( priority <= 0 ) {
-		leftRequests.prepend(checkedOutRequest);
+		leftRequests.push_front(checkedOutRequest);
 	} else if( priority <=1 ) {
-		leftRequests.append(checkedOutRequest);
+		leftRequests.push_back(checkedOutRequest);
 	} else {
-		errorRequests.append(checkedOutRequest);
+		errorRequests.push_back(checkedOutRequest);
 	}
 	checkedOutRequest = NULL;
 }
@@ -420,7 +429,7 @@ const HistRequest& HistTodo::current() const
 void HistTodo::tellDone()
 {
 	assert( checkedOutRequest != NULL );
-	doneRequests.append(checkedOutRequest);
+	doneRequests.push_back(checkedOutRequest);
 	checkedOutRequest = NULL;
 }
 
@@ -428,7 +437,7 @@ void HistTodo::tellDone()
 void HistTodo::add( const HistRequest& hR )
 {
 	HistRequest *p = new HistRequest(hR);
-	leftRequests.append(p);
+	leftRequests.push_back(p);
 }
 
 
