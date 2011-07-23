@@ -4,7 +4,7 @@
 #include "twsUtil.h"
 #include "debug.h"
 
-#include <QtCore/QStringList>
+#include <QtCore/QString>
 
 
 #include <libxml/xmlmemory.h>
@@ -1338,15 +1338,19 @@ void PacingGod::checkAdd( const IB::Contract& c,
 	*lazyC_ = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	*farm_ = dataFarms.getHmdsFarm(c);
 	
-	QStringList lazies;
+	std::vector<QString> lazies;
+	bool append_lazyC = true;
 	std::map<const QString, PacingControl*>::const_iterator it =
 		controlLazy.begin();
 	while( it != controlLazy.end() ) {
-		lazies.append( it->first );
+		lazies.push_back( it->first );
+		if( it->first == *lazyC_ ) {
+			append_lazyC = false;
+		}
 		it++;
 	}
-	if( !lazies.contains(*lazyC_) ) {
-		lazies.append(*lazyC_);
+	if( append_lazyC ) {
+		lazies.push_back(*lazyC_);
 	}
 	
 	foreach( QString lazyC, lazies ) {
@@ -1623,11 +1627,11 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 {
 	QString lazyC = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	
-	QStringList sl;
+	std::vector<QString> sl;
 	std::map<const QString, State>::const_iterator it = hStates.begin();
 	while( it != hStates.end() ) {
 		if( it->second == OK ) {
-			sl.append( it->first );
+			sl.push_back( it->first );
 		}
 		it++;
 	}
@@ -1635,20 +1639,36 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 		assert(false); // assuming at least one farm must be active
 	} else if( sl.size() == 1 ) {
 		if( hLearn.find(lazyC) != hLearn.end() ) {
-			assert( hLearn.find( lazyC )->second == sl.first() );
+			assert( hLearn.find( lazyC )->second == sl.front() );
 		} else {
-			hLearn[lazyC] = sl.first();
+			hLearn[lazyC] = sl.front();
 			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
-				lazyC.toStdString().c_str(), sl.first().toStdString().c_str() );
+				lazyC.toStdString().c_str(), sl.front().toStdString().c_str() );
 		}
 	} else {
 		if( hLearn.find(lazyC) != hLearn.end() ) {
-			assert( sl.contains( hLearn.find(lazyC)->second) );
+			// here we just validate that the known farm is active
+			const QString &known_farm =  hLearn.find(lazyC)->second;
+			bool sl_contains_lazyC = false;
+			for( std::vector<QString>::const_iterator it = sl.begin();
+				    it != sl.end(); it++ ) {
+				if( *it == known_farm ) {
+					sl_contains_lazyC = true;
+					break;
+				}
+			}
+			assert( sl_contains_lazyC );
 		} else {
 			//but doing nothing
+			std::string dbg_active_farms;
+			for( std::vector<QString>::const_iterator it = sl.begin();
+				    it != sl.end(); it++ ) {
+				dbg_active_farms.append(",").append(it->toStdString());
+			}
+			
 			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
 				lazyC.toStdString().c_str(),
-				sl.join(",").toStdString().c_str() );
+				(dbg_active_farms.c_str()+1) );
 		}
 	}
 }
