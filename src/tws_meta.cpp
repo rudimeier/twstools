@@ -708,7 +708,7 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 
 
 PacketHistData::PacketHistData() :
-		rows(*(new QList<Row>()))
+		rows(*(new std::vector<Row>()))
 {
 	mode = CLEAN;
 	error = ERR_NONE;
@@ -740,7 +740,7 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 					}
 					if( strcmp((char*)q->name, "row") == 0 ) {
 						Row *row = Row::fromXml( q );
-						phd->rows.append(*row);
+						phd->rows.push_back(*row);
 						delete row;
 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
 						Row *fin = Row::fromXml( q );
@@ -820,7 +820,7 @@ void PacketHistData::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
-		for( int i=0; i<rows.size(); i++ ) {
+		for( size_t i=0; i<rows.size(); i++ ) {
 			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
 			ADD_ATTR_STRING( nrow, rows[i], date );
 			ADD_ATTR_DOUBLE( nrow, rows[i], open );
@@ -901,7 +901,7 @@ void PacketHistData::append( int reqId, const std::string &date,
 		mode = CLOSED;
 		finishRow = row;
 	} else {
-		rows.append( row );
+		rows.push_back( row );
 	}
 }
 

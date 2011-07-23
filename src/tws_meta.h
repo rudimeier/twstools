@@ -320,7 +320,7 @@ class PacketHistData
 		
 		int reqId;
 		HistRequest *request;
-		QList<Row> &rows;
+		std::vector<Row> &rows;
 		Row finishRow;
 };
 
