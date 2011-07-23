@@ -300,16 +300,17 @@ HistTodo::HistTodo() :
 
 HistTodo::~HistTodo()
 {
-	foreach( HistRequest *hR, doneRequests ) {
-		delete hR;
+	std::list<HistRequest*>::const_iterator it;
+	for( it = doneRequests.begin(); it != doneRequests.end(); it++ ) {
+		delete *it;
 	}
 	delete &doneRequests;
-	foreach( HistRequest *hR, leftRequests ) {
-		delete hR;
+	for( it = leftRequests.begin(); it != leftRequests.end(); it++ ) {
+		delete *it;
 	}
 	delete &leftRequests;
-	foreach( HistRequest *hR, errorRequests ) {
-		delete hR;
+	for( it = errorRequests.begin(); it != errorRequests.end(); it++ ) {
+		delete *it;
 	}
 	delete &errorRequests;
 	if( checkedOutRequest != NULL ) {
@@ -356,10 +357,11 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	
 	QHash< QString, HistRequest* > hashByFarm;
 	QHash<QString, int> countByFarm;
-	foreach( HistRequest* hR ,leftRequests ) {
-		QString farm = dfs->getHmdsFarm(hR->ibContract());
+	for( std::list<HistRequest*>::const_iterator it = leftRequests.begin();
+		it != leftRequests.end(); it++ ) {
+		QString farm = dfs->getHmdsFarm((*it)->ibContract());
 		if( !hashByFarm.contains(farm) ) {
-			hashByFarm.insert(farm, hR);
+			hashByFarm.insert(farm, *it);
 			countByFarm.insert(farm, 1);
 		} else {
 			countByFarm[farm]++;
@@ -921,16 +923,17 @@ void PacketHistData::dump( bool printFormatDates )
 	const char *wts = short_wts( request->whatToShow().c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting().c_str());
 	
-	foreach( Row r, rows ) {
+	for( std::vector<Row>::const_iterator it = rows.begin();
+		it != rows.end(); it++ ) {
 		std::string expiry = c.expiry;
-		std::string dateTime = r.date;
+		std::string dateTime = it->date;
 		if( printFormatDates ) {
 			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
 				expiry = ibDate2ISO( c.expiry );
 			}
-			dateTime = ibDate2ISO(r.date);
+			dateTime = ibDate2ISO(it->date);
 			assert( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
 		
@@ -949,8 +952,8 @@ void PacketHistData::dump( bool printFormatDates )
 		       bss,
 		       buf_c,
 		       dateTime.c_str(),
-		       r.open, r.high, r.low, r.close,
-		       r.volume, r.count, r.WAP, r.hasGaps);
+		       it->open, it->high, it->low, it->close,
+		       it->volume, it->count, it->WAP, it->hasGaps);
 		fflush(stdout);
 	}
 }
