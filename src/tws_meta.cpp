@@ -291,10 +291,10 @@ void GenericRequest::close()
 
 HistTodo::HistTodo() :
 	histRequests(*(new QList<HistRequest*>())),
-	doneRequests(*(new QList<int>())),
-	leftRequests(*(new QList<int>())),
-	errorRequests(*(new QList<int>())),
-	checkedOutRequests(*(new QList<int>()))
+	doneRequests(*(new QList<HistRequest*>())),
+	leftRequests(*(new QList<HistRequest*>())),
+	errorRequests(*(new QList<HistRequest*>())),
+	checkedOutRequest(NULL)
 {
 }
 
@@ -308,16 +308,15 @@ HistTodo::~HistTodo()
 	delete &doneRequests;
 	delete &leftRequests;
 	delete &errorRequests;
-	delete &checkedOutRequests;
 }
 
 
 void HistTodo::dumpLeft( FILE *stream ) const
 {
 	for(int i=0; i < leftRequests.size(); i++ ) {
-		fprintf( stream, "[%d]\t%s\n",
+		fprintf( stream, "[%p]\t%s\n",
 		         leftRequests[i],
-		         histRequests.at(leftRequests[i])->toString().c_str() );
+		         leftRequests[i]->toString().c_str() );
 	}
 }
 
@@ -336,22 +335,21 @@ int HistTodo::countLeft() const
 
 void HistTodo::checkout()
 {
-	assert( checkedOutRequests.isEmpty() );
-	int id = leftRequests.takeFirst();
-	checkedOutRequests.append(id);
+	assert( checkedOutRequest == NULL );
+	checkedOutRequest = leftRequests.takeFirst();
 }
 
 
 int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
-	assert( checkedOutRequests.isEmpty() );
+	assert( checkedOutRequest == NULL );
 	
-	QHash< QString, int > hashByFarm;
+	QHash< QString, HistRequest* > hashByFarm;
 	QHash<QString, int> countByFarm;
-	foreach( int i ,leftRequests ) {
-		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract());
+	foreach( HistRequest* hR ,leftRequests ) {
+		QString farm = dfs->getHmdsFarm(hR->ibContract());
 		if( !hashByFarm.contains(farm) ) {
-			hashByFarm.insert(farm, i);
+			hashByFarm.insert(farm, hR);
 			countByFarm.insert(farm, 1);
 		} else {
 			countByFarm[farm]++;
@@ -360,32 +358,31 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	
 	QStringList farms = hashByFarm.keys();
 	
-	int todoId = leftRequests.first();
+	HistRequest *todo_hR = leftRequests.first();
 	int countTodo = 0;
 	foreach( QString farm, farms ) {
 		assert( hashByFarm.contains(farm) );
-		int tmpid = hashByFarm[farm];
-		assert( histRequests.size() > tmpid );
-		const IB::Contract& c = histRequests.at(tmpid)->ibContract();
+		 HistRequest *tmp_hR = hashByFarm[farm];
+		const IB::Contract& c = tmp_hR->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.isEmpty() ) {
 				// 1. the unknown ones to learn farm quickly
-				todoId = tmpid;
+				todo_hR = tmp_hR;
 				break;
 			} else if( countTodo < countByFarm[farm] ) {
 				// 2. get from them biggest list
-				todoId = tmpid;
+				todo_hR = tmp_hR;
 				countTodo = countByFarm[farm];
 			}
 		}
 	}
 	
-	int i = leftRequests.indexOf( todoId );
+	int i = leftRequests.indexOf( todo_hR );
 	assert( i>=0 );
-	int wait = pG->goodTime( histRequests[todoId]->ibContract() );
+	int wait = pG->goodTime( todo_hR->ibContract() );
 	if( wait <= 0 ) {
 		leftRequests.removeAt( i );
-		checkedOutRequests.append(todoId);
+		checkedOutRequest = todo_hR;
 	}
 	
 	return wait;
@@ -394,37 +391,30 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 
 void HistTodo::cancelForRepeat( int priority )
 {
-	assert( checkedOutRequests.size() == 1 );
-	int id = checkedOutRequests.takeFirst();
+	assert( checkedOutRequest != NULL );
 	if( priority <= 0 ) {
-		leftRequests.prepend(id);
+		leftRequests.prepend(checkedOutRequest);
 	} else if( priority <=1 ) {
-		leftRequests.append(id);
+		leftRequests.append(checkedOutRequest);
 	} else {
-		errorRequests.append(id);
+		errorRequests.append(checkedOutRequest);
 	}
-}
-
-
-int HistTodo::currentIndex() const
-{
-	assert( !checkedOutRequests.isEmpty() );
-	return checkedOutRequests.first();
+	checkedOutRequest = NULL;
 }
 
 
 const HistRequest& HistTodo::current() const
 {
-	assert( !checkedOutRequests.isEmpty() );
-	return *histRequests[checkedOutRequests.first()];
+	assert( checkedOutRequest != NULL );
+	return *checkedOutRequest;
 }
 
 
 void HistTodo::tellDone()
 {
-	assert( !checkedOutRequests.isEmpty() );
-	int doneId = checkedOutRequests.takeFirst();
-	doneRequests.append(doneId);
+	assert( checkedOutRequest != NULL );
+	doneRequests.append(checkedOutRequest);
+	checkedOutRequest = NULL;
 }
 
 
@@ -432,7 +422,7 @@ void HistTodo::add( const HistRequest& hR )
 {
 	HistRequest *p = new HistRequest(hR);
 	histRequests.append(p);
-	leftRequests.append(histRequests.size() - 1);
+	leftRequests.append(p);
 }
 
 

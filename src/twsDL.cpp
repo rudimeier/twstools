@@ -443,8 +443,8 @@ void TwsDL::getData()
 	
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 	
-	DEBUG_PRINTF( "DOWNLOAD DATA %d %d %s",
-		workTodo->getHistTodo().currentIndex(),
+	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
+		&workTodo->getHistTodo().current(),
 		currentRequest.reqId(),
 		ibToString(hR.ibContract()).c_str() );
 	
@@ -629,7 +629,7 @@ void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
-	int curIndex = workTodo->getHistTodo().currentIndex();
+	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
 	switch( errorCode ) {
 	// Historical Market Data Service error message:
 	case 162:
@@ -638,14 +638,14 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 			pacingControl.notifyViolation( curContract );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
-			DEBUG_PRINTF( "READY - NO DATA %d %d", curIndex, id );
+			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE on HMDS server. "
-				"%d %d", curIndex, id );
+				"%p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			curIdleTime = 0;
@@ -653,7 +653,7 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
-				"%d %d", curIndex, id );
+				"%p %d", cur_hR, id );
 			p_histData.closeError( PacketHistData::ERR_NAV );
 			curIdleTime = 0;
 		} else if( ERR_MATCH("No market data permissions for") ) {
@@ -806,8 +806,8 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	
 	if( p_histData.isFinished() ) {
 		curIdleTime = 0;
-		DEBUG_PRINTF( "READY %d %d",
-			workTodo->getHistTodo().currentIndex(), reqId );
+		DEBUG_PRINTF( "READY %p %d",
+			&workTodo->getHistTodo().current(), reqId );
 	}
 }
 

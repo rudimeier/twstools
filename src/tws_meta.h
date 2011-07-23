@@ -171,7 +171,6 @@ class HistTodo
 		int countLeft() const;
 		void checkout();
 		int checkoutOpt( PacingGod *pG, const DataFarmStates *dfs );
-		int currentIndex() const;
 		const HistRequest& current() const;
 		void tellDone();
 		void cancelForRepeat( int priority );
@@ -179,10 +178,10 @@ class HistTodo
 		
 	private:
 		QList<HistRequest*> &histRequests;
-		QList<int> &doneRequests;
-		QList<int> &leftRequests;
-		QList<int> &errorRequests;
-		QList<int> &checkedOutRequests;
+		QList<HistRequest*> &doneRequests;
+		QList<HistRequest*> &leftRequests;
+		QList<HistRequest*> &errorRequests;
+		HistRequest *checkedOutRequest;
 };
 
 
