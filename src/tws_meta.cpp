@@ -1222,11 +1222,11 @@ void PacingGod::clear()
 		}
 	} else {
 		// clear only PacingControls of inactive farms
-		foreach( QString farm, dataFarms.getInactives() ) {
-			if( controlHmds.contains(farm) ) {
+		foreach( std::string farm, dataFarms.getInactives() ) {
+			if( controlHmds.contains(QString::fromStdString(farm)) ) {
 				DEBUG_PRINTF( "clear pacing control of inactive farm %s",
-					farm.toStdString().c_str() );
-				controlHmds.value(farm)->clear();
+					farm.c_str() );
+				controlHmds.value(QString::fromStdString(farm))->clear();
 			}
 		}
 	}
@@ -1655,13 +1655,13 @@ void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 }
 
 
-std::vector<QString> DataFarmStates::getInactives() const
+std::vector<std::string> DataFarmStates::getInactives() const
 {
-	std::vector<QString> sl;
+	std::vector<std::string> sl;
 	QHash<const QString, State>::const_iterator it = hStates.constBegin();
 	while( it != hStates.constEnd() ) {
 		if( *it == INACTIVE || *it == BROKEN ) {
-			sl.push_back( it.key() );
+			sl.push_back( it.key().toStdString() );
 		}
 		it++;
 	}
@@ -1669,13 +1669,13 @@ std::vector<QString> DataFarmStates::getInactives() const
 }
 
 
-std::vector<QString> DataFarmStates::getActives() const
+std::vector<std::string> DataFarmStates::getActives() const
 {
-	std::vector<QString> sl;
+	std::vector<std::string> sl;
 	QHash<const QString, State>::const_iterator it = hStates.constBegin();
 	while( it != hStates.constEnd() ) {
 		if( *it == OK ) {
-			sl.push_back( it.key() );
+			sl.push_back( it.key().toStdString() );
 		}
 		it++;
 	}

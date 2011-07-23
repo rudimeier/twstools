@@ -409,8 +409,8 @@ class DataFarmStates
 		DataFarmStates();
 		virtual ~DataFarmStates();
 		
-		std::vector<QString> getInactives() const;
-		std::vector<QString>  getActives() const;
+		std::vector<std::string> getInactives() const;
+		std::vector<std::string>  getActives() const;
 		QString getMarketFarm( const IB::Contract& ) const;
 		QString getHmdsFarm( const QString& lazyC ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;
