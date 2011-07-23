@@ -455,55 +455,6 @@ void HistTodo::add( const HistRequest& hR )
 }
 
 
-void HistTodo::optimize( PacingGod *pG, const DataFarmStates *dfs)
-{
-	Q_ASSERT( checkedOutRequests.isEmpty() );
-	
-	QList<int> tmp;
-	QHash< QString, QList<int> > h;
-	foreach( int i ,leftRequests ) {
-		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract());
-		if( !h.contains(farm) ) {
-			h.insert(farm, QList<int>());
-		}
-		h[farm].append(i);
-	}
-	
-	QStringList farms = h.keys();
-	if( farms.removeOne("") ) {
-		farms.prepend("");
-	}
-	
-	foreach( QString farm, farms ) {
-		int i = 0;
-		Q_ASSERT( h.contains(farm) );
-		QList<int> &l = h[farm];
-		Q_ASSERT( l.size() > 0 );
-		Q_ASSERT( histRequests.size() > l.first() );
-		const IB::Contract& c = histRequests.at(l.first())->ibContract();
-		int count = qMin( pG->countLeft( c ), l.size() );
-		while( i < count) {
-			tmp.append(l.takeFirst());
-			i++;
-		}
-	}
-	foreach( QString farm, farms ) {
-		int i = 0;
-		Q_ASSERT( h.contains(farm) );
-		QList<int> &l = h[farm];
-		while( i < l.size() ) {
-			tmp.append(l.at(i));
-			i++;
-		}
-	}
-	
-	
-	qDebug() << tmp.size() << leftRequests.size();
-	Q_ASSERT( tmp.size() == leftRequests.size() );
-	leftRequests = tmp;
-}
-
-
 
 
 

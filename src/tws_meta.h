@@ -179,7 +179,6 @@ class HistTodo
 		void tellDone();
 		void cancelForRepeat( int priority );
 		void add( const HistRequest& );
-		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
 		QList<HistRequest*> &histRequests;
