@@ -321,16 +321,6 @@ HistTodo::~HistTodo()
 }
 
 
-void HistTodo::dump( FILE *stream ) const
-{
-	for(int i=0; i < histRequests.size(); i++ ) {
-		fprintf( stream, "[%d]\t%s\n",
-		         i,
-		         histRequests.at(i)->toString().c_str() );
-	}
-}
-
-
 void HistTodo::dumpLeft( FILE *stream ) const
 {
 	for(int i=0; i < leftRequests.size(); i++ ) {
