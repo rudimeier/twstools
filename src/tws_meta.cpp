@@ -1223,11 +1223,13 @@ void PacingGod::clear()
 		}
 	} else {
 		// clear only PacingControls of inactive farms
-		foreach( std::string farm, dataFarms.getInactives() ) {
-			if( controlHmds.find(QString::fromStdString(farm)) != controlHmds.end() ) {
+		const std::vector<std::string> inactives = dataFarms.getInactives();
+		for( std::vector<std::string>::const_iterator it = inactives.begin();
+			    it != inactives.end(); it++ ) {
+			if( controlHmds.find(QString::fromStdString(*it)) != controlHmds.end() ) {
 				DEBUG_PRINTF( "clear pacing control of inactive farm %s",
-					farm.c_str() );
-				controlHmds.find(QString::fromStdString(farm))->second->clear();
+					it->c_str() );
+				controlHmds.find(QString::fromStdString(*it))->second->clear();
 			}
 		}
 	}
@@ -1353,7 +1355,9 @@ void PacingGod::checkAdd( const IB::Contract& c,
 		lazies.push_back(*lazyC_);
 	}
 	
-	foreach( QString lazyC, lazies ) {
+	for( std::vector<QString>::const_iterator it = lazies.begin();
+		    it != lazies.end(); it++ ) {
+	const QString &lazyC = *it;
 	QString farm = dataFarms.getHmdsFarm(lazyC);
 	if( !farm.isEmpty() ) {
 		if( controlHmds.find(farm) == controlHmds.end() ) {
