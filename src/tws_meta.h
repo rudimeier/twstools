@@ -3,7 +3,6 @@
 
 #include "ibtws/Contract.h"
 
-#include <QtCore/QtContainerFwd>
 #include <stdint.h>
 #include <list>
 #include <map>

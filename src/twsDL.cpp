@@ -429,7 +429,7 @@ void TwsDL::getData()
 	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
 	
 	if( wait > 0 ) {
-		curIdleTime = qMin( 1000, wait );
+		curIdleTime = (wait < 1000) ? wait : 1000;
 		return;
 	}
 	if( wait < -1 ) {
