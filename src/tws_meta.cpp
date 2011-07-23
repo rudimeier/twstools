@@ -290,7 +290,6 @@ void GenericRequest::close()
 
 
 HistTodo::HistTodo() :
-	histRequests(*(new QList<HistRequest*>())),
 	doneRequests(*(new QList<HistRequest*>())),
 	leftRequests(*(new QList<HistRequest*>())),
 	errorRequests(*(new QList<HistRequest*>())),
@@ -301,13 +300,21 @@ HistTodo::HistTodo() :
 
 HistTodo::~HistTodo()
 {
-	foreach( HistRequest *hR, histRequests ) {
+	foreach( HistRequest *hR, doneRequests ) {
 		delete hR;
 	}
-	delete &histRequests;
 	delete &doneRequests;
+	foreach( HistRequest *hR, leftRequests ) {
+		delete hR;
+	}
 	delete &leftRequests;
+	foreach( HistRequest *hR, errorRequests ) {
+		delete hR;
+	}
 	delete &errorRequests;
+	if( checkedOutRequest != NULL ) {
+		delete checkedOutRequest;
+	}
 }
 
 
@@ -421,7 +428,6 @@ void HistTodo::tellDone()
 void HistTodo::add( const HistRequest& hR )
 {
 	HistRequest *p = new HistRequest(hR);
-	histRequests.append(p);
 	leftRequests.append(p);
 }
 

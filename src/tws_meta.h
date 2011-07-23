@@ -177,7 +177,6 @@ class HistTodo
 		void add( const HistRequest& );
 		
 	private:
-		QList<HistRequest*> &histRequests;
 		QList<HistRequest*> &doneRequests;
 		QList<HistRequest*> &leftRequests;
 		QList<HistRequest*> &errorRequests;
