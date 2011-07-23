@@ -5,7 +5,6 @@
 #include "debug.h"
 
 #include <QtCore/QStringList>
-#include <QtCore/QHash>
 
 
 #include <libxml/xmlmemory.h>
@@ -1154,8 +1153,8 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
 		maxRequests, checkInterval, minPacingTime, violationPause)) ),
-	controlHmds(*(new QHash<const QString, PacingControl*>()) ),
-	controlLazy(*(new QHash<const QString, PacingControl*>()) )
+	controlHmds(*(new std::map<const QString, PacingControl*>()) ),
+	controlLazy(*(new std::map<const QString, PacingControl*>()) )
 {
 }
 
@@ -1164,16 +1163,12 @@ PacingGod::~PacingGod()
 {
 	delete &controlGlobal;
 	
-	QHash<const QString, PacingControl*>::iterator it;
-	it = controlHmds.begin();
-	while( it != controlHmds.end() ) {
-		delete *it;
-		it = controlHmds.erase(it);
+	std::map<const QString, PacingControl*>::iterator it;
+	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+		delete it->second;
 	}
-	it = controlLazy.begin();
-	while( it != controlLazy.end() ) {
-		delete *it;
-		it = controlLazy.erase(it);
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		delete it->second;
 	}
 	delete &controlHmds;
 	delete &controlLazy;
@@ -1186,11 +1181,13 @@ void PacingGod::setPacingTime( int r, int i, int m )
 	checkInterval = i;
 	minPacingTime = m;
 	controlGlobal.setPacingTime( r, i, m );
-	foreach( PacingControl *pC, controlHmds ) {
-		pC->setPacingTime( r, i, m );
+	std::map<const QString, PacingControl*>::iterator it;
+	
+	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+		it->second->setPacingTime( r, i, m );
 	}
-	foreach( PacingControl *pC, controlLazy ) {
-		pC->setPacingTime( r, i, m  );
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		it->second->setPacingTime( r, i, m  );
 	}
 }
 
@@ -1199,11 +1196,13 @@ void PacingGod::setViolationPause( int vP )
 {
 	violationPause = vP;
 	controlGlobal.setViolationPause( vP );
-	foreach( PacingControl *pC, controlHmds ) {
-		pC->setViolationPause( vP );
+	std::map<const QString, PacingControl*>::iterator it;
+	
+	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+		it->second->setViolationPause( vP );
 	}
-	foreach( PacingControl *pC, controlLazy ) {
-		pC->setViolationPause( vP );
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		it->second->setViolationPause( vP );
 	}
 }
 
@@ -1214,19 +1213,21 @@ void PacingGod::clear()
 		// clear all PacingControls
 		DEBUG_PRINTF( "clear all pacing controls" );
 		controlGlobal.clear();
-		foreach( PacingControl *pC, controlHmds ) {
-			pC->clear();
+		std::map<const QString, PacingControl*>::iterator it;
+		
+		for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+			it->second->clear();
 		}
-		foreach( PacingControl *pC, controlLazy ) {
-			pC->clear();
+		for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+			it->second->clear();
 		}
 	} else {
 		// clear only PacingControls of inactive farms
 		foreach( std::string farm, dataFarms.getInactives() ) {
-			if( controlHmds.contains(QString::fromStdString(farm)) ) {
+			if( controlHmds.find(QString::fromStdString(farm)) != controlHmds.end() ) {
 				DEBUG_PRINTF( "clear pacing control of inactive farm %s",
 					farm.c_str() );
-				controlHmds.value(QString::fromStdString(farm))->clear();
+				controlHmds.find(QString::fromStdString(farm))->second->clear();
 			}
 		}
 	}
@@ -1243,11 +1244,13 @@ void PacingGod::addRequest( const IB::Contract& c )
 	
 	if( farm.isEmpty() ) {
 		DEBUG_PRINTF( "add request lazy" );
-		assert( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
+		assert( controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() );
 		controlLazy[lazyC]->addRequest();
 	} else {
 		DEBUG_PRINTF( "add request farm %s", farm.toStdString().c_str() );
-		assert( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		assert( controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.find(lazyC) == controlLazy.end() );
 		controlHmds[farm]->addRequest();
 	}
 }
@@ -1263,11 +1266,13 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 	
 	if( farm.isEmpty() ) {
 		DEBUG_PRINTF( "set violation lazy" );
-		assert( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
+		assert( controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() );
 		controlLazy[lazyC]->notifyViolation();
 	} else {
 		DEBUG_PRINTF( "set violation farm %s", farm.toStdString().c_str() );
-		assert( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		assert( controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.find(lazyC) == controlLazy.end() );
 		controlHmds[farm]->notifyViolation();
 	}
 }
@@ -1283,15 +1288,16 @@ int PacingGod::goodTime( const IB::Contract& c )
 	
 	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		assert( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+		assert( (controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() )
 			|| !laziesCleared );
 		int t = controlGlobal.goodTime(&dbg);
 		DEBUG_PRINTF( "get good time global %s %d", dbg, t );
 		return t;
 	} else {
-		assert( (controlHmds.contains(farm) && controlLazy.isEmpty())
-			|| laziesCleared );
-		int t = controlHmds.value(farm)->goodTime(&dbg);
+		assert( (controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.empty()) || laziesCleared );
+		int t = controlHmds.find(farm)->second->goodTime(&dbg);
 		DEBUG_PRINTF( "get good time farm %s %s %d",
 			farm.toStdString().c_str(), dbg, t );
 		return t;
@@ -1308,18 +1314,19 @@ int PacingGod::countLeft( const IB::Contract& c )
 	
 	if( farm.isEmpty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		assert( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+		assert( (controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end())
 			|| !laziesCleared );
 		int left = controlGlobal.countLeft();
 		DEBUG_PRINTF( "get count left global %d", left );
 		return left;
 	} else {
-		assert( (controlHmds.contains(farm) && controlLazy.isEmpty())
-			|| laziesCleared );
-		int left = controlHmds.value(farm)->countLeft();
+		assert( (controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.empty()) || laziesCleared );
+		int left = controlHmds.find(farm)->second->countLeft();
 		DEBUG_PRINTF( "get count left farm %s %d",
 			farm.toStdString().c_str(), left );
-		return controlHmds.value(farm)->countLeft();
+		return controlHmds.find(farm)->second->countLeft();
 	}
 }
 
@@ -1331,12 +1338,11 @@ void PacingGod::checkAdd( const IB::Contract& c,
 	*lazyC_ = QString::fromStdString(LAZY_CONTRACT_STR(c));
 	*farm_ = dataFarms.getHmdsFarm(c);
 	
-	// controlLazy.keys() does not work for QHash<const QString, PacingControl*>
 	QStringList lazies;
-	QHash<const QString, PacingControl*>::const_iterator it =
-		controlLazy.constBegin();
-	while( it != controlLazy.constEnd() ) {
-		lazies.append( it.key() );
+	std::map<const QString, PacingControl*>::const_iterator it =
+		controlLazy.begin();
+	while( it != controlLazy.end() ) {
+		lazies.append( it->first );
 		it++;
 	}
 	if( !lazies.contains(*lazyC_) ) {
@@ -1346,42 +1352,51 @@ void PacingGod::checkAdd( const IB::Contract& c,
 	foreach( QString lazyC, lazies ) {
 	QString farm = dataFarms.getHmdsFarm(lazyC);
 	if( !farm.isEmpty() ) {
-		if( !controlHmds.contains(farm) ) {
+		if( controlHmds.find(farm) == controlHmds.end() ) {
 			PacingControl *pC;
-			if( controlLazy.contains(lazyC) ) {
+			if( controlLazy.find(lazyC) != controlLazy.end() ) {
 				DEBUG_PRINTF( "move pacing control lazy to farm %s, %s",
 					lazyC.toStdString().c_str(), farm.toStdString().c_str() );
-				pC = controlLazy.take(lazyC);
+				
+				
+				std::map<const QString, PacingControl*>::iterator it
+					= controlLazy.find(lazyC);
+				pC = it->second;
+				controlLazy.erase(it);
 			} else {
 				DEBUG_PRINTF( "create pacing control for farm %s",
 					farm.toStdString().c_str() );
 				pC = new PacingControl(
 					maxRequests, checkInterval, minPacingTime, violationPause);
 			}
-			controlHmds.insert( farm, pC );
+			controlHmds[farm] = pC;
 		} else {
-			if( !controlLazy.contains(lazyC) ) {
+			if( controlLazy.find(lazyC) == controlLazy.end() ) {
 				// fine - no history about that
 			} else {
 				DEBUG_PRINTF( "merge pacing control lazy into farm %s %s",
 					lazyC.toStdString().c_str(), farm.toStdString().c_str() );
-				PacingControl *pC = controlLazy.take(lazyC);
-				controlHmds.value(farm)->merge(*pC);
+				
+				std::map<const QString, PacingControl*>::iterator it
+					= controlLazy.find(lazyC);
+				PacingControl *pC = it->second;
+				controlLazy.erase(it);
+				controlHmds.find(farm)->second->merge(*pC);
 				delete pC;
 			}
 		}
-		assert( controlHmds.contains(farm) );
-		assert( !controlLazy.contains(lazyC) );
+		assert( controlHmds.find(farm) != controlHmds.end() );
+		assert( controlLazy.find(lazyC) == controlLazy.end() );
 		
-	} else if( !controlLazy.contains(lazyC) ) {
+	} else if( controlLazy.find(lazyC) == controlLazy.end() ) {
 			DEBUG_PRINTF( "create pacing control for lazy %s",
 				lazyC.toStdString().c_str() );
 			PacingControl *pC = new PacingControl(
 				maxRequests, checkInterval, minPacingTime, violationPause);
-			controlLazy.insert( lazyC, pC );
+			controlLazy[lazyC] = pC;
 			
-			assert( !controlHmds.contains(farm) );
-			assert( controlLazy.contains(lazyC) );
+			assert( controlHmds.find(farm) == controlHmds.end() );
+			assert( controlLazy.find(lazyC) != controlLazy.end() );
 	}
 	}
 }
@@ -1391,8 +1406,9 @@ bool PacingGod::laziesAreCleared() const
 {
 	
 	bool retVal = true;
-	foreach( PacingControl *pC, controlLazy ) {
-		retVal &=  pC->isEmpty();
+	std::map<const QString, PacingControl*>::iterator it;
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		retVal &=  it->second->isEmpty();
 	}
 	return retVal;
 }
