@@ -21,6 +21,22 @@ int64_t nowInMsecs()
 	return now_ms;
 }
 
+std::string msecs_to_string( int64_t msecs )
+{
+	const time_t s = msecs / 1000;
+	const uint ms = msecs % 1000;
+	char buf[ 19 + 4 + 1 ]; // "yyyy-mm-dd hh:mm:ss.zzz"
+	const struct tm *tmp_tm = localtime( &s );
+	size_t tmp_sz;
+	
+	tmp_sz = strftime(buf, 19+1 , "%F %T", tmp_tm);
+	assert( tmp_sz == 19);
+	tmp_sz = snprintf( buf+19, 4+1, ".%03u", ms );
+	assert( tmp_sz == 4);
+	
+	return std::string(buf);
+}
+
 
 std::string ibToString( int tickType) {
 	switch ( tickType) {
