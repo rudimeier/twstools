@@ -1546,6 +1546,8 @@ void DataFarmStates::setAllBroken()
 		it->second = BROKEN;
 		it++;
 	}
+	
+	last_learned_lazy_contract.clear();
 }
 
 
@@ -1602,6 +1604,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 	
 	lastChanged = farm;
 	(*pHash)[farm] = state;
+	last_learned_lazy_contract.clear();
 // 	qDebug() << *pHash; // TODO print farms with states
 }
 
@@ -1625,6 +1628,11 @@ void DataFarmStates::learnMarket( const IB::Contract& )
 void DataFarmStates::learnHmds( const IB::Contract& c )
 {
 	std::string lazyC = LAZY_CONTRACT_STR(c);
+	
+	if( last_learned_lazy_contract == lazyC ) {
+		return;
+	}
+	last_learned_lazy_contract = lazyC;
 	
 	std::vector<std::string> sl;
 	std::map<const std::string, State>::const_iterator it = hStates.begin();
