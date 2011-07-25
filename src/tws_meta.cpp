@@ -1405,6 +1405,7 @@ DataFarmStates::DataFarmStates() :
 	hLearn( *(new QHash<const QString, QString>()) ),
 	lastMsgNumber(INT_MIN)
 {
+	initHardCodedFarms();
 }
 
 DataFarmStates::~DataFarmStates()
@@ -1413,6 +1414,96 @@ DataFarmStates::~DataFarmStates()
 	delete &mLearn;
 	delete &hStates;
 	delete &mStates;
+}
+
+void DataFarmStates::initHardCodedFarms()
+{
+	hLearn["BELFOX\tIND"] = "euhmds2";
+	hLearn["BM\tIND"] = "euhmds2";
+	hLearn["BVME\tIND"] = "euhmds2";
+	hLearn["CBOT\tIND"] = "euhmds2";
+	hLearn["DTB\tIND"] = "euhmds2";
+	hLearn["EBS\tIND"] = "euhmds2";
+	hLearn["EDXNO\tIND"] = "euhmds2";
+	hLearn["FTA\tIND"] = "euhmds2";
+	hLearn["IBIS\tIND"] = "euhmds2";
+	hLearn["IDEM\tIND"] = "euhmds2";
+	hLearn["IPE\tIND"] = "euhmds2";
+	hLearn["LIFFE_NF\tIND"] = "euhmds2";
+	hLearn["LIFFE\tIND"] = "euhmds2";
+	hLearn["LSE\tIND"] = "euhmds2";
+	hLearn["MATIF\tIND"] = "euhmds2";
+	hLearn["MEFFRV\tIND"] = "euhmds2";
+	hLearn["MONEP\tIND"] = "euhmds2";
+	hLearn["OMS\tIND"] = "euhmds2";
+	hLearn["SFB\tIND"] = "euhmds2";
+	hLearn["SOFFEX\tIND"] = "euhmds2";
+	
+	hLearn["BELFOX\tFUT"] = "euhmds2";
+	hLearn["DTB\tFUT"] = "euhmds2";
+	hLearn["FTA\tFUT"] = "euhmds2";
+	hLearn["LIFFE_NF\tFUT"] = "euhmds2";
+	hLearn["LIFFE\tFUT"] = "euhmds2";
+	hLearn["LSSF\tFUT"] = "euhmds2";
+	hLearn["MONEP\tFUT"] = "euhmds2";
+	hLearn["SOFFEX\tFUT"] = "euhmds2";
+	
+	hLearn["DTB\tOPT"] = "euhmds2";
+	hLearn["LIFFE\tOPT"] = "euhmds2";
+	hLearn["MONEP\tOPT"] = "euhmds2";
+	
+	
+	hLearn["IDEALPRO\tCASH"] = "ushmds2a";
+	
+	hLearn["AMEX\tIND"] = "ushmds2a";
+	hLearn["AQS\tIND"] = "ushmds2a";
+	hLearn["ARCA\tIND"] = "ushmds2a";
+	hLearn["CBOE\tIND"] = "ushmds2a";
+	hLearn["CDE\tIND"] = "ushmds2a";
+	hLearn["CFE\tIND"] = "ushmds2a";
+	hLearn["CME\tIND"] = "ushmds2a";
+	hLearn["ECBOT\tIND"] = "ushmds2a";
+	hLearn["GLOBEX\tIND"] = "ushmds2a";
+	hLearn["ISE\tIND"] = "ushmds2a";
+	hLearn["NASDAQ\tIND"] = "ushmds2a";
+	hLearn["NYBOT\tIND"] = "ushmds2a";
+	hLearn["NYMEX\tIND"] = "ushmds2a";
+	hLearn["NYSELIFFE\tIND"] = "ushmds2a";
+	hLearn["NYSE\tIND"] = "ushmds2a";
+	hLearn["ONE\tIND"] = "ushmds2a";
+	hLearn["PHLX\tIND"] = "ushmds2a";
+	hLearn["PSE\tIND"] = "ushmds2a";
+	hLearn["TSE\tIND"] = "ushmds2a";
+	
+	hLearn["CDE\tFUT"] = "ushmds2a";
+	hLearn["CFE\tFUT"] = "ushmds2a";
+	hLearn["CME\tFUT"] = "ushmds2a";
+	hLearn["ECBOT\tFUT"] = "ushmds2a";
+	hLearn["GLOBEX\tFUT"] = "ushmds2a";
+	hLearn["IPE\tFUT"] = "ushmds2a";
+	hLearn["NYBOT\tFUT"] = "ushmds2a";
+	hLearn["NYMEX\tFUT"] = "ushmds2a";
+	hLearn["NYSELIFFE\tFUT"] = "ushmds2a";
+	hLearn["ONE\tFUT"] = "ushmds2a";
+	
+	hLearn["CBOE\tOPT"] = "ushmds2a";
+	
+	
+	hLearn["ASX\tIND"] = "hkhmds2";
+	hLearn["HKFE\tIND"] = "hkhmds2";
+	hLearn["KSE\tIND"] = "hkhmds2";
+	hLearn["NSE\tIND"] = "hkhmds2";
+	hLearn["OSE.JPN\tIND"] = "hkhmds2";
+	hLearn["SGX\tIND"] = "hkhmds2";
+	hLearn["SNFE\tIND"] = "hkhmds2";
+	hLearn["TSE.JPN\tIND"] = "hkhmds2";
+	
+	hLearn["HKFE\tFUT"] = "hkhmds2";
+	hLearn["NSE\tFUT"] = "hkhmds2";
+	hLearn["SGX\tFUT"] = "hkhmds2";
+	hLearn["SNFE\tFUT"] = "hkhmds2";
+	
+	hLearn["KSE\tOPT"] = "hkhmds2";
 }
 
 void DataFarmStates::setAllBroken()
