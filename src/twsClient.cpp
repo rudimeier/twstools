@@ -266,6 +266,14 @@ void TWSClient::reqAccountUpdates( bool subscribe, const std::string &acctCode )
 }
 
 
+void TWSClient::reqExecutions(int reqId, const IB::ExecutionFilter& filter)
+{
+	DEBUG_PRINTF("REQ_EXECUTIONS %d", reqId);
+	
+	ePosixClient->reqExecutions(reqId, filter);
+}
+
+
 void TWSClient::reqIds( int numIds)
 {
 	DEBUG_PRINTF("REQ_IDS %d", numIds);

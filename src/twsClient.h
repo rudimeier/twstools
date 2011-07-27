@@ -10,6 +10,7 @@ namespace IB {
 	class Order;
 	class OrderState;
 	class Execution;
+	class ExecutionFilter;
 	class EPosixClientSocket;
 	class EWrapper;
 };
@@ -43,6 +44,7 @@ class TWSClient
 		void placeOrder( int id, const IB::Contract &contract, const IB::Order &order );
 		void cancelOrder( int id );
 		void reqOpenOrders();
+		void reqExecutions(int reqId, const IB::ExecutionFilter& filter);
 		void reqAccountUpdates( bool subscribe, const std::string &acctCode );
 		void reqIds( int numIds );
 		void reqContractDetails( int reqId, const IB::Contract &contract );
