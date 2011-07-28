@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "twsUtil.h"
 #include "ibtws/Contract.h"
+#include "ibtws/Execution.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -160,6 +161,31 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 }
 
 
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
+{
+	char tmp[128];
+	static const IB::Execution dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_STRING( e, execId );
+	ADD_ATTR_STRING( e, time );
+	ADD_ATTR_STRING( e, acctNumber );
+	ADD_ATTR_STRING( e, exchange );
+	ADD_ATTR_STRING( e, side );
+	ADD_ATTR_INT( e, shares );
+	ADD_ATTR_DOUBLE( e, price );
+	ADD_ATTR_INT( e, permId );
+	ADD_ATTR_LONG( e, clientId );
+	ADD_ATTR_LONG( e, orderId );
+	ADD_ATTR_INT( e, liquidation );
+	ADD_ATTR_INT( e, cumQty );
+	ADD_ATTR_DOUBLE( e, avgPrice );
+}
+
+
+
 
 #define GET_ATTR_INT( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
@@ -297,6 +323,27 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, nextOptionType );
 	GET_ATTR_BOOL( cd, nextOptionPartial );
 	GET_ATTR_STRING( cd, notes );
+}
+
+
+void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::Execution dflt;
+	
+	GET_ATTR_STRING( e, execId );
+	GET_ATTR_STRING( e, time );
+	GET_ATTR_STRING( e, acctNumber );
+	GET_ATTR_STRING( e, exchange );
+	GET_ATTR_STRING( e, side );
+	GET_ATTR_INT( e, shares );
+	GET_ATTR_DOUBLE( e, price );
+	GET_ATTR_INT( e, permId );
+	GET_ATTR_LONG( e, clientId );
+	GET_ATTR_LONG( e, orderId );
+	GET_ATTR_INT( e, liquidation );
+	GET_ATTR_INT( e, cumQty );
+	GET_ATTR_DOUBLE( e, avgPrice );
 }
 
 
