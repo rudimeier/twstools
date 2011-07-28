@@ -9,6 +9,9 @@ namespace IB {
 	class ContractDetails;
 	class Execution;
 	class ExecutionFilter;
+	class TagValue;
+	class Order;
+	class OrderState;
 }
 
 
@@ -24,6 +27,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
 	const IB::ExecutionFilter& );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& );
 
 void conv_xml2ib( IB::ComboLeg* c, const xmlNodePtr node );
 void conv_xml2ib( IB::UnderComp* c, const xmlNodePtr node );
@@ -31,6 +37,9 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node );
 void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
 void conv_xml2ib( IB::Execution*, const xmlNodePtr node );
 void conv_xml2ib( IB::ExecutionFilter*, const xmlNodePtr node );
+void conv_xml2ib( IB::TagValue*, const xmlNodePtr node );
+void conv_xml2ib( IB::Order*, const xmlNodePtr node );
+void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
 
 
 
