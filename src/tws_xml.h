@@ -8,6 +8,7 @@ namespace IB {
 	class Contract;
 	class ContractDetails;
 	class Execution;
+	class ExecutionFilter;
 }
 
 
@@ -21,12 +22,15 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
 	const IB::ContractDetails& c );
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& );
+void conv_ib2xml( xmlNodePtr parent, const char* name,
+	const IB::ExecutionFilter& );
 
 void conv_xml2ib( IB::ComboLeg* c, const xmlNodePtr node );
 void conv_xml2ib( IB::UnderComp* c, const xmlNodePtr node );
 void conv_xml2ib( IB::Contract* c, const xmlNodePtr node );
 void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
 void conv_xml2ib( IB::Execution*, const xmlNodePtr node );
+void conv_xml2ib( IB::ExecutionFilter*, const xmlNodePtr node );
 
 
 

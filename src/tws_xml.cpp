@@ -184,6 +184,24 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
 	ADD_ATTR_DOUBLE( e, avgPrice );
 }
 
+void conv_ib2xml( xmlNodePtr parent, const char* name,
+	const IB::ExecutionFilter& eF )
+{
+	char tmp[128];
+	static const IB::ExecutionFilter dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_LONG( eF, m_clientId );
+	ADD_ATTR_STRING( eF, m_acctCode );
+	ADD_ATTR_STRING( eF, m_time );
+	ADD_ATTR_STRING( eF, m_symbol );
+	ADD_ATTR_STRING( eF, m_secType );
+	ADD_ATTR_STRING( eF, m_exchange );
+	ADD_ATTR_STRING( eF, m_side );
+}
+
 
 
 
@@ -344,6 +362,21 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 	GET_ATTR_INT( e, liquidation );
 	GET_ATTR_INT( e, cumQty );
 	GET_ATTR_DOUBLE( e, avgPrice );
+}
+
+
+void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::ExecutionFilter dflt;
+	
+	GET_ATTR_LONG( eF, m_clientId );
+	GET_ATTR_STRING( eF, m_acctCode );
+	GET_ATTR_STRING( eF, m_time );
+	GET_ATTR_STRING( eF, m_symbol );
+	GET_ATTR_STRING( eF, m_secType );
+	GET_ATTR_STRING( eF, m_exchange );
+	GET_ATTR_STRING( eF, m_side );
 }
 
 
