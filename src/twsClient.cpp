@@ -258,6 +258,20 @@ void TWSClient::reqOpenOrders()
 }
 
 
+void TWSClient::reqAllOpenOrders()
+{
+	DEBUG_PRINTF("REQ_ALL_OPEN_ORDERS");
+	ePosixClient->reqAllOpenOrders();
+}
+
+
+void TWSClient::reqAutoOpenOrders( bool bAutoBind )
+{
+	DEBUG_PRINTF("REQ_AUTO_OPEN_ORDERS %d", bAutoBind);
+	ePosixClient->reqAutoOpenOrders( bAutoBind );
+}
+
+
 void TWSClient::reqAccountUpdates( bool subscribe, const std::string &acctCode )
 {
 	DEBUG_PRINTF("REQ_ACCOUNT_DATA %d '%s'", subscribe, acctCode.c_str() );

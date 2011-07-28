@@ -44,6 +44,8 @@ class TWSClient
 		void placeOrder( int id, const IB::Contract &contract, const IB::Order &order );
 		void cancelOrder( int id );
 		void reqOpenOrders();
+		void reqAllOpenOrders();
+		void reqAutoOpenOrders( bool bAutoBind );
 		void reqExecutions(int reqId, const IB::ExecutionFilter& filter);
 		void reqAccountUpdates( bool subscribe, const std::string &acctCode );
 		void reqIds( int numIds );
