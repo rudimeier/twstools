@@ -63,8 +63,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 	ADD_ATTR_LONG( cl, shortSaleSlot );
 	ADD_ATTR_STRING( cl, designatedLocation );
 	ADD_ATTR_INT( cl, exemptCode );
-	
-	xmlAddChild(parent, ne);
 }
 
 
@@ -78,8 +76,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc )
 	ADD_ATTR_LONG( uc, conId );
 	ADD_ATTR_DOUBLE( uc, delta );
 	ADD_ATTR_DOUBLE( uc, price );
-	
-	xmlAddChild(parent, ne);
 }
 
 
@@ -117,8 +113,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	if( c.underComp != NULL ) {
 		conv_ib2xml( ne, "underComp", *c.underComp );
 	}
-	
-	xmlAddChild(parent, ne);
 }
 
 
@@ -165,8 +159,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, nextOptionType );
 	ADD_ATTR_BOOL( cd, nextOptionPartial );
 	ADD_ATTR_STRING( cd, notes );
-	
-	xmlAddChild(parent, ne);
 }
 
 
