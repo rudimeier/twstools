@@ -555,7 +555,8 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 
-Packet::Packet()
+Packet::Packet() :
+	mode(CLEAN)
 {
 }
 
@@ -723,7 +724,6 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<Row>()))
 {
-	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
 	request = NULL;

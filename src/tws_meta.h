@@ -241,6 +241,9 @@ class Packet
 		
 		virtual void clear() = 0;
 		virtual void dumpXml() = 0;
+		
+	protected:
+		Mode mode;
 };
 
 
@@ -294,7 +297,6 @@ class PacketHistData
 	: public  Packet
 {
 	public:
-		enum Mode { CLEAN, RECORD, CLOSED };
 		enum Error { ERR_NONE, ERR_NODATA, ERR_NAV,
 			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
 		
@@ -334,7 +336,6 @@ class PacketHistData
 				bool hasGaps;
 		};
 		
-		Mode mode;
 		Error error;
 		
 		int reqId;
