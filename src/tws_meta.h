@@ -231,7 +231,27 @@ class WorkTodo
 
 
 
+class Packet
+{
+	public:
+		enum Mode { CLEAN, RECORD, CLOSED };
+		
+		Packet();
+		virtual ~Packet();
+		
+		virtual void clear() = 0;
+		virtual void dumpXml() = 0;
+};
+
+
+
+
+
+
+
+
 class PacketContractDetails
+	: public Packet
 {
 	public:
 		PacketContractDetails();
@@ -271,6 +291,7 @@ PacketContractDetails::constList() const
 
 
 class PacketHistData
+	: public  Packet
 {
 	public:
 		enum Mode { CLEAN, RECORD, CLOSED };

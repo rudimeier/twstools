@@ -555,6 +555,21 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 
+Packet::Packet()
+{
+}
+
+Packet::~Packet()
+{
+}
+
+
+
+
+
+
+
+
 PacketContractDetails::PacketContractDetails() :
 	cdList(new std::vector<IB::ContractDetails>())
 {
