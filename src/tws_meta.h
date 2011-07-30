@@ -167,7 +167,6 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		void dump( FILE *stream ) const;
 		void dumpLeft( FILE *stream ) const;
 		
 		int countDone() const;
@@ -179,7 +178,6 @@ class HistTodo
 		void tellDone();
 		void cancelForRepeat( int priority );
 		void add( const HistRequest& );
-		void optimize(PacingGod*, const DataFarmStates*);
 		
 	private:
 		QList<HistRequest*> &histRequests;
@@ -419,6 +417,7 @@ class DataFarmStates
 		QString getHmdsFarm( const QString& lazyC ) const;
 		QString getHmdsFarm( const IB::Contract& ) const;
 		
+		void initHardCodedFarms();
 		void setAllBroken();
 		void notify(int msgNumber, int errorCode, const std::string &msg);
 		void learnMarket( const IB::Contract& );

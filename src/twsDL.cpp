@@ -15,7 +15,10 @@
 #include <QtCore/QCoreApplication>
 #include <popt.h>
 #include <stdio.h>
+#include <string.h>
 
+
+enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
 static poptContext opt_ctx;
 static const char *workfilep = "";
@@ -41,12 +44,18 @@ License: BSD 3-Clause\n"
 static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
 	poptOption *key, const char */*arg*/, void */*data*/ )
 {
-	if (key->shortName == 'h') {
+	switch( key->val ) {
+	case POPT_HELP:
 		poptPrintHelp(con, stdout, 0);
-	} else if (key->shortName == 'V') {
+		break;
+	case POPT_VERSION:
 		fprintf(stdout, VERSION_MSG);
-	} else {
+		break;
+	case POPT_USAGE:
 		poptPrintUsage(con, stdout, 0);
+		break;
+	default:
+		assert(false);
 	}
 	
 	exit(0);
@@ -82,11 +91,12 @@ static struct poptOption tws_tweak_opts[] = {
 
 static struct poptOption help_opts[] = {
 	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
-	{"help", 'h', POPT_ARG_NONE, NULL, 0, "Show this help message.", NULL},
-	{"version", 'V', POPT_ARG_NONE, NULL, 0, "Print version string and exit.",
-		NULL},
-	{"usage", '\0', POPT_ARG_NONE, NULL, 0, "Display brief usage message."
-		, NULL},
+	{"help", '\0', POPT_ARG_NONE, NULL, POPT_HELP,
+		"Show this help message.", NULL},
+	{"version", '\0', POPT_ARG_NONE, NULL, POPT_VERSION,
+		"Print version string and exit.", NULL},
+	{"usage", '\0', POPT_ARG_NONE, NULL, POPT_USAGE,
+		"Display brief usage message." , NULL},
 	POPT_TABLEEND
 };
 
