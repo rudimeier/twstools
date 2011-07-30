@@ -389,7 +389,7 @@ void TwsDL::idle()
 	
 	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
 		if(  workTodo->getHistTodo().countLeft() > 0 ) {
-			getData();
+			getHist();
 			return;
 		}
 	}
@@ -408,22 +408,25 @@ void TwsDL::getContracts()
 }
 
 
-void TwsDL::finContracts()
+bool TwsDL::finContracts()
 {
+	if( !packet->finished() ) {
+		DEBUG_PRINTF( "Timeout waiting for data." );
+		// TODO repeat
+		return false;
+	}
+	
 	DEBUG_PRINTF( "Contracts received: %zu",
 		((PacketContractDetails*)packet)->constList().size() );
 	
 	packet->dumpXml();
-	delete packet;
-	packet = NULL;
 	
 	curIndexTodoContractDetails++;
-	currentRequest.close();
-	changeState( IDLE );
+	return true;
 }
 
 
-void TwsDL::getData()
+void TwsDL::getHist()
 {
 	assert( workTodo->getHistTodo().countLeft() > 0 );
 	
@@ -457,51 +460,42 @@ void TwsDL::getData()
 
 void TwsDL::waitData()
 {
+	if( !packet->finished() && (currentRequest.age() <= tws_reqTimeoutp) ) {
+		DEBUG_PRINTF( "still waiting for data." );
+		return;
+	}
+	
+	bool ok = false;
 	switch( currentRequest.reqType() ) {
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
-		waitContracts();
+		ok = finContracts();
 		break;
 	case GenericRequest::HIST_REQUEST:
-		waitHist();
+		ok = finHist();
 		break;
 	case GenericRequest::NONE:
 		assert( false );
+		ok = false;
 		break;
 	}
-}
-
-
-void TwsDL::waitContracts()
-{
-	if( packet->finished() ) {
-		finContracts();
-	} else if( currentRequest.age() > tws_reqTimeoutp ) {
-		DEBUG_PRINTF( "Timeout waiting for data." );
-		// TODO repeat
-		changeState( QUIT_ERROR );
+	if( ok ) {
+		changeState( IDLE );
 	} else {
-		DEBUG_PRINTF( "still waiting for data." );
+		changeState( QUIT_ERROR );
 	}
+	delete packet;
+	packet = NULL;
+	currentRequest.close();
 }
 
 
-void TwsDL::waitHist()
+bool TwsDL::finHist()
 {
-	if( packet->finished() ) {
-		finData();
-	} else if( currentRequest.age() > tws_reqTimeoutp ) {
+	if( !packet->finished() ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
 		((PacketHistData*)packet)->closeError( PacketHistData::ERR_TIMEOUT );
-		finData();
-	} else {
-		DEBUG_PRINTF( "still waiting for data." );
 	}
-}
-
-
-void TwsDL::finData()
-{
-	assert( packet->finished() );
+	
 	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( ((PacketHistData*)packet)->getError() ) {
@@ -521,11 +515,7 @@ void TwsDL::finData()
 		histTodo->cancelForRepeat(2);
 		break;
 	}
-	
-	delete packet;
-	packet = NULL;
-	currentRequest.close();
-	changeState( IDLE );
+	return true;
 }
 
 

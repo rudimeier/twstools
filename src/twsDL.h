@@ -63,12 +63,10 @@ class TwsDL
 		void waitTwsCon();
 		void idle();
 		void getContracts();
-		void finContracts();
-		void getData();
+		bool finContracts();
+		void getHist();
+		bool finHist();
 		void waitData();
-		void waitContracts();
-		void waitHist();
-		void finData();
 		void onQuit( int ret );
 		
 		void changeState( State );
