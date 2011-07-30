@@ -309,7 +309,6 @@ class PacketHistData
 		static PacketHistData * fromXml( xmlNodePtr );
 		
 		const HistRequest& getRequest() const;
-		bool isFinished() const;
 		Error getError() const;
 		void clear();
 		void record( int reqId, const HistRequest& );

@@ -486,7 +486,7 @@ void TwsDL::waitContracts()
 
 void TwsDL::waitHist()
 {
-	if( p_histData.isFinished() ) {
+	if( p_histData.finished() ) {
 		finData();
 	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
@@ -500,7 +500,7 @@ void TwsDL::waitHist()
 
 void TwsDL::finData()
 {
-	assert( p_histData.isFinished() );
+	assert( p_histData.finished() );
 	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( p_histData.getError() ) {
@@ -734,7 +734,7 @@ void TwsDL::twsConnected( bool connected )
 				}
 				break;
 			case GenericRequest::HIST_REQUEST:
-				if( !p_histData.isFinished() ) {
+				if( !p_histData.finished() ) {
 					p_histData.closeError( PacketHistData::ERR_TWSCON );
 				}
 				break;
@@ -800,11 +800,11 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	// TODO we shouldn't do this each row
 	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
 	
-	assert( !p_histData.isFinished() );
+	assert( !p_histData.finished() );
 	p_histData.append( reqId, date, open, high, low,
 		close, volume, count, WAP, hasGaps );
 	
-	if( p_histData.isFinished() ) {
+	if( p_histData.finished() ) {
 		curIdleTime = 0;
 		DEBUG_PRINTF( "READY %p %d",
 			&workTodo->getHistTodo().current(), reqId );

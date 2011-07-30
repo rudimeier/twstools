@@ -875,11 +875,6 @@ const HistRequest& PacketHistData::getRequest() const
 	return *request;
 }
 
-bool PacketHistData::isFinished() const
-{
-	return (mode == CLOSED);
-}
-
 
 PacketHistData::Error PacketHistData::getError() const
 {
