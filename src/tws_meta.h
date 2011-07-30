@@ -431,6 +431,11 @@ class DataFarmStates
 		
 		int lastMsgNumber;
 		std::string lastChanged;
+		
+		/* Remember last (lazy) contract we've tried to learn as long as farm
+		   states don't change. This is for optimizing repeatedly calls of
+		   learnHmds(). */
+		std::string last_learned_lazy_contract;
 };
 
 

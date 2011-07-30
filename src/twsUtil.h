@@ -11,6 +11,7 @@ namespace IB {
 }
 
 int64_t nowInMsecs();
+std::string msecs_to_string( int64_t msecs );
 
 std::string ibToString( int ibTickType);
 std::string ibToString( const IB::Execution& );
