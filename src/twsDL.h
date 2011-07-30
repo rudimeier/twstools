@@ -25,8 +25,7 @@ class GenericRequest;
 class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
-class PacketContractDetails;
-class PacketHistData;
+class Packet;
 class PacingGod;
 class DataFarmStates;
 
@@ -113,8 +112,7 @@ class TwsDL
 		
 		WorkTodo *workTodo;
 		
-		PacketContractDetails &p_contractDetails;
-		PacketHistData &p_histData;
+		Packet *packet;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;

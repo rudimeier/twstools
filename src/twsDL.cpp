@@ -244,8 +244,7 @@ TwsDL::TwsDL( const std::string& workFile ) :
 	currentRequest(  *(new GenericRequest()) ),
 	curIndexTodoContractDetails(0),
 	workTodo( new WorkTodo() ),
-	p_contractDetails( *(new PacketContractDetails()) ),
-	p_histData( *(new PacketHistData()) ),
+	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
 	pacingControl( *(new PacingGod(dataFarms)) )
 {
@@ -270,8 +269,9 @@ TwsDL::~TwsDL()
 	if( workTodo != NULL ) {
 		delete workTodo;
 	}
-	delete &p_contractDetails;
-	delete &p_histData;
+	if( packet != NULL ) {
+		delete packet;
+	}
 	delete &pacingControl;
 	delete &dataFarms;
 }
@@ -411,10 +411,11 @@ void TwsDL::getContracts()
 void TwsDL::finContracts()
 {
 	DEBUG_PRINTF( "Contracts received: %zu",
-		p_contractDetails.constList().size() );
+		((PacketContractDetails*)packet)->constList().size() );
 	
-	p_contractDetails.dumpXml();
-	p_contractDetails.clear();
+	packet->dumpXml();
+	delete packet;
+	packet = NULL;
 	
 	curIndexTodoContractDetails++;
 	currentRequest.close();
@@ -472,7 +473,7 @@ void TwsDL::waitData()
 
 void TwsDL::waitContracts()
 {
-	if( p_contractDetails.finished() ) {
+	if( packet->finished() ) {
 		finContracts();
 	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
@@ -486,11 +487,11 @@ void TwsDL::waitContracts()
 
 void TwsDL::waitHist()
 {
-	if( p_histData.finished() ) {
+	if( packet->finished() ) {
 		finData();
 	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
-		p_histData.closeError( PacketHistData::ERR_TIMEOUT );
+		((PacketHistData*)packet)->closeError( PacketHistData::ERR_TIMEOUT );
 		finData();
 	} else {
 		DEBUG_PRINTF( "still waiting for data." );
@@ -500,12 +501,12 @@ void TwsDL::waitHist()
 
 void TwsDL::finData()
 {
-	assert( p_histData.finished() );
+	assert( packet->finished() );
 	HistTodo *histTodo = workTodo->histTodo();
 	
-	switch( p_histData.getError() ) {
+	switch( ((PacketHistData*)packet)->getError() ) {
 	case PacketHistData::ERR_NONE:
-		p_histData.dumpXml();
+		packet->dumpXml();
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();
@@ -521,7 +522,8 @@ void TwsDL::finData()
 		break;
 	}
 	
-	p_histData.clear();
+	delete packet;
+	packet = NULL;
 	currentRequest.close();
 	changeState( IDLE );
 }
@@ -584,14 +586,16 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		case 1101:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				p_histData.closeError( PacketHistData::ERR_TWSCON );
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
 				curIdleTime = 0;
 			}
 			break;
 		case 1102:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				p_histData.closeError( PacketHistData::ERR_TWSCON );
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
 				curIdleTime = 0;
 			}
 			break;
@@ -630,6 +634,7 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
 	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
+	PacketHistData &p_histData = *((PacketHistData*)packet);
 	switch( errorCode ) {
 	// Historical Market Data Service error message:
 	case 162:
@@ -727,20 +732,19 @@ void TwsDL::twsConnected( bool connected )
 		if( state == WAIT_TWS_CON ) {
 			connection_failed = true;
 		} else if( state == WAIT_DATA ) {
-			switch( currentRequest.reqType() ) {
-			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				if( !p_contractDetails.finished() ) {
+			if( !packet->finished() ) {
+				switch( currentRequest.reqType() ) {
+				case GenericRequest::CONTRACT_DETAILS_REQUEST:
 					assert(false); // TODO repeat
+					break;
+				case GenericRequest::HIST_REQUEST:
+					((PacketHistData*)packet)->closeError(
+						PacketHistData::ERR_TWSCON );
+					break;
+				case GenericRequest::NONE:
+					assert(false);
+					break;
 				}
-				break;
-			case GenericRequest::HIST_REQUEST:
-				if( !p_histData.finished() ) {
-					p_histData.closeError( PacketHistData::ERR_TWSCON );
-				}
-				break;
-			case GenericRequest::NONE:
-				assert(false);
-				break;
 			}
 		}
 		dataFarms.setAllBroken();
@@ -759,7 +763,7 @@ void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContract
 		assert( false );
 	}
 	
-	p_contractDetails.append(reqId, ibContractDetails);
+	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
 }
 
 
@@ -771,7 +775,7 @@ void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibCont
 		assert( false );
 	}
 	
-	p_contractDetails.append(reqId, ibContractDetails);
+	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
 }
 
 
@@ -784,7 +788,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 	}
 	
 	curIdleTime = 0;
-	p_contractDetails.setFinished();
+	((PacketContractDetails*)packet)->setFinished();
 }
 
 
@@ -800,11 +804,11 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	// TODO we shouldn't do this each row
 	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
 	
-	assert( !p_histData.finished() );
-	p_histData.append( reqId, date, open, high, low,
+	assert( !packet->finished() );
+	((PacketHistData*)packet)->append( reqId, date, open, high, low,
 		close, volume, count, WAP, hasGaps );
 	
-	if( p_histData.finished() ) {
+	if( packet->finished() ) {
 		curIdleTime = 0;
 		DEBUG_PRINTF( "READY %p %d",
 			&workTodo->getHistTodo().current(), reqId );
@@ -867,14 +871,18 @@ void TwsDL::changeState( State s )
 
 void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 {
-	p_contractDetails.record( currentRequest.reqId(), cdR );
+	PacketContractDetails *p_contractDetails = new PacketContractDetails();
+	packet = p_contractDetails;
+	p_contractDetails->record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
 }
 
 
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
-	p_histData.record( currentRequest.reqId(), hR );
+	PacketHistData *p_histData = new PacketHistData();
+	packet = p_histData;
+	p_histData->record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
 	                              hR.endDateTime(),
