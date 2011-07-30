@@ -240,6 +240,7 @@ class Packet
 		virtual ~Packet();
 		
 		bool empty() const;
+		bool finished() const;
 		
 		virtual void clear() = 0;
 		virtual void dumpXml() = 0;

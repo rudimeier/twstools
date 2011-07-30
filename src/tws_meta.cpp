@@ -569,6 +569,11 @@ bool Packet::empty() const
 	return (mode == CLEAN);
 }
 
+bool Packet::finished() const
+{
+	return (mode == CLOSED);
+}
+
 
 
 
