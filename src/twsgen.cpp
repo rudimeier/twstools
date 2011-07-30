@@ -1,13 +1,13 @@
 #include "twsgen.h"
 #include "tws_xml.h"
 #include "tws_meta.h"
+#include "debug.h"
 #include "config.h"
 
 #include <popt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <libxml/tree.h>
 
 
@@ -328,9 +328,9 @@ bool gen_csv()
 }
 
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-	twsgen_parse_cl(argc, (const char **) argv);
+	twsgen_parse_cl(argc, argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	if( !durationStrp ) {

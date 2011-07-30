@@ -6,23 +6,23 @@
 #include "ibtws/Execution.h"
 #include "ibtws/Contract.h"
 
+#include <sys/time.h>
 
 
-QString toQString( const std::string &ibString )
+
+
+int64_t nowInMsecs()
 {
-	QString retVal = QString::fromUtf8(ibString.c_str());
-	return retVal;
+	timeval tv;
+	int err = gettimeofday( &tv, NULL );
+	assert( err == 0 );
+	
+	const uint64_t now_ms = tv.tv_sec*1000 + tv.tv_usec/1000;
+	return now_ms;
 }
 
 
-std::string toIBString( const QString &qString )
-{
-	std::string retVal(qString.toUtf8());
-	return retVal;
-}
-
-
-QString ibToString( int tickType) {
+std::string ibToString( int tickType) {
 	switch ( tickType) {
 		case IB::BID_SIZE:                    return "bidSize";
 		case IB::BID:                         return "bidPrice";
@@ -79,33 +79,36 @@ QString ibToString( int tickType) {
 }
 
 
-QString ibToString( const IB::Execution& ex )
+std::string ibToString( const IB::Execution& ex )
 {
-	QString retVal = QString()
-		+ "orderId:%1: ,clientId:%2, execId:%3, time:%4, acctNumber:%5, exchange:%6, side:%7, "
-		+ "shares:%8, price:%9, permId:%10, liquidation:%11, cumQty:%12, avgPrice:%13";
-	retVal = retVal
-		.arg(ex.orderId).arg(ex.clientId).arg(toQString(ex.execId)).arg(toQString(ex.time))
-		.arg(toQString(ex.acctNumber)).arg(toQString(ex.exchange)).arg(toQString(ex.side))
-		.arg(ex.shares).arg(ex.price).arg(ex.permId).arg(ex.liquidation).arg(ex.cumQty).arg(ex.avgPrice);
-	return retVal;
+	char buf[1024];
+	snprintf( buf, sizeof(buf), "orderId:%ld: clientId:%ld, execId:%s, "
+		"time:%s, acctNumber:%s, exchange:%s, side:%s, shares:%d, price:%g, "
+		"permId:%d, liquidation:%d, cumQty:%d, avgPrice:%g",
+		ex.orderId, ex.clientId, ex.execId.c_str(), ex.time.c_str(),
+		ex.acctNumber.c_str(), ex.exchange.c_str(), ex.side.c_str(),
+		ex.shares, ex.price, ex.permId, ex.liquidation, ex.cumQty, ex.avgPrice);
+	return std::string(buf);
 }
 
 
-QString ibToString( const IB::Contract &c, bool showFields )
+std::string ibToString( const IB::Contract &c, bool showFields )
 {
-	QString retString;
-	retString = showFields ?
-		"conId:%1,symbol:%2, secType:%3, expiry:%4, strike:%5, right:%6, multiplier:%7, exchange:%8, currency:%9, localSymbol:%10"
-		: "%1,%2,%3,%4,%5,%6,%7,%8,%9,%10";
-	retString = retString.arg(c.conId).arg(toQString(c.symbol)).arg(toQString(c.secType))
-		.arg(toQString(c.expiry)).arg(c.strike,0,'f',1).arg(toQString(c.right))
-		.arg(toQString(c.multiplier)).arg(toQString(c.exchange)).arg(toQString(c.currency))
-		.arg(toQString(c.localSymbol));
-
-	return retString;
+	char buf[1024];
+	const char *fmt;
+	
+	if( showFields ) {
+		fmt = "conId:%ld, symbol:%s, secType:%s, expiry:%s, strike:%g, "
+		"right:%s, multiplier:%s, exchange:%s, currency:%s, localSymbol:%s";
+	} else {
+		fmt = "%ld,%s,%s,%s,%g,%s,%s,%s,%s,%s";
+	}
+	snprintf( buf, sizeof(buf), fmt,
+		c.conId, c.symbol.c_str(), c.secType.c_str(),
+		c.expiry.c_str(), c.strike, c.right.c_str(),
+		c.multiplier.c_str(), c.exchange.c_str(), c.currency.c_str(),
+		c.localSymbol.c_str() );
+	
+	return std::string(buf);
 }
-
-
-const QString ibExpiryDateFormat("yyyyMMdd");
 

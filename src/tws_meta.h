@@ -3,19 +3,16 @@
 
 #include "ibtws/Contract.h"
 
-#include <QtCore/QtContainerFwd>
 #include <stdint.h>
+#include <list>
+#include <map>
+
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
-class QString;
-class QStringList;
 
 
-
-
-int64_t nowInMsecs();
 
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate );
@@ -173,18 +170,16 @@ class HistTodo
 		int countLeft() const;
 		void checkout();
 		int checkoutOpt( PacingGod *pG, const DataFarmStates *dfs );
-		int currentIndex() const;
 		const HistRequest& current() const;
 		void tellDone();
 		void cancelForRepeat( int priority );
 		void add( const HistRequest& );
 		
 	private:
-		QList<HistRequest*> &histRequests;
-		QList<int> &doneRequests;
-		QList<int> &leftRequests;
-		QList<int> &errorRequests;
-		QList<int> &checkedOutRequests;
+		std::list<HistRequest*> &doneRequests;
+		std::list<HistRequest*> &leftRequests;
+		std::list<HistRequest*> &errorRequests;
+		HistRequest *checkedOutRequest;
 };
 
 
@@ -200,7 +195,7 @@ class ContractDetailsTodo
 		ContractDetailsTodo();
 		virtual ~ContractDetailsTodo();
 		
-		QList<ContractDetailsRequest> &contractDetailsRequests;
+		std::vector<ContractDetailsRequest> &contractDetailsRequests;
 };
 
 
@@ -323,7 +318,7 @@ class PacketHistData
 		
 		int reqId;
 		HistRequest *request;
-		QList<Row> &rows;
+		std::vector<Row> &rows;
 		Row finishRow;
 };
 
@@ -353,8 +348,8 @@ class PacingControl
 		void merge( const PacingControl& );
 		
 	private:
-		QList<int64_t> &dateTimes;
-		QList<bool> &violations;
+		std::vector<int64_t> &dateTimes;
+		std::vector<bool> &violations;
 		
 		int maxRequests;
 		int checkInterval;
@@ -382,7 +377,7 @@ class PacingGod
 	
 	private:
 		void checkAdd( const IB::Contract&,
-			QString *lazyContract, QString *farm );
+			std::string *lazyContract, std::string *farm );
 		bool laziesAreCleared() const;
 		
 		const DataFarmStates& dataFarms;
@@ -393,8 +388,8 @@ class PacingGod
 		int violationPause;
 		
 		PacingControl &controlGlobal;
-		QHash<const QString, PacingControl*> &controlHmds;
-		QHash<const QString, PacingControl*> &controlLazy;
+		std::map<const std::string, PacingControl*> &controlHmds;
+		std::map<const std::string, PacingControl*> &controlLazy;
 };
 
 
@@ -411,11 +406,11 @@ class DataFarmStates
 		DataFarmStates();
 		virtual ~DataFarmStates();
 		
-		QStringList getInactives() const;
-		QStringList getActives() const;
-		QString getMarketFarm( const IB::Contract& ) const;
-		QString getHmdsFarm( const QString& lazyC ) const;
-		QString getHmdsFarm( const IB::Contract& ) const;
+		std::vector<std::string> getInactives() const;
+		std::vector<std::string>  getActives() const;
+		std::string getMarketFarm( const IB::Contract& ) const;
+		std::string getHmdsFarm( const std::string& lazyC ) const;
+		std::string getHmdsFarm( const IB::Contract& ) const;
 		
 		void initHardCodedFarms();
 		void setAllBroken();
@@ -425,13 +420,14 @@ class DataFarmStates
 		void learnHmdsLastOk(int msgNumber, const IB::Contract& );
 		
 	private:
-		static QString getFarm( const QString prefix, const QString& msg );
+		static std::string getFarm( const std::string &prefix,
+			const std::string &msg );
 		
-		QHash<const QString, State> &mStates;
-		QHash<const QString, State> &hStates;
+		std::map<const std::string, State> &mStates;
+		std::map<const std::string, State> &hStates;
 		
-		QHash<const QString, QString> &mLearn;
-		QHash<const QString, QString> &hLearn;
+		std::map<const std::string, std::string> &mLearn;
+		std::map<const std::string, std::string> &hLearn;
 		
 		int lastMsgNumber;
 		std::string lastChanged;

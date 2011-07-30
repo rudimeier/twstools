@@ -4,56 +4,42 @@
 #include "twsUtil.h"
 #include "debug.h"
 
-#include <QtCore/QDateTime>
-#include <QtCore/QStringList>
-#include <QtCore/QHash>
-
-
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
 #include <limits.h>
+#include <string.h>
 
 
 
 
 
 
-
-
-int64_t nowInMsecs()
-{
-	const QDateTime now = QDateTime::currentDateTime();
-	const int64_t now_s = now.toTime_t();
-	const int64_t now_ms = now_s * 1000 + now.time().msec();
-	return now_ms;
-}
 
 
 /// stupid static helper
 std::string ibDate2ISO( const std::string &ibDate )
 {
-	QDateTime dt;
+	struct tm tm;
+	char buf[255];
+	char *tmp;
 	
-	dt = QDateTime::fromString( toQString(ibDate), "yyyyMMdd  hh:mm:ss");
-	if( dt.isValid() ) {
-		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d", &tm);
+	if( tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F", &tm);
+		return buf;
 	}
 	
-	dt.setDate( QDate::fromString( toQString(ibDate), "yyyyMMdd") );
-	if( dt.isValid() ) {
-		return toIBString(dt.toString("yyyy-MM-dd"));
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d%t%H:%M:%S", &tm);
+	if(  tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F %T", &tm);
+		return buf;
 	}
 	
-	bool ok = false;
-	uint t = toQString(ibDate).toUInt( &ok );
-	if( ok ) {
-		dt.setTime_t( t );
-		return toIBString(dt.toString("yyyy-MM-dd hh:mm:ss"));
-	}
-	
-	return std::string();
+	return "";
 }
 
 typedef const char* string_pair[2];
@@ -168,25 +154,27 @@ bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
 
 std::string HistRequest::toString() const
 {
-	QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(toQString(_ibContract.symbol))
-		.arg(toQString(_ibContract.secType))
-		.arg(toQString(_ibContract.exchange))
-		.arg(toQString(_ibContract.currency))
-		.arg(toQString(_ibContract.expiry))
-		.arg(_ibContract.strike)
-		.arg(toQString(_ibContract.right));
+	char buf_c[512];
+	char buf_a[1024];
+	snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
+		_ibContract.symbol.c_str(),
+		_ibContract.secType.c_str(),
+		_ibContract.exchange.c_str(),
+		_ibContract.currency.c_str(),
+		_ibContract.expiry.c_str(),
+		_ibContract.strike,
+		_ibContract.right.c_str() );
 	
-	QString retVal = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-		.arg(toQString(_endDateTime))
-		.arg(toQString(_durationStr))
-		.arg(toQString(_barSizeSetting))
-		.arg(toQString(_whatToShow))
-		.arg(_useRTH)
-		.arg(_formatDate)
-		.arg(c_str);
+	snprintf( buf_a, sizeof(buf_a), "%s\t%s\t%s\t%s\t%d\t%d\t%s",
+		_endDateTime.c_str(),
+		_durationStr.c_str(),
+		_barSizeSetting.c_str(),
+		_whatToShow.c_str(),
+		_useRTH,
+		_formatDate,
+		buf_c );
 	
-	return retVal.toStdString();
+	return std::string(buf_a);
 }
 
 
@@ -299,34 +287,43 @@ void GenericRequest::close()
 
 
 HistTodo::HistTodo() :
-	histRequests(*(new QList<HistRequest*>())),
-	doneRequests(*(new QList<int>())),
-	leftRequests(*(new QList<int>())),
-	errorRequests(*(new QList<int>())),
-	checkedOutRequests(*(new QList<int>()))
+	doneRequests(*(new std::list<HistRequest*>())),
+	leftRequests(*(new std::list<HistRequest*>())),
+	errorRequests(*(new std::list<HistRequest*>())),
+	checkedOutRequest(NULL)
 {
 }
 
 
 HistTodo::~HistTodo()
 {
-	foreach( HistRequest *hR, histRequests ) {
-		delete hR;
+	std::list<HistRequest*>::const_iterator it;
+	for( it = doneRequests.begin(); it != doneRequests.end(); it++ ) {
+		delete *it;
 	}
-	delete &histRequests;
 	delete &doneRequests;
+	for( it = leftRequests.begin(); it != leftRequests.end(); it++ ) {
+		delete *it;
+	}
 	delete &leftRequests;
+	for( it = errorRequests.begin(); it != errorRequests.end(); it++ ) {
+		delete *it;
+	}
 	delete &errorRequests;
-	delete &checkedOutRequests;
+	if( checkedOutRequest != NULL ) {
+		delete checkedOutRequest;
+	}
 }
 
 
 void HistTodo::dumpLeft( FILE *stream ) const
 {
-	for(int i=0; i < leftRequests.size(); i++ ) {
-		fprintf( stream, "[%d]\t%s\n",
-		         leftRequests[i],
-		         histRequests.at(leftRequests[i])->toString().c_str() );
+	std::list<HistRequest*>::const_iterator it = leftRequests.begin();
+	while( it != leftRequests.end() ) {
+		fprintf( stream, "[%p]\t%s\n",
+		         *it,
+		         (*it)->toString().c_str() );
+		it++;
 	}
 }
 
@@ -345,56 +342,61 @@ int HistTodo::countLeft() const
 
 void HistTodo::checkout()
 {
-	Q_ASSERT( checkedOutRequests.isEmpty() );
-	int id = leftRequests.takeFirst();
-	checkedOutRequests.append(id);
+	assert( checkedOutRequest == NULL );
+	checkedOutRequest = leftRequests.front();
+	leftRequests.pop_front();
 }
 
 
 int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
-	Q_ASSERT( checkedOutRequests.isEmpty() );
+	assert( checkedOutRequest == NULL );
 	
-	QHash< QString, int > hashByFarm;
-	QHash<QString, int> countByFarm;
-	foreach( int i ,leftRequests ) {
-		QString farm = dfs->getHmdsFarm(histRequests.at(i)->ibContract());
-		if( !hashByFarm.contains(farm) ) {
-			hashByFarm.insert(farm, i);
-			countByFarm.insert(farm, 1);
+	std::map<std::string, HistRequest*> hashByFarm;
+	std::map<std::string, int> countByFarm;
+	for( std::list<HistRequest*>::const_iterator it = leftRequests.begin();
+		it != leftRequests.end(); it++ ) {
+		std::string farm = dfs->getHmdsFarm((*it)->ibContract());
+		if( hashByFarm.find(farm) == hashByFarm.end() ) {
+			hashByFarm[farm] = *it;
+			countByFarm[farm] = 1;
 		} else {
 			countByFarm[farm]++;
 		}
 	}
 	
-	QStringList farms = hashByFarm.keys();
-	
-	int todoId = leftRequests.first();
+	HistRequest *todo_hR = leftRequests.front();
 	int countTodo = 0;
-	foreach( QString farm, farms ) {
-		Q_ASSERT( hashByFarm.contains(farm) );
-		int tmpid = hashByFarm[farm];
-		Q_ASSERT( histRequests.size() > tmpid );
-		const IB::Contract& c = histRequests.at(tmpid)->ibContract();
+	for( std::map<std::string, HistRequest*>::const_iterator
+		    it = hashByFarm.begin(); it != hashByFarm.end(); it++ ) {
+		const std::string &farm = it->first;
+		HistRequest *tmp_hR = it->second;
+		const IB::Contract& c = tmp_hR->ibContract();
 		if( pG->countLeft( c ) > 0 ) {
-			if( farm.isEmpty() ) {
+			if( farm.empty() ) {
 				// 1. the unknown ones to learn farm quickly
-				todoId = tmpid;
+				todo_hR = tmp_hR;
 				break;
 			} else if( countTodo < countByFarm[farm] ) {
 				// 2. get from them biggest list
-				todoId = tmpid;
+				todo_hR = tmp_hR;
 				countTodo = countByFarm[farm];
 			}
 		}
 	}
 	
-	int i = leftRequests.indexOf( todoId );
-	Q_ASSERT( i>=0 );
-	int wait = pG->goodTime( histRequests[todoId]->ibContract() );
+	std::list<HistRequest*>::iterator it = leftRequests.begin();
+	while( it != leftRequests.end() ) {
+		if( *it == todo_hR ) {
+			break;
+		}
+		it++;
+	}
+	assert( it != leftRequests.end() );
+	int wait = pG->goodTime( todo_hR->ibContract() );
 	if( wait <= 0 ) {
-		leftRequests.removeAt( i );
-		checkedOutRequests.append(todoId);
+		leftRequests.erase( it );
+		checkedOutRequest = todo_hR;
 	}
 	
 	return wait;
@@ -403,45 +405,37 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 
 void HistTodo::cancelForRepeat( int priority )
 {
-	Q_ASSERT( checkedOutRequests.size() == 1 );
-	int id = checkedOutRequests.takeFirst();
+	assert( checkedOutRequest != NULL );
 	if( priority <= 0 ) {
-		leftRequests.prepend(id);
+		leftRequests.push_front(checkedOutRequest);
 	} else if( priority <=1 ) {
-		leftRequests.append(id);
+		leftRequests.push_back(checkedOutRequest);
 	} else {
-		errorRequests.append(id);
+		errorRequests.push_back(checkedOutRequest);
 	}
-}
-
-
-int HistTodo::currentIndex() const
-{
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
-	return checkedOutRequests.first();
+	checkedOutRequest = NULL;
 }
 
 
 const HistRequest& HistTodo::current() const
 {
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
-	return *histRequests[checkedOutRequests.first()];
+	assert( checkedOutRequest != NULL );
+	return *checkedOutRequest;
 }
 
 
 void HistTodo::tellDone()
 {
-	Q_ASSERT( !checkedOutRequests.isEmpty() );
-	int doneId = checkedOutRequests.takeFirst();
-	doneRequests.append(doneId);
+	assert( checkedOutRequest != NULL );
+	doneRequests.push_back(checkedOutRequest);
+	checkedOutRequest = NULL;
 }
 
 
 void HistTodo::add( const HistRequest& hR )
 {
 	HistRequest *p = new HistRequest(hR);
-	histRequests.append(p);
-	leftRequests.append(histRequests.size() - 1);
+	leftRequests.push_back(p);
 }
 
 
@@ -452,7 +446,7 @@ void HistTodo::add( const HistRequest& hR )
 
 
 ContractDetailsTodo::ContractDetailsTodo() :
-	contractDetailsRequests(*(new QList<ContractDetailsRequest>()))
+	contractDetailsRequests(*(new std::vector<ContractDetailsRequest>()))
 {
 }
 
@@ -525,7 +519,7 @@ int WorkTodo::read_file( const std::string & fileName )
 	retVal = 0;
 	xmlNodePtr xn;
 	while( (xn = file.nextXmlNode()) != NULL ) {
-		Q_ASSERT( xn->type == XML_ELEMENT_NODE  );
+		assert( xn->type == XML_ELEMENT_NODE  );
 		if( strcmp((char*)xn->name, "request") == 0 ) {
 			char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
 			if( tmp == NULL ) {
@@ -533,7 +527,7 @@ int WorkTodo::read_file( const std::string & fileName )
 			} else if( strcmp( tmp, "contract_details") == 0 ) {
 				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-				_contractDetailsTodo->contractDetailsRequests.append(pcd->getRequest());
+				_contractDetailsTodo->contractDetailsRequests.push_back(pcd->getRequest());
 				retVal++;
 			} else if ( strcmp( tmp, "historical_data") == 0 ) {
 				reqType = GenericRequest::HIST_REQUEST;
@@ -609,7 +603,7 @@ const ContractDetailsRequest& PacketContractDetails::getRequest() const
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
-	Q_ASSERT( !complete && this->reqId == -1 && request == NULL
+	assert( !complete && this->reqId == -1 && request == NULL
 		&& cdList->empty() );
 	this->reqId = reqId;
 	this->request = new ContractDetailsRequest( cdr );
@@ -617,7 +611,7 @@ void PacketContractDetails::record( int reqId,
 
 void PacketContractDetails::setFinished()
 {
-	Q_ASSERT( !complete );
+	assert( !complete );
 	complete = true;
 }
 
@@ -645,8 +639,8 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 	if( cdList->empty() ) {
 		this->reqId = reqId;
 	}
-	Q_ASSERT( this->reqId == reqId );
-	Q_ASSERT( !complete );
+	assert( this->reqId == reqId );
+	assert( !complete );
 	
 	cdList->push_back(c);
 }
@@ -712,7 +706,7 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 
 
 PacketHistData::PacketHistData() :
-		rows(*(new QList<Row>()))
+		rows(*(new std::vector<Row>()))
 {
 	mode = CLEAN;
 	error = ERR_NONE;
@@ -744,7 +738,7 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 					}
 					if( strcmp((char*)q->name, "row") == 0 ) {
 						Row *row = Row::fromXml( q );
-						phd->rows.append(*row);
+						phd->rows.push_back(*row);
 						delete row;
 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
 						Row *fin = Row::fromXml( q );
@@ -824,7 +818,7 @@ void PacketHistData::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
-		for( int i=0; i<rows.size(); i++ ) {
+		for( size_t i=0; i<rows.size(); i++ ) {
 			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
 			ADD_ATTR_STRING( nrow, rows[i], date );
 			ADD_ATTR_DOUBLE( nrow, rows[i], open );
@@ -884,7 +878,7 @@ void PacketHistData::clear()
 
 void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	Q_ASSERT( mode == CLEAN && error == ERR_NONE && request == NULL );
+	assert( mode == CLEAN && error == ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
 	this->request = new HistRequest( hR );
@@ -895,8 +889,8 @@ void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
-	Q_ASSERT( mode == RECORD && error == ERR_NONE );
-	Q_ASSERT( this->reqId == reqId );
+	assert( mode == RECORD && error == ERR_NONE );
+	assert( this->reqId == reqId );
 	
 	Row row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
@@ -905,14 +899,14 @@ void PacketHistData::append( int reqId, const std::string &date,
 		mode = CLOSED;
 		finishRow = row;
 	} else {
-		rows.append( row );
+		rows.push_back( row );
 	}
 }
 
 
 void PacketHistData::closeError( Error e )
 {
-	Q_ASSERT( mode == RECORD);
+	assert( mode == RECORD);
 	mode = CLOSED;
 	error = e;
 }
@@ -920,38 +914,42 @@ void PacketHistData::closeError( Error e )
 
 void PacketHistData::dump( bool printFormatDates )
 {
-	Q_ASSERT( mode == CLOSED && error == ERR_NONE );
+	assert( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = request->ibContract();
 	const char *wts = short_wts( request->whatToShow().c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting().c_str());
 	
-	foreach( Row r, rows ) {
+	for( std::vector<Row>::const_iterator it = rows.begin();
+		it != rows.end(); it++ ) {
 		std::string expiry = c.expiry;
-		std::string dateTime = r.date;
+		std::string dateTime = it->date;
 		if( printFormatDates ) {
 			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
 				expiry = ibDate2ISO( c.expiry );
 			}
-			dateTime = ibDate2ISO(r.date);
-			Q_ASSERT( !expiry.empty() && !dateTime.empty() ); //TODO
+			dateTime = ibDate2ISO(it->date);
+			assert( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
-		QString c_str = QString("%1\t%2\t%3\t%4\t%5\t%6\t%7")
-			.arg(toQString(c.symbol))
-			.arg(toQString(c.secType))
-			.arg(toQString(c.exchange))
-			.arg(toQString(c.currency))
-			.arg(toQString(expiry))
-			.arg(c.strike)
-			.arg(toQString(c.right));
+		
+		char buf_c[512];
+		snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
+			c.symbol.c_str(),
+			c.secType.c_str(),
+			c.exchange.c_str(),
+			c.currency.c_str(),
+			expiry.c_str(),
+			c.strike,
+			c.right.c_str() );
+		
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       wts,
 		       bss,
-		       c_str.toUtf8().constData(),
+		       buf_c,
 		       dateTime.c_str(),
-		       r.open, r.high, r.low, r.close,
-		       r.volume, r.count, r.WAP, r.hasGaps);
+		       it->open, it->high, it->low, it->close,
+		       it->volume, it->count, it->WAP, it->hasGaps);
 		fflush(stdout);
 	}
 }
@@ -964,8 +962,8 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
-	dateTimes(*(new QList<int64_t>())),
-	violations(*(new QList<bool>())),
+	dateTimes(*(new std::vector<int64_t>())),
+	violations(*(new std::vector<bool>())),
 	maxRequests( r ),
 	checkInterval( i ),
 	minPacingTime( m ),
@@ -995,19 +993,19 @@ void PacingControl::setViolationPause( int vP )
 
 bool PacingControl::isEmpty() const
 {
-	return dateTimes.isEmpty();
+	return dateTimes.empty();
 }
 
 
 void PacingControl::clear()
 {
-	if( !dateTimes.isEmpty() ) {
+	if( !dateTimes.empty() ) {
 		int64_t now = nowInMsecs();
-		if( now - dateTimes.last() < 5000  ) {
+		if( now - dateTimes.back() < 5000  ) {
 			// HACK race condition might cause assert in notifyViolation(),
 			// to avoid this we would need to ack each request
-			qDebug() << "Warning, keep last pacing date time "
-				"because it looks too new.";
+			DEBUG_PRINTF( "Warning, keep last pacing date time "
+				"because it looks too new." );
 			dateTimes.erase( dateTimes.begin(), --(dateTimes.end()) );
 			violations.erase( violations.begin(), --(violations.end()) );
 		} else {
@@ -1021,15 +1019,15 @@ void PacingControl::clear()
 void PacingControl::addRequest()
 {
 	const int64_t now_t = nowInMsecs();
-	dateTimes.append( now_t );
-	violations.append( false );
+	dateTimes.push_back( now_t );
+	violations.push_back( false );
 }
 
 
 void PacingControl::notifyViolation()
 {
-	Q_ASSERT( !violations.isEmpty() );
-	violations.last() = true;
+	assert( !violations.empty() );
+	violations.back() = true;
 }
 
 
@@ -1045,20 +1043,20 @@ int PacingControl::goodTime(const char** ddd) const
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
 	
-	if( dateTimes.isEmpty() ) {
+	if( dateTimes.empty() ) {
 		*ddd = dbg;
 		return retVal;
 	}
 	
 	
-	int waitMin = dateTimes.last() + minPacingTime - now;
+	int waitMin = dateTimes.back() + minPacingTime - now;
 	SWAP_MAX( waitMin, "wait min" );
 	
 // 	int waitAvg =  dateTimes.last() + avgPacingTime - now;
 // 	SWAP_MAX( waitAvg, "wait avg" );
 	
-	int waitViol = violations.last() ?
-		(dateTimes.last() + violationPause - now) : INT_MIN;
+	int waitViol = violations.back() ?
+		(dateTimes.back() + violationPause - now) : INT_MIN;
 	SWAP_MAX( waitViol, "wait violation" );
 	
 	int waitBurst = INT_MIN;
@@ -1080,16 +1078,16 @@ int PacingControl::countLeft() const
 {
 	const int64_t now = nowInMsecs();
 	
-	if( (dateTimes.size() > 0) && violations.last() ) {
-		int waitViol = dateTimes.last() + violationPause - now;
+	if( (dateTimes.size() > 0) && violations.back() ) {
+		int waitViol = dateTimes.back() + violationPause - now;
 		if( waitViol > 0 ) {
 			return 0;
 		}
 	}
 	
 	int retVal = maxRequests;
-	QList<int64_t>::const_iterator it = dateTimes.constEnd();
-	while( it != dateTimes.constBegin() ) {
+	std::vector<int64_t>::const_iterator it = dateTimes.end();
+	while( it != dateTimes.begin() ) {
 		it--;
 		int waitBurst = *it + checkInterval - now;
 		if( waitBurst > 0 ) {
@@ -1104,14 +1102,14 @@ int PacingControl::countLeft() const
 
 void PacingControl::merge( const PacingControl& other )
 {
-	qDebug() << dateTimes;
-	qDebug() << other.dateTimes;
-	QList<int64_t>::iterator t_d = dateTimes.begin();
-	QList<bool>::iterator t_v = violations.begin();
-	QList<int64_t>::const_iterator o_d = other.dateTimes.constBegin();
-	QList<bool>::const_iterator o_v = other.violations.constBegin();
+// 	qDebug() << dateTimes;
+// 	qDebug() << other.dateTimes;
+	std::vector<int64_t>::iterator t_d = dateTimes.begin();
+	std::vector<bool>::iterator t_v = violations.begin();
+	std::vector<int64_t>::const_iterator o_d = other.dateTimes.begin();
+	std::vector<bool>::const_iterator o_v = other.violations.begin();
 	
-	while( t_d != dateTimes.end() && o_d != other.dateTimes.constEnd() ) {
+	while( t_d != dateTimes.end() && o_d != other.dateTimes.end() ) {
 		if( *o_d < *t_d ) {
 			t_d = dateTimes.insert( t_d, *o_d );
 			t_v = violations.insert( t_v, *o_v );
@@ -1122,8 +1120,8 @@ void PacingControl::merge( const PacingControl& other )
 			t_v++;
 		}
 	}
-	while( o_d != other.dateTimes.constEnd() ) {
-		Q_ASSERT( t_d == dateTimes.end() );
+	while( o_d != other.dateTimes.end() ) {
+		assert( t_d == dateTimes.end() );
 		t_d = dateTimes.insert( t_d, *o_d );
 		t_v = violations.insert( t_v, *o_v );
 		t_d++;
@@ -1131,7 +1129,7 @@ void PacingControl::merge( const PacingControl& other )
 		o_d++;
 		o_v++;
 	}
-	qDebug() << dateTimes;
+// 	qDebug() << dateTimes;
 }
 
 
@@ -1142,7 +1140,7 @@ void PacingControl::merge( const PacingControl& other )
 
 
 #define LAZY_CONTRACT_STR( _c_ ) \
-	toQString(_c_.exchange) + QString("\t") + toQString(_c_.secType);
+	std::string(_c_.exchange).append("\t").append(_c_.secType)
 
 
 PacingGod::PacingGod( const DataFarmStates &dfs ) :
@@ -1153,8 +1151,8 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 	violationPause( 60000 ),
 	controlGlobal( *(new PacingControl(
 		maxRequests, checkInterval, minPacingTime, violationPause)) ),
-	controlHmds(*(new QHash<const QString, PacingControl*>()) ),
-	controlLazy(*(new QHash<const QString, PacingControl*>()) )
+	controlHmds(*(new std::map<const std::string, PacingControl*>()) ),
+	controlLazy(*(new std::map<const std::string, PacingControl*>()) )
 {
 }
 
@@ -1163,16 +1161,12 @@ PacingGod::~PacingGod()
 {
 	delete &controlGlobal;
 	
-	QHash<const QString, PacingControl*>::iterator it;
-	it = controlHmds.begin();
-	while( it != controlHmds.end() ) {
-		delete *it;
-		it = controlHmds.erase(it);
+	std::map<const std::string, PacingControl*>::iterator it;
+	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+		delete it->second;
 	}
-	it = controlLazy.begin();
-	while( it != controlLazy.end() ) {
-		delete *it;
-		it = controlLazy.erase(it);
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		delete it->second;
 	}
 	delete &controlHmds;
 	delete &controlLazy;
@@ -1185,11 +1179,13 @@ void PacingGod::setPacingTime( int r, int i, int m )
 	checkInterval = i;
 	minPacingTime = m;
 	controlGlobal.setPacingTime( r, i, m );
-	foreach( PacingControl *pC, controlHmds ) {
-		pC->setPacingTime( r, i, m );
+	std::map<const std::string, PacingControl*>::iterator it;
+	
+	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+		it->second->setPacingTime( r, i, m );
 	}
-	foreach( PacingControl *pC, controlLazy ) {
-		pC->setPacingTime( r, i, m  );
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		it->second->setPacingTime( r, i, m  );
 	}
 }
 
@@ -1198,33 +1194,40 @@ void PacingGod::setViolationPause( int vP )
 {
 	violationPause = vP;
 	controlGlobal.setViolationPause( vP );
-	foreach( PacingControl *pC, controlHmds ) {
-		pC->setViolationPause( vP );
+	std::map<const std::string, PacingControl*>::iterator it;
+	
+	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+		it->second->setViolationPause( vP );
 	}
-	foreach( PacingControl *pC, controlLazy ) {
-		pC->setViolationPause( vP );
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		it->second->setViolationPause( vP );
 	}
 }
 
 
 void PacingGod::clear()
 {
-	if( dataFarms.getActives().isEmpty() ) {
+	if( dataFarms.getActives().empty() ) {
 		// clear all PacingControls
-		qDebug() << "clear all pacing controls";
+		DEBUG_PRINTF( "clear all pacing controls" );
 		controlGlobal.clear();
-		foreach( PacingControl *pC, controlHmds ) {
-			pC->clear();
+		std::map<const std::string, PacingControl*>::iterator it;
+		
+		for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
+			it->second->clear();
 		}
-		foreach( PacingControl *pC, controlLazy ) {
-			pC->clear();
+		for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+			it->second->clear();
 		}
 	} else {
 		// clear only PacingControls of inactive farms
-		foreach( QString farm, dataFarms.getInactives() ) {
-			if( controlHmds.contains(farm) ) {
-				qDebug() << "clear pacing control of inactive farm" << farm;
-				controlHmds.value(farm)->clear();
+		const std::vector<std::string> inactives = dataFarms.getInactives();
+		for( std::vector<std::string>::const_iterator it = inactives.begin();
+			    it != inactives.end(); it++ ) {
+			if( controlHmds.find(*it) != controlHmds.end() ) {
+				DEBUG_PRINTF( "clear pacing control of inactive farm %s",
+					it->c_str() );
+				controlHmds.find(*it)->second->clear();
 			}
 		}
 	}
@@ -1233,19 +1236,21 @@ void PacingGod::clear()
 
 void PacingGod::addRequest( const IB::Contract& c )
 {
-	QString farm;
-	QString lazyC;
+	std::string farm;
+	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
 	
 	controlGlobal.addRequest();
 	
-	if( farm.isEmpty() ) {
-		qDebug() << "add request lazy";
-		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
+	if( farm.empty() ) {
+		DEBUG_PRINTF( "add request lazy" );
+		assert( controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() );
 		controlLazy[lazyC]->addRequest();
 	} else {
-		qDebug() << "add request farm" << farm;
-		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		DEBUG_PRINTF( "add request farm %s", farm.c_str() );
+		assert( controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.find(lazyC) == controlLazy.end() );
 		controlHmds[farm]->addRequest();
 	}
 }
@@ -1253,19 +1258,21 @@ void PacingGod::addRequest( const IB::Contract& c )
 
 void PacingGod::notifyViolation( const IB::Contract& c )
 {
-	QString farm;
-	QString lazyC;
+	std::string farm;
+	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
 	
 	controlGlobal.notifyViolation();
 	
-	if( farm.isEmpty() ) {
-		qDebug() << "set violation lazy";
-		Q_ASSERT( controlLazy.contains(lazyC) && !controlHmds.contains(farm) );
+	if( farm.empty() ) {
+		DEBUG_PRINTF( "set violation lazy" );
+		assert( controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() );
 		controlLazy[lazyC]->notifyViolation();
 	} else {
-		qDebug() << "set violation farm" << farm;
-		Q_ASSERT( controlHmds.contains(farm) && !controlLazy.contains(lazyC) );
+		DEBUG_PRINTF( "set violation farm %s", farm.c_str() );
+		assert( controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.find(lazyC) == controlLazy.end() );
 		controlHmds[farm]->notifyViolation();
 	}
 }
@@ -1274,23 +1281,24 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 int PacingGod::goodTime( const IB::Contract& c )
 {
 	const char* dbg;
-	QString farm;
-	QString lazyC;
+	std::string farm;
+	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
 	bool laziesCleared = laziesAreCleared();
 	
-	if( farm.isEmpty() || !laziesCleared ) {
+	if( farm.empty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+		assert( (controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() )
 			|| !laziesCleared );
 		int t = controlGlobal.goodTime(&dbg);
-		qDebug() << "get good time global" << dbg << t;
+		DEBUG_PRINTF( "get good time global %s %d", dbg, t );
 		return t;
 	} else {
-		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
-			|| laziesCleared );
-		int t = controlHmds.value(farm)->goodTime(&dbg);
-		qDebug() << "get good time farm" << farm << dbg << t;
+		assert( (controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.empty()) || laziesCleared );
+		int t = controlHmds.find(farm)->second->goodTime(&dbg);
+		DEBUG_PRINTF( "get good time farm %s %s %d", farm.c_str(), dbg, t );
 		return t;
 	}
 }
@@ -1298,84 +1306,100 @@ int PacingGod::goodTime( const IB::Contract& c )
 
 int PacingGod::countLeft( const IB::Contract& c )
 {
-	QString farm;
-	QString lazyC;
+	std::string farm;
+	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
 	bool laziesCleared = laziesAreCleared();
 	
-	if( farm.isEmpty() || !laziesCleared ) {
+	if( farm.empty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
-		Q_ASSERT( (controlLazy.contains(lazyC) && !controlHmds.contains(farm))
+		assert( (controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end())
 			|| !laziesCleared );
 		int left = controlGlobal.countLeft();
-		qDebug() << "get count left global" << left;
+		DEBUG_PRINTF( "get count left global %d", left );
 		return left;
 	} else {
-		Q_ASSERT( (controlHmds.contains(farm) && controlLazy.isEmpty())
-			|| laziesCleared );
-		int left = controlHmds.value(farm)->countLeft();
-		qDebug() << "get count left farm" << farm << left;
-		return controlHmds.value(farm)->countLeft();
+		assert( (controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.empty()) || laziesCleared );
+		int left = controlHmds.find(farm)->second->countLeft();
+		DEBUG_PRINTF( "get count left farm %s %d", farm.c_str(), left );
+		return controlHmds.find(farm)->second->countLeft();
 	}
 }
 
 
 
 void PacingGod::checkAdd( const IB::Contract& c,
-	QString *lazyC_, QString *farm_ )
+	std::string *lazyC_, std::string *farm_ )
 {
 	*lazyC_ = LAZY_CONTRACT_STR(c);
 	*farm_ = dataFarms.getHmdsFarm(c);
 	
-	// controlLazy.keys() does not work for QHash<const QString, PacingControl*>
-	QStringList lazies;
-	QHash<const QString, PacingControl*>::const_iterator it =
-		controlLazy.constBegin();
-	while( it != controlLazy.constEnd() ) {
-		lazies.append( it.key() );
+	std::vector<std::string> lazies;
+	bool append_lazyC = true;
+	std::map<const std::string, PacingControl*>::const_iterator it =
+		controlLazy.begin();
+	while( it != controlLazy.end() ) {
+		lazies.push_back( it->first );
+		if( it->first == *lazyC_ ) {
+			append_lazyC = false;
+		}
 		it++;
 	}
-	if( !lazies.contains(*lazyC_) ) {
-		lazies.append(*lazyC_);
+	if( append_lazyC ) {
+		lazies.push_back(*lazyC_);
 	}
 	
-	foreach( QString lazyC, lazies ) {
-	QString farm = dataFarms.getHmdsFarm(lazyC);
-	if( !farm.isEmpty() ) {
-		if( !controlHmds.contains(farm) ) {
+	for( std::vector<std::string>::const_iterator it = lazies.begin();
+		    it != lazies.end(); it++ ) {
+	const std::string &lazyC = *it;
+	std::string farm = dataFarms.getHmdsFarm(lazyC);
+	if( !farm.empty() ) {
+		if( controlHmds.find(farm) == controlHmds.end() ) {
 			PacingControl *pC;
-			if( controlLazy.contains(lazyC) ) {
-				qDebug() << "move pacing control lazy to farm"
-					<< lazyC << farm;
-				pC = controlLazy.take(lazyC);
+			if( controlLazy.find(lazyC) != controlLazy.end() ) {
+				DEBUG_PRINTF( "move pacing control lazy to farm %s, %s",
+					lazyC.c_str(), farm.c_str() );
+				
+				
+				std::map<const std::string, PacingControl*>::iterator it
+					= controlLazy.find(lazyC);
+				pC = it->second;
+				controlLazy.erase(it);
 			} else {
-				qDebug() << "create pacing control for farm" << farm;
+				DEBUG_PRINTF( "create pacing control for farm %s",
+					farm.c_str() );
 				pC = new PacingControl(
 					maxRequests, checkInterval, minPacingTime, violationPause);
 			}
-			controlHmds.insert( farm, pC );
+			controlHmds[farm] = pC;
 		} else {
-			if( !controlLazy.contains(lazyC) ) {
+			if( controlLazy.find(lazyC) == controlLazy.end() ) {
 				// fine - no history about that
 			} else {
-				qDebug() << "merge pacing control lazy into farm"
-					<< lazyC << farm;
-				PacingControl *pC = controlLazy.take(lazyC);
-				controlHmds.value(farm)->merge(*pC);
+				DEBUG_PRINTF( "merge pacing control lazy into farm %s %s",
+					lazyC.c_str(), farm.c_str() );
+				
+				std::map<const std::string, PacingControl*>::iterator it
+					= controlLazy.find(lazyC);
+				PacingControl *pC = it->second;
+				controlLazy.erase(it);
+				controlHmds.find(farm)->second->merge(*pC);
 				delete pC;
 			}
 		}
-		Q_ASSERT( controlHmds.contains(farm) );
-		Q_ASSERT( !controlLazy.contains(lazyC) );
+		assert( controlHmds.find(farm) != controlHmds.end() );
+		assert( controlLazy.find(lazyC) == controlLazy.end() );
 		
-	} else if( !controlLazy.contains(lazyC) ) {
-			qDebug() << "create pacing control for lazy" << lazyC;
+	} else if( controlLazy.find(lazyC) == controlLazy.end() ) {
+			DEBUG_PRINTF( "create pacing control for lazy %s", lazyC.c_str() );
 			PacingControl *pC = new PacingControl(
 				maxRequests, checkInterval, minPacingTime, violationPause);
-			controlLazy.insert( lazyC, pC );
+			controlLazy[lazyC] = pC;
 			
-			Q_ASSERT( !controlHmds.contains(farm) );
-			Q_ASSERT( controlLazy.contains(lazyC) );
+			assert( controlHmds.find(farm) == controlHmds.end() );
+			assert( controlLazy.find(lazyC) != controlLazy.end() );
 	}
 	}
 }
@@ -1385,8 +1409,9 @@ bool PacingGod::laziesAreCleared() const
 {
 	
 	bool retVal = true;
-	foreach( PacingControl *pC, controlLazy ) {
-		retVal &=  pC->isEmpty();
+	std::map<const std::string, PacingControl*>::iterator it;
+	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
+		retVal &=  it->second->isEmpty();
 	}
 	return retVal;
 }
@@ -1399,10 +1424,10 @@ bool PacingGod::laziesAreCleared() const
 
 
 DataFarmStates::DataFarmStates() :
-	mStates( *(new QHash<const QString, State>()) ),
-	hStates( *(new QHash<const QString, State>()) ),
-	mLearn( *(new QHash<const QString, QString>()) ),
-	hLearn( *(new QHash<const QString, QString>()) ),
+	mStates( *(new std::map<const std::string, State>()) ),
+	hStates( *(new std::map<const std::string, State>()) ),
+	mLearn( *(new std::map<const std::string, std::string>()) ),
+	hLearn( *(new std::map<const std::string, std::string>()) ),
 	lastMsgNumber(INT_MIN)
 {
 	initHardCodedFarms();
@@ -1508,30 +1533,29 @@ void DataFarmStates::initHardCodedFarms()
 
 void DataFarmStates::setAllBroken()
 {
-	QHash<const QString, State>::iterator it;
+	std::map<const std::string, State>::iterator it;
 	
 	it = mStates.begin();
 	while( it != mStates.end() ) {
-		*it = BROKEN;
+		it->second = BROKEN;
 		it++;
 	}
 	
 	it = hStates.begin();
 	while( it != hStates.end() ) {
-		*it = BROKEN;
+		it->second = BROKEN;
 		it++;
 	}
 }
 
 
 void DataFarmStates::notify(int msgNumber, int errorCode,
-	const std::string &_msg)
+	const std::string &msg)
 {
-	QString msg = toQString(_msg); // just convert to QString
 	lastMsgNumber = msgNumber;
-	QString farm;
+	std::string farm;
 	State state;
-	QHash<const QString, State> *pHash = NULL;
+	std::map<const std::string, State> *pHash = NULL;
 	
 	// prefixes used for getFarm() are taken from past logs
 	switch( errorCode ) {
@@ -1572,58 +1596,78 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		farm = getFarm("Market data farm connection is inactive but should be available upon demand.", msg);
 		break;
 	default:
-		Q_ASSERT(false);
+		assert(false);
 		return;
 	}
 	
-	lastChanged = toIBString(farm);
-	pHash->insert( farm, state );
-	qDebug() << *pHash;
+	lastChanged = farm;
+	(*pHash)[farm] = state;
+// 	qDebug() << *pHash; // TODO print farms with states
 }
 
 
 /// static member
-QString DataFarmStates::getFarm( const QString prefix, const QString& msg )
+std::string DataFarmStates::getFarm( const std::string &prefix,
+	const std::string& msg )
 {
-	Q_ASSERT( msg.startsWith(prefix, Qt::CaseInsensitive) );
+	assert( prefix == msg.substr(0, prefix.size()) );
 	
-	return msg.right( msg.size() - prefix.size() );
+	return msg.substr( prefix.size() );
 }
 
 
 void DataFarmStates::learnMarket( const IB::Contract& )
 {
-	Q_ASSERT( false ); //not implemented
+	assert( false ); //not implemented
 }
 
 
 void DataFarmStates::learnHmds( const IB::Contract& c )
 {
-	QString lazyC = LAZY_CONTRACT_STR(c);
+	std::string lazyC = LAZY_CONTRACT_STR(c);
 	
-	QStringList sl;
-	QHash<const QString, State>::const_iterator it = hStates.constBegin();
-	while( it != hStates.constEnd() ) {
-		if( *it == OK ) {
-			sl.append( it.key() );
+	std::vector<std::string> sl;
+	std::map<const std::string, State>::const_iterator it = hStates.begin();
+	while( it != hStates.end() ) {
+		if( it->second == OK ) {
+			sl.push_back( it->first );
 		}
 		it++;
 	}
 	if( sl.size() <= 0 ) {
-		Q_ASSERT(false); // assuming at least one farm must be active
+		assert(false); // assuming at least one farm must be active
 	} else if( sl.size() == 1 ) {
-		if( hLearn.contains(lazyC) ) {
-			Q_ASSERT( hLearn.value( lazyC ) == sl.first() );
+		if( hLearn.find(lazyC) != hLearn.end() ) {
+			assert( hLearn.find( lazyC )->second == sl.front() );
 		} else {
-			hLearn.insert( lazyC, sl.first() );
-			qDebug() << "learn HMDS farm (unique):" << lazyC << sl.first();
+			hLearn[lazyC] = sl.front();
+			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
+				lazyC.c_str(), sl.front().c_str() );
 		}
 	} else {
-		if( hLearn.contains(lazyC) ) {
-			Q_ASSERT( sl.contains(hLearn.value(lazyC)) );
+		if( hLearn.find(lazyC) != hLearn.end() ) {
+			// here we just validate that the known farm is active
+			const std::string &known_farm =  hLearn.find(lazyC)->second;
+			bool sl_contains_lazyC = false;
+			for( std::vector<std::string>::const_iterator it = sl.begin();
+				    it != sl.end(); it++ ) {
+				if( *it == known_farm ) {
+					sl_contains_lazyC = true;
+					break;
+				}
+			}
+			assert( sl_contains_lazyC );
 		} else {
 			//but doing nothing
-			qDebug() << "learn HMDS farm (ambiguous):" << lazyC << sl;
+			std::string dbg_active_farms;
+			for( std::vector<std::string>::const_iterator it = sl.begin();
+				    it != sl.end(); it++ ) {
+				dbg_active_farms.append(",").append(*it);
+			}
+			
+			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
+				lazyC.c_str(),
+				(dbg_active_farms.c_str()+1) );
 		}
 	}
 }
@@ -1631,41 +1675,28 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
-	QString lastChanged = toQString(this->lastChanged);
-	Q_ASSERT( !lastChanged.isEmpty() && hStates.contains(lastChanged) );
+	assert( !lastChanged.empty()
+		&& (hStates.find(lastChanged) != hStates.end()) );
 	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
-		QString lazyC = LAZY_CONTRACT_STR(c);
-		if( hLearn.contains(lazyC) ) {
-			Q_ASSERT( hLearn.value( lazyC ) == lastChanged );
+		std::string lazyC = LAZY_CONTRACT_STR(c);
+		if( hLearn.find(lazyC) != hLearn.end() ) {
+			assert( hLearn.find(lazyC)->second == lastChanged );
 		} else {
-			hLearn.insert( lazyC, lastChanged );
-			qDebug() << "learn HMDS farm (last ok):" << lazyC << lastChanged;
+			hLearn[lazyC] = lastChanged;
+			DEBUG_PRINTF( "learn HMDS farm (last ok): %s %s",
+				lazyC.c_str(), lastChanged.c_str());
 		}
 	}
 }
 
 
-QStringList DataFarmStates::getInactives() const
+std::vector<std::string> DataFarmStates::getInactives() const
 {
-	QStringList sl;
-	QHash<const QString, State>::const_iterator it = hStates.constBegin();
-	while( it != hStates.constEnd() ) {
-		if( *it == INACTIVE || *it == BROKEN ) {
-			sl.append( it.key() );
-		}
-		it++;
-	}
-	return sl;
-}
-
-
-QStringList DataFarmStates::getActives() const
-{
-	QStringList sl;
-	QHash<const QString, State>::const_iterator it = hStates.constBegin();
-	while( it != hStates.constEnd() ) {
-		if( *it == OK ) {
-			sl.append( it.key() );
+	std::vector<std::string> sl;
+	std::map<const std::string, State>::const_iterator it = hStates.begin();
+	while( it != hStates.end() ) {
+		if( it->second == INACTIVE || it->second == BROKEN ) {
+			sl.push_back( it->first );
 		}
 		it++;
 	}
@@ -1673,23 +1704,40 @@ QStringList DataFarmStates::getActives() const
 }
 
 
-QString DataFarmStates::getMarketFarm( const IB::Contract& c ) const
+std::vector<std::string> DataFarmStates::getActives() const
 {
-	QString lazyC = LAZY_CONTRACT_STR(c);
-	return mLearn.value(lazyC);
+	std::vector<std::string> sl;
+	std::map<const std::string, State>::const_iterator it = hStates.begin();
+	while( it != hStates.end() ) {
+		if( it->second == OK ) {
+			sl.push_back( it->first );
+		}
+		it++;
+	}
+	return sl;
 }
 
 
-QString DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
+std::string DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 {
-	QString lazyC = LAZY_CONTRACT_STR(c);
-	return hLearn.value(lazyC);
+	std::string lazyC = LAZY_CONTRACT_STR(c);
+	std::map<const std::string, std::string>::const_iterator it = mLearn.find(lazyC);
+	return (it != mLearn.end()) ? it->second : "";
 }
 
 
-QString DataFarmStates::getHmdsFarm( const QString& lazyC ) const
+std::string DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
 {
-	return hLearn.value(lazyC);
+	std::string lazyC = LAZY_CONTRACT_STR(c);
+	std::map<const std::string, std::string>::const_iterator it = hLearn.find(lazyC);
+	return (it != hLearn.end()) ? it->second : "";
+}
+
+
+std::string DataFarmStates::getHmdsFarm( const std::string& lazyC ) const
+{
+	std::map<const std::string, std::string>::const_iterator it = hLearn.find(lazyC);
+	return (it != hLearn.end()) ? it->second : "";
 }
 
 
