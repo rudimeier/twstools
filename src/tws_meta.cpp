@@ -584,7 +584,6 @@ bool Packet::finished() const
 PacketContractDetails::PacketContractDetails() :
 	cdList(new std::vector<IB::ContractDetails>())
 {
-	complete = false;
 	reqId = -1;
 	request = NULL;
 }
@@ -629,28 +628,23 @@ const ContractDetailsRequest& PacketContractDetails::getRequest() const
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
-	assert( !complete && this->reqId == -1 && request == NULL
+	assert( empty() && this->reqId == -1 && request == NULL
 		&& cdList->empty() );
 	this->reqId = reqId;
 	this->request = new ContractDetailsRequest( cdr );
+	mode = RECORD;
 }
 
 void PacketContractDetails::setFinished()
 {
-	assert( !complete );
-	complete = true;
-}
-
-
-bool PacketContractDetails::isFinished() const
-{
-	return complete;
+	assert( mode == RECORD );
+	mode = CLOSED;
 }
 
 
 void PacketContractDetails::clear()
 {
-	complete = false;
+	mode = CLEAN;
 	reqId = -1;
 	cdList->clear();
 	if( request != NULL ) {
@@ -666,7 +660,7 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 		this->reqId = reqId;
 	}
 	assert( this->reqId == reqId );
-	assert( !complete );
+	assert( mode == RECORD );
 	
 	cdList->push_back(c);
 }

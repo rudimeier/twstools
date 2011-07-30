@@ -269,14 +269,12 @@ class PacketContractDetails
 		const std::vector<IB::ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
-		bool isFinished() const;
 		void clear();
 		void append( int reqId, const IB::ContractDetails& );
 		
 		void dumpXml();
 		
 	private:
-		bool complete;
 		int reqId;
 		ContractDetailsRequest *request;
 		std::vector<IB::ContractDetails> * const cdList;

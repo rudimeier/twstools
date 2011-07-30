@@ -472,7 +472,7 @@ void TwsDL::waitData()
 
 void TwsDL::waitContracts()
 {
-	if( p_contractDetails.isFinished() ) {
+	if( p_contractDetails.finished() ) {
 		finContracts();
 	} else if( currentRequest.age() > tws_reqTimeoutp ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
@@ -729,7 +729,7 @@ void TwsDL::twsConnected( bool connected )
 		} else if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				if( !p_contractDetails.isFinished() ) {
+				if( !p_contractDetails.finished() ) {
 					assert(false); // TODO repeat
 				}
 				break;
