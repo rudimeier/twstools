@@ -239,6 +239,8 @@ class Packet
 		Packet();
 		virtual ~Packet();
 		
+		bool empty() const;
+		
 		virtual void clear() = 0;
 		virtual void dumpXml() = 0;
 		

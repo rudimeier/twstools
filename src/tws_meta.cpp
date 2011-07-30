@@ -564,6 +564,11 @@ Packet::~Packet()
 {
 }
 
+bool Packet::empty() const
+{
+	return (mode == CLEAN);
+}
+
 
 
 
