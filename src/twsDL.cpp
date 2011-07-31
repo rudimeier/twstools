@@ -25,7 +25,11 @@ static const char *tws_hostp = "localhost";
 static int tws_portp = 7474;
 static int tws_client_idp = 123;
 
+static int get_accountp = 0;
 static const char* tws_account_namep = "";
+static int get_execp = 0;
+static int get_orderp = 0;
+
 static int tws_conTimeoutp = 30000;
 static int tws_reqTimeoutp = 1200000;
 static int tws_maxRequestsp = 60;
@@ -69,6 +73,14 @@ static struct poptOption flow_opts[] = {
 		"TWS port number (default: 7474).", NULL},
 	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
 		"TWS client connection id (default: 123).", NULL},
+	{"get-account", 'A', POPT_ARG_NONE, &get_accountp, 0,
+		"Request account status.", NULL},
+	{"accountName", '\0', POPT_ARG_STRING, &tws_account_namep, 0,
+		"IB account name (default: \"\").", NULL},
+	{"get-exec", 'E', POPT_ARG_NONE, &get_execp, 0,
+		"Request executions.", NULL},
+	{"get-order", 'O', POPT_ARG_NONE, &get_orderp, 0,
+		"Request open orders.", NULL},
 	POPT_TABLEEND
 };
 
@@ -460,6 +472,22 @@ void TwsDL::idle()
 		return;
 	}
 	
+	if( get_accountp ) {
+		reqAccStatus();
+		get_accountp = 0;
+		return;
+	}
+	if( get_execp ) {
+		reqExecutions();
+		get_execp = 0;
+		return;
+	}
+	if( get_orderp ) {
+		reqOrders();
+		get_orderp = 0;
+		return;
+	}
+	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		if( curIndexTodoContractDetails < (int)workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
 			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
@@ -558,8 +586,9 @@ void TwsDL::waitData()
 		ok = finHist();
 		break;
 	case GenericRequest::NONE:
-		assert( false );
-		ok = false;
+		/* must be account stuff */
+		packet->dumpXml();
+		ok = true;
 		break;
 	}
 	if( ok ) {
