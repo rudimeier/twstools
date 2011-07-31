@@ -12,6 +12,7 @@ class TWSClient;
 namespace IB {
 	class ContractDetails;
 	class Contract;
+	class Execution;
 }
 
 
@@ -26,6 +27,10 @@ class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class Packet;
+class RowAccVal;
+class RowPrtfl;
+class RowOrderStatus;
+class RowOpenOrder;
 class PacingGod;
 class DataFarmStates;
 
@@ -75,6 +80,9 @@ class TwsDL
 		
 		void reqContractDetails( const ContractDetailsRequest& );
 		void reqHistoricalData( const HistRequest& );
+		void reqAccStatus();
+		void reqExecutions();
+		void reqOrders();
 		
 		void errorContracts(int, int, const std::string &);
 		void errorHistData(int, int, const std::string &);
@@ -91,6 +99,16 @@ class TwsDL
 		void twsHistoricalData( int reqId, const std::string &date, double open,
 			double high, double low, double close, int volume, int count,
 			double WAP, bool hasGaps );
+		void twsUpdateAccountValue( const RowAccVal& );
+		void twsUpdatePortfolio( const RowPrtfl& );
+		void twsUpdateAccountTime( const std::string& timeStamp );
+		void twsAccountDownloadEnd( const std::string& accountName );
+		void twsExecDetails( int reqId, const IB::Contract&,
+			const IB::Execution& );
+		void twsExecDetailsEnd( int reqId );
+		void twsOrderStatus( const RowOrderStatus& );
+		void twsOpenOrder( const RowOpenOrder& );
+		void twsOpenOrderEnd();
 		
 		
 		State state;

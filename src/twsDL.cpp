@@ -25,6 +25,7 @@ static const char *tws_hostp = "localhost";
 static int tws_portp = 7474;
 static int tws_client_idp = 123;
 
+static const char* tws_account_namep = "";
 static int tws_conTimeoutp = 30000;
 static int tws_reqTimeoutp = 1200000;
 static int tws_maxRequestsp = 60;
@@ -167,6 +168,25 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void historicalData( IB::TickerId reqId, const IB::IBString& date,
 			double open, double high, double low, double close, int volume,
 			int barCount, double WAP, int hasGaps );
+		void updateAccountValue( const std::string& key,
+			const IB::IBString& val, const std::string& currency,
+			const IB::IBString& accountName );
+		void updatePortfolio( const IB::Contract& contract, int position,
+			double marketPrice, double marketValue, double averageCost,
+			double unrealizedPNL, double realizedPNL,
+			const IB::IBString& accountName);
+		void updateAccountTime( const IB::IBString& timeStamp );
+		void accountDownloadEnd( const IB::IBString& accountName );
+		void execDetails( int reqId, const IB::Contract& contract,
+			const IB::Execution& execution );
+		void execDetailsEnd( int reqId );
+		void orderStatus( IB::OrderId orderId, const IB::IBString &status,
+			int filled, int remaining, double avgFillPrice, int permId,
+			int parentId, double lastFillPrice, int clientId,
+			const IB::IBString& whyHeld );
+		void openOrder( IB::OrderId orderId, const IB::Contract&,
+			const IB::Order&, const IB::OrderState& );
+		void openOrderEnd();
 		
 	private:
 		TwsDL* parentTwsDL;
@@ -227,6 +247,70 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 	parentTwsDL->twsHistoricalData(
 		reqId, date, open, high, low, close, volume,
 		barCount, WAP, hasGaps);
+}
+
+
+void TwsDlWrapper::updateAccountValue( const IB::IBString& key,
+	const IB::IBString& val, const IB::IBString& currency,
+	const IB::IBString& accountName )
+{
+	RowAccVal row = { key, val, currency, accountName };
+	parentTwsDL->twsUpdateAccountValue( row );
+}
+
+void TwsDlWrapper::updatePortfolio( const IB::Contract& contract,
+	int position, double marketPrice, double marketValue, double averageCost,
+	double unrealizedPNL, double realizedPNL, const IB::IBString& accountName)
+{
+	RowPrtfl row = { contract, position, marketPrice, marketValue, averageCost,
+		unrealizedPNL, realizedPNL, accountName};
+	parentTwsDL->twsUpdatePortfolio( row );
+}
+
+void TwsDlWrapper::updateAccountTime( const IB::IBString& timeStamp )
+{
+	parentTwsDL->twsUpdateAccountTime( timeStamp );
+}
+
+void TwsDlWrapper::accountDownloadEnd( const IB::IBString& accountName )
+{
+	DebugTwsWrapper::accountDownloadEnd( accountName );
+	parentTwsDL->twsAccountDownloadEnd( accountName );
+}
+
+void TwsDlWrapper::execDetails( int reqId, const IB::Contract& contract,
+	const IB::Execution& execution )
+{
+	parentTwsDL->twsExecDetails(  reqId, contract, execution  );
+}
+
+void TwsDlWrapper::execDetailsEnd( int reqId )
+{
+	DebugTwsWrapper::execDetailsEnd( reqId );
+	parentTwsDL->twsExecDetailsEnd( reqId );
+}
+
+void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
+	int filled, int remaining, double avgFillPrice, int permId,
+	int parentId, double lastFillPrice, int clientId,
+	const IB::IBString& whyHeld )
+{
+	RowOrderStatus row = { orderId, status, filled, remaining, avgFillPrice,
+		permId, parentId, lastFillPrice, clientId, whyHeld };
+	parentTwsDL->twsOrderStatus(row);
+}
+
+void TwsDlWrapper::openOrder( IB::OrderId orderId, const IB::Contract& c,
+	const IB::Order& o, const IB::OrderState& os)
+{
+	RowOpenOrder row = { orderId, c, o, os };
+	parentTwsDL->twsOpenOrder(row);
+}
+
+void TwsDlWrapper::openOrderEnd()
+{
+	DebugTwsWrapper::openOrderEnd();
+	parentTwsDL->twsOpenOrderEnd();
 }
 
 
@@ -805,6 +889,57 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	}
 }
 
+void TwsDL::twsUpdateAccountValue( const RowAccVal& row )
+{
+	((PacketAccStatus*)packet)->append( row );
+}
+
+void TwsDL::twsUpdatePortfolio( const RowPrtfl& row )
+{
+	((PacketAccStatus*)packet)->append( row );
+}
+
+void TwsDL::twsUpdateAccountTime( const std::string& timeStamp )
+{
+	((PacketAccStatus*)packet)->appendUpdateAccountTime( timeStamp );
+}
+
+void TwsDL::twsAccountDownloadEnd( const std::string& accountName )
+{
+	((PacketAccStatus*)packet)->appendAccountDownloadEnd( accountName );
+}
+
+void TwsDL::twsExecDetails( int reqId, const IB::Contract& contract,
+	const IB::Execution& execution )
+{
+	((PacketExecutions*)packet)->append( reqId, contract, execution );
+}
+
+void TwsDL::twsExecDetailsEnd( int reqId )
+{
+	((PacketExecutions*)packet)->appendExecutionsEnd( reqId );
+}
+
+void TwsDL::twsOrderStatus( const RowOrderStatus& row )
+{
+	((PacketOrders*)packet)->append(row);
+}
+
+void TwsDL::twsOpenOrder( const RowOpenOrder& row )
+{
+	((PacketOrders*)packet)->append(row);
+}
+
+void TwsDL::twsOpenOrderEnd()
+{
+	// TODO
+	static int i = 0;
+	i++;
+	if( i == 2 ) {
+		((PacketOrders*)packet)->appendOpenOrderEnd();
+	}
+}
+
 
 void TwsDL::initWork()
 {
@@ -867,7 +1002,6 @@ void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
 }
 
-
 void TwsDL::reqHistoricalData( const HistRequest& hR )
 {
 	PacketHistData *p_histData = new PacketHistData();
@@ -881,6 +1015,40 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 	                              hR.whatToShow(),
 	                              hR.useRTH(),
 	                              hR.formatDate() );
+}
+
+void TwsDL::reqAccStatus()
+{
+	PacketAccStatus *accStatus = new PacketAccStatus();
+	packet = accStatus;
+	currentRequest.nextRequest( GenericRequest::NONE );
+	
+	accStatus->record( tws_account_namep );
+	twsClient->reqAccountUpdates(true, tws_account_namep);
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::reqExecutions()
+{
+	PacketExecutions *executions = new PacketExecutions();
+	packet = executions;
+	currentRequest.nextRequest( GenericRequest::NONE );
+	
+	IB::ExecutionFilter eF;
+	executions->record( 1, eF );
+	twsClient->reqExecutions( 1, eF);
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::reqOrders()
+{
+	PacketOrders *orders = new PacketOrders();
+	packet = orders;
+	currentRequest.nextRequest( GenericRequest::NONE );
+	
+	orders->record();
+	twsClient->reqAllOpenOrders();
+	changeState( WAIT_DATA );
 }
 
 
