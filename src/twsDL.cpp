@@ -491,7 +491,7 @@ void TwsDL::idle()
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		if( curIndexTodoContractDetails < (int)workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
 			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
-			getContracts();
+			reqContractDetails();
 			return;
 		}
 	}
@@ -501,22 +501,12 @@ void TwsDL::idle()
 	
 	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
 		if(  workTodo->getHistTodo().countLeft() > 0 ) {
-			getHist();
+			reqHistoricalData();
 			return;
 		}
 	}
 	
 	changeState( QUIT_READY );
-}
-
-
-void TwsDL::getContracts()
-{
-	const ContractDetailsRequest &cdR =
-		workTodo->getContractDetailsTodo().contractDetailsRequests.at( curIndexTodoContractDetails );
-	reqContractDetails( cdR );
-	
-	changeState( WAIT_DATA );
 }
 
 
@@ -535,38 +525,6 @@ bool TwsDL::finContracts()
 	
 	curIndexTodoContractDetails++;
 	return true;
-}
-
-
-void TwsDL::getHist()
-{
-	assert( workTodo->getHistTodo().countLeft() > 0 );
-	
-	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
-	
-	if( wait > 0 ) {
-		curIdleTime = (wait < 1000) ? wait : 1000;
-		return;
-	}
-	if( wait < -1 ) {
-		// just debug timer resolution
-		DEBUG_PRINTF( "late timeout: %d", wait );
-	}
-	
-	const HistRequest &hR = workTodo->getHistTodo().current();
-	
-	pacingControl.addRequest( hR.ibContract() );
-	
-	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	
-	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
-		&workTodo->getHistTodo().current(),
-		currentRequest.reqId(),
-		ibToString(hR.ibContract()).c_str() );
-	
-	reqHistoricalData( hR );
-	
-	changeState( WAIT_DATA );
 }
 
 
@@ -1023,16 +981,45 @@ void TwsDL::changeState( State s )
 }
 
 
-void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
+void TwsDL::reqContractDetails()
 {
+	const ContractDetailsRequest &cdR =	workTodo->getContractDetailsTodo()
+		.contractDetailsRequests.at( curIndexTodoContractDetails );
+	
 	PacketContractDetails *p_contractDetails = new PacketContractDetails();
 	packet = p_contractDetails;
 	p_contractDetails->record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
+	
+	changeState( WAIT_DATA );
 }
 
-void TwsDL::reqHistoricalData( const HistRequest& hR )
+void TwsDL::reqHistoricalData()
 {
+	assert( workTodo->getHistTodo().countLeft() > 0 );
+	
+	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
+	
+	if( wait > 0 ) {
+		curIdleTime = (wait < 1000) ? wait : 1000;
+		return;
+	}
+	if( wait < -1 ) {
+		// just debug timer resolution
+		DEBUG_PRINTF( "late timeout: %d", wait );
+	}
+	
+	const HistRequest &hR = workTodo->getHistTodo().current();
+	
+	pacingControl.addRequest( hR.ibContract() );
+	
+	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
+	
+	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
+		&workTodo->getHistTodo().current(),
+		currentRequest.reqId(),
+		ibToString(hR.ibContract()).c_str() );
+	
 	PacketHistData *p_histData = new PacketHistData();
 	packet = p_histData;
 	p_histData->record( currentRequest.reqId(), hR );
@@ -1044,6 +1031,8 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 	                              hR.whatToShow(),
 	                              hR.useRTH(),
 	                              hR.formatDate() );
+	
+	changeState( WAIT_DATA );
 }
 
 void TwsDL::reqAccStatus()

@@ -67,9 +67,7 @@ class TwsDL
 		void connectTws();
 		void waitTwsCon();
 		void idle();
-		void getContracts();
 		bool finContracts();
-		void getHist();
 		bool finHist();
 		void waitData();
 		void onQuit( int ret );
@@ -78,8 +76,8 @@ class TwsDL
 		
 		void initWork();
 		
-		void reqContractDetails( const ContractDetailsRequest& );
-		void reqHistoricalData( const HistRequest& );
+		void reqContractDetails();
+		void reqHistoricalData();
 		void reqAccStatus();
 		void reqExecutions();
 		void reqOrders();
