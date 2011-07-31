@@ -199,6 +199,13 @@ class ContractDetailsTodo
 		ContractDetailsTodo();
 		virtual ~ContractDetailsTodo();
 		
+		int countLeft() const;
+		void checkout();
+		const ContractDetailsRequest& current() const;
+		void add( const ContractDetailsRequest& );
+		
+	private:
+		int curIndex;
 		std::vector<ContractDetailsRequest> &contractDetailsRequests;
 };
 

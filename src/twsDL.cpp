@@ -338,7 +338,6 @@ TwsDL::TwsDL( const std::string& workFile ) :
 	twsClient(NULL),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
-	curIndexTodoContractDetails(0),
 	workTodo( new WorkTodo() ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
@@ -489,7 +488,7 @@ void TwsDL::idle()
 	}
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		if( curIndexTodoContractDetails < (int)workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
+		if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
 			reqContractDetails();
 			return;
 		}
@@ -522,7 +521,6 @@ bool TwsDL::finContracts()
 	
 	packet->dumpXml();
 	
-	curIndexTodoContractDetails++;
 	return true;
 }
 
@@ -933,8 +931,8 @@ void TwsDL::initWork()
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, workFile.c_str() );
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		DEBUG_PRINTF( "getting contracts from TWS, %zu",
-			workTodo->getContractDetailsTodo().contractDetailsRequests.size() );
+		DEBUG_PRINTF( "getting contracts from TWS, %d",
+			workTodo->getContractDetailsTodo().countLeft() );
 // 		state = IDLE;
 	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
 		DEBUG_PRINTF( "getting hist data from TWS, %d",
@@ -982,8 +980,9 @@ void TwsDL::changeState( State s )
 
 void TwsDL::reqContractDetails()
 {
-	const ContractDetailsRequest &cdR =	workTodo->getContractDetailsTodo()
-		.contractDetailsRequests.at( curIndexTodoContractDetails );
+	workTodo->contractDetailsTodo()->checkout();
+	const ContractDetailsRequest &cdR
+		= workTodo->getContractDetailsTodo().current();
 	
 	PacketContractDetails *p_contractDetails = new PacketContractDetails();
 	packet = p_contractDetails;

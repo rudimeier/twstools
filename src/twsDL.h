@@ -122,8 +122,6 @@ class TwsDL
 		int msgCounter;
 		GenericRequest &currentRequest;
 		
-		int curIndexTodoContractDetails;
-		
 		WorkTodo *workTodo;
 		
 		Packet *packet;

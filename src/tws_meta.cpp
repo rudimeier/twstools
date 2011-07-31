@@ -446,6 +446,7 @@ void HistTodo::add( const HistRequest& hR )
 
 
 ContractDetailsTodo::ContractDetailsTodo() :
+	curIndex(-1),
 	contractDetailsRequests(*(new std::vector<ContractDetailsRequest>()))
 {
 }
@@ -453,6 +454,28 @@ ContractDetailsTodo::ContractDetailsTodo() :
 ContractDetailsTodo::~ContractDetailsTodo()
 {
 	delete &contractDetailsRequests;
+}
+
+int ContractDetailsTodo::countLeft() const
+{
+	return contractDetailsRequests.size() - curIndex - 1;
+}
+
+void ContractDetailsTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+const ContractDetailsRequest& ContractDetailsTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)contractDetailsRequests.size() );
+	return contractDetailsRequests.at(curIndex);
+}
+
+void ContractDetailsTodo::add( const ContractDetailsRequest& cdr )
+{
+	contractDetailsRequests.push_back(cdr);
 }
 
 
@@ -527,7 +550,7 @@ int WorkTodo::read_file( const std::string & fileName )
 			} else if( strcmp( tmp, "contract_details") == 0 ) {
 				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-				_contractDetailsTodo->contractDetailsRequests.push_back(pcd->getRequest());
+				_contractDetailsTodo->add(pcd->getRequest());
 				retVal++;
 			} else if ( strcmp( tmp, "historical_data") == 0 ) {
 				reqType = GenericRequest::HIST_REQUEST;
