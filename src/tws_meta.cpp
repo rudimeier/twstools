@@ -975,6 +975,183 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 
+PacketAccStatus::PacketAccStatus() :
+	list( new std::vector<RowAcc*>() )
+{
+}
+
+PacketAccStatus::~PacketAccStatus()
+{
+	del_list_elements();
+	delete list;
+}
+
+void PacketAccStatus::clear()
+{
+	assert( finished() );
+	mode = CLEAN;
+	del_list_elements();
+	list->clear();
+}
+
+void PacketAccStatus::del_list_elements()
+{
+	std::vector<RowAcc*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		switch( (*it)->type ) {
+		case RowAcc::t_AccVal:
+			delete (RowAccVal*) (*it)->data;
+			break;
+		case RowAcc::t_Prtfl:
+			delete (RowPrtfl*) (*it)->data;
+			break;
+		case RowAcc::t_stamp:
+		case RowAcc::t_end:
+			delete (std::string*) (*it)->data;
+			break;
+		}
+		delete (*it);
+	}
+}
+
+void PacketAccStatus::record( const std::string &acctCode )
+{
+	assert( empty() );
+	mode = RECORD;
+	this->accountName = acctCode;
+}
+
+void PacketAccStatus::append( const RowAccVal& row )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type = RowAcc::t_AccVal;
+	arow->data = new RowAccVal(row);
+	list->push_back( arow );
+}
+
+void PacketAccStatus::append( const RowPrtfl& row )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type = RowAcc::t_Prtfl;
+	arow->data = new RowPrtfl(row);
+	list->push_back( arow );
+}
+
+void PacketAccStatus::appendUpdateAccountTime( const std::string& timeStamp )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type =RowAcc::t_stamp;
+	arow->data = new std::string(timeStamp);
+	list->push_back( arow );
+}
+
+void PacketAccStatus::appendAccountDownloadEnd( const std::string& accountName )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type =RowAcc::t_end;
+	arow->data = new std::string(accountName);
+	list->push_back( arow );
+	
+	mode = CLOSED;
+}
+
+
+#define A_ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+		(const xmlChar*) _struct_._attr_.c_str() )
+
+#define A_ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_LONG( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+
+static void conv2xml( xmlNodePtr parent, const RowAcc *row )
+{
+		char tmp[128];
+		switch( row->type ) {
+		case RowAcc::t_AccVal:
+			{
+				const RowAccVal &d = *(RowAccVal*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"AccVal", NULL);
+				A_ADD_ATTR_STRING( nrow, d, key );
+				A_ADD_ATTR_STRING( nrow, d, val );
+				A_ADD_ATTR_STRING( nrow, d, currency );
+				A_ADD_ATTR_STRING( nrow, d, accountName );
+			}
+			break;
+		case RowAcc::t_Prtfl:
+			{
+				const RowPrtfl &d = *(RowPrtfl*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"Prtfl", NULL);
+				conv_ib2xml( nrow, "contract", d.contract );
+				A_ADD_ATTR_INT( nrow, d, position );
+				A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
+				A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
+				A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
+				A_ADD_ATTR_DOUBLE( nrow, d, unrealizedPNL );
+				A_ADD_ATTR_DOUBLE( nrow, d, realizedPNL );
+				A_ADD_ATTR_STRING( nrow, d, accountName );
+			}
+			break;
+		case RowAcc::t_stamp:
+			{
+				const std::string &d = *(std::string*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"stamp", NULL);
+				xmlNewProp ( nrow, (xmlChar*) "timeStamp",
+					(const xmlChar*) d.c_str() );
+			}
+			break;
+		case RowAcc::t_end:
+			{
+				const std::string &d = *(std::string*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"end", NULL);
+				xmlNewProp ( nrow, (xmlChar*) "accountName",
+					(const xmlChar*) d.c_str() );
+			}
+			break;
+		}
+}
+
+void PacketAccStatus::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"account" );
+	
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	xmlNewProp ( nqry, (xmlChar*) "accountName",
+		(const xmlChar*) accountName.c_str() );
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	std::vector<RowAcc*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		conv2xml( nrsp, (*it) );
+	}
+	
+	TwsXml::dumpAndFree( root );
+}
+
+
+
+
+
+
+
+
 PacingControl::PacingControl( int r, int i, int m, int v ) :
 	dateTimes(*(new std::vector<int64_t>())),
 	violations(*(new std::vector<bool>())),

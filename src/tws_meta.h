@@ -351,6 +351,64 @@ class PacketHistData
 
 
 
+struct RowAcc
+{
+	enum row_acc_type { t_AccVal, t_Prtfl, t_stamp, t_end };
+	row_acc_type type;
+	void *data;
+};
+
+struct RowAccVal
+{
+	std::string key;
+	std::string val;
+	std::string currency;
+	std::string accountName;
+};
+
+struct RowPrtfl
+{
+	IB::Contract contract;
+	int position;
+	double marketPrice;
+	double marketValue;
+	double averageCost;
+	double unrealizedPNL;
+	double realizedPNL;
+	std::string accountName;
+};
+
+class PacketAccStatus
+	: public  Packet
+{
+	public:
+		PacketAccStatus();
+		virtual ~PacketAccStatus();
+		
+		void clear();
+		void record( const std::string &acctCode );
+		void append( const RowAccVal& );
+		void append( const RowPrtfl& );
+		void appendUpdateAccountTime( const std::string& timeStamp );
+		void appendAccountDownloadEnd( const std::string& accountName );
+		
+		void dumpXml();
+		
+	private:
+		void del_list_elements();
+		
+		std::string accountName;
+		
+		std::vector<RowAcc*> * const list;
+};
+
+
+
+
+
+
+
+
 class PacingControl
 {
 	public:
