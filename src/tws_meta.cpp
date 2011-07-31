@@ -1152,6 +1152,98 @@ void PacketAccStatus::dumpXml()
 
 
 
+PacketExecutions::PacketExecutions() :
+	reqId(-1),
+	executionFilter(NULL),
+	list( new std::vector<RowExecution*>() )
+{
+}
+
+PacketExecutions::~PacketExecutions()
+{
+	del_list_elements();
+	delete list;
+	if( executionFilter != NULL ) {
+		delete executionFilter;
+	}
+}
+
+void PacketExecutions::clear()
+{
+	assert( finished() );
+	mode = CLEAN;
+	del_list_elements();
+	list->clear();
+	if( executionFilter != NULL ) {
+		delete executionFilter;
+	}
+	executionFilter = NULL;
+}
+
+void PacketExecutions::del_list_elements()
+{
+	std::vector<RowExecution*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		delete (*it);
+	}
+}
+
+void PacketExecutions::record(  const int reqId, const IB::ExecutionFilter &eF )
+{
+	assert( empty() );
+	mode = RECORD;
+	this->reqId = reqId;
+	this->executionFilter = new IB::ExecutionFilter( eF );
+}
+
+void PacketExecutions::append( int reqId,
+	const IB::Contract& c, const IB::Execution& e)
+{
+	RowExecution *arow = new RowExecution();
+	arow->contract = c;
+	arow->execution = e;
+	list->push_back( arow );
+}
+
+void PacketExecutions::appendExecutionsEnd( int reqId )
+{
+	mode = CLOSED;
+}
+
+static void conv2xml( xmlNodePtr parent, const RowExecution *row )
+{
+		xmlNodePtr nrow = xmlNewChild( parent,
+			NULL, (const xmlChar*)"ExecDetails", NULL);
+		conv_ib2xml( nrow, "contract", row->contract );
+		conv_ib2xml( nrow, "execution", row->execution );
+}
+
+void PacketExecutions::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"executions" );
+	
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "executionFilter", *executionFilter );
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	std::vector<RowExecution*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		conv2xml( nrsp, (*it) );
+	}
+	
+	TwsXml::dumpAndFree( root );
+}
+
+
+
+
+
+
+
 PacingControl::PacingControl( int r, int i, int m, int v ) :
 	dateTimes(*(new std::vector<int64_t>())),
 	violations(*(new std::vector<bool>())),

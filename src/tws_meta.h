@@ -2,6 +2,7 @@
 #define TWS_META_H
 
 #include "ibtws/Contract.h"
+#include "ibtws/Execution.h"
 
 #include <stdint.h>
 #include <list>
@@ -400,6 +401,42 @@ class PacketAccStatus
 		std::string accountName;
 		
 		std::vector<RowAcc*> * const list;
+};
+
+
+
+
+
+
+
+
+struct RowExecution
+{
+	IB::Contract contract;
+	IB::Execution execution;
+};
+
+class PacketExecutions
+	: public  Packet
+{
+	public:
+		PacketExecutions();
+		virtual ~PacketExecutions();
+		
+		void clear();
+		void record( const int reqId, const IB::ExecutionFilter& );
+		void append( int reqId, const IB::Contract&, const IB::Execution& );
+		void appendExecutionsEnd( int reqId );
+		
+		void dumpXml();
+		
+	private:
+		void del_list_elements();
+		
+		int reqId;
+		IB::ExecutionFilter *executionFilter;
+		
+		std::vector<RowExecution*> * const list;
 };
 
 
