@@ -1244,6 +1244,130 @@ void PacketExecutions::dumpXml()
 
 
 
+PacketOrders::PacketOrders() :
+	list( new std::vector<RowOrd*>() )
+{
+}
+
+PacketOrders::~PacketOrders()
+{
+	del_list_elements();
+	delete list;
+}
+
+void PacketOrders::clear()
+{
+	assert( finished() );
+	mode = CLEAN;
+	del_list_elements();
+	list->clear();
+}
+
+void PacketOrders::del_list_elements()
+{
+	std::vector<RowOrd*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		switch( (*it)->type ) {
+		case RowOrd::t_OrderStatus:
+			delete (RowOrderStatus*) (*it)->data;
+			break;
+		case RowOrd::t_OpenOrder:
+			delete (RowOpenOrder*) (*it)->data;
+			break;
+		}
+		delete (*it);
+	}
+}
+
+void PacketOrders::record()
+{
+	assert( empty() );
+	mode = RECORD;
+}
+
+void PacketOrders::append( const RowOrderStatus& row )
+{
+	RowOrd *arow = new RowOrd();
+	arow->type = RowOrd::t_OrderStatus;
+	arow->data = new RowOrderStatus(row);
+	list->push_back( arow );
+}
+
+void PacketOrders::append( const RowOpenOrder& row )
+{
+	RowOrd *arow = new RowOrd();
+	arow->type = RowOrd::t_OpenOrder;
+	arow->data = new RowOpenOrder(row);
+	list->push_back( arow );
+}
+
+void PacketOrders::appendOpenOrderEnd()
+{
+	mode = CLOSED;
+}
+
+
+static void conv2xml( xmlNodePtr parent, const RowOrd *row )
+{
+	char tmp[128];
+	switch( row->type ) {
+	case RowOrd::t_OrderStatus:
+		{
+			const RowOrderStatus &d = *(RowOrderStatus*)row->data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"OrderStatus", NULL);
+			A_ADD_ATTR_LONG(nrow, d, id);
+			A_ADD_ATTR_STRING( nrow, d, status );
+			A_ADD_ATTR_INT( nrow, d, filled );
+			A_ADD_ATTR_INT( nrow, d, remaining );
+			A_ADD_ATTR_DOUBLE( nrow, d, avgFillPrice );
+			A_ADD_ATTR_INT( nrow, d, permId );
+			A_ADD_ATTR_INT( nrow, d, parentId );
+			A_ADD_ATTR_DOUBLE( nrow, d, lastFillPrice );
+			A_ADD_ATTR_INT( nrow, d, clientId );
+			A_ADD_ATTR_STRING( nrow, d, whyHeld );
+		}
+		break;
+	case RowOrd::t_OpenOrder:
+		{
+			const RowOpenOrder &d = *(RowOpenOrder*)row->data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"OpenOrder", NULL);
+			A_ADD_ATTR_LONG(nrow, d, orderId);
+			conv_ib2xml( nrow, "contract", d.contract );
+			conv_ib2xml( nrow, "order", d.order );
+			conv_ib2xml( nrow, "orderState", d.orderState );
+		}
+		break;
+	}
+}
+
+void PacketOrders::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"open_orders" );
+	
+	/*xmlNodePtr nqry = */xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	std::vector<RowOrd*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		conv2xml( nrsp, (*it) );
+	}
+	
+	TwsXml::dumpAndFree( root );
+}
+
+
+
+
+
+
+
+
 PacingControl::PacingControl( int r, int i, int m, int v ) :
 	dateTimes(*(new std::vector<int64_t>())),
 	violations(*(new std::vector<bool>())),

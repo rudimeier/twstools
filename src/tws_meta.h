@@ -3,6 +3,9 @@
 
 #include "ibtws/Contract.h"
 #include "ibtws/Execution.h"
+#include "ibtws/Order.h"
+#include "ibtws/OrderState.h"
+#include "ibtws/CommonDefs.h"
 
 #include <stdint.h>
 #include <list>
@@ -437,6 +440,63 @@ class PacketExecutions
 		IB::ExecutionFilter *executionFilter;
 		
 		std::vector<RowExecution*> * const list;
+};
+
+
+
+
+
+
+
+
+struct RowOrd
+{
+	enum row_ord_type { t_OrderStatus, t_OpenOrder };
+	row_ord_type type;
+	void *data;
+};
+
+struct RowOrderStatus
+{
+	IB::OrderId id;
+	std::string status;
+	int filled;
+	int remaining;
+	double avgFillPrice;
+	int permId;
+	int parentId;
+	double lastFillPrice;
+	int clientId;
+	std::string whyHeld;
+};
+
+struct RowOpenOrder
+{
+	IB::OrderId orderId;
+	IB::Contract contract;
+	IB::Order order;
+	IB::OrderState orderState;
+};
+
+class PacketOrders
+	: public  Packet
+{
+	public:
+		PacketOrders();
+		virtual ~PacketOrders();
+		
+		void clear();
+		void record();
+		void append( const RowOrderStatus& );
+		void append( const RowOpenOrder& );
+		void appendOpenOrderEnd();
+		
+		void dumpXml();
+		
+	private:
+		void del_list_elements();
+		
+		std::vector<RowOrd*> * const list;
 };
 
 
