@@ -490,7 +490,6 @@ void TwsDL::idle()
 	
 	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		if( curIndexTodoContractDetails < (int)workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
-			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
 			reqContractDetails();
 			return;
 		}
@@ -988,9 +987,10 @@ void TwsDL::reqContractDetails()
 	
 	PacketContractDetails *p_contractDetails = new PacketContractDetails();
 	packet = p_contractDetails;
+	currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
+	
 	p_contractDetails->record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
-	
 	changeState( WAIT_DATA );
 }
 
@@ -1009,19 +1009,19 @@ void TwsDL::reqHistoricalData()
 		DEBUG_PRINTF( "late timeout: %d", wait );
 	}
 	
-	const HistRequest &hR = workTodo->getHistTodo().current();
-	
-	pacingControl.addRequest( hR.ibContract() );
-	
+	PacketHistData *p_histData = new PacketHistData();
+	packet = p_histData;
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
+	
+	
+	const HistRequest &hR = workTodo->getHistTodo().current();
+	pacingControl.addRequest( hR.ibContract() );
 	
 	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
 		&workTodo->getHistTodo().current(),
 		currentRequest.reqId(),
 		ibToString(hR.ibContract()).c_str() );
 	
-	PacketHistData *p_histData = new PacketHistData();
-	packet = p_histData;
 	p_histData->record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
@@ -1031,7 +1031,6 @@ void TwsDL::reqHistoricalData()
 	                              hR.whatToShow(),
 	                              hR.useRTH(),
 	                              hR.formatDate() );
-	
 	changeState( WAIT_DATA );
 }
 
@@ -1053,8 +1052,9 @@ void TwsDL::reqExecutions()
 	currentRequest.nextRequest( GenericRequest::NONE );
 	
 	IB::ExecutionFilter eF;
-	executions->record( 1, eF );
-	twsClient->reqExecutions( 1, eF);
+	
+	executions->record( currentRequest.reqId(), eF );
+	twsClient->reqExecutions( currentRequest.reqId(), eF);
 	changeState( WAIT_DATA );
 }
 
