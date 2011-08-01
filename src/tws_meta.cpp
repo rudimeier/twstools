@@ -486,7 +486,6 @@ void ContractDetailsTodo::add( const ContractDetailsRequest& cdr )
 
 
 WorkTodo::WorkTodo() :
-	reqType(GenericRequest::NONE),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() )
 {
@@ -504,9 +503,15 @@ WorkTodo::~WorkTodo()
 }
 
 
-GenericRequest::ReqType WorkTodo::getType() const
+GenericRequest::ReqType WorkTodo::nextReqType() const
 {
-	return reqType;
+	if( _contractDetailsTodo->countLeft() > 0 ) {
+		return GenericRequest::CONTRACT_DETAILS_REQUEST;
+	} else if( _histTodo->countLeft() > 0 ) {
+		return GenericRequest::HIST_REQUEST;
+	} else {
+		return GenericRequest::NONE;
+	}
 }
 
 ContractDetailsTodo* WorkTodo::contractDetailsTodo() const
@@ -533,7 +538,6 @@ const HistTodo& WorkTodo::getHistTodo() const
 int WorkTodo::read_file( const std::string & fileName )
 {
 	int retVal = -1;
-	reqType = GenericRequest::NONE;
 	
 	TwsXml file;
 	if( ! file.openFile(fileName.c_str()) ) {
@@ -548,12 +552,10 @@ int WorkTodo::read_file( const std::string & fileName )
 			if( tmp == NULL ) {
 				fprintf(stderr, "Warning, no request type specified.\n");
 			} else if( strcmp( tmp, "contract_details") == 0 ) {
-				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
 				_contractDetailsTodo->add(pcd->getRequest());
 				retVal++;
 			} else if ( strcmp( tmp, "historical_data") == 0 ) {
-				reqType = GenericRequest::HIST_REQUEST;
 				PacketHistData *phd = PacketHistData::fromXml(xn);
 				_histTodo->add( phd->getRequest() );
 				retVal++;

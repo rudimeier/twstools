@@ -487,24 +487,21 @@ void TwsDL::idle()
 		return;
 	}
 	
-	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
-			reqContractDetails();
-			return;
-		}
+	GenericRequest::ReqType reqType = workTodo->nextReqType();
+	switch( reqType ) {
+	case GenericRequest::CONTRACT_DETAILS_REQUEST:
+		reqContractDetails();
+		break;
+	case GenericRequest::HIST_REQUEST:
+		reqHistoricalData();
+		break;
+	case GenericRequest::NONE:
+		break;
 	}
 	
-	// TODO we want to dump only one time
-	dumpWorkTodo();
-	
-	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if(  workTodo->getHistTodo().countLeft() > 0 ) {
-			reqHistoricalData();
-			return;
-		}
+	if( reqType == GenericRequest::NONE ) {
+		changeState( QUIT_READY );
 	}
-	
-	changeState( QUIT_READY );
 }
 
 
@@ -930,11 +927,12 @@ void TwsDL::initWork()
 	int cnt = workTodo->read_file(workFile);
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, workFile.c_str() );
 	
-	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+	if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
 		DEBUG_PRINTF( "getting contracts from TWS, %d",
 			workTodo->getContractDetailsTodo().countLeft() );
 // 		state = IDLE;
-	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
+	}
+	if( workTodo->getHistTodo().countLeft() > 0 ) {
 		DEBUG_PRINTF( "getting hist data from TWS, %d",
 			workTodo->getHistTodo().countLeft());
 		dumpWorkTodo();

@@ -222,7 +222,7 @@ class WorkTodo
 		WorkTodo();
 		virtual ~WorkTodo();
 		
-		GenericRequest::ReqType getType() const;
+		GenericRequest::ReqType nextReqType() const;
 		ContractDetailsTodo* contractDetailsTodo() const;
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
@@ -230,7 +230,6 @@ class WorkTodo
 		int read_file( const std::string & fileName);
 		
 	private:
-		GenericRequest::ReqType reqType;
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 };
