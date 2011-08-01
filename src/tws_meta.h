@@ -132,6 +132,9 @@ class GenericRequest
 	public:
 		enum ReqType {
 			NONE,
+			ACC_STATUS_REQUEST,
+			EXECUTIONS_REQUEST,
+			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST
 		};
@@ -227,9 +230,13 @@ class WorkTodo
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
+		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const std::string & fileName);
 		
 	private:
+		mutable bool acc_status_todo;
+		mutable bool executions_todo;
+		mutable bool orders_todo;
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 };

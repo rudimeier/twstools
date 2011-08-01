@@ -471,24 +471,17 @@ void TwsDL::idle()
 		return;
 	}
 	
-	if( get_accountp ) {
-		reqAccStatus();
-		get_accountp = 0;
-		return;
-	}
-	if( get_execp ) {
-		reqExecutions();
-		get_execp = 0;
-		return;
-	}
-	if( get_orderp ) {
-		reqOrders();
-		get_orderp = 0;
-		return;
-	}
-	
 	GenericRequest::ReqType reqType = workTodo->nextReqType();
 	switch( reqType ) {
+	case GenericRequest::ACC_STATUS_REQUEST:
+		reqAccStatus();
+		break;
+	case GenericRequest::EXECUTIONS_REQUEST:
+		reqExecutions();
+		break;
+	case GenericRequest::ORDERS_REQUEST:
+		reqOrders();
+		break;
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
 		reqContractDetails();
 		break;
@@ -537,10 +530,14 @@ void TwsDL::waitData()
 	case GenericRequest::HIST_REQUEST:
 		ok = finHist();
 		break;
-	case GenericRequest::NONE:
-		/* must be account stuff */
+	case GenericRequest::ACC_STATUS_REQUEST:
+	case GenericRequest::EXECUTIONS_REQUEST:
+	case GenericRequest::ORDERS_REQUEST:
 		packet->dumpXml();
 		ok = true;
+		break;
+	case GenericRequest::NONE:
+		assert(false);
 		break;
 	}
 	if( ok ) {
@@ -617,6 +614,9 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			case GenericRequest::HIST_REQUEST:
 				errorHistData( id, errorCode, errorMsg );
 				break;
+			case GenericRequest::ACC_STATUS_REQUEST:
+			case GenericRequest::EXECUTIONS_REQUEST:
+			case GenericRequest::ORDERS_REQUEST:
 			case GenericRequest::NONE:
 				assert( false );
 				break;
@@ -790,6 +790,9 @@ void TwsDL::twsConnected( bool connected )
 			if( !packet->finished() ) {
 				switch( currentRequest.reqType() ) {
 				case GenericRequest::CONTRACT_DETAILS_REQUEST:
+				case GenericRequest::ACC_STATUS_REQUEST:
+				case GenericRequest::EXECUTIONS_REQUEST:
+				case GenericRequest::ORDERS_REQUEST:
 					assert(false); // TODO repeat
 					break;
 				case GenericRequest::HIST_REQUEST:
@@ -924,6 +927,16 @@ void TwsDL::twsOpenOrderEnd()
 
 void TwsDL::initWork()
 {
+	if( get_accountp ) {
+		workTodo->addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
+	}
+	if( get_execp ) {
+		workTodo->addSimpleRequest(GenericRequest::EXECUTIONS_REQUEST);
+	}
+	if( get_orderp ) {
+		workTodo->addSimpleRequest(GenericRequest::ORDERS_REQUEST);
+	}
+	
 	int cnt = workTodo->read_file(workFile);
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, workFile.c_str() );
 	
@@ -1035,7 +1048,7 @@ void TwsDL::reqAccStatus()
 {
 	PacketAccStatus *accStatus = new PacketAccStatus();
 	packet = accStatus;
-	currentRequest.nextRequest( GenericRequest::NONE );
+	currentRequest.nextRequest( GenericRequest::ACC_STATUS_REQUEST );
 	
 	accStatus->record( tws_account_namep );
 	twsClient->reqAccountUpdates(true, tws_account_namep);
@@ -1046,7 +1059,7 @@ void TwsDL::reqExecutions()
 {
 	PacketExecutions *executions = new PacketExecutions();
 	packet = executions;
-	currentRequest.nextRequest( GenericRequest::NONE );
+	currentRequest.nextRequest( GenericRequest::EXECUTIONS_REQUEST );
 	
 	IB::ExecutionFilter eF;
 	
@@ -1059,7 +1072,7 @@ void TwsDL::reqOrders()
 {
 	PacketOrders *orders = new PacketOrders();
 	packet = orders;
-	currentRequest.nextRequest( GenericRequest::NONE );
+	currentRequest.nextRequest( GenericRequest::ORDERS_REQUEST );
 	
 	orders->record();
 	twsClient->reqAllOpenOrders();

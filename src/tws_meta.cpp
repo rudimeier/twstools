@@ -505,7 +505,16 @@ WorkTodo::~WorkTodo()
 
 GenericRequest::ReqType WorkTodo::nextReqType() const
 {
-	if( _contractDetailsTodo->countLeft() > 0 ) {
+	if( acc_status_todo ) {
+		acc_status_todo = false;
+		return GenericRequest::ACC_STATUS_REQUEST;
+	} else if( executions_todo ) {
+		executions_todo = false;
+		return GenericRequest::EXECUTIONS_REQUEST;
+	} else if( orders_todo ) {
+		orders_todo = false;
+		return GenericRequest::ORDERS_REQUEST;
+	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {
 		return GenericRequest::HIST_REQUEST;
@@ -532,6 +541,24 @@ HistTodo* WorkTodo::histTodo() const
 const HistTodo& WorkTodo::getHistTodo() const
 {
 	return *_histTodo;
+}
+
+
+void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
+{
+	switch( reqType ) {
+	case GenericRequest::ACC_STATUS_REQUEST:
+		acc_status_todo = true;
+		break;
+	case GenericRequest::EXECUTIONS_REQUEST:
+		executions_todo = true;
+		break;
+	case GenericRequest::ORDERS_REQUEST:
+		orders_todo = true;
+		break;
+	default:
+		assert(false);
+	}
 }
 
 
