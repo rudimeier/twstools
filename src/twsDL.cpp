@@ -814,6 +814,10 @@ void TwsDL::twsConnected( bool connected )
 
 void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
+	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
@@ -827,6 +831,10 @@ void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContract
 
 void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
+	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
@@ -839,6 +847,10 @@ void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibCont
 
 void TwsDL::twsContractDetailsEnd( int reqId )
 {
+	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
@@ -853,6 +865,10 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
+	if( currentRequest.reqType() != GenericRequest::HIST_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
@@ -875,47 +891,83 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 
 void TwsDL::twsUpdateAccountValue( const RowAccVal& row )
 {
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketAccStatus*)packet)->append( row );
 }
 
 void TwsDL::twsUpdatePortfolio( const RowPrtfl& row )
 {
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketAccStatus*)packet)->append( row );
 }
 
 void TwsDL::twsUpdateAccountTime( const std::string& timeStamp )
 {
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketAccStatus*)packet)->appendUpdateAccountTime( timeStamp );
 }
 
 void TwsDL::twsAccountDownloadEnd( const std::string& accountName )
 {
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketAccStatus*)packet)->appendAccountDownloadEnd( accountName );
 }
 
 void TwsDL::twsExecDetails( int reqId, const IB::Contract& contract,
 	const IB::Execution& execution )
 {
+	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketExecutions*)packet)->append( reqId, contract, execution );
 }
 
 void TwsDL::twsExecDetailsEnd( int reqId )
 {
+	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketExecutions*)packet)->appendExecutionsEnd( reqId );
 }
 
 void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 {
+	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	((PacketOrders*)packet)->append(row);
 }
 
 void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 {
+	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback..");
+		return;
+	}
 	((PacketOrders*)packet)->append(row);
 }
 
 void TwsDL::twsOpenOrderEnd()
 {
+	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	// TODO
 	static int i = 0;
 	i++;
