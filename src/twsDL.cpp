@@ -438,16 +438,28 @@ void TwsDL::connectTws()
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
-		curIdleTime = 1000; //TODO wait for first tws messages
+		/* waiting for first messages until tws_time is received */
+		tws_time = 0;
+		twsClient->reqCurrentTime();
 	}
 }
 
 
 void TwsDL::waitTwsCon()
 {
+	int64_t w = tws_conTimeoutp - (nowInMsecs() - lastConnectionTime);
+	
 	if( twsClient->isConnected() ) {
-		DEBUG_PRINTF( "We are connected to TWS." );
-		changeState( IDLE );
+		if( tws_time != 0 ) {
+			DEBUG_PRINTF( "Connection process finished." );
+			changeState( IDLE );
+		} else if( w > 0 ) {
+			DEBUG_PRINTF( "Still waiting for connection finish." );
+			curIdleTime = w;
+		} else {
+			DEBUG_PRINTF( "Timeout connecting TWS." );
+			twsClient->disconnectTWS();
+		}
 	} else {
 		DEBUG_PRINTF( "Connecting TWS failed." );
 		changeState( IDLE );
