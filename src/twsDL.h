@@ -46,7 +46,7 @@ class TwsDL
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
-			QUIT_READY
+			QUIT
 		};
 		
 		TwsDL( const std::string& workFile );

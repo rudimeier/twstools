@@ -400,7 +400,7 @@ void TwsDL::eventLoop()
 			case WAIT_DATA:
 				waitData();
 				break;
-			case QUIT_READY:
+			case QUIT:
 				run = false;
 				break;
 		}
@@ -487,7 +487,7 @@ void TwsDL::idle()
 	}
 	
 	if( reqType == GenericRequest::NONE ) {
-		changeState( QUIT_READY );
+		changeState( QUIT );
 	}
 }
 
@@ -538,7 +538,7 @@ void TwsDL::waitData()
 		changeState( IDLE );
 	} else {
 		error = 1;
-		changeState( QUIT_READY );
+		changeState( QUIT );
 	}
 	delete packet;
 	packet = NULL;
@@ -1132,7 +1132,7 @@ int main(int argc, const char *argv[])
 	TwsDL twsDL( workfilep );
 	int ret = twsDL.start();
 	
-	assert( twsDL.currentState() == TwsDL::QUIT_READY );
+	assert( twsDL.currentState() == TwsDL::QUIT );
 	if( ret != 0 ) {
 		DEBUG_PRINTF( "Finished with errors." );
 	}
