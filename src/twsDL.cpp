@@ -430,13 +430,15 @@ void TwsDL::connectTws()
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
+	/* this might fire callbacks already */
 	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
 	
 	if( !twsClient->isConnected() ) {
 		DEBUG_PRINTF("Connection to TWS failed:"); //TODO print a specific error
 		twsConnected( false );
 	} else {
-		//TODO print client/server version and m_TwsTime
+		DEBUG_PRINTF("TWS connection established: %d, %s",
+			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
 		twsConnected( true );
 	}
 }
