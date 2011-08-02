@@ -39,6 +39,9 @@ class TWSClient
 		void connectTWS( const std::string &host, int port, int clientId );
 		void disconnectTWS();
 		
+		int serverVersion();
+		std::string TwsConnectionTime();
+		
 		void reqMktData( int tickerId, const IB::Contract &contract, const std::string &genericTickList, bool snapshot );
 		void cancelMktData( int tickerId );
 		void placeOrder( int id, const IB::Contract &contract, const IB::Order &order );

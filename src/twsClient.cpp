@@ -205,6 +205,16 @@ void TWSClient::selectStuff( int msec )
 }
 
 
+int TWSClient::serverVersion()
+{
+	return ePosixClient->serverVersion();
+}
+
+std::string TWSClient::TwsConnectionTime()
+{
+	return ePosixClient->TwsConnectionTime();
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
