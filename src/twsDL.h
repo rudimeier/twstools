@@ -111,7 +111,6 @@ class TwsDL
 		int error;
 		std::string _lastError;
 		int64_t lastConnectionTime;
-		bool connection_failed;
 		int curIdleTime;
 		
 		std::string workFile;
