@@ -52,8 +52,6 @@ class TWSClient
 		void reqCurrentTime();
 		
 	private:
-		void disconnected();
-		
 		IB::EWrapper* myEWrapper;
 		IB::EPosixClientSocket* ePosixClient;
 };

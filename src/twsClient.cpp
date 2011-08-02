@@ -74,13 +74,6 @@ void TWSClient::disconnectTWS()
 	}
 	
 	ePosixClient->eDisconnect();
-	disconnected();
-}
-
-
-void TWSClient::disconnected()
-{
-	assert( !isConnected() );
 	myEWrapper->connectionClosed();
 	DEBUG_PRINTF("We are disconnected");
 }
