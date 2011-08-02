@@ -167,7 +167,6 @@ class TwsDlWrapper : public DebugTwsWrapper
 		TwsDlWrapper( TwsDL* parent );
 		virtual ~TwsDlWrapper();
 		
-// 		void twsConnected( bool connected );
 		void connectionClosed();
 		
 		void error( const int id, const int errorCode,
@@ -218,7 +217,7 @@ TwsDlWrapper::~TwsDlWrapper()
 
 void TwsDlWrapper::connectionClosed()
 {
-	parentTwsDL->twsConnected( false );
+	parentTwsDL->twsConnectionClosed();
 }
 
 
@@ -427,11 +426,11 @@ void TwsDL::connectTws()
 	
 	if( !twsClient->isConnected() ) {
 		DEBUG_PRINTF("Connection to TWS failed:"); //TODO print a specific error
-		twsConnected( false );
+		twsConnectionClosed();
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
-		twsConnected( true );
+		curIdleTime = 1000; //TODO wait for first tws messages
 	}
 }
 
@@ -769,12 +768,8 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 #undef ERR_MATCH
 
 
-void TwsDL::twsConnected( bool connected )
+void TwsDL::twsConnectionClosed()
 {
-	if( connected ) {
-		assert( state == WAIT_TWS_CON );
-		curIdleTime = 1000; //TODO wait for first tws messages
-	} else {
 		DEBUG_PRINTF( "disconnected in state %d", state );
 		
 		if( state == WAIT_TWS_CON ) {
@@ -801,7 +796,6 @@ void TwsDL::twsConnected( bool connected )
 		dataFarms.setAllBroken();
 		pacingControl.clear();
 		curIdleTime = 0;
-	}
 }
 
 

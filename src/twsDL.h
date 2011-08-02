@@ -86,7 +86,7 @@ class TwsDL
 		// callbacks from our twsWrapper
 		void twsError(int, int, const std::string &);
 		
-		void twsConnected( bool connected );
+		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void twsBondContractDetails( int reqId,
