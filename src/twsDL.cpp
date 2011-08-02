@@ -487,6 +487,7 @@ void TwsDL::idle()
 	}
 	
 	if( reqType == GenericRequest::NONE ) {
+		_lastError = "No more work to do.";
 		changeState( QUIT );
 	}
 }
@@ -538,6 +539,7 @@ void TwsDL::waitData()
 		changeState( IDLE );
 	} else {
 		error = 1;
+		_lastError = "Fatal error.";
 		changeState( QUIT );
 	}
 	delete packet;
@@ -1011,6 +1013,10 @@ TwsDL::State TwsDL::currentState() const
 	return state;
 }
 
+std::string TwsDL::lastError() const
+{
+	return _lastError;
+}
 
 void TwsDL::changeState( State s )
 {
@@ -1134,7 +1140,9 @@ int main(int argc, const char *argv[])
 	
 	assert( twsDL.currentState() == TwsDL::QUIT );
 	if( ret != 0 ) {
-		DEBUG_PRINTF( "Finished with errors." );
+		DEBUG_PRINTF( "error: %s", twsDL.lastError().c_str() );
+	} else {
+		DEBUG_PRINTF( "%s", twsDL.lastError().c_str() );
 	}
 	return ret;
 }

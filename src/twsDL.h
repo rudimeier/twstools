@@ -55,6 +55,7 @@ class TwsDL
 		int start();
 		
 		State currentState() const;
+		std::string lastError() const;
 		
 	private:
 		void initTwsClient();
@@ -108,6 +109,7 @@ class TwsDL
 		
 		State state;
 		int error;
+		std::string _lastError;
 		int64_t lastConnectionTime;
 		bool connection_failed;
 		int curIdleTime;
