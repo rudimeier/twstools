@@ -329,7 +329,7 @@ void TwsDlWrapper::openOrderEnd()
 
 
 TwsDL::TwsDL( const std::string& workFile ) :
-	state(CONNECT),
+	state(IDLE),
 	lastConnectionTime(0),
 	connection_failed( false ),
 	curIdleTime(0),
@@ -374,10 +374,8 @@ TwsDL::~TwsDL()
 
 void TwsDL::start()
 {
-	assert( (state == CONNECT) ||
-		(state == QUIT_READY) || (state == QUIT_ERROR) );
+	assert( state == IDLE );
 	
-	state = CONNECT;
 	curIdleTime = 0;
 	eventLoop();
 }
@@ -391,9 +389,6 @@ void TwsDL::eventLoop()
 			twsClient->selectStuff( curIdleTime );
 		}
 		switch( state ) {
-			case CONNECT:
-				connectTws();
-				break;
 			case WAIT_TWS_CON:
 				waitTwsCon();
 				break;
@@ -452,7 +447,7 @@ void TwsDL::waitTwsCon()
 	} else {
 		if( connection_failed ) {
 			DEBUG_PRINTF( "Connecting TWS failed." );
-			changeState( CONNECT );
+			changeState( IDLE );
 		} else if( (nowInMsecs() - lastConnectionTime) > tws_conTimeoutp ) {
 				DEBUG_PRINTF( "Timeout connecting TWS." );
 				twsClient->disconnectTWS();
@@ -469,7 +464,7 @@ void TwsDL::idle()
 	assert(currentRequest.reqType() == GenericRequest::NONE);
 	
 	if( !twsClient->isConnected() ) {
-		changeState( CONNECT );
+		connectTws();
 		return;
 	}
 	
@@ -787,7 +782,6 @@ void TwsDL::twsConnected( bool connected )
 		curIdleTime = 1000; //TODO wait for first tws messages
 	} else {
 		DEBUG_PRINTF( "disconnected in state %d", state );
-		assert( state != CONNECT );
 		
 		if( state == WAIT_TWS_CON ) {
 			connection_failed = true;

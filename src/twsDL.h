@@ -43,7 +43,6 @@ class TwsDL
 {
 	public:
 		enum State {
-			CONNECT,
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
