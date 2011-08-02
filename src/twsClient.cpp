@@ -47,13 +47,6 @@ bool TWSClient::isConnected() const
 }
 
 
-void TWSClient::connectTWS()
-{
-	//TODO connectTWS( host, port, clientId ) should call connectTWS()
-// 	connectTWS( twsHost, twsPort, clientId, new FU );
-}
-
-
 void TWSClient::connectTWS( const std::string &host, int port, int clientId )
 {
 	DEBUG_PRINTF("connect: %s:%d, clientId: %d", host.c_str(), port, clientId);
