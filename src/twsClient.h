@@ -24,14 +24,6 @@ class TWSClient
 		
 		bool isConnected() const;
 		
-		std::string getTWSHost() const;
-		int getTWSPort() const;
-		int getClientId() const;
-		
-		void setTWSHost( const std::string &host );
-		void setTWSPort( const int port );
-		void setClientId( int clientId );
-		
 		void selectStuff( int msec );
 		
 		/////////////////////////////////////////////////////
@@ -62,10 +54,6 @@ class TWSClient
 		
 	private:
 		void disconnected();
-		
-		std::string twsHost;
-		int twsPort;
-		int clientId;
 		
 		IB::EWrapper* myEWrapper;
 		IB::EPosixClientSocket* ePosixClient;

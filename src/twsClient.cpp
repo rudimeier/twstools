@@ -30,9 +30,6 @@ TWSClient::TWSClient( IB::EWrapper *ew ) :
 	myEWrapper(ew),
 	ePosixClient(NULL)
 {
-	twsHost  = "otto";
-	twsPort  = 7497;
-	clientId = 579;
 }
 
 
@@ -47,51 +44,6 @@ TWSClient::~TWSClient()
 bool TWSClient::isConnected() const
 {
 	return ( (ePosixClient != NULL) && ePosixClient->isConnected() );
-}
-
-
-std::string TWSClient::getTWSHost() const
-{
-	return twsHost;
-}
-
-
-int TWSClient::getTWSPort() const
-{
-	return twsPort;
-}
-
-
-int     TWSClient::getClientId() const
-{
-	return clientId;
-}
-
-
-void TWSClient::setTWSHost( const std::string &host )
-{
-	if ( isConnected() ) {
-		assert(false); // TODO handle that
-	}
-	this->twsHost = host;
-}
-
-
-void TWSClient::setTWSPort( const int port )
-{
-	if ( isConnected() ) {
-		assert(false); // TODO handle that
-	}
-	this->twsPort  = port;
-}
-
-
-void TWSClient::setClientId( const int clientId )
-{
-	if ( isConnected() ) {
-		assert(false); // TODO handle that
-	}
-	this->clientId = clientId;
 }
 
 
@@ -115,10 +67,6 @@ void TWSClient::connectTWS( const std::string &host, int port, int clientId )
 	}
 	
 	ePosixClient = new IB::EPosixClientSocket(myEWrapper);
-	
-	this->twsHost  = host;
-	this->twsPort  = port;
-	this->clientId = clientId;
 	
 	ePosixClient->eConnect( host.c_str(), port, clientId );
 }
