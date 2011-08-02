@@ -105,12 +105,14 @@ class TwsDL
 		void twsOrderStatus( const RowOrderStatus& );
 		void twsOpenOrder( const RowOpenOrder& );
 		void twsOpenOrderEnd();
+		void twsCurrentTime( long time );
 		
 		
 		State state;
 		int error;
 		std::string _lastError;
 		int64_t lastConnectionTime;
+		long tws_time;
 		int curIdleTime;
 		
 		std::string workFile;

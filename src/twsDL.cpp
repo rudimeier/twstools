@@ -198,6 +198,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void openOrder( IB::OrderId orderId, const IB::Contract&,
 			const IB::Order&, const IB::OrderState& );
 		void openOrderEnd();
+		void currentTime( long time );
 		
 	private:
 		TwsDL* parentTwsDL;
@@ -324,6 +325,12 @@ void TwsDlWrapper::openOrderEnd()
 	parentTwsDL->twsOpenOrderEnd();
 }
 
+void TwsDlWrapper::currentTime( long time )
+{
+	DebugTwsWrapper::currentTime(time);
+	parentTwsDL->twsCurrentTime( time );
+}
+
 
 
 
@@ -331,6 +338,7 @@ TwsDL::TwsDL( const std::string& workFile ) :
 	state(IDLE),
 	error(0),
 	lastConnectionTime(0),
+	tws_time(0),
 	curIdleTime(0),
 	workFile(workFile),
 	twsWrapper(NULL),
@@ -949,6 +957,13 @@ void TwsDL::twsOpenOrderEnd()
 	}
 	
 	((PacketOrders*)packet)->appendOpenOrderEnd();
+}
+
+void TwsDL::twsCurrentTime( long time )
+{
+	if( state == WAIT_TWS_CON ) {
+		tws_time = time;
+	}
 }
 
 
