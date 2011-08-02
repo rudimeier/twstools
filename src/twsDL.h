@@ -46,14 +46,13 @@ class TwsDL
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
-			QUIT_READY,
-			QUIT_ERROR
+			QUIT_READY
 		};
 		
 		TwsDL( const std::string& workFile );
 		~TwsDL();
 		
-		void start();
+		int start();
 		
 		State currentState() const;
 		
@@ -69,7 +68,6 @@ class TwsDL
 		bool finContracts();
 		bool finHist();
 		void waitData();
-		void onQuit( int ret );
 		
 		void changeState( State );
 		
@@ -109,6 +107,7 @@ class TwsDL
 		
 		
 		State state;
+		int error;
 		int64_t lastConnectionTime;
 		bool connection_failed;
 		int curIdleTime;

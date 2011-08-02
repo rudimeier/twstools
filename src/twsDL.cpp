@@ -330,6 +330,7 @@ void TwsDlWrapper::openOrderEnd()
 
 TwsDL::TwsDL( const std::string& workFile ) :
 	state(IDLE),
+	error(0),
 	lastConnectionTime(0),
 	connection_failed( false ),
 	curIdleTime(0),
@@ -372,12 +373,13 @@ TwsDL::~TwsDL()
 }
 
 
-void TwsDL::start()
+int TwsDL::start()
 {
 	assert( state == IDLE );
 	
 	curIdleTime = 0;
 	eventLoop();
+	return error;
 }
 
 
@@ -399,11 +401,6 @@ void TwsDL::eventLoop()
 				waitData();
 				break;
 			case QUIT_READY:
-				onQuit(0);
-				run = false;
-				break;
-			case QUIT_ERROR:
-				onQuit(-1);
 				run = false;
 				break;
 		}
@@ -540,7 +537,8 @@ void TwsDL::waitData()
 	if( ok ) {
 		changeState( IDLE );
 	} else {
-		changeState( QUIT_ERROR );
+		error = 1;
+		changeState( QUIT_READY );
 	}
 	delete packet;
 	packet = NULL;
@@ -575,12 +573,6 @@ bool TwsDL::finHist()
 		break;
 	}
 	return true;
-}
-
-
-void TwsDL::onQuit( int /*ret*/ )
-{
-	curIdleTime = 0;
 }
 
 
@@ -1138,15 +1130,11 @@ int main(int argc, const char *argv[])
 	TwsXml::setSkipDefaults( !skipdefp );
 	
 	TwsDL twsDL( workfilep );
-	twsDL.start();
+	int ret = twsDL.start();
 	
-	TwsDL::State state = twsDL.currentState();
-	assert( (state == TwsDL::QUIT_READY) ||
-		(state == TwsDL::QUIT_ERROR) );
-	if( state == TwsDL::QUIT_READY ) {
-		return 0;
-	} else {
+	assert( twsDL.currentState() == TwsDL::QUIT_READY );
+	if( ret != 0 ) {
 		DEBUG_PRINTF( "Finished with errors." );
-		return 1;
 	}
+	return ret;
 }
