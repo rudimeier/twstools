@@ -964,16 +964,14 @@ void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 
 void TwsDL::twsOpenOrderEnd()
 {
+	/* this messages usually comes unexpected right after connecting */
+	
 	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
 		DEBUG_PRINTF( "Warning, unexpected tws callback.");
 		return;
 	}
-	// TODO
-	static int i = 0;
-	i++;
-	if( i == 2 ) {
-		((PacketOrders*)packet)->appendOpenOrderEnd();
-	}
+	
+	((PacketOrders*)packet)->appendOpenOrderEnd();
 }
 
 
