@@ -147,10 +147,6 @@ void TWSClient::disconnected()
 
 void TWSClient::selectStuff( int msec )
 {
-	int fd = ePosixClient->fd();
-	
-	assert( fd >= 0 || ( fd == -1 && !isConnected()) );
-	
 	struct timeval tval;
 	tval.tv_usec = msec * 1000;
 	tval.tv_sec = 0;
@@ -160,8 +156,12 @@ void TWSClient::selectStuff( int msec )
 	FD_ZERO( &readSet);
 	errorSet = writeSet = readSet;
 	
+	int fd = -1;
 	if( isConnected() ) {
 		// if not connected then all sets are zero and select will just timeout
+		fd = ePosixClient->fd();
+		assert( fd >= 0 );
+		
 		FD_SET( fd, &readSet);
 		if( !ePosixClient->isOutBufferEmpty()) {
 			FD_SET( fd, &writeSet);
