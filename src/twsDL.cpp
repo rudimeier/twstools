@@ -606,7 +606,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	msgCounter++;
 	
 	if( id == currentRequest.reqId() ) {
-		DEBUG_PRINTF( "ERROR for request %d %d %s",
+		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
 			id, errorCode, errorMsg.c_str() );
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
@@ -630,9 +630,12 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	}
 	
 	if( id != -1 ) {
-		DEBUG_PRINTF( "Warning, unexpected request Id %d", id );
+		DEBUG_PRINTF( "TWS message for unexpected request %d: %d '%s'",
+			id, errorCode, errorMsg.c_str() );
 		return;
 	}
+	
+	DEBUG_PRINTF( "TWS message generic: %d %s", errorCode, errorMsg.c_str() );
 	
 	// TODO do better
 	switch( errorCode ) {
