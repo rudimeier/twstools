@@ -433,7 +433,9 @@ void TwsDL::connectTws()
 	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
 	
 	if( !twsClient->isConnected() ) {
-		DEBUG_PRINTF("Connection to TWS failed:"); //TODO print a specific error
+		DEBUG_PRINTF("TWS connection failed.");
+		/* here we could changeState(IDLE) already. But callbacks might have
+		   been fired so we go through WAIT_TWS_CON to cleanup safely. */
 		twsConnectionClosed();
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
@@ -461,6 +463,7 @@ void TwsDL::waitTwsCon()
 			twsClient->disconnectTWS();
 		}
 	} else {
+		// TODO print a specific error
 		DEBUG_PRINTF( "Connecting TWS failed." );
 		changeState( IDLE );
 	}
