@@ -43,20 +43,19 @@ class TwsDL
 {
 	public:
 		enum State {
-			CONNECT,
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
-			QUIT_READY,
-			QUIT_ERROR
+			QUIT
 		};
 		
 		TwsDL( const std::string& workFile );
 		~TwsDL();
 		
-		void start();
+		int start();
 		
 		State currentState() const;
+		std::string lastError() const;
 		
 	private:
 		void initTwsClient();
@@ -70,7 +69,6 @@ class TwsDL
 		bool finContracts();
 		bool finHist();
 		void waitData();
-		void onQuit( int ret );
 		
 		void changeState( State );
 		
@@ -88,7 +86,7 @@ class TwsDL
 		// callbacks from our twsWrapper
 		void twsError(int, int, const std::string &);
 		
-		void twsConnected( bool connected );
+		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void twsBondContractDetails( int reqId,
@@ -107,11 +105,14 @@ class TwsDL
 		void twsOrderStatus( const RowOrderStatus& );
 		void twsOpenOrder( const RowOpenOrder& );
 		void twsOpenOrderEnd();
+		void twsCurrentTime( long time );
 		
 		
 		State state;
+		int error;
+		std::string _lastError;
 		int64_t lastConnectionTime;
-		bool connection_failed;
+		long tws_time;
 		int curIdleTime;
 		
 		std::string workFile;

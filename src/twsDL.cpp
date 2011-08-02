@@ -167,7 +167,6 @@ class TwsDlWrapper : public DebugTwsWrapper
 		TwsDlWrapper( TwsDL* parent );
 		virtual ~TwsDlWrapper();
 		
-// 		void twsConnected( bool connected );
 		void connectionClosed();
 		
 		void error( const int id, const int errorCode,
@@ -199,6 +198,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void openOrder( IB::OrderId orderId, const IB::Contract&,
 			const IB::Order&, const IB::OrderState& );
 		void openOrderEnd();
+		void currentTime( long time );
 		
 	private:
 		TwsDL* parentTwsDL;
@@ -218,7 +218,7 @@ TwsDlWrapper::~TwsDlWrapper()
 
 void TwsDlWrapper::connectionClosed()
 {
-	parentTwsDL->twsConnected( false );
+	parentTwsDL->twsConnectionClosed();
 }
 
 
@@ -325,13 +325,20 @@ void TwsDlWrapper::openOrderEnd()
 	parentTwsDL->twsOpenOrderEnd();
 }
 
+void TwsDlWrapper::currentTime( long time )
+{
+	DebugTwsWrapper::currentTime(time);
+	parentTwsDL->twsCurrentTime( time );
+}
+
 
 
 
 TwsDL::TwsDL( const std::string& workFile ) :
-	state(CONNECT),
+	state(IDLE),
+	error(0),
 	lastConnectionTime(0),
-	connection_failed( false ),
+	tws_time(0),
 	curIdleTime(0),
 	workFile(workFile),
 	twsWrapper(NULL),
@@ -372,14 +379,13 @@ TwsDL::~TwsDL()
 }
 
 
-void TwsDL::start()
+int TwsDL::start()
 {
-	assert( (state == CONNECT) ||
-		(state == QUIT_READY) || (state == QUIT_ERROR) );
+	assert( state == IDLE );
 	
-	state = CONNECT;
 	curIdleTime = 0;
 	eventLoop();
+	return error;
 }
 
 
@@ -391,9 +397,6 @@ void TwsDL::eventLoop()
 			twsClient->selectStuff( curIdleTime );
 		}
 		switch( state ) {
-			case CONNECT:
-				connectTws();
-				break;
 			case WAIT_TWS_CON:
 				waitTwsCon();
 				break;
@@ -403,12 +406,7 @@ void TwsDL::eventLoop()
 			case WAIT_DATA:
 				waitData();
 				break;
-			case QUIT_READY:
-				onQuit(0);
-				run = false;
-				break;
-			case QUIT_ERROR:
-				onQuit(-1);
+			case QUIT:
 				run = false;
 				break;
 		}
@@ -418,6 +416,8 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
+	assert( !twsClient->isConnected() );
+	
 	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < tws_conTimeoutp ) {
 		DEBUG_PRINTF( "Waiting %ldms before connecting again.",
@@ -426,38 +426,46 @@ void TwsDL::connectTws()
 		return;
 	}
 	
-	connection_failed = false;
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
+	/* this might fire callbacks already */
 	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
 	
 	if( !twsClient->isConnected() ) {
-		DEBUG_PRINTF("Connection to TWS failed:"); //TODO print a specific error
-		twsConnected( false );
+		DEBUG_PRINTF("TWS connection failed.");
+		/* here we could changeState(IDLE) already. But callbacks might have
+		   been fired so we go through WAIT_TWS_CON to cleanup safely. */
+		twsConnectionClosed();
 	} else {
-		//TODO print client/server version and m_TwsTime
-		twsConnected( true );
+		DEBUG_PRINTF("TWS connection established: %d, %s",
+			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
+		/* waiting for first messages until tws_time is received */
+		tws_time = 0;
+		twsClient->reqCurrentTime();
 	}
 }
 
 
 void TwsDL::waitTwsCon()
 {
+	int64_t w = tws_conTimeoutp - (nowInMsecs() - lastConnectionTime);
+	
 	if( twsClient->isConnected() ) {
-		DEBUG_PRINTF( "We are connected to TWS." );
-		changeState( IDLE );
-	} else {
-		if( connection_failed ) {
-			DEBUG_PRINTF( "Connecting TWS failed." );
-			changeState( CONNECT );
-		} else if( (nowInMsecs() - lastConnectionTime) > tws_conTimeoutp ) {
-				DEBUG_PRINTF( "Timeout connecting TWS." );
-				twsClient->disconnectTWS();
-				curIdleTime = 1000;
+		if( tws_time != 0 ) {
+			DEBUG_PRINTF( "Connection process finished." );
+			changeState( IDLE );
+		} else if( w > 0 ) {
+			DEBUG_PRINTF( "Still waiting for connection finish." );
+			curIdleTime = w;
 		} else {
-			DEBUG_PRINTF( "Still waiting for tws connection." );
+			DEBUG_PRINTF( "Timeout connecting TWS." );
+			twsClient->disconnectTWS();
 		}
+	} else {
+		// TODO print a specific error
+		DEBUG_PRINTF( "Connecting TWS failed." );
+		changeState( IDLE );
 	}
 }
 
@@ -467,7 +475,7 @@ void TwsDL::idle()
 	assert(currentRequest.reqType() == GenericRequest::NONE);
 	
 	if( !twsClient->isConnected() ) {
-		changeState( CONNECT );
+		connectTws();
 		return;
 	}
 	
@@ -493,7 +501,8 @@ void TwsDL::idle()
 	}
 	
 	if( reqType == GenericRequest::NONE ) {
-		changeState( QUIT_READY );
+		_lastError = "No more work to do.";
+		changeState( QUIT );
 	}
 }
 
@@ -543,7 +552,9 @@ void TwsDL::waitData()
 	if( ok ) {
 		changeState( IDLE );
 	} else {
-		changeState( QUIT_ERROR );
+		error = 1;
+		_lastError = "Fatal error.";
+		changeState( QUIT );
 	}
 	delete packet;
 	packet = NULL;
@@ -581,12 +592,6 @@ bool TwsDL::finHist()
 }
 
 
-void TwsDL::onQuit( int /*ret*/ )
-{
-	curIdleTime = 0;
-}
-
-
 void TwsDL::initTwsClient()
 {
 	assert( twsClient == NULL && twsWrapper == NULL );
@@ -604,7 +609,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	msgCounter++;
 	
 	if( id == currentRequest.reqId() ) {
-		DEBUG_PRINTF( "ERROR for request %d %d %s",
+		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
 			id, errorCode, errorMsg.c_str() );
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
@@ -628,9 +633,12 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	}
 	
 	if( id != -1 ) {
-		DEBUG_PRINTF( "Warning, unexpected request Id %d", id );
+		DEBUG_PRINTF( "TWS message for unexpected request %d: %d '%s'",
+			id, errorCode, errorMsg.c_str() );
 		return;
 	}
+	
+	DEBUG_PRINTF( "TWS message generic: %d %s", errorCode, errorMsg.c_str() );
 	
 	// TODO do better
 	switch( errorCode ) {
@@ -775,40 +783,32 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 #undef ERR_MATCH
 
 
-void TwsDL::twsConnected( bool connected )
+void TwsDL::twsConnectionClosed()
 {
-	if( connected ) {
-		assert( state == WAIT_TWS_CON );
-		curIdleTime = 1000; //TODO wait for first tws messages
-	} else {
-		DEBUG_PRINTF( "disconnected in state %d", state );
-		assert( state != CONNECT );
-		
-		if( state == WAIT_TWS_CON ) {
-			connection_failed = true;
-		} else if( state == WAIT_DATA ) {
-			if( !packet->finished() ) {
-				switch( currentRequest.reqType() ) {
-				case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				case GenericRequest::ACC_STATUS_REQUEST:
-				case GenericRequest::EXECUTIONS_REQUEST:
-				case GenericRequest::ORDERS_REQUEST:
-					assert(false); // TODO repeat
-					break;
-				case GenericRequest::HIST_REQUEST:
-					((PacketHistData*)packet)->closeError(
-						PacketHistData::ERR_TWSCON );
-					break;
-				case GenericRequest::NONE:
-					assert(false);
-					break;
-				}
+	DEBUG_PRINTF( "disconnected in state %d", state );
+	
+	if( state == WAIT_DATA ) {
+		if( !packet->finished() ) {
+			switch( currentRequest.reqType() ) {
+			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::ACC_STATUS_REQUEST:
+			case GenericRequest::EXECUTIONS_REQUEST:
+			case GenericRequest::ORDERS_REQUEST:
+				assert(false); // TODO repeat
+				break;
+			case GenericRequest::HIST_REQUEST:
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
+				break;
+			case GenericRequest::NONE:
+				assert(false);
+				break;
 			}
 		}
-		dataFarms.setAllBroken();
-		pacingControl.clear();
-		curIdleTime = 0;
 	}
+	dataFarms.setAllBroken();
+	pacingControl.clear();
+	curIdleTime = 0;
 }
 
 
@@ -974,6 +974,13 @@ void TwsDL::twsOpenOrderEnd()
 	((PacketOrders*)packet)->appendOpenOrderEnd();
 }
 
+void TwsDL::twsCurrentTime( long time )
+{
+	if( state == WAIT_TWS_CON ) {
+		tws_time = time;
+	}
+}
+
 
 void TwsDL::initWork()
 {
@@ -1020,6 +1027,10 @@ TwsDL::State TwsDL::currentState() const
 	return state;
 }
 
+std::string TwsDL::lastError() const
+{
+	return _lastError;
+}
 
 void TwsDL::changeState( State s )
 {
@@ -1139,15 +1150,13 @@ int main(int argc, const char *argv[])
 	TwsXml::setSkipDefaults( !skipdefp );
 	
 	TwsDL twsDL( workfilep );
-	twsDL.start();
+	int ret = twsDL.start();
 	
-	TwsDL::State state = twsDL.currentState();
-	assert( (state == TwsDL::QUIT_READY) ||
-		(state == TwsDL::QUIT_ERROR) );
-	if( state == TwsDL::QUIT_READY ) {
-		return 0;
+	assert( twsDL.currentState() == TwsDL::QUIT );
+	if( ret != 0 ) {
+		DEBUG_PRINTF( "error: %s", twsDL.lastError().c_str() );
 	} else {
-		DEBUG_PRINTF( "Finished with errors." );
-		return 1;
+		DEBUG_PRINTF( "%s", twsDL.lastError().c_str() );
 	}
+	return ret;
 }
