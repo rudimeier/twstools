@@ -785,30 +785,30 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 
 void TwsDL::twsConnectionClosed()
 {
-		DEBUG_PRINTF( "disconnected in state %d", state );
-		
-		if( state == WAIT_DATA ) {
-			if( !packet->finished() ) {
-				switch( currentRequest.reqType() ) {
-				case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				case GenericRequest::ACC_STATUS_REQUEST:
-				case GenericRequest::EXECUTIONS_REQUEST:
-				case GenericRequest::ORDERS_REQUEST:
-					assert(false); // TODO repeat
-					break;
-				case GenericRequest::HIST_REQUEST:
-					((PacketHistData*)packet)->closeError(
-						PacketHistData::ERR_TWSCON );
-					break;
-				case GenericRequest::NONE:
-					assert(false);
-					break;
-				}
+	DEBUG_PRINTF( "disconnected in state %d", state );
+	
+	if( state == WAIT_DATA ) {
+		if( !packet->finished() ) {
+			switch( currentRequest.reqType() ) {
+			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::ACC_STATUS_REQUEST:
+			case GenericRequest::EXECUTIONS_REQUEST:
+			case GenericRequest::ORDERS_REQUEST:
+				assert(false); // TODO repeat
+				break;
+			case GenericRequest::HIST_REQUEST:
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
+				break;
+			case GenericRequest::NONE:
+				assert(false);
+				break;
 			}
 		}
-		dataFarms.setAllBroken();
-		pacingControl.clear();
-		curIdleTime = 0;
+	}
+	dataFarms.setAllBroken();
+	pacingControl.clear();
+	curIdleTime = 0;
 }
 
 
