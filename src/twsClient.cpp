@@ -85,10 +85,10 @@ void TWSClient::selectStuff( int msec )
 	tval.tv_usec = msec * 1000;
 	tval.tv_sec = 0;
 	
-	fd_set readSet, writeSet, errorSet;
+	fd_set readSet, writeSet;
 	
 	FD_ZERO( &readSet);
-	errorSet = writeSet = readSet;
+	writeSet = readSet;
 	
 	int fd = -1;
 	if( isConnected() ) {
@@ -100,10 +100,9 @@ void TWSClient::selectStuff( int msec )
 		if( !ePosixClient->isOutBufferEmpty()) {
 			FD_SET( fd, &writeSet);
 		}
-		FD_CLR( fd, &errorSet);
 	}
 	int ret = select( fd + 1,
-		&readSet, &writeSet, &errorSet, &tval );
+		&readSet, &writeSet, NULL, &tval );
 	/////  blocking  ///////////////////////////////////////
 	
 	if( ret == 0) {
@@ -114,14 +113,6 @@ void TWSClient::selectStuff( int msec )
 			strerror(errno) );
 		disconnectTWS();
 		return;
-	}
-	
-	if( FD_ISSET( fd, &errorSet)) {
-		TWS_DEBUG( 1 ,"Error on socket." );
-		ePosixClient->onError(); // might disconnect us
-		if( !isConnected() ) {
-			return;
-		}
 	}
 	
 	if( FD_ISSET( fd, &writeSet)) {
