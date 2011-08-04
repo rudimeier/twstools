@@ -28,38 +28,26 @@
 
 TWSClient::TWSClient( IB::EWrapper *ew ) :
 	myEWrapper(ew),
-	ePosixClient(NULL)
+	ePosixClient( new IB::EPosixClientSocket(ew) )
 {
 }
 
 
 TWSClient::~TWSClient()
 {
-	if( ePosixClient != NULL ) {
-		delete ePosixClient;
-	}
+	delete ePosixClient;
 }
 
 
 bool TWSClient::isConnected() const
 {
-	return ( (ePosixClient != NULL) && ePosixClient->isConnected() );
+	return ePosixClient->isConnected();
 }
 
 
 void TWSClient::connectTWS( const std::string &host, int port, int clientId )
 {
 	DEBUG_PRINTF("connect: %s:%d, clientId: %d", host.c_str(), port, clientId);
-	
-	if( isConnected() ) {
-		myEWrapper->error( IB::NO_VALID_ID, IB::ALREADY_CONNECTED.code(),
-			IB::ALREADY_CONNECTED.msg() );
-		return;
-	} else if( ePosixClient != NULL ) {
-		delete ePosixClient;
-	}
-	
-	ePosixClient = new IB::EPosixClientSocket(myEWrapper);
 	
 	ePosixClient->eConnect( host.c_str(), port, clientId );
 }
