@@ -45,11 +45,11 @@ bool TWSClient::isConnected() const
 }
 
 
-void TWSClient::connectTWS( const std::string &host, int port, int clientId )
+bool TWSClient::connectTWS( const std::string &host, int port, int clientId )
 {
 	DEBUG_PRINTF("connect: %s:%d, clientId: %d", host.c_str(), port, clientId);
 	
-	ePosixClient->eConnect( host.c_str(), port, clientId );
+	return ePosixClient->eConnect( host.c_str(), port, clientId );
 }
 
 

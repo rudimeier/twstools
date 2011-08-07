@@ -429,14 +429,13 @@ void TwsDL::connectTws()
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
-	/* this might fire callbacks already */
-	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
+	/* this may callback (negative) error messages only */
+	bool con = twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
+	assert( con == twsClient->isConnected() );
 	
-	if( !twsClient->isConnected() ) {
+	if( !con ) {
 		DEBUG_PRINTF("TWS connection failed.");
-		/* here we could changeState(IDLE) already. But callbacks might have
-		   been fired so we go through WAIT_TWS_CON to cleanup safely. */
-		twsConnectionClosed();
+		changeState(IDLE);
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
