@@ -608,6 +608,23 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
 	msgCounter++;
 	
+	if( !twsClient->isConnected() ) {
+		switch( errorCode ) {
+		default:
+		case 504: /* NOT_CONNECTED */
+			DEBUG_PRINTF( "fatal: %d %d %s", id, errorCode, errorMsg.c_str() );
+			assert(false);
+			break;
+		case 503: /* UPDATE_TWS */
+			DEBUG_PRINTF( "error: %s", errorMsg.c_str() );
+			break;
+		case 502: /* CONNECT_FAIL */
+			DEBUG_PRINTF( "connection failed: %s", errorMsg.c_str());
+			break;
+		}
+		return;
+	}
+	
 	if( id == currentRequest.reqId() ) {
 		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
 			id, errorCode, errorMsg.c_str() );
