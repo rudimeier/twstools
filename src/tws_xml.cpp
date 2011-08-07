@@ -3,6 +3,9 @@
 #include "debug.h"
 #include "twsUtil.h"
 #include "ibtws/Contract.h"
+#include "ibtws/Execution.h"
+#include "ibtws/Order.h"
+#include "ibtws/OrderState.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -160,6 +163,165 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 }
 
 
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
+{
+	char tmp[128];
+	static const IB::Execution dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_STRING( e, execId );
+	ADD_ATTR_STRING( e, time );
+	ADD_ATTR_STRING( e, acctNumber );
+	ADD_ATTR_STRING( e, exchange );
+	ADD_ATTR_STRING( e, side );
+	ADD_ATTR_INT( e, shares );
+	ADD_ATTR_DOUBLE( e, price );
+	ADD_ATTR_INT( e, permId );
+	ADD_ATTR_LONG( e, clientId );
+	ADD_ATTR_LONG( e, orderId );
+	ADD_ATTR_INT( e, liquidation );
+	ADD_ATTR_INT( e, cumQty );
+	ADD_ATTR_DOUBLE( e, avgPrice );
+}
+
+void conv_ib2xml( xmlNodePtr parent, const char* name,
+	const IB::ExecutionFilter& eF )
+{
+	char tmp[128];
+	static const IB::ExecutionFilter dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_LONG( eF, m_clientId );
+	ADD_ATTR_STRING( eF, m_acctCode );
+	ADD_ATTR_STRING( eF, m_time );
+	ADD_ATTR_STRING( eF, m_symbol );
+	ADD_ATTR_STRING( eF, m_secType );
+	ADD_ATTR_STRING( eF, m_exchange );
+	ADD_ATTR_STRING( eF, m_side );
+}
+
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& tV )
+{
+	static const IB::TagValue dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_STRING( tV, tag );
+	ADD_ATTR_STRING( tV, value );
+}
+
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
+{
+	char tmp[128];
+	static const IB::Order dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_LONG( o, orderId );
+	ADD_ATTR_LONG( o, clientId );
+	ADD_ATTR_LONG( o, permId );
+	ADD_ATTR_STRING( o, action );
+	ADD_ATTR_LONG( o, totalQuantity );
+	ADD_ATTR_STRING( o, orderType );
+	ADD_ATTR_DOUBLE( o, lmtPrice );
+	ADD_ATTR_DOUBLE( o, auxPrice );
+	ADD_ATTR_STRING( o, tif );
+	ADD_ATTR_STRING( o, ocaGroup );
+	ADD_ATTR_INT( o, ocaType );
+	ADD_ATTR_STRING( o, orderRef );
+	ADD_ATTR_BOOL( o, transmit );
+	ADD_ATTR_LONG( o, parentId );
+	ADD_ATTR_BOOL( o, blockOrder );
+	ADD_ATTR_BOOL( o, sweepToFill );
+	ADD_ATTR_INT( o, displaySize );
+	ADD_ATTR_INT( o, triggerMethod );
+	ADD_ATTR_BOOL( o, outsideRth );
+	ADD_ATTR_BOOL( o, hidden );
+	ADD_ATTR_STRING( o, goodAfterTime );
+	ADD_ATTR_STRING( o, goodTillDate );
+	ADD_ATTR_STRING( o, rule80A );
+	ADD_ATTR_BOOL( o, allOrNone );
+	ADD_ATTR_INT( o, minQty );
+	ADD_ATTR_DOUBLE( o, percentOffset );
+	ADD_ATTR_BOOL( o, overridePercentageConstraints );
+	ADD_ATTR_DOUBLE( o, trailStopPrice );
+	ADD_ATTR_STRING( o, faGroup );
+	ADD_ATTR_STRING( o, faProfile );
+	ADD_ATTR_STRING( o, faMethod );
+	ADD_ATTR_STRING( o, faPercentage );
+	ADD_ATTR_STRING( o, openClose );
+	ADD_ATTR_INT( o, origin ); // TODO that's an enum!
+	ADD_ATTR_INT( o, shortSaleSlot );
+	ADD_ATTR_STRING( o, designatedLocation );
+	ADD_ATTR_INT( o, exemptCode );
+	ADD_ATTR_DOUBLE( o, discretionaryAmt );
+	ADD_ATTR_BOOL( o, eTradeOnly );
+	ADD_ATTR_BOOL( o, firmQuoteOnly );
+	ADD_ATTR_DOUBLE( o, nbboPriceCap );
+	ADD_ATTR_INT( o, auctionStrategy );
+	ADD_ATTR_DOUBLE( o, startingPrice );
+	ADD_ATTR_DOUBLE( o, stockRefPrice );
+	ADD_ATTR_DOUBLE( o, delta );
+	ADD_ATTR_DOUBLE( o, stockRangeLower );
+	ADD_ATTR_DOUBLE( o, stockRangeUpper );
+	ADD_ATTR_DOUBLE( o, volatility );
+	ADD_ATTR_INT( o, volatilityType );
+	ADD_ATTR_STRING( o,  deltaNeutralOrderType );
+	ADD_ATTR_DOUBLE( o, deltaNeutralAuxPrice );
+	ADD_ATTR_BOOL( o, continuousUpdate );
+	ADD_ATTR_INT( o, referencePriceType );
+	ADD_ATTR_DOUBLE( o, basisPoints );
+	ADD_ATTR_INT( o, basisPointsType );
+	ADD_ATTR_INT( o, scaleInitLevelSize );
+	ADD_ATTR_INT( o, scaleSubsLevelSize );
+	ADD_ATTR_DOUBLE( o, scalePriceIncrement );
+	ADD_ATTR_STRING( o, account );
+	ADD_ATTR_STRING( o, settlingFirm );
+	ADD_ATTR_STRING( o, clearingAccount );
+	ADD_ATTR_STRING( o, clearingIntent );
+	ADD_ATTR_STRING( o, algoStrategy );
+	{
+		const IB::Order::TagValueList* const algoParams = o.algoParams.get();
+		if( algoParams != NULL ) {
+			xmlNodePtr napl = xmlNewChild( ne, NULL,
+				(const xmlChar*)"algoParams", NULL);
+			for( IB::Order::TagValueList::const_iterator it
+				    = algoParams->begin(); it != algoParams->end(); ++it) {
+				conv_ib2xml( napl, "tagValue", **it );
+			}
+		}
+	}
+	ADD_ATTR_BOOL( o, whatIf );
+	ADD_ATTR_BOOL( o, notHeld );
+}
+
+void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
+{
+	char tmp[128];
+	static const IB::OrderState dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+	
+	ADD_ATTR_STRING( os, status );
+	ADD_ATTR_STRING( os, initMargin );
+	ADD_ATTR_STRING( os, maintMargin );
+	ADD_ATTR_STRING( os, equityWithLoan );
+	ADD_ATTR_DOUBLE( os, commission );
+	ADD_ATTR_DOUBLE( os, minCommission );
+	ADD_ATTR_DOUBLE( os, maxCommission );
+	ADD_ATTR_STRING( os, commissionCurrency );
+	ADD_ATTR_STRING( os, warningText );
+}
+
+
+
 
 #define GET_ATTR_INT( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
@@ -297,6 +459,164 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, nextOptionType );
 	GET_ATTR_BOOL( cd, nextOptionPartial );
 	GET_ATTR_STRING( cd, notes );
+}
+
+
+void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::Execution dflt;
+	
+	GET_ATTR_STRING( e, execId );
+	GET_ATTR_STRING( e, time );
+	GET_ATTR_STRING( e, acctNumber );
+	GET_ATTR_STRING( e, exchange );
+	GET_ATTR_STRING( e, side );
+	GET_ATTR_INT( e, shares );
+	GET_ATTR_DOUBLE( e, price );
+	GET_ATTR_INT( e, permId );
+	GET_ATTR_LONG( e, clientId );
+	GET_ATTR_LONG( e, orderId );
+	GET_ATTR_INT( e, liquidation );
+	GET_ATTR_INT( e, cumQty );
+	GET_ATTR_DOUBLE( e, avgPrice );
+}
+
+
+void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::ExecutionFilter dflt;
+	
+	GET_ATTR_LONG( eF, m_clientId );
+	GET_ATTR_STRING( eF, m_acctCode );
+	GET_ATTR_STRING( eF, m_time );
+	GET_ATTR_STRING( eF, m_symbol );
+	GET_ATTR_STRING( eF, m_secType );
+	GET_ATTR_STRING( eF, m_exchange );
+	GET_ATTR_STRING( eF, m_side );
+}
+
+void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::TagValue dflt;
+	
+	GET_ATTR_STRING( tV, tag );
+	GET_ATTR_STRING( tV, value );
+}
+
+void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::Order dflt;
+	
+	GET_ATTR_LONG( o, orderId );
+	GET_ATTR_LONG( o, clientId );
+	GET_ATTR_LONG( o, permId );
+	GET_ATTR_STRING( o, action );
+	GET_ATTR_LONG( o, totalQuantity );
+	GET_ATTR_STRING( o, orderType );
+	GET_ATTR_DOUBLE( o, lmtPrice );
+	GET_ATTR_DOUBLE( o, auxPrice );
+	GET_ATTR_STRING( o, tif );
+	GET_ATTR_STRING( o, ocaGroup );
+	GET_ATTR_INT( o, ocaType );
+	GET_ATTR_STRING( o, orderRef );
+	GET_ATTR_BOOL( o, transmit );
+	GET_ATTR_LONG( o, parentId );
+	GET_ATTR_BOOL( o, blockOrder );
+	GET_ATTR_BOOL( o, sweepToFill );
+	GET_ATTR_INT( o, displaySize );
+	GET_ATTR_INT( o, triggerMethod );
+	GET_ATTR_BOOL( o, outsideRth );
+	GET_ATTR_BOOL( o, hidden );
+	GET_ATTR_STRING( o, goodAfterTime );
+	GET_ATTR_STRING( o, goodTillDate );
+	GET_ATTR_STRING( o, rule80A );
+	GET_ATTR_BOOL( o, allOrNone );
+	GET_ATTR_INT( o, minQty );
+	GET_ATTR_DOUBLE( o, percentOffset );
+	GET_ATTR_BOOL( o, overridePercentageConstraints );
+	GET_ATTR_DOUBLE( o, trailStopPrice );
+	GET_ATTR_STRING( o, faGroup );
+	GET_ATTR_STRING( o, faProfile );
+	GET_ATTR_STRING( o, faMethod );
+	GET_ATTR_STRING( o, faPercentage );
+	GET_ATTR_STRING( o, openClose );
+	
+	int orderOriginInt;
+	tmp = (char*) xmlGetProp( node, (xmlChar*) "origin" ); \
+	orderOriginInt = tmp ? atoi( tmp ) : dflt.origin; \
+	free(tmp);
+	o->origin = (IB::Origin) orderOriginInt;
+	
+	GET_ATTR_INT( o, shortSaleSlot );
+	GET_ATTR_STRING( o, designatedLocation );
+	GET_ATTR_INT( o, exemptCode );
+	GET_ATTR_DOUBLE( o, discretionaryAmt );
+	GET_ATTR_BOOL( o, eTradeOnly );
+	GET_ATTR_BOOL( o, firmQuoteOnly );
+	GET_ATTR_DOUBLE( o, nbboPriceCap );
+	GET_ATTR_INT( o, auctionStrategy );
+	GET_ATTR_DOUBLE( o, startingPrice );
+	GET_ATTR_DOUBLE( o, stockRefPrice );
+	GET_ATTR_DOUBLE( o, delta );
+	GET_ATTR_DOUBLE( o, stockRangeLower );
+	GET_ATTR_DOUBLE( o, stockRangeUpper );
+	GET_ATTR_DOUBLE( o, volatility );
+	GET_ATTR_INT( o, volatilityType );
+	GET_ATTR_STRING( o,  deltaNeutralOrderType );
+	GET_ATTR_DOUBLE( o, deltaNeutralAuxPrice );
+	GET_ATTR_BOOL( o, continuousUpdate );
+	GET_ATTR_INT( o, referencePriceType );
+	GET_ATTR_DOUBLE( o, basisPoints );
+	GET_ATTR_INT( o, basisPointsType );
+	GET_ATTR_INT( o, scaleInitLevelSize );
+	GET_ATTR_INT( o, scaleSubsLevelSize );
+	GET_ATTR_DOUBLE( o, scalePriceIncrement );
+	GET_ATTR_STRING( o, account );
+	GET_ATTR_STRING( o, settlingFirm );
+	GET_ATTR_STRING( o, clearingAccount );
+	GET_ATTR_STRING( o, clearingIntent );
+	GET_ATTR_STRING( o, algoStrategy );
+	GET_ATTR_BOOL( o, whatIf );
+	GET_ATTR_BOOL( o, notHeld );
+
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if(p->name && (strcmp((char*) p->name, "algoParams") == 0)) {
+			if( o->algoParams.get() ==  NULL ) {
+				IB::Order::TagValueListSPtr
+					algoParams( new IB::Order::TagValueList);
+				o->algoParams = algoParams;
+			} else {
+				o->algoParams->clear();
+			}
+			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				IB::TagValueSPtr tV( new IB::TagValue());
+				conv_xml2ib( tV.get(), q );
+				o->algoParams->push_back(tV);
+			}
+		}
+	}
+
+
+}
+
+void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
+{
+	char* tmp;
+	static const IB::OrderState dflt;
+	
+	GET_ATTR_STRING( os, status );
+	GET_ATTR_STRING( os, initMargin );
+	GET_ATTR_STRING( os, maintMargin );
+	GET_ATTR_STRING( os, equityWithLoan );
+	GET_ATTR_DOUBLE( os, commission );
+	GET_ATTR_DOUBLE( os, minCommission );
+	GET_ATTR_DOUBLE( os, maxCommission );
+	GET_ATTR_STRING( os, commissionCurrency );
+	GET_ATTR_STRING( os, warningText );
 }
 
 

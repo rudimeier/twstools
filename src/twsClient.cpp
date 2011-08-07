@@ -147,10 +147,6 @@ void TWSClient::disconnected()
 
 void TWSClient::selectStuff( int msec )
 {
-	int fd = ePosixClient->fd();
-	
-	assert( fd >= 0 || ( fd == -1 && !isConnected()) );
-	
 	struct timeval tval;
 	tval.tv_usec = msec * 1000;
 	tval.tv_sec = 0;
@@ -160,8 +156,12 @@ void TWSClient::selectStuff( int msec )
 	FD_ZERO( &readSet);
 	errorSet = writeSet = readSet;
 	
+	int fd = -1;
 	if( isConnected() ) {
 		// if not connected then all sets are zero and select will just timeout
+		fd = ePosixClient->fd();
+		assert( fd >= 0 );
+		
 		FD_SET( fd, &readSet);
 		if( !ePosixClient->isOutBufferEmpty()) {
 			FD_SET( fd, &writeSet);
@@ -204,6 +204,16 @@ void TWSClient::selectStuff( int msec )
 	}
 }
 
+
+int TWSClient::serverVersion()
+{
+	return ePosixClient->serverVersion();
+}
+
+std::string TWSClient::TwsConnectionTime()
+{
+	return ePosixClient->TwsConnectionTime();
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -258,11 +268,33 @@ void TWSClient::reqOpenOrders()
 }
 
 
+void TWSClient::reqAllOpenOrders()
+{
+	DEBUG_PRINTF("REQ_ALL_OPEN_ORDERS");
+	ePosixClient->reqAllOpenOrders();
+}
+
+
+void TWSClient::reqAutoOpenOrders( bool bAutoBind )
+{
+	DEBUG_PRINTF("REQ_AUTO_OPEN_ORDERS %d", bAutoBind);
+	ePosixClient->reqAutoOpenOrders( bAutoBind );
+}
+
+
 void TWSClient::reqAccountUpdates( bool subscribe, const std::string &acctCode )
 {
 	DEBUG_PRINTF("REQ_ACCOUNT_DATA %d '%s'", subscribe, acctCode.c_str() );
 	
 	ePosixClient->reqAccountUpdates( subscribe, acctCode );
+}
+
+
+void TWSClient::reqExecutions(int reqId, const IB::ExecutionFilter& filter)
+{
+	DEBUG_PRINTF("REQ_EXECUTIONS %d", reqId);
+	
+	ePosixClient->reqExecutions(reqId, filter);
 }
 
 

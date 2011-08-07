@@ -446,6 +446,7 @@ void HistTodo::add( const HistRequest& hR )
 
 
 ContractDetailsTodo::ContractDetailsTodo() :
+	curIndex(-1),
 	contractDetailsRequests(*(new std::vector<ContractDetailsRequest>()))
 {
 }
@@ -453,6 +454,28 @@ ContractDetailsTodo::ContractDetailsTodo() :
 ContractDetailsTodo::~ContractDetailsTodo()
 {
 	delete &contractDetailsRequests;
+}
+
+int ContractDetailsTodo::countLeft() const
+{
+	return contractDetailsRequests.size() - curIndex - 1;
+}
+
+void ContractDetailsTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+const ContractDetailsRequest& ContractDetailsTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)contractDetailsRequests.size() );
+	return contractDetailsRequests.at(curIndex);
+}
+
+void ContractDetailsTodo::add( const ContractDetailsRequest& cdr )
+{
+	contractDetailsRequests.push_back(cdr);
 }
 
 
@@ -463,7 +486,6 @@ ContractDetailsTodo::~ContractDetailsTodo()
 
 
 WorkTodo::WorkTodo() :
-	reqType(GenericRequest::NONE),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() )
 {
@@ -481,9 +503,24 @@ WorkTodo::~WorkTodo()
 }
 
 
-GenericRequest::ReqType WorkTodo::getType() const
+GenericRequest::ReqType WorkTodo::nextReqType() const
 {
-	return reqType;
+	if( acc_status_todo ) {
+		acc_status_todo = false;
+		return GenericRequest::ACC_STATUS_REQUEST;
+	} else if( executions_todo ) {
+		executions_todo = false;
+		return GenericRequest::EXECUTIONS_REQUEST;
+	} else if( orders_todo ) {
+		orders_todo = false;
+		return GenericRequest::ORDERS_REQUEST;
+	} else if( _contractDetailsTodo->countLeft() > 0 ) {
+		return GenericRequest::CONTRACT_DETAILS_REQUEST;
+	} else if( _histTodo->countLeft() > 0 ) {
+		return GenericRequest::HIST_REQUEST;
+	} else {
+		return GenericRequest::NONE;
+	}
 }
 
 ContractDetailsTodo* WorkTodo::contractDetailsTodo() const
@@ -507,10 +544,27 @@ const HistTodo& WorkTodo::getHistTodo() const
 }
 
 
+void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
+{
+	switch( reqType ) {
+	case GenericRequest::ACC_STATUS_REQUEST:
+		acc_status_todo = true;
+		break;
+	case GenericRequest::EXECUTIONS_REQUEST:
+		executions_todo = true;
+		break;
+	case GenericRequest::ORDERS_REQUEST:
+		orders_todo = true;
+		break;
+	default:
+		assert(false);
+	}
+}
+
+
 int WorkTodo::read_file( const std::string & fileName )
 {
 	int retVal = -1;
-	reqType = GenericRequest::NONE;
 	
 	TwsXml file;
 	if( ! file.openFile(fileName.c_str()) ) {
@@ -525,12 +579,10 @@ int WorkTodo::read_file( const std::string & fileName )
 			if( tmp == NULL ) {
 				fprintf(stderr, "Warning, no request type specified.\n");
 			} else if( strcmp( tmp, "contract_details") == 0 ) {
-				reqType = GenericRequest::CONTRACT_DETAILS_REQUEST;
 				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-				_contractDetailsTodo->contractDetailsRequests.push_back(pcd->getRequest());
+				_contractDetailsTodo->add(pcd->getRequest());
 				retVal++;
 			} else if ( strcmp( tmp, "historical_data") == 0 ) {
-				reqType = GenericRequest::HIST_REQUEST;
 				PacketHistData *phd = PacketHistData::fromXml(xn);
 				_histTodo->add( phd->getRequest() );
 				retVal++;
@@ -555,10 +607,35 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 
+Packet::Packet() :
+	mode(CLEAN)
+{
+}
+
+Packet::~Packet()
+{
+}
+
+bool Packet::empty() const
+{
+	return (mode == CLEAN);
+}
+
+bool Packet::finished() const
+{
+	return (mode == CLOSED);
+}
+
+
+
+
+
+
+
+
 PacketContractDetails::PacketContractDetails() :
 	cdList(new std::vector<IB::ContractDetails>())
 {
-	complete = false;
 	reqId = -1;
 	request = NULL;
 }
@@ -603,28 +680,23 @@ const ContractDetailsRequest& PacketContractDetails::getRequest() const
 void PacketContractDetails::record( int reqId,
 	const ContractDetailsRequest& cdr )
 {
-	assert( !complete && this->reqId == -1 && request == NULL
+	assert( empty() && this->reqId == -1 && request == NULL
 		&& cdList->empty() );
 	this->reqId = reqId;
 	this->request = new ContractDetailsRequest( cdr );
+	mode = RECORD;
 }
 
 void PacketContractDetails::setFinished()
 {
-	assert( !complete );
-	complete = true;
-}
-
-
-bool PacketContractDetails::isFinished() const
-{
-	return complete;
+	assert( mode == RECORD );
+	mode = CLOSED;
 }
 
 
 void PacketContractDetails::clear()
 {
-	complete = false;
+	mode = CLEAN;
 	reqId = -1;
 	cdList->clear();
 	if( request != NULL ) {
@@ -640,7 +712,7 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 		this->reqId = reqId;
 	}
 	assert( this->reqId == reqId );
-	assert( !complete );
+	assert( mode == RECORD );
 	
 	cdList->push_back(c);
 }
@@ -708,7 +780,6 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<Row>()))
 {
-	mode = CLEAN;
 	error = ERR_NONE;
 	reqId = -1;
 	request = NULL;
@@ -850,11 +921,6 @@ const HistRequest& PacketHistData::getRequest() const
 	return *request;
 }
 
-bool PacketHistData::isFinished() const
-{
-	return (mode == CLOSED);
-}
-
 
 PacketHistData::Error PacketHistData::getError() const
 {
@@ -952,6 +1018,399 @@ void PacketHistData::dump( bool printFormatDates )
 		       it->volume, it->count, it->WAP, it->hasGaps);
 		fflush(stdout);
 	}
+}
+
+
+
+
+
+
+
+
+PacketAccStatus::PacketAccStatus() :
+	list( new std::vector<RowAcc*>() )
+{
+}
+
+PacketAccStatus::~PacketAccStatus()
+{
+	del_list_elements();
+	delete list;
+}
+
+void PacketAccStatus::clear()
+{
+	assert( finished() );
+	mode = CLEAN;
+	del_list_elements();
+	list->clear();
+}
+
+void PacketAccStatus::del_list_elements()
+{
+	std::vector<RowAcc*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		switch( (*it)->type ) {
+		case RowAcc::t_AccVal:
+			delete (RowAccVal*) (*it)->data;
+			break;
+		case RowAcc::t_Prtfl:
+			delete (RowPrtfl*) (*it)->data;
+			break;
+		case RowAcc::t_stamp:
+		case RowAcc::t_end:
+			delete (std::string*) (*it)->data;
+			break;
+		}
+		delete (*it);
+	}
+}
+
+void PacketAccStatus::record( const std::string &acctCode )
+{
+	assert( empty() );
+	mode = RECORD;
+	this->accountName = acctCode;
+}
+
+void PacketAccStatus::append( const RowAccVal& row )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type = RowAcc::t_AccVal;
+	arow->data = new RowAccVal(row);
+	list->push_back( arow );
+}
+
+void PacketAccStatus::append( const RowPrtfl& row )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type = RowAcc::t_Prtfl;
+	arow->data = new RowPrtfl(row);
+	list->push_back( arow );
+}
+
+void PacketAccStatus::appendUpdateAccountTime( const std::string& timeStamp )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type =RowAcc::t_stamp;
+	arow->data = new std::string(timeStamp);
+	list->push_back( arow );
+}
+
+void PacketAccStatus::appendAccountDownloadEnd( const std::string& accountName )
+{
+	RowAcc *arow = new RowAcc();
+	arow->type =RowAcc::t_end;
+	arow->data = new std::string(accountName);
+	list->push_back( arow );
+	
+	mode = CLOSED;
+}
+
+
+#define A_ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+		(const xmlChar*) _struct_._attr_.c_str() )
+
+#define A_ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_LONG( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+
+static void conv2xml( xmlNodePtr parent, const RowAcc *row )
+{
+		char tmp[128];
+		switch( row->type ) {
+		case RowAcc::t_AccVal:
+			{
+				const RowAccVal &d = *(RowAccVal*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"AccVal", NULL);
+				A_ADD_ATTR_STRING( nrow, d, key );
+				A_ADD_ATTR_STRING( nrow, d, val );
+				A_ADD_ATTR_STRING( nrow, d, currency );
+				A_ADD_ATTR_STRING( nrow, d, accountName );
+			}
+			break;
+		case RowAcc::t_Prtfl:
+			{
+				const RowPrtfl &d = *(RowPrtfl*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"Prtfl", NULL);
+				conv_ib2xml( nrow, "contract", d.contract );
+				A_ADD_ATTR_INT( nrow, d, position );
+				A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
+				A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
+				A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
+				A_ADD_ATTR_DOUBLE( nrow, d, unrealizedPNL );
+				A_ADD_ATTR_DOUBLE( nrow, d, realizedPNL );
+				A_ADD_ATTR_STRING( nrow, d, accountName );
+			}
+			break;
+		case RowAcc::t_stamp:
+			{
+				const std::string &d = *(std::string*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"stamp", NULL);
+				xmlNewProp ( nrow, (xmlChar*) "timeStamp",
+					(const xmlChar*) d.c_str() );
+			}
+			break;
+		case RowAcc::t_end:
+			{
+				const std::string &d = *(std::string*)row->data;
+				xmlNodePtr nrow = xmlNewChild( parent,
+					NULL, (const xmlChar*)"end", NULL);
+				xmlNewProp ( nrow, (xmlChar*) "accountName",
+					(const xmlChar*) d.c_str() );
+			}
+			break;
+		}
+}
+
+void PacketAccStatus::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"account" );
+	
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	xmlNewProp ( nqry, (xmlChar*) "accountName",
+		(const xmlChar*) accountName.c_str() );
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	std::vector<RowAcc*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		conv2xml( nrsp, (*it) );
+	}
+	
+	TwsXml::dumpAndFree( root );
+}
+
+
+
+
+
+
+
+
+PacketExecutions::PacketExecutions() :
+	reqId(-1),
+	executionFilter(NULL),
+	list( new std::vector<RowExecution*>() )
+{
+}
+
+PacketExecutions::~PacketExecutions()
+{
+	del_list_elements();
+	delete list;
+	if( executionFilter != NULL ) {
+		delete executionFilter;
+	}
+}
+
+void PacketExecutions::clear()
+{
+	assert( finished() );
+	mode = CLEAN;
+	del_list_elements();
+	list->clear();
+	if( executionFilter != NULL ) {
+		delete executionFilter;
+	}
+	executionFilter = NULL;
+}
+
+void PacketExecutions::del_list_elements()
+{
+	std::vector<RowExecution*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		delete (*it);
+	}
+}
+
+void PacketExecutions::record(  const int reqId, const IB::ExecutionFilter &eF )
+{
+	assert( empty() );
+	mode = RECORD;
+	this->reqId = reqId;
+	this->executionFilter = new IB::ExecutionFilter( eF );
+}
+
+void PacketExecutions::append( int reqId,
+	const IB::Contract& c, const IB::Execution& e)
+{
+	RowExecution *arow = new RowExecution();
+	arow->contract = c;
+	arow->execution = e;
+	list->push_back( arow );
+}
+
+void PacketExecutions::appendExecutionsEnd( int reqId )
+{
+	mode = CLOSED;
+}
+
+static void conv2xml( xmlNodePtr parent, const RowExecution *row )
+{
+		xmlNodePtr nrow = xmlNewChild( parent,
+			NULL, (const xmlChar*)"ExecDetails", NULL);
+		conv_ib2xml( nrow, "contract", row->contract );
+		conv_ib2xml( nrow, "execution", row->execution );
+}
+
+void PacketExecutions::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"executions" );
+	
+	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "executionFilter", *executionFilter );
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	std::vector<RowExecution*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		conv2xml( nrsp, (*it) );
+	}
+	
+	TwsXml::dumpAndFree( root );
+}
+
+
+
+
+
+
+
+PacketOrders::PacketOrders() :
+	list( new std::vector<RowOrd*>() )
+{
+}
+
+PacketOrders::~PacketOrders()
+{
+	del_list_elements();
+	delete list;
+}
+
+void PacketOrders::clear()
+{
+	assert( finished() );
+	mode = CLEAN;
+	del_list_elements();
+	list->clear();
+}
+
+void PacketOrders::del_list_elements()
+{
+	std::vector<RowOrd*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		switch( (*it)->type ) {
+		case RowOrd::t_OrderStatus:
+			delete (RowOrderStatus*) (*it)->data;
+			break;
+		case RowOrd::t_OpenOrder:
+			delete (RowOpenOrder*) (*it)->data;
+			break;
+		}
+		delete (*it);
+	}
+}
+
+void PacketOrders::record()
+{
+	assert( empty() );
+	mode = RECORD;
+}
+
+void PacketOrders::append( const RowOrderStatus& row )
+{
+	RowOrd *arow = new RowOrd();
+	arow->type = RowOrd::t_OrderStatus;
+	arow->data = new RowOrderStatus(row);
+	list->push_back( arow );
+}
+
+void PacketOrders::append( const RowOpenOrder& row )
+{
+	RowOrd *arow = new RowOrd();
+	arow->type = RowOrd::t_OpenOrder;
+	arow->data = new RowOpenOrder(row);
+	list->push_back( arow );
+}
+
+void PacketOrders::appendOpenOrderEnd()
+{
+	mode = CLOSED;
+}
+
+
+static void conv2xml( xmlNodePtr parent, const RowOrd *row )
+{
+	char tmp[128];
+	switch( row->type ) {
+	case RowOrd::t_OrderStatus:
+		{
+			const RowOrderStatus &d = *(RowOrderStatus*)row->data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"OrderStatus", NULL);
+			A_ADD_ATTR_LONG(nrow, d, id);
+			A_ADD_ATTR_STRING( nrow, d, status );
+			A_ADD_ATTR_INT( nrow, d, filled );
+			A_ADD_ATTR_INT( nrow, d, remaining );
+			A_ADD_ATTR_DOUBLE( nrow, d, avgFillPrice );
+			A_ADD_ATTR_INT( nrow, d, permId );
+			A_ADD_ATTR_INT( nrow, d, parentId );
+			A_ADD_ATTR_DOUBLE( nrow, d, lastFillPrice );
+			A_ADD_ATTR_INT( nrow, d, clientId );
+			A_ADD_ATTR_STRING( nrow, d, whyHeld );
+		}
+		break;
+	case RowOrd::t_OpenOrder:
+		{
+			const RowOpenOrder &d = *(RowOpenOrder*)row->data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"OpenOrder", NULL);
+			A_ADD_ATTR_LONG(nrow, d, orderId);
+			conv_ib2xml( nrow, "contract", d.contract );
+			conv_ib2xml( nrow, "order", d.order );
+			conv_ib2xml( nrow, "orderState", d.orderState );
+		}
+		break;
+	}
+}
+
+void PacketOrders::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr npcd = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( npcd, (const xmlChar*)"type",
+		(const xmlChar*)"open_orders" );
+	
+	/*xmlNodePtr nqry = */xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	
+	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
+	std::vector<RowOrd*>::const_iterator it;
+	for( it = list->begin(); it < list->end(); it++ ) {
+		conv2xml( nrsp, (*it) );
+	}
+	
+	TwsXml::dumpAndFree( root );
 }
 
 

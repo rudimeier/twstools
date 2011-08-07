@@ -12,6 +12,7 @@ class TWSClient;
 namespace IB {
 	class ContractDetails;
 	class Contract;
+	class Execution;
 }
 
 
@@ -25,8 +26,11 @@ class GenericRequest;
 class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
-class PacketContractDetails;
-class PacketHistData;
+class Packet;
+class RowAccVal;
+class RowPrtfl;
+class RowOrderStatus;
+class RowOpenOrder;
 class PacingGod;
 class DataFarmStates;
 
@@ -39,20 +43,19 @@ class TwsDL
 {
 	public:
 		enum State {
-			CONNECT,
 			WAIT_TWS_CON,
 			IDLE,
 			WAIT_DATA,
-			QUIT_READY,
-			QUIT_ERROR
+			QUIT
 		};
 		
 		TwsDL( const std::string& workFile );
 		~TwsDL();
 		
-		void start();
+		int start();
 		
 		State currentState() const;
+		std::string lastError() const;
 		
 	private:
 		void initTwsClient();
@@ -63,21 +66,19 @@ class TwsDL
 		void connectTws();
 		void waitTwsCon();
 		void idle();
-		void getContracts();
-		void finContracts();
-		void getData();
+		bool finContracts();
+		bool finHist();
 		void waitData();
-		void waitContracts();
-		void waitHist();
-		void finData();
-		void onQuit( int ret );
 		
 		void changeState( State );
 		
 		void initWork();
 		
-		void reqContractDetails( const ContractDetailsRequest& );
-		void reqHistoricalData( const HistRequest& );
+		void reqContractDetails();
+		void reqHistoricalData();
+		void reqAccStatus();
+		void reqExecutions();
+		void reqOrders();
 		
 		void errorContracts(int, int, const std::string &);
 		void errorHistData(int, int, const std::string &);
@@ -85,7 +86,7 @@ class TwsDL
 		// callbacks from our twsWrapper
 		void twsError(int, int, const std::string &);
 		
-		void twsConnected( bool connected );
+		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void twsBondContractDetails( int reqId,
@@ -94,11 +95,24 @@ class TwsDL
 		void twsHistoricalData( int reqId, const std::string &date, double open,
 			double high, double low, double close, int volume, int count,
 			double WAP, bool hasGaps );
+		void twsUpdateAccountValue( const RowAccVal& );
+		void twsUpdatePortfolio( const RowPrtfl& );
+		void twsUpdateAccountTime( const std::string& timeStamp );
+		void twsAccountDownloadEnd( const std::string& accountName );
+		void twsExecDetails( int reqId, const IB::Contract&,
+			const IB::Execution& );
+		void twsExecDetailsEnd( int reqId );
+		void twsOrderStatus( const RowOrderStatus& );
+		void twsOpenOrder( const RowOpenOrder& );
+		void twsOpenOrderEnd();
+		void twsCurrentTime( long time );
 		
 		
 		State state;
+		int error;
+		std::string _lastError;
 		int64_t lastConnectionTime;
-		bool connection_failed;
+		long tws_time;
 		int curIdleTime;
 		
 		std::string workFile;
@@ -109,12 +123,9 @@ class TwsDL
 		int msgCounter;
 		GenericRequest &currentRequest;
 		
-		int curIndexTodoContractDetails;
-		
 		WorkTodo *workTodo;
 		
-		PacketContractDetails &p_contractDetails;
-		PacketHistData &p_histData;
+		Packet *packet;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;

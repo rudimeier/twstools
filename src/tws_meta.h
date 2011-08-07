@@ -2,6 +2,10 @@
 #define TWS_META_H
 
 #include "ibtws/Contract.h"
+#include "ibtws/Execution.h"
+#include "ibtws/Order.h"
+#include "ibtws/OrderState.h"
+#include "ibtws/CommonDefs.h"
 
 #include <stdint.h>
 #include <list>
@@ -128,6 +132,9 @@ class GenericRequest
 	public:
 		enum ReqType {
 			NONE,
+			ACC_STATUS_REQUEST,
+			EXECUTIONS_REQUEST,
+			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST
 		};
@@ -195,6 +202,13 @@ class ContractDetailsTodo
 		ContractDetailsTodo();
 		virtual ~ContractDetailsTodo();
 		
+		int countLeft() const;
+		void checkout();
+		const ContractDetailsRequest& current() const;
+		void add( const ContractDetailsRequest& );
+		
+	private:
+		int curIndex;
 		std::vector<ContractDetailsRequest> &contractDetailsRequests;
 };
 
@@ -211,15 +225,18 @@ class WorkTodo
 		WorkTodo();
 		virtual ~WorkTodo();
 		
-		GenericRequest::ReqType getType() const;
+		GenericRequest::ReqType nextReqType() const;
 		ContractDetailsTodo* contractDetailsTodo() const;
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
+		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const std::string & fileName);
 		
 	private:
-		GenericRequest::ReqType reqType;
+		mutable bool acc_status_todo;
+		mutable bool executions_todo;
+		mutable bool orders_todo;
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 };
@@ -231,7 +248,33 @@ class WorkTodo
 
 
 
+class Packet
+{
+	public:
+		enum Mode { CLEAN, RECORD, CLOSED };
+		
+		Packet();
+		virtual ~Packet();
+		
+		bool empty() const;
+		bool finished() const;
+		
+		virtual void clear() = 0;
+		virtual void dumpXml() = 0;
+		
+	protected:
+		Mode mode;
+};
+
+
+
+
+
+
+
+
 class PacketContractDetails
+	: public Packet
 {
 	public:
 		PacketContractDetails();
@@ -243,14 +286,12 @@ class PacketContractDetails
 		const std::vector<IB::ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
-		bool isFinished() const;
 		void clear();
 		void append( int reqId, const IB::ContractDetails& );
 		
 		void dumpXml();
 		
 	private:
-		bool complete;
 		int reqId;
 		ContractDetailsRequest *request;
 		std::vector<IB::ContractDetails> * const cdList;
@@ -271,9 +312,9 @@ PacketContractDetails::constList() const
 
 
 class PacketHistData
+	: public  Packet
 {
 	public:
-		enum Mode { CLEAN, RECORD, CLOSED };
 		enum Error { ERR_NONE, ERR_NODATA, ERR_NAV,
 			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
 		
@@ -283,7 +324,6 @@ class PacketHistData
 		static PacketHistData * fromXml( xmlNodePtr );
 		
 		const HistRequest& getRequest() const;
-		bool isFinished() const;
 		Error getError() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
@@ -313,13 +353,163 @@ class PacketHistData
 				bool hasGaps;
 		};
 		
-		Mode mode;
 		Error error;
 		
 		int reqId;
 		HistRequest *request;
 		std::vector<Row> &rows;
 		Row finishRow;
+};
+
+
+
+
+
+
+
+
+struct RowAcc
+{
+	enum row_acc_type { t_AccVal, t_Prtfl, t_stamp, t_end };
+	row_acc_type type;
+	void *data;
+};
+
+struct RowAccVal
+{
+	std::string key;
+	std::string val;
+	std::string currency;
+	std::string accountName;
+};
+
+struct RowPrtfl
+{
+	IB::Contract contract;
+	int position;
+	double marketPrice;
+	double marketValue;
+	double averageCost;
+	double unrealizedPNL;
+	double realizedPNL;
+	std::string accountName;
+};
+
+class PacketAccStatus
+	: public  Packet
+{
+	public:
+		PacketAccStatus();
+		virtual ~PacketAccStatus();
+		
+		void clear();
+		void record( const std::string &acctCode );
+		void append( const RowAccVal& );
+		void append( const RowPrtfl& );
+		void appendUpdateAccountTime( const std::string& timeStamp );
+		void appendAccountDownloadEnd( const std::string& accountName );
+		
+		void dumpXml();
+		
+	private:
+		void del_list_elements();
+		
+		std::string accountName;
+		
+		std::vector<RowAcc*> * const list;
+};
+
+
+
+
+
+
+
+
+struct RowExecution
+{
+	IB::Contract contract;
+	IB::Execution execution;
+};
+
+class PacketExecutions
+	: public  Packet
+{
+	public:
+		PacketExecutions();
+		virtual ~PacketExecutions();
+		
+		void clear();
+		void record( const int reqId, const IB::ExecutionFilter& );
+		void append( int reqId, const IB::Contract&, const IB::Execution& );
+		void appendExecutionsEnd( int reqId );
+		
+		void dumpXml();
+		
+	private:
+		void del_list_elements();
+		
+		int reqId;
+		IB::ExecutionFilter *executionFilter;
+		
+		std::vector<RowExecution*> * const list;
+};
+
+
+
+
+
+
+
+
+struct RowOrd
+{
+	enum row_ord_type { t_OrderStatus, t_OpenOrder };
+	row_ord_type type;
+	void *data;
+};
+
+struct RowOrderStatus
+{
+	IB::OrderId id;
+	std::string status;
+	int filled;
+	int remaining;
+	double avgFillPrice;
+	int permId;
+	int parentId;
+	double lastFillPrice;
+	int clientId;
+	std::string whyHeld;
+};
+
+struct RowOpenOrder
+{
+	IB::OrderId orderId;
+	IB::Contract contract;
+	IB::Order order;
+	IB::OrderState orderState;
+};
+
+class PacketOrders
+	: public  Packet
+{
+	public:
+		PacketOrders();
+		virtual ~PacketOrders();
+		
+		void clear();
+		void record();
+		void append( const RowOrderStatus& );
+		void append( const RowOpenOrder& );
+		void appendOpenOrderEnd();
+		
+		void dumpXml();
+		
+	private:
+		void del_list_elements();
+		
+		std::vector<RowOrd*> * const list;
 };
 
 

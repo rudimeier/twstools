@@ -25,6 +25,11 @@ static const char *tws_hostp = "localhost";
 static int tws_portp = 7474;
 static int tws_client_idp = 123;
 
+static int get_accountp = 0;
+static const char* tws_account_namep = "";
+static int get_execp = 0;
+static int get_orderp = 0;
+
 static int tws_conTimeoutp = 30000;
 static int tws_reqTimeoutp = 1200000;
 static int tws_maxRequestsp = 60;
@@ -68,6 +73,14 @@ static struct poptOption flow_opts[] = {
 		"TWS port number (default: 7474).", NULL},
 	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
 		"TWS client connection id (default: 123).", NULL},
+	{"get-account", 'A', POPT_ARG_NONE, &get_accountp, 0,
+		"Request account status.", NULL},
+	{"accountName", '\0', POPT_ARG_STRING, &tws_account_namep, 0,
+		"IB account name (default: \"\").", NULL},
+	{"get-exec", 'E', POPT_ARG_NONE, &get_execp, 0,
+		"Request executions.", NULL},
+	{"get-order", 'O', POPT_ARG_NONE, &get_orderp, 0,
+		"Request open orders.", NULL},
 	POPT_TABLEEND
 };
 
@@ -154,7 +167,6 @@ class TwsDlWrapper : public DebugTwsWrapper
 		TwsDlWrapper( TwsDL* parent );
 		virtual ~TwsDlWrapper();
 		
-// 		void twsConnected( bool connected );
 		void connectionClosed();
 		
 		void error( const int id, const int errorCode,
@@ -167,6 +179,26 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void historicalData( IB::TickerId reqId, const IB::IBString& date,
 			double open, double high, double low, double close, int volume,
 			int barCount, double WAP, int hasGaps );
+		void updateAccountValue( const std::string& key,
+			const IB::IBString& val, const std::string& currency,
+			const IB::IBString& accountName );
+		void updatePortfolio( const IB::Contract& contract, int position,
+			double marketPrice, double marketValue, double averageCost,
+			double unrealizedPNL, double realizedPNL,
+			const IB::IBString& accountName);
+		void updateAccountTime( const IB::IBString& timeStamp );
+		void accountDownloadEnd( const IB::IBString& accountName );
+		void execDetails( int reqId, const IB::Contract& contract,
+			const IB::Execution& execution );
+		void execDetailsEnd( int reqId );
+		void orderStatus( IB::OrderId orderId, const IB::IBString &status,
+			int filled, int remaining, double avgFillPrice, int permId,
+			int parentId, double lastFillPrice, int clientId,
+			const IB::IBString& whyHeld );
+		void openOrder( IB::OrderId orderId, const IB::Contract&,
+			const IB::Order&, const IB::OrderState& );
+		void openOrderEnd();
+		void currentTime( long time );
 		
 	private:
 		TwsDL* parentTwsDL;
@@ -186,7 +218,7 @@ TwsDlWrapper::~TwsDlWrapper()
 
 void TwsDlWrapper::connectionClosed()
 {
-	parentTwsDL->twsConnected( false );
+	parentTwsDL->twsConnectionClosed();
 }
 
 
@@ -230,22 +262,91 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 }
 
 
+void TwsDlWrapper::updateAccountValue( const IB::IBString& key,
+	const IB::IBString& val, const IB::IBString& currency,
+	const IB::IBString& accountName )
+{
+	RowAccVal row = { key, val, currency, accountName };
+	parentTwsDL->twsUpdateAccountValue( row );
+}
+
+void TwsDlWrapper::updatePortfolio( const IB::Contract& contract,
+	int position, double marketPrice, double marketValue, double averageCost,
+	double unrealizedPNL, double realizedPNL, const IB::IBString& accountName)
+{
+	RowPrtfl row = { contract, position, marketPrice, marketValue, averageCost,
+		unrealizedPNL, realizedPNL, accountName};
+	parentTwsDL->twsUpdatePortfolio( row );
+}
+
+void TwsDlWrapper::updateAccountTime( const IB::IBString& timeStamp )
+{
+	parentTwsDL->twsUpdateAccountTime( timeStamp );
+}
+
+void TwsDlWrapper::accountDownloadEnd( const IB::IBString& accountName )
+{
+	DebugTwsWrapper::accountDownloadEnd( accountName );
+	parentTwsDL->twsAccountDownloadEnd( accountName );
+}
+
+void TwsDlWrapper::execDetails( int reqId, const IB::Contract& contract,
+	const IB::Execution& execution )
+{
+	parentTwsDL->twsExecDetails(  reqId, contract, execution  );
+}
+
+void TwsDlWrapper::execDetailsEnd( int reqId )
+{
+	DebugTwsWrapper::execDetailsEnd( reqId );
+	parentTwsDL->twsExecDetailsEnd( reqId );
+}
+
+void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
+	int filled, int remaining, double avgFillPrice, int permId,
+	int parentId, double lastFillPrice, int clientId,
+	const IB::IBString& whyHeld )
+{
+	RowOrderStatus row = { orderId, status, filled, remaining, avgFillPrice,
+		permId, parentId, lastFillPrice, clientId, whyHeld };
+	parentTwsDL->twsOrderStatus(row);
+}
+
+void TwsDlWrapper::openOrder( IB::OrderId orderId, const IB::Contract& c,
+	const IB::Order& o, const IB::OrderState& os)
+{
+	RowOpenOrder row = { orderId, c, o, os };
+	parentTwsDL->twsOpenOrder(row);
+}
+
+void TwsDlWrapper::openOrderEnd()
+{
+	DebugTwsWrapper::openOrderEnd();
+	parentTwsDL->twsOpenOrderEnd();
+}
+
+void TwsDlWrapper::currentTime( long time )
+{
+	DebugTwsWrapper::currentTime(time);
+	parentTwsDL->twsCurrentTime( time );
+}
+
+
 
 
 TwsDL::TwsDL( const std::string& workFile ) :
-	state(CONNECT),
+	state(IDLE),
+	error(0),
 	lastConnectionTime(0),
-	connection_failed( false ),
+	tws_time(0),
 	curIdleTime(0),
 	workFile(workFile),
 	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
-	curIndexTodoContractDetails(0),
 	workTodo( new WorkTodo() ),
-	p_contractDetails( *(new PacketContractDetails()) ),
-	p_histData( *(new PacketHistData()) ),
+	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
 	pacingControl( *(new PacingGod(dataFarms)) )
 {
@@ -270,21 +371,21 @@ TwsDL::~TwsDL()
 	if( workTodo != NULL ) {
 		delete workTodo;
 	}
-	delete &p_contractDetails;
-	delete &p_histData;
+	if( packet != NULL ) {
+		delete packet;
+	}
 	delete &pacingControl;
 	delete &dataFarms;
 }
 
 
-void TwsDL::start()
+int TwsDL::start()
 {
-	assert( (state == CONNECT) ||
-		(state == QUIT_READY) || (state == QUIT_ERROR) );
+	assert( state == IDLE );
 	
-	state = CONNECT;
 	curIdleTime = 0;
 	eventLoop();
+	return error;
 }
 
 
@@ -296,9 +397,6 @@ void TwsDL::eventLoop()
 			twsClient->selectStuff( curIdleTime );
 		}
 		switch( state ) {
-			case CONNECT:
-				connectTws();
-				break;
 			case WAIT_TWS_CON:
 				waitTwsCon();
 				break;
@@ -308,12 +406,7 @@ void TwsDL::eventLoop()
 			case WAIT_DATA:
 				waitData();
 				break;
-			case QUIT_READY:
-				onQuit(0);
-				run = false;
-				break;
-			case QUIT_ERROR:
-				onQuit(-1);
+			case QUIT:
 				run = false;
 				break;
 		}
@@ -323,6 +416,8 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
+	assert( !twsClient->isConnected() );
+	
 	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < tws_conTimeoutp ) {
 		DEBUG_PRINTF( "Waiting %ldms before connecting again.",
@@ -331,38 +426,46 @@ void TwsDL::connectTws()
 		return;
 	}
 	
-	connection_failed = false;
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
+	/* this might fire callbacks already */
 	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
 	
 	if( !twsClient->isConnected() ) {
-		DEBUG_PRINTF("Connection to TWS failed:"); //TODO print a specific error
-		twsConnected( false );
+		DEBUG_PRINTF("TWS connection failed.");
+		/* here we could changeState(IDLE) already. But callbacks might have
+		   been fired so we go through WAIT_TWS_CON to cleanup safely. */
+		twsConnectionClosed();
 	} else {
-		//TODO print client/server version and m_TwsTime
-		twsConnected( true );
+		DEBUG_PRINTF("TWS connection established: %d, %s",
+			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
+		/* waiting for first messages until tws_time is received */
+		tws_time = 0;
+		twsClient->reqCurrentTime();
 	}
 }
 
 
 void TwsDL::waitTwsCon()
 {
+	int64_t w = tws_conTimeoutp - (nowInMsecs() - lastConnectionTime);
+	
 	if( twsClient->isConnected() ) {
-		DEBUG_PRINTF( "We are connected to TWS." );
-		changeState( IDLE );
-	} else {
-		if( connection_failed ) {
-			DEBUG_PRINTF( "Connecting TWS failed." );
-			changeState( CONNECT );
-		} else if( (nowInMsecs() - lastConnectionTime) > tws_conTimeoutp ) {
-				DEBUG_PRINTF( "Timeout connecting TWS." );
-				twsClient->disconnectTWS();
-				curIdleTime = 1000;
+		if( tws_time != 0 ) {
+			DEBUG_PRINTF( "Connection process finished." );
+			changeState( IDLE );
+		} else if( w > 0 ) {
+			DEBUG_PRINTF( "Still waiting for connection finish." );
+			curIdleTime = w;
 		} else {
-			DEBUG_PRINTF( "Still waiting for tws connection." );
+			DEBUG_PRINTF( "Timeout connecting TWS." );
+			twsClient->disconnectTWS();
 		}
+	} else {
+		// TODO print a specific error
+		DEBUG_PRINTF( "Connecting TWS failed." );
+		changeState( IDLE );
 	}
 }
 
@@ -372,140 +475,105 @@ void TwsDL::idle()
 	assert(currentRequest.reqType() == GenericRequest::NONE);
 	
 	if( !twsClient->isConnected() ) {
-		changeState( CONNECT );
+		connectTws();
 		return;
 	}
 	
-	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		if( curIndexTodoContractDetails < (int)workTodo->getContractDetailsTodo().contractDetailsRequests.size() ) {
-			currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
-			getContracts();
-			return;
-		}
+	GenericRequest::ReqType reqType = workTodo->nextReqType();
+	switch( reqType ) {
+	case GenericRequest::ACC_STATUS_REQUEST:
+		reqAccStatus();
+		break;
+	case GenericRequest::EXECUTIONS_REQUEST:
+		reqExecutions();
+		break;
+	case GenericRequest::ORDERS_REQUEST:
+		reqOrders();
+		break;
+	case GenericRequest::CONTRACT_DETAILS_REQUEST:
+		reqContractDetails();
+		break;
+	case GenericRequest::HIST_REQUEST:
+		reqHistoricalData();
+		break;
+	case GenericRequest::NONE:
+		break;
 	}
 	
-	// TODO we want to dump only one time
-	dumpWorkTodo();
-	
-	if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
-		if(  workTodo->getHistTodo().countLeft() > 0 ) {
-			getData();
-			return;
-		}
+	if( reqType == GenericRequest::NONE ) {
+		_lastError = "No more work to do.";
+		changeState( QUIT );
 	}
-	
-	changeState( QUIT_READY );
 }
 
 
-void TwsDL::getContracts()
+bool TwsDL::finContracts()
 {
-	const ContractDetailsRequest &cdR =
-		workTodo->getContractDetailsTodo().contractDetailsRequests.at( curIndexTodoContractDetails );
-	reqContractDetails( cdR );
+	if( !packet->finished() ) {
+		DEBUG_PRINTF( "Timeout waiting for data." );
+		// TODO repeat
+		return false;
+	}
 	
-	changeState( WAIT_DATA );
-}
-
-
-void TwsDL::finContracts()
-{
 	DEBUG_PRINTF( "Contracts received: %zu",
-		p_contractDetails.constList().size() );
+		((PacketContractDetails*)packet)->constList().size() );
 	
-	p_contractDetails.dumpXml();
-	p_contractDetails.clear();
+	packet->dumpXml();
 	
-	curIndexTodoContractDetails++;
-	currentRequest.close();
-	changeState( IDLE );
-}
-
-
-void TwsDL::getData()
-{
-	assert( workTodo->getHistTodo().countLeft() > 0 );
-	
-	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
-	
-	if( wait > 0 ) {
-		curIdleTime = (wait < 1000) ? wait : 1000;
-		return;
-	}
-	if( wait < -1 ) {
-		// just debug timer resolution
-		DEBUG_PRINTF( "late timeout: %d", wait );
-	}
-	
-	const HistRequest &hR = workTodo->getHistTodo().current();
-	
-	pacingControl.addRequest( hR.ibContract() );
-	
-	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
-	
-	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
-		&workTodo->getHistTodo().current(),
-		currentRequest.reqId(),
-		ibToString(hR.ibContract()).c_str() );
-	
-	reqHistoricalData( hR );
-	
-	changeState( WAIT_DATA );
+	return true;
 }
 
 
 void TwsDL::waitData()
 {
+	if( !packet->finished() && (currentRequest.age() <= tws_reqTimeoutp) ) {
+		DEBUG_PRINTF( "still waiting for data." );
+		return;
+	}
+	
+	bool ok = false;
 	switch( currentRequest.reqType() ) {
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
-		waitContracts();
+		ok = finContracts();
 		break;
 	case GenericRequest::HIST_REQUEST:
-		waitHist();
+		ok = finHist();
+		break;
+	case GenericRequest::ACC_STATUS_REQUEST:
+	case GenericRequest::EXECUTIONS_REQUEST:
+	case GenericRequest::ORDERS_REQUEST:
+		packet->dumpXml();
+		ok = true;
 		break;
 	case GenericRequest::NONE:
-		assert( false );
+		assert(false);
 		break;
 	}
-}
-
-
-void TwsDL::waitContracts()
-{
-	if( p_contractDetails.isFinished() ) {
-		finContracts();
-	} else if( currentRequest.age() > tws_reqTimeoutp ) {
-		DEBUG_PRINTF( "Timeout waiting for data." );
-		// TODO repeat
-		changeState( QUIT_ERROR );
+	if( ok ) {
+		changeState( IDLE );
 	} else {
-		DEBUG_PRINTF( "still waiting for data." );
+		error = 1;
+		_lastError = "Fatal error.";
+		changeState( QUIT );
 	}
+	delete packet;
+	packet = NULL;
+	currentRequest.close();
 }
 
 
-void TwsDL::waitHist()
+bool TwsDL::finHist()
 {
-	if( p_histData.isFinished() ) {
-		finData();
-	} else if( currentRequest.age() > tws_reqTimeoutp ) {
+	if( !packet->finished() ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
-		p_histData.closeError( PacketHistData::ERR_TIMEOUT );
-		finData();
-	} else {
-		DEBUG_PRINTF( "still waiting for data." );
+		((PacketHistData*)packet)->closeError( PacketHistData::ERR_TIMEOUT );
 	}
-}
-
-
-void TwsDL::finData()
-{
-	assert( p_histData.isFinished() );
+	
 	HistTodo *histTodo = workTodo->histTodo();
 	
-	switch( p_histData.getError() ) {
+	switch( ((PacketHistData*)packet)->getError() ) {
 	case PacketHistData::ERR_NONE:
-		p_histData.dumpXml();
+		packet->dumpXml();
 	case PacketHistData::ERR_NODATA:
 	case PacketHistData::ERR_NAV:
 		histTodo->tellDone();
@@ -520,16 +588,7 @@ void TwsDL::finData()
 		histTodo->cancelForRepeat(2);
 		break;
 	}
-	
-	p_histData.clear();
-	currentRequest.close();
-	changeState( IDLE );
-}
-
-
-void TwsDL::onQuit( int /*ret*/ )
-{
-	curIdleTime = 0;
+	return true;
 }
 
 
@@ -550,7 +609,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	msgCounter++;
 	
 	if( id == currentRequest.reqId() ) {
-		DEBUG_PRINTF( "ERROR for request %d %d %s",
+		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
 			id, errorCode, errorMsg.c_str() );
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
@@ -560,6 +619,9 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			case GenericRequest::HIST_REQUEST:
 				errorHistData( id, errorCode, errorMsg );
 				break;
+			case GenericRequest::ACC_STATUS_REQUEST:
+			case GenericRequest::EXECUTIONS_REQUEST:
+			case GenericRequest::ORDERS_REQUEST:
 			case GenericRequest::NONE:
 				assert( false );
 				break;
@@ -571,9 +633,12 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	}
 	
 	if( id != -1 ) {
-		DEBUG_PRINTF( "Warning, unexpected request Id %d", id );
+		DEBUG_PRINTF( "TWS message for unexpected request %d: %d '%s'",
+			id, errorCode, errorMsg.c_str() );
 		return;
 	}
+	
+	DEBUG_PRINTF( "TWS message generic: %d %s", errorCode, errorMsg.c_str() );
 	
 	// TODO do better
 	switch( errorCode ) {
@@ -584,14 +649,16 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		case 1101:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				p_histData.closeError( PacketHistData::ERR_TWSCON );
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
 				curIdleTime = 0;
 			}
 			break;
 		case 1102:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				p_histData.closeError( PacketHistData::ERR_TWSCON );
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
 				curIdleTime = 0;
 			}
 			break;
@@ -630,6 +697,7 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
 	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
+	PacketHistData &p_histData = *((PacketHistData*)packet);
 	switch( errorCode ) {
 	// Historical Market Data Service error message:
 	case 162:
@@ -715,43 +783,41 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 #undef ERR_MATCH
 
 
-void TwsDL::twsConnected( bool connected )
+void TwsDL::twsConnectionClosed()
 {
-	if( connected ) {
-		assert( state == WAIT_TWS_CON );
-		curIdleTime = 1000; //TODO wait for first tws messages
-	} else {
-		DEBUG_PRINTF( "disconnected in state %d", state );
-		assert( state != CONNECT );
-		
-		if( state == WAIT_TWS_CON ) {
-			connection_failed = true;
-		} else if( state == WAIT_DATA ) {
+	DEBUG_PRINTF( "disconnected in state %d", state );
+	
+	if( state == WAIT_DATA ) {
+		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				if( !p_contractDetails.isFinished() ) {
-					assert(false); // TODO repeat
-				}
+			case GenericRequest::ACC_STATUS_REQUEST:
+			case GenericRequest::EXECUTIONS_REQUEST:
+			case GenericRequest::ORDERS_REQUEST:
+				assert(false); // TODO repeat
 				break;
 			case GenericRequest::HIST_REQUEST:
-				if( !p_histData.isFinished() ) {
-					p_histData.closeError( PacketHistData::ERR_TWSCON );
-				}
+				((PacketHistData*)packet)->closeError(
+					PacketHistData::ERR_TWSCON );
 				break;
 			case GenericRequest::NONE:
 				assert(false);
 				break;
 			}
 		}
-		dataFarms.setAllBroken();
-		pacingControl.clear();
-		curIdleTime = 0;
 	}
+	dataFarms.setAllBroken();
+	pacingControl.clear();
+	curIdleTime = 0;
 }
 
 
 void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
+	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
@@ -759,24 +825,32 @@ void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContract
 		assert( false );
 	}
 	
-	p_contractDetails.append(reqId, ibContractDetails);
+	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
 }
 
 
 void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
 {
+	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
 		assert( false );
 	}
 	
-	p_contractDetails.append(reqId, ibContractDetails);
+	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
 }
 
 
 void TwsDL::twsContractDetailsEnd( int reqId )
 {
+	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
@@ -784,13 +858,17 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 	}
 	
 	curIdleTime = 0;
-	p_contractDetails.setFinished();
+	((PacketContractDetails*)packet)->setFinished();
 }
 
 
 void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, double high, double low,
 			double close, int volume, int count, double WAP, bool hasGaps )
 {
+	if( currentRequest.reqType() != GenericRequest::HIST_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
@@ -800,28 +878,131 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	// TODO we shouldn't do this each row
 	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
 	
-	assert( !p_histData.isFinished() );
-	p_histData.append( reqId, date, open, high, low,
+	assert( !packet->finished() );
+	((PacketHistData*)packet)->append( reqId, date, open, high, low,
 		close, volume, count, WAP, hasGaps );
 	
-	if( p_histData.isFinished() ) {
+	if( packet->finished() ) {
 		curIdleTime = 0;
 		DEBUG_PRINTF( "READY %p %d",
 			&workTodo->getHistTodo().current(), reqId );
 	}
 }
 
+void TwsDL::twsUpdateAccountValue( const RowAccVal& row )
+{
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketAccStatus*)packet)->append( row );
+}
+
+void TwsDL::twsUpdatePortfolio( const RowPrtfl& row )
+{
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketAccStatus*)packet)->append( row );
+}
+
+void TwsDL::twsUpdateAccountTime( const std::string& timeStamp )
+{
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketAccStatus*)packet)->appendUpdateAccountTime( timeStamp );
+}
+
+void TwsDL::twsAccountDownloadEnd( const std::string& accountName )
+{
+	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketAccStatus*)packet)->appendAccountDownloadEnd( accountName );
+}
+
+void TwsDL::twsExecDetails( int reqId, const IB::Contract& contract,
+	const IB::Execution& execution )
+{
+	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketExecutions*)packet)->append( reqId, contract, execution );
+}
+
+void TwsDL::twsExecDetailsEnd( int reqId )
+{
+	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketExecutions*)packet)->appendExecutionsEnd( reqId );
+}
+
+void TwsDL::twsOrderStatus( const RowOrderStatus& row )
+{
+	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	((PacketOrders*)packet)->append(row);
+}
+
+void TwsDL::twsOpenOrder( const RowOpenOrder& row )
+{
+	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback..");
+		return;
+	}
+	((PacketOrders*)packet)->append(row);
+}
+
+void TwsDL::twsOpenOrderEnd()
+{
+	/* this messages usually comes unexpected right after connecting */
+	
+	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	
+	((PacketOrders*)packet)->appendOpenOrderEnd();
+}
+
+void TwsDL::twsCurrentTime( long time )
+{
+	if( state == WAIT_TWS_CON ) {
+		tws_time = time;
+	}
+}
+
 
 void TwsDL::initWork()
 {
+	if( get_accountp ) {
+		workTodo->addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
+	}
+	if( get_execp ) {
+		workTodo->addSimpleRequest(GenericRequest::EXECUTIONS_REQUEST);
+	}
+	if( get_orderp ) {
+		workTodo->addSimpleRequest(GenericRequest::ORDERS_REQUEST);
+	}
+	
 	int cnt = workTodo->read_file(workFile);
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, workFile.c_str() );
 	
-	if( workTodo->getType() == GenericRequest::CONTRACT_DETAILS_REQUEST ) {
-		DEBUG_PRINTF( "getting contracts from TWS, %zu",
-			workTodo->getContractDetailsTodo().contractDetailsRequests.size() );
+	if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
+		DEBUG_PRINTF( "getting contracts from TWS, %d",
+			workTodo->getContractDetailsTodo().countLeft() );
 // 		state = IDLE;
-	} else if( workTodo->getType() == GenericRequest::HIST_REQUEST ) {
+	}
+	if( workTodo->getHistTodo().countLeft() > 0 ) {
 		DEBUG_PRINTF( "getting hist data from TWS, %d",
 			workTodo->getHistTodo().countLeft());
 		dumpWorkTodo();
@@ -846,6 +1027,10 @@ TwsDL::State TwsDL::currentState() const
 	return state;
 }
 
+std::string TwsDL::lastError() const
+{
+	return _lastError;
+}
 
 void TwsDL::changeState( State s )
 {
@@ -865,16 +1050,50 @@ void TwsDL::changeState( State s )
 }
 
 
-void TwsDL::reqContractDetails( const ContractDetailsRequest& cdR )
+void TwsDL::reqContractDetails()
 {
-	p_contractDetails.record( currentRequest.reqId(), cdR );
+	workTodo->contractDetailsTodo()->checkout();
+	const ContractDetailsRequest &cdR
+		= workTodo->getContractDetailsTodo().current();
+	
+	PacketContractDetails *p_contractDetails = new PacketContractDetails();
+	packet = p_contractDetails;
+	currentRequest.nextRequest( GenericRequest::CONTRACT_DETAILS_REQUEST );
+	
+	p_contractDetails->record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
+	changeState( WAIT_DATA );
 }
 
-
-void TwsDL::reqHistoricalData( const HistRequest& hR )
+void TwsDL::reqHistoricalData()
 {
-	p_histData.record( currentRequest.reqId(), hR );
+	assert( workTodo->getHistTodo().countLeft() > 0 );
+	
+	int wait = workTodo->histTodo()->checkoutOpt( &pacingControl, &dataFarms );
+	
+	if( wait > 0 ) {
+		curIdleTime = (wait < 1000) ? wait : 1000;
+		return;
+	}
+	if( wait < -1 ) {
+		// just debug timer resolution
+		DEBUG_PRINTF( "late timeout: %d", wait );
+	}
+	
+	PacketHistData *p_histData = new PacketHistData();
+	packet = p_histData;
+	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
+	
+	
+	const HistRequest &hR = workTodo->getHistTodo().current();
+	pacingControl.addRequest( hR.ibContract() );
+	
+	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
+		&workTodo->getHistTodo().current(),
+		currentRequest.reqId(),
+		ibToString(hR.ibContract()).c_str() );
+	
+	p_histData->record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              hR.ibContract(),
 	                              hR.endDateTime(),
@@ -883,6 +1102,42 @@ void TwsDL::reqHistoricalData( const HistRequest& hR )
 	                              hR.whatToShow(),
 	                              hR.useRTH(),
 	                              hR.formatDate() );
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::reqAccStatus()
+{
+	PacketAccStatus *accStatus = new PacketAccStatus();
+	packet = accStatus;
+	currentRequest.nextRequest( GenericRequest::ACC_STATUS_REQUEST );
+	
+	accStatus->record( tws_account_namep );
+	twsClient->reqAccountUpdates(true, tws_account_namep);
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::reqExecutions()
+{
+	PacketExecutions *executions = new PacketExecutions();
+	packet = executions;
+	currentRequest.nextRequest( GenericRequest::EXECUTIONS_REQUEST );
+	
+	IB::ExecutionFilter eF;
+	
+	executions->record( currentRequest.reqId(), eF );
+	twsClient->reqExecutions( currentRequest.reqId(), eF);
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::reqOrders()
+{
+	PacketOrders *orders = new PacketOrders();
+	packet = orders;
+	currentRequest.nextRequest( GenericRequest::ORDERS_REQUEST );
+	
+	orders->record();
+	twsClient->reqAllOpenOrders();
+	changeState( WAIT_DATA );
 }
 
 
@@ -895,15 +1150,13 @@ int main(int argc, const char *argv[])
 	TwsXml::setSkipDefaults( !skipdefp );
 	
 	TwsDL twsDL( workfilep );
-	twsDL.start();
+	int ret = twsDL.start();
 	
-	TwsDL::State state = twsDL.currentState();
-	assert( (state == TwsDL::QUIT_READY) ||
-		(state == TwsDL::QUIT_ERROR) );
-	if( state == TwsDL::QUIT_READY ) {
-		return 0;
+	assert( twsDL.currentState() == TwsDL::QUIT );
+	if( ret != 0 ) {
+		DEBUG_PRINTF( "error: %s", twsDL.lastError().c_str() );
 	} else {
-		DEBUG_PRINTF( "Finished with errors." );
-		return 1;
+		DEBUG_PRINTF( "%s", twsDL.lastError().c_str() );
 	}
+	return ret;
 }
