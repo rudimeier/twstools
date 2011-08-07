@@ -30,9 +30,6 @@ TWSClient::TWSClient( IB::EWrapper *ew ) :
 	myEWrapper(ew),
 	ePosixClient(NULL)
 {
-	twsHost  = "otto";
-	twsPort  = 7497;
-	clientId = 579;
 }
 
 
@@ -50,58 +47,6 @@ bool TWSClient::isConnected() const
 }
 
 
-std::string TWSClient::getTWSHost() const
-{
-	return twsHost;
-}
-
-
-int TWSClient::getTWSPort() const
-{
-	return twsPort;
-}
-
-
-int     TWSClient::getClientId() const
-{
-	return clientId;
-}
-
-
-void TWSClient::setTWSHost( const std::string &host )
-{
-	if ( isConnected() ) {
-		assert(false); // TODO handle that
-	}
-	this->twsHost = host;
-}
-
-
-void TWSClient::setTWSPort( const int port )
-{
-	if ( isConnected() ) {
-		assert(false); // TODO handle that
-	}
-	this->twsPort  = port;
-}
-
-
-void TWSClient::setClientId( const int clientId )
-{
-	if ( isConnected() ) {
-		assert(false); // TODO handle that
-	}
-	this->clientId = clientId;
-}
-
-
-void TWSClient::connectTWS()
-{
-	//TODO connectTWS( host, port, clientId ) should call connectTWS()
-// 	connectTWS( twsHost, twsPort, clientId, new FU );
-}
-
-
 void TWSClient::connectTWS( const std::string &host, int port, int clientId )
 {
 	DEBUG_PRINTF("connect: %s:%d, clientId: %d", host.c_str(), port, clientId);
@@ -116,10 +61,6 @@ void TWSClient::connectTWS( const std::string &host, int port, int clientId )
 	
 	ePosixClient = new IB::EPosixClientSocket(myEWrapper);
 	
-	this->twsHost  = host;
-	this->twsPort  = port;
-	this->clientId = clientId;
-	
 	ePosixClient->eConnect( host.c_str(), port, clientId );
 }
 
@@ -133,13 +74,6 @@ void TWSClient::disconnectTWS()
 	}
 	
 	ePosixClient->eDisconnect();
-	disconnected();
-}
-
-
-void TWSClient::disconnected()
-{
-	assert( !isConnected() );
 	myEWrapper->connectionClosed();
 	DEBUG_PRINTF("We are disconnected");
 }
@@ -151,10 +85,10 @@ void TWSClient::selectStuff( int msec )
 	tval.tv_usec = msec * 1000;
 	tval.tv_sec = 0;
 	
-	fd_set readSet, writeSet, errorSet;
+	fd_set readSet, writeSet;
 	
 	FD_ZERO( &readSet);
-	errorSet = writeSet = readSet;
+	writeSet = readSet;
 	
 	int fd = -1;
 	if( isConnected() ) {
@@ -166,10 +100,9 @@ void TWSClient::selectStuff( int msec )
 		if( !ePosixClient->isOutBufferEmpty()) {
 			FD_SET( fd, &writeSet);
 		}
-		FD_CLR( fd, &errorSet);
 	}
 	int ret = select( fd + 1,
-		&readSet, &writeSet, &errorSet, &tval );
+		&readSet, &writeSet, NULL, &tval );
 	/////  blocking  ///////////////////////////////////////
 	
 	if( ret == 0) {
@@ -180,14 +113,6 @@ void TWSClient::selectStuff( int msec )
 			strerror(errno) );
 		disconnectTWS();
 		return;
-	}
-	
-	if( FD_ISSET( fd, &errorSet)) {
-		TWS_DEBUG( 1 ,"Error on socket." );
-		ePosixClient->onError(); // might disconnect us
-		if( !isConnected() ) {
-			return;
-		}
 	}
 	
 	if( FD_ISSET( fd, &writeSet)) {
