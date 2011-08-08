@@ -667,7 +667,6 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
-				curIdleTime = 0;
 			}
 			break;
 		case 1102:
@@ -675,7 +674,6 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
-				curIdleTime = 0;
 			}
 			break;
 		case 1300:
@@ -720,36 +718,30 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( PacketHistData::ERR_TWSCON );
 			pacingControl.notifyViolation( curContract );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE on HMDS server. "
 				"%p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NAV );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
 				"%p %d", cur_hR, id );
 			p_histData.closeError( PacketHistData::ERR_NAV );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
-			curIdleTime = 0;
 		} else {
 			DEBUG_PRINTF( "Warning, unhandled error message." );
 			// seen: "TWS exited during processing of HMDS query"
@@ -771,7 +763,6 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		// NOTE we could find out more to throw away similar worktodo
 		// TODO "The contract description specified for DESX5 is ambiguous;\nyou must specify the multiplier."
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
-		curIdleTime = 0;
 		break;
 	// Order rejected - Reason:
 	case 201:
@@ -788,7 +779,6 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		// comes directly from TWS whith prefix "Error validating request:-"
 		// NOTE we could find out more to throw away similar worktodo
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
-		curIdleTime = 0;
 		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
@@ -873,7 +863,6 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 		assert( false );
 	}
 	
-	curIdleTime = 0;
 	((PacketContractDetails*)packet)->setFinished();
 }
 
@@ -899,7 +888,6 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 		close, volume, count, WAP, hasGaps );
 	
 	if( packet->finished() ) {
-		curIdleTime = 0;
 		DEBUG_PRINTF( "READY %p %d",
 			&workTodo->getHistTodo().current(), reqId );
 	}
