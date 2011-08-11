@@ -43,6 +43,7 @@
 #include "twsapi/Execution.h"
 #include "twsapi/Contract.h"
 
+#include <string.h>
 #include <sys/time.h>
 
 
@@ -72,6 +73,29 @@ std::string msecs_to_string( int64_t msecs )
 	assert( tmp_sz == 4);
 	
 	return std::string(buf);
+}
+
+
+/**
+ * Convert IB style date or date time string to struct tm.
+ * Return 0 on success or -1 on error;
+ */
+int ib_strptime( struct tm *tm, const std::string &ib_datetime )
+{
+	char *tmp;
+	
+	memset(tm, 0, sizeof(struct tm));
+	tmp = strptime( ib_datetime.c_str(), "%Y%m%d", tm);
+	if( tmp != NULL && *tmp == '\0' ) {
+		return 0;
+	}
+	
+	memset(tm, 0, sizeof(struct tm));
+	tmp = strptime( ib_datetime.c_str(), "%Y%m%d%t%H:%M:%S", tm);
+	if(  tmp != NULL && *tmp == '\0' ) {
+		return 0;
+	}
+	return -1;
 }
 
 

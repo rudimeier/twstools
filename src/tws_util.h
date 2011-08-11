@@ -50,6 +50,8 @@ namespace IB {
 int64_t nowInMsecs();
 std::string msecs_to_string( int64_t msecs );
 
+int ib_strptime( struct tm *tm, const std::string &ib_datetime );
+
 std::string ibToString( int ibTickType);
 std::string ibToString( const IB::Execution& );
 std::string ibToString( const IB::Contract&, bool showFields = false );
