@@ -2142,9 +2142,17 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
-	assert( !lastChanged.empty()
-		&& (hStates.find(lastChanged) != hStates.end()) );
-	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
+	if( msgNumber != (lastMsgNumber + 1) ) {
+		return;
+	}
+	/* Last tws message notified about a farm state change ...*/
+	
+	std::map<const std::string, State>::const_iterator it =
+		hStates.find(lastChanged);
+	
+	if( it != hStates.end() && it->second == OK ) {
+		/* ... and it was a hist farm which became OK. So this contract should
+		   belong to that farm.*/
 		std::string lazyC = LAZY_CONTRACT_STR(c);
 		if( hLearn.find(lazyC) != hLearn.end() ) {
 			assert( hLearn.find(lazyC)->second == lastChanged );
