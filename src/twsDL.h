@@ -113,6 +113,7 @@ class TwsDL
 		std::string _lastError;
 		int64_t lastConnectionTime;
 		long tws_time;
+		bool connectivity_IB_TWS;
 		int curIdleTime;
 		
 		std::string workFile;

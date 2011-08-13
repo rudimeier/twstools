@@ -339,6 +339,7 @@ TwsDL::TwsDL( const std::string& workFile ) :
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
+	connectivity_IB_TWS(false),
 	curIdleTime(0),
 	workFile(workFile),
 	twsWrapper(NULL),
@@ -416,7 +417,7 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
-	assert( !twsClient->isConnected() );
+	assert( !twsClient->isConnected() && !connectivity_IB_TWS );
 	
 	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < tws_conTimeoutp ) {
@@ -439,6 +440,8 @@ void TwsDL::connectTws()
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
+		/* this must be set before any possible "Connectivity" callback msg */
+		connectivity_IB_TWS = true;
 		/* waiting for first messages until tws_time is received */
 		tws_time = 0;
 		twsClient->reqCurrentTime();
@@ -660,10 +663,12 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	switch( errorCode ) {
 		case 1100:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
+			connectivity_IB_TWS = false;
 			curIdleTime = tws_reqTimeoutp;
 			break;
 		case 1101:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
+			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
@@ -671,6 +676,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			break;
 		case 1102:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
+			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
@@ -687,6 +693,11 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		case 2108:
 			dataFarms.notify( msgCounter, errorCode, errorMsg );
 			pacingControl.clear();
+			break;
+		case 2110:
+			/* looks like we get that only on fresh connection */
+			assert(ERR_MATCH("Connectivity between TWS and server is broken. It will be restored automatically."));
+			connectivity_IB_TWS = false;
 			break;
 	}
 }
@@ -762,7 +773,12 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	case 200:
 		// NOTE we could find out more to throw away similar worktodo
 		// TODO "The contract description specified for DESX5 is ambiguous;\nyou must specify the multiplier."
-		p_histData.closeError( PacketHistData::ERR_REQUEST );
+		if( connectivity_IB_TWS ) {
+			p_histData.closeError( PacketHistData::ERR_REQUEST );
+		} else {
+			/* using ERR_TIMEOUT instead ERR_TWSCON to push_back this request */
+			p_histData.closeError( PacketHistData::ERR_TIMEOUT );
+		}
 		break;
 	// Order rejected - Reason:
 	case 201:
@@ -812,6 +828,8 @@ void TwsDL::twsConnectionClosed()
 			}
 		}
 	}
+	
+	connectivity_IB_TWS = false;
 	dataFarms.setAllBroken();
 	pacingControl.clear();
 	curIdleTime = 0;

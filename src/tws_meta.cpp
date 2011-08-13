@@ -1597,9 +1597,10 @@ void PacingControl::merge( const PacingControl& other )
 
 
 
-
+/* In past we've used "exchange{TAB}secType", but exchange seems to be a unique
+   for HMDS farms */
 #define LAZY_CONTRACT_STR( _c_ ) \
-	std::string(_c_.exchange).append("\t").append(_c_.secType)
+	_c_.exchange
 
 
 PacingGod::PacingGod( const DataFarmStates &dfs ) :
@@ -1902,92 +1903,58 @@ DataFarmStates::~DataFarmStates()
 
 void DataFarmStates::initHardCodedFarms()
 {
-	hLearn["BELFOX\tIND"] = "euhmds2";
-	hLearn["BM\tIND"] = "euhmds2";
-	hLearn["BVME\tIND"] = "euhmds2";
-	hLearn["CBOT\tIND"] = "euhmds2";
-	hLearn["DTB\tIND"] = "euhmds2";
-	hLearn["EBS\tIND"] = "euhmds2";
-	hLearn["EDXNO\tIND"] = "euhmds2";
-	hLearn["FTA\tIND"] = "euhmds2";
-	hLearn["IBIS\tIND"] = "euhmds2";
-	hLearn["IDEM\tIND"] = "euhmds2";
-	hLearn["IPE\tIND"] = "euhmds2";
-	hLearn["LIFFE_NF\tIND"] = "euhmds2";
-	hLearn["LIFFE\tIND"] = "euhmds2";
-	hLearn["LSE\tIND"] = "euhmds2";
-	hLearn["MATIF\tIND"] = "euhmds2";
-	hLearn["MEFFRV\tIND"] = "euhmds2";
-	hLearn["MONEP\tIND"] = "euhmds2";
-	hLearn["OMS\tIND"] = "euhmds2";
-	hLearn["SFB\tIND"] = "euhmds2";
-	hLearn["SOFFEX\tIND"] = "euhmds2";
+	hLearn["BELFOX"] = "euhmds2";
+	hLearn["BM"] = "euhmds2";
+	hLearn["BVME"] = "euhmds2";
+	hLearn["CBOT"] = "euhmds2";
+	hLearn["DTB"] = "euhmds2";
+	hLearn["EBS"] = "euhmds2";
+	hLearn["EDXNO"] = "euhmds2";
+	hLearn["FTA"] = "euhmds2";
+	hLearn["IBIS"] = "euhmds2";
+	hLearn["IDEM"] = "euhmds2";
+	hLearn["IPE"] = "euhmds2";
+	hLearn["LIFFE_NF"] = "euhmds2";
+	hLearn["LIFFE"] = "euhmds2";
+	hLearn["LSE"] = "euhmds2";
+	hLearn["LSSF"] = "euhmds2";
+	hLearn["MATIF"] = "euhmds2";
+	hLearn["MEFFRV"] = "euhmds2";
+	hLearn["MONEP"] = "euhmds2";
+	hLearn["OMS"] = "euhmds2";
+	hLearn["SFB"] = "euhmds2";
+	hLearn["SOFFEX"] = "euhmds2";
 	
-	hLearn["BELFOX\tFUT"] = "euhmds2";
-	hLearn["DTB\tFUT"] = "euhmds2";
-	hLearn["FTA\tFUT"] = "euhmds2";
-	hLearn["LIFFE_NF\tFUT"] = "euhmds2";
-	hLearn["LIFFE\tFUT"] = "euhmds2";
-	hLearn["LSSF\tFUT"] = "euhmds2";
-	hLearn["MONEP\tFUT"] = "euhmds2";
-	hLearn["SOFFEX\tFUT"] = "euhmds2";
+	hLearn["AMEX"] = "ushmds2a";
+	hLearn["AQS"] = "ushmds2a";
+	hLearn["ARCA"] = "ushmds2a";
+	hLearn["CBOE"] = "ushmds2a";
+	hLearn["CDE"] = "ushmds2a";
+	hLearn["CFE"] = "ushmds2a";
+	hLearn["CME"] = "ushmds2a";
+	hLearn["ECBOT"] = "ushmds2a";
+	hLearn["GLOBEX"] = "ushmds2a";
+	hLearn["IDEALPRO"] = "ushmds2a";
+	hLearn["IPE"] = "ushmds2a";
+	hLearn["ISE"] = "ushmds2a";
+	hLearn["NASDAQ"] = "ushmds2a";
+	hLearn["NYBOT"] = "ushmds2a";
+	hLearn["NYMEX"] = "ushmds2a";
+	hLearn["NYSELIFFE"] = "ushmds2a";
+	hLearn["NYSE"] = "ushmds2a";
+	hLearn["ONE"] = "ushmds2a";
+	hLearn["PHLX"] = "ushmds2a";
+	hLearn["PSE"] = "ushmds2a";
+	hLearn["TSE"] = "ushmds2a";
 	
-	hLearn["DTB\tOPT"] = "euhmds2";
-	hLearn["LIFFE\tOPT"] = "euhmds2";
-	hLearn["MONEP\tOPT"] = "euhmds2";
-	
-	
-	hLearn["IDEALPRO\tCASH"] = "ushmds2a";
-	
-	hLearn["AMEX\tIND"] = "ushmds2a";
-	hLearn["AQS\tIND"] = "ushmds2a";
-	hLearn["ARCA\tIND"] = "ushmds2a";
-	hLearn["CBOE\tIND"] = "ushmds2a";
-	hLearn["CDE\tIND"] = "ushmds2a";
-	hLearn["CFE\tIND"] = "ushmds2a";
-	hLearn["CME\tIND"] = "ushmds2a";
-	hLearn["ECBOT\tIND"] = "ushmds2a";
-	hLearn["GLOBEX\tIND"] = "ushmds2a";
-	hLearn["ISE\tIND"] = "ushmds2a";
-	hLearn["NASDAQ\tIND"] = "ushmds2a";
-	hLearn["NYBOT\tIND"] = "ushmds2a";
-	hLearn["NYMEX\tIND"] = "ushmds2a";
-	hLearn["NYSELIFFE\tIND"] = "ushmds2a";
-	hLearn["NYSE\tIND"] = "ushmds2a";
-	hLearn["ONE\tIND"] = "ushmds2a";
-	hLearn["PHLX\tIND"] = "ushmds2a";
-	hLearn["PSE\tIND"] = "ushmds2a";
-	hLearn["TSE\tIND"] = "ushmds2a";
-	
-	hLearn["CDE\tFUT"] = "ushmds2a";
-	hLearn["CFE\tFUT"] = "ushmds2a";
-	hLearn["CME\tFUT"] = "ushmds2a";
-	hLearn["ECBOT\tFUT"] = "ushmds2a";
-	hLearn["GLOBEX\tFUT"] = "ushmds2a";
-	hLearn["IPE\tFUT"] = "ushmds2a";
-	hLearn["NYBOT\tFUT"] = "ushmds2a";
-	hLearn["NYMEX\tFUT"] = "ushmds2a";
-	hLearn["NYSELIFFE\tFUT"] = "ushmds2a";
-	hLearn["ONE\tFUT"] = "ushmds2a";
-	
-	hLearn["CBOE\tOPT"] = "ushmds2a";
-	
-	
-	hLearn["ASX\tIND"] = "hkhmds2";
-	hLearn["HKFE\tIND"] = "hkhmds2";
-	hLearn["KSE\tIND"] = "hkhmds2";
-	hLearn["NSE\tIND"] = "hkhmds2";
-	hLearn["OSE.JPN\tIND"] = "hkhmds2";
-	hLearn["SGX\tIND"] = "hkhmds2";
-	hLearn["SNFE\tIND"] = "hkhmds2";
-	hLearn["TSE.JPN\tIND"] = "hkhmds2";
-	
-	hLearn["HKFE\tFUT"] = "hkhmds2";
-	hLearn["NSE\tFUT"] = "hkhmds2";
-	hLearn["SGX\tFUT"] = "hkhmds2";
-	hLearn["SNFE\tFUT"] = "hkhmds2";
-	
-	hLearn["KSE\tOPT"] = "hkhmds2";
+	hLearn["ASX"] = "hkhmds2";
+	hLearn["HKFE"] = "hkhmds2";
+	hLearn["KSE"] = "hkhmds2";
+	hLearn["NSE"] = "hkhmds2";
+	hLearn["OSE.JPN"] = "hkhmds2";
+	hLearn["SGX"] = "hkhmds2";
+	hLearn["SNFE"] = "hkhmds2";
+	hLearn["TSE.JPN"] = "hkhmds2";
 }
 
 void DataFarmStates::setAllBroken()
@@ -2142,9 +2109,17 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 
 void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 {
-	assert( !lastChanged.empty()
-		&& (hStates.find(lastChanged) != hStates.end()) );
-	if( (msgNumber == (lastMsgNumber + 1)) && (hStates[lastChanged] == OK) ) {
+	if( msgNumber != (lastMsgNumber + 1) ) {
+		return;
+	}
+	/* Last tws message notified about a farm state change ...*/
+	
+	std::map<const std::string, State>::const_iterator it =
+		hStates.find(lastChanged);
+	
+	if( it != hStates.end() && it->second == OK ) {
+		/* ... and it was a hist farm which became OK. So this contract should
+		   belong to that farm.*/
 		std::string lazyC = LAZY_CONTRACT_STR(c);
 		if( hLearn.find(lazyC) != hLearn.end() ) {
 			assert( hLearn.find(lazyC)->second == lastChanged );
