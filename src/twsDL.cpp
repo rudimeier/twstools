@@ -429,14 +429,13 @@ void TwsDL::connectTws()
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
 	
-	/* this might fire callbacks already */
-	twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
+	/* this may callback (negative) error messages only */
+	bool con = twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
+	assert( con == twsClient->isConnected() );
 	
-	if( !twsClient->isConnected() ) {
+	if( !con ) {
 		DEBUG_PRINTF("TWS connection failed.");
-		/* here we could changeState(IDLE) already. But callbacks might have
-		   been fired so we go through WAIT_TWS_CON to cleanup safely. */
-		twsConnectionClosed();
+		changeState(IDLE);
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
@@ -608,6 +607,23 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 {
 	msgCounter++;
 	
+	if( !twsClient->isConnected() ) {
+		switch( errorCode ) {
+		default:
+		case 504: /* NOT_CONNECTED */
+			DEBUG_PRINTF( "fatal: %d %d %s", id, errorCode, errorMsg.c_str() );
+			assert(false);
+			break;
+		case 503: /* UPDATE_TWS */
+			DEBUG_PRINTF( "error: %s", errorMsg.c_str() );
+			break;
+		case 502: /* CONNECT_FAIL */
+			DEBUG_PRINTF( "connection failed: %s", errorMsg.c_str());
+			break;
+		}
+		return;
+	}
+	
 	if( id == currentRequest.reqId() ) {
 		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
 			id, errorCode, errorMsg.c_str() );
@@ -651,7 +667,6 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
-				curIdleTime = 0;
 			}
 			break;
 		case 1102:
@@ -659,7 +674,6 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
-				curIdleTime = 0;
 			}
 			break;
 		case 1300:
@@ -704,36 +718,30 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( PacketHistData::ERR_TWSCON );
 			pacingControl.notifyViolation( curContract );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NODATA );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE on HMDS server. "
 				"%p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_NAV );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
 				"%p %d", cur_hR, id );
 			p_histData.closeError( PacketHistData::ERR_NAV );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
-			curIdleTime = 0;
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( PacketHistData::ERR_REQUEST );
-			curIdleTime = 0;
 		} else {
 			DEBUG_PRINTF( "Warning, unhandled error message." );
 			// seen: "TWS exited during processing of HMDS query"
@@ -755,7 +763,6 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		// NOTE we could find out more to throw away similar worktodo
 		// TODO "The contract description specified for DESX5 is ambiguous;\nyou must specify the multiplier."
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
-		curIdleTime = 0;
 		break;
 	// Order rejected - Reason:
 	case 201:
@@ -772,7 +779,6 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		// comes directly from TWS whith prefix "Error validating request:-"
 		// NOTE we could find out more to throw away similar worktodo
 		p_histData.closeError( PacketHistData::ERR_REQUEST );
-		curIdleTime = 0;
 		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
@@ -857,7 +863,6 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 		assert( false );
 	}
 	
-	curIdleTime = 0;
 	((PacketContractDetails*)packet)->setFinished();
 }
 
@@ -883,7 +888,6 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 		close, volume, count, WAP, hasGaps );
 	
 	if( packet->finished() ) {
-		curIdleTime = 0;
 		DEBUG_PRINTF( "READY %p %d",
 			&workTodo->getHistTodo().current(), reqId );
 	}
