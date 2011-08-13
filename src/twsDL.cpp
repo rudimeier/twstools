@@ -339,6 +339,7 @@ TwsDL::TwsDL( const std::string& workFile ) :
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
+	connectivity_IB_TWS(false),
 	curIdleTime(0),
 	workFile(workFile),
 	twsWrapper(NULL),
@@ -416,7 +417,7 @@ void TwsDL::eventLoop()
 
 void TwsDL::connectTws()
 {
-	assert( !twsClient->isConnected() );
+	assert( !twsClient->isConnected() && !connectivity_IB_TWS );
 	
 	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < tws_conTimeoutp ) {
@@ -440,6 +441,8 @@ void TwsDL::connectTws()
 	} else {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
+		/* this must be set before any possible "Connectivity" callback msg */
+		connectivity_IB_TWS = true;
 		/* waiting for first messages until tws_time is received */
 		tws_time = 0;
 		twsClient->reqCurrentTime();
@@ -644,10 +647,12 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 	switch( errorCode ) {
 		case 1100:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
+			connectivity_IB_TWS = false;
 			curIdleTime = tws_reqTimeoutp;
 			break;
 		case 1101:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
+			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
@@ -656,6 +661,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			break;
 		case 1102:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
+			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				((PacketHistData*)packet)->closeError(
 					PacketHistData::ERR_TWSCON );
@@ -806,6 +812,8 @@ void TwsDL::twsConnectionClosed()
 			}
 		}
 	}
+	
+	connectivity_IB_TWS = false;
 	dataFarms.setAllBroken();
 	pacingControl.clear();
 	curIdleTime = 0;
