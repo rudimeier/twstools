@@ -680,6 +680,11 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			dataFarms.notify( msgCounter, errorCode, errorMsg );
 			pacingControl.clear();
 			break;
+		case 2110:
+			/* looks like we get that only on fresh connection */
+			assert(ERR_MATCH("Connectivity between TWS and server is broken. It will be restored automatically."));
+			connectivity_IB_TWS = false;
+			break;
 	}
 }
 
