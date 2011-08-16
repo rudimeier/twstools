@@ -2,14 +2,14 @@
 #include "twsUtil.h"
 #include "debug.h"
 
-// from global installed ibtws
-#include "ibtws/Contract.h"
-#include "ibtws/Order.h"
-#include "ibtws/OrderState.h"
-#include "ibtws/Execution.h"
-#include "ibtws/TwsSocketClientErrors.h"
-#include "ibtws/EWrapper.h"
-#include "ibtws/EPosixClientSocket.h"
+// from global installed twsapi
+#include "twsapi/Contract.h"
+#include "twsapi/Order.h"
+#include "twsapi/OrderState.h"
+#include "twsapi/Execution.h"
+#include "twsapi/TwsSocketClientErrors.h"
+#include "twsapi/EWrapper.h"
+#include "twsapi/EPosixClientSocket.h"
 
 #include <unistd.h>
 #include <errno.h>

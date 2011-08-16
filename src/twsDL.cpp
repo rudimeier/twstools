@@ -8,8 +8,8 @@
 #include "debug.h"
 #include "config.h"
 
-// from global installed ibtws
-#include "ibtws/Contract.h"
+// from global installed twsapi
+#include "twsapi/Contract.h"
 
 #include <popt.h>
 #include <stdio.h>

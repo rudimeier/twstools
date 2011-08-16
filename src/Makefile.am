@@ -20,7 +20,7 @@ twsDL_CPPFLAGS = ${AM_CPPFLAGS}
 twsDL_LDFLAGS = ${AM_LDFLAGS}
 twsDL_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsDL_LDADD =
-twsDL_LDADD += -libtws
+twsDL_LDADD += -ltwsapi
 twsDL_LDADD += -lpopt
 
 twsgen_SOURCES =
@@ -32,7 +32,7 @@ twsgen_CPPFLAGS = ${AM_CPPFLAGS}
 twsgen_LDFLAGS = ${AM_LDFLAGS}
 twsgen_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsgen_LDADD =
-twsgen_LDADD += -libtws
+twsgen_LDADD += -ltwsapi
 twsgen_LDADD += -lpopt
 
 noinst_HEADERS =

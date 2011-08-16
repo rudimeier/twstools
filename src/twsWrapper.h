@@ -2,7 +2,7 @@
 #define TWSWrapper_H
 
 // from global installed ibapi
-#include "ibtws/EWrapper.h"
+#include "twsapi/EWrapper.h"
 
 
 

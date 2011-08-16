@@ -2,10 +2,10 @@
 
 #include "debug.h"
 #include "twsUtil.h"
-#include "ibtws/Contract.h"
-#include "ibtws/Execution.h"
-#include "ibtws/Order.h"
-#include "ibtws/OrderState.h"
+#include "twsapi/Contract.h"
+#include "twsapi/Execution.h"
+#include "twsapi/Order.h"
+#include "twsapi/OrderState.h"
 
 #include <string.h>
 #include <stdlib.h>

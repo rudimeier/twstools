@@ -3,9 +3,9 @@
 #include "debug.h"
 
 // from global installed ibapi
-#include "ibtws/Contract.h"
-#include "ibtws/Order.h"
-#include "ibtws/OrderState.h"
+#include "twsapi/Contract.h"
+#include "twsapi/Order.h"
+#include "twsapi/OrderState.h"
 
 
 

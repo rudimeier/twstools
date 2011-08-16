@@ -1,11 +1,11 @@
 #ifndef TWS_META_H
 #define TWS_META_H
 
-#include "ibtws/Contract.h"
-#include "ibtws/Execution.h"
-#include "ibtws/Order.h"
-#include "ibtws/OrderState.h"
-#include "ibtws/CommonDefs.h"
+#include "twsapi/Contract.h"
+#include "twsapi/Execution.h"
+#include "twsapi/Order.h"
+#include "twsapi/OrderState.h"
+#include "twsapi/CommonDefs.h"
 
 #include <stdint.h>
 #include <list>

@@ -1,10 +1,10 @@
 #include "twsUtil.h"
 #include "debug.h"
 
-// from global installed ibtws
-#include "ibtws/EWrapper.h" //IB::TickType
-#include "ibtws/Execution.h"
-#include "ibtws/Contract.h"
+// from global installed twsapi
+#include "twsapi/EWrapper.h" //IB::TickType
+#include "twsapi/Execution.h"
+#include "twsapi/Contract.h"
 
 #include <sys/time.h>
 
