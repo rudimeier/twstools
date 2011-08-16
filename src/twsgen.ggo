@@ -86,6 +86,10 @@ option "no-conv" -
 "For testing, output xml again."
 optional
 
+option "max-expiry" -
+"Filter out expiries newer than that."
+string typestr="DATE" optional
+
 
 # section
 section "Help options"
