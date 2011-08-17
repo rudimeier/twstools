@@ -47,8 +47,9 @@ Installation
 ------------
 
 Building from source requires a c++ compiler (tested with gcc/g++),
-libpopt and libxml2.
-Additionally we need twsapi from
+libpopt and libxml2 which should be available by your distribution.
+
+Additionally we need to install twsapi from
 https://github.com/rudimeier/twsapi
 
 Windows has been not be tested yet but using cygwin (or even mingw) should
@@ -59,6 +60,15 @@ work.
  make install
 
 (Within git repo type "autoreconf -fi" before.)
+
+
+Now you may just try such quick shot like getting account info:
+
+ twsdo -h localhost -p 7496 --get-account
+
+Note there is still a lot debug output on stderr. Just redirect it into files:
+
+ twsdo -h localhost -p 7496 --get-account  2>bla.log  >bla.xml
 
 
 
