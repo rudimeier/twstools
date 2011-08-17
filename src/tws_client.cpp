@@ -1,4 +1,4 @@
-/*** twsClient.cpp -- IB/API TWSClient class
+/*** tws_client.cpp -- IB/API TWSClient class
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *
@@ -35,8 +35,8 @@
  *
  ***/
 
-#include "twsClient.h"
-#include "twsUtil.h"
+#include "tws_client.h"
+#include "tws_util.h"
 #include "debug.h"
 
 // from global installed twsapi

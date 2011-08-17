@@ -35,8 +35,8 @@
  *
  ***/
 
-#include "twsWrapper.h"
-#include "twsUtil.h"
+#include "tws_wrapper.h"
+#include "tws_util.h"
 #include "debug.h"
 
 // from global installed ibapi

@@ -38,7 +38,7 @@
 #include "tws_meta.h"
 #include "tws_xml.h"
 
-#include "twsUtil.h"
+#include "tws_util.h"
 #include "debug.h"
 
 #include <libxml/xmlmemory.h>

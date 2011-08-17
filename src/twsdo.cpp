@@ -1,4 +1,4 @@
-/*** twsDL.cpp -- TWS job processing tool
+/*** twsdo.cpp -- TWS job processing tool
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *
@@ -35,12 +35,12 @@
  *
  ***/
 
-#include "twsDL.h"
+#include "twsdo.h"
 #include "tws_meta.h"
 
-#include "twsUtil.h"
-#include "twsClient.h"
-#include "twsWrapper.h"
+#include "tws_util.h"
+#include "tws_client.h"
+#include "tws_wrapper.h"
 #include "tws_xml.h"
 #include "debug.h"
 #include "config.h"

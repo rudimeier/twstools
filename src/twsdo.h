@@ -1,4 +1,4 @@
-/*** twsDL.h -- TWS job processing tool
+/*** twsdo.h -- TWS job processing tool
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *

@@ -38,7 +38,7 @@
 #include "tws_xml.h"
 
 #include "debug.h"
-#include "twsUtil.h"
+#include "tws_util.h"
 #include "twsapi/Contract.h"
 #include "twsapi/Execution.h"
 #include "twsapi/Order.h"

@@ -1,4 +1,4 @@
-/*** twsUtil.cpp -- common utils
+/*** tws_util.cpp -- common utils
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *
@@ -35,7 +35,7 @@
  *
  ***/
 
-#include "twsUtil.h"
+#include "tws_util.h"
 #include "debug.h"
 
 // from global installed twsapi

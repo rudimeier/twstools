@@ -1,4 +1,4 @@
-/*** twsUtil.h -- common utils
+/*** tws_client.h -- IB/API TWSClient class
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *
@@ -35,25 +35,63 @@
  *
  ***/
 
-#ifndef TWS_UTIL_H
-#define TWS_UTIL_H
+#ifndef TWS_CLIENT_H
+#define TWS_CLIENT_H
 
 #include <string>
-#include <stdint.h>
 
 
 namespace IB {
-	class Execution;
 	class Contract;
-}
+	class ContractDetails;
+	class Order;
+	class OrderState;
+	class Execution;
+	class ExecutionFilter;
+	class EPosixClientSocket;
+	class EWrapper;
+};
 
-int64_t nowInMsecs();
-std::string msecs_to_string( int64_t msecs );
 
-std::string ibToString( int ibTickType);
-std::string ibToString( const IB::Execution& );
-std::string ibToString( const IB::Contract&, bool showFields = false );
-
+class TWSClient
+{
+	public:
+		TWSClient( IB::EWrapper *ew );
+		~TWSClient();
+		
+		bool isConnected() const;
+		
+		void selectStuff( int msec );
+		
+		/////////////////////////////////////////////////////
+		bool connectTWS( const std::string &host, int port, int clientId );
+		void disconnectTWS();
+		
+		int serverVersion();
+		std::string TwsConnectionTime();
+		
+		void reqMktData( int tickerId, const IB::Contract &contract, const std::string &genericTickList, bool snapshot );
+		void cancelMktData( int tickerId );
+		void placeOrder( int id, const IB::Contract &contract, const IB::Order &order );
+		void cancelOrder( int id );
+		void reqOpenOrders();
+		void reqAllOpenOrders();
+		void reqAutoOpenOrders( bool bAutoBind );
+		void reqExecutions(int reqId, const IB::ExecutionFilter& filter);
+		void reqAccountUpdates( bool subscribe, const std::string &acctCode );
+		void reqIds( int numIds );
+		void reqContractDetails( int reqId, const IB::Contract &contract );
+		void setServerLogLevel( int logLevel );
+		void reqHistoricalData ( int tickerId, const IB::Contract &contract,
+			const std::string &endDateTime, const std::string &durationStr,
+			const std::string &barSizeSetting, const std::string &whatToShow,
+			int useRTH, int formatDate );
+		void reqCurrentTime();
+		
+	private:
+		IB::EWrapper* myEWrapper;
+		IB::EPosixClientSocket* ePosixClient;
+};
 
 
 #endif
