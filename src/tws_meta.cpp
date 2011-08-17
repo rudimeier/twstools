@@ -1925,7 +1925,8 @@ DataFarmStates::DataFarmStates() :
 	hStates( *(new std::map<const std::string, State>()) ),
 	mLearn( *(new std::map<const std::string, std::string>()) ),
 	hLearn( *(new std::map<const std::string, std::string>()) ),
-	lastMsgNumber(INT_MIN)
+	lastMsgNumber(INT_MIN),
+	edemo_checked(false)
 {
 	initHardCodedFarms();
 }
@@ -1993,6 +1994,24 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["SNFE"] = "hkhmds2";
 	hLearn["TSE.JPN"] = "hkhmds2";
 }
+
+
+void DataFarmStates::check_edemo_hack( const std::string &farm )
+{
+	if( edemo_checked ) {
+		return;
+	}
+	
+	/* This is a dirty HACK. We would still crash if we are changing to edemo
+	   after reconnect. To fix it we would need to handle the general case that
+	   we've learned a wrong farm somehow which should be handled anyway. */
+	if( farm == "ibdemo" || farm == "demohmds" ) {
+		DEBUG_PRINTF( "Dropping hardcoded data farms because edemo TWS." );
+		hLearn.clear();
+	}
+	edemo_checked = true;
+}
+
 
 void DataFarmStates::setAllBroken()
 {
@@ -2064,6 +2083,8 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		assert(false);
 		return;
 	}
+	
+	check_edemo_hack(farm);
 	
 	lastChanged = farm;
 	(*pHash)[farm] = state;
