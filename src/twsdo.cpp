@@ -566,7 +566,12 @@ bool TwsDL::finContracts()
 void TwsDL::waitData()
 {
 	if( !packet->finished() && (currentRequest.age() <= tws_reqTimeoutp) ) {
-		DEBUG_PRINTF( "still waiting for data." );
+		static int64_t last = 0;
+		int64_t now = nowInMsecs();
+		if( now - last > 2000 ) {
+			last = now;
+			DEBUG_PRINTF( "still waiting for data." );
+		}
 		return;
 	}
 	
