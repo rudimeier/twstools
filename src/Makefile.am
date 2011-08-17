@@ -1,46 +1,46 @@
 AM_CPPFLAGS =
 AM_CPPFLAGS += -DDEBUG -D_GNU_SOURCE
-AM_CPPFLAGS += -DIB_USE_STD_STRING
+AM_CPPFLAGS += ${libtwsapi_CFLAGS}
 AM_CXXFLAGS =
 AM_CXXFLAGS += $(DEFAULT_CXXFLAGS)
 AM_LDFLAGS =
 
 
 bin_PROGRAMS =
-bin_PROGRAMS += twsDL twsgen
+bin_PROGRAMS += twsdo twsgen
 
-twsDL_SOURCES =
-twsDL_SOURCES += twsDL.cpp
-twsDL_SOURCES += tws_meta.cpp
-twsDL_SOURCES += tws_xml.cpp
-twsDL_SOURCES += twsClient.cpp
-twsDL_SOURCES += twsUtil.cpp
-twsDL_SOURCES += twsWrapper.cpp
-twsDL_CPPFLAGS = ${AM_CPPFLAGS}
-twsDL_LDFLAGS = ${AM_LDFLAGS}
-twsDL_LDFLAGS += ${libxml2_DEPS_LIBS}
-twsDL_LDADD =
-twsDL_LDADD += -libtws
-twsDL_LDADD += -lpopt
+twsdo_SOURCES =
+twsdo_SOURCES += twsdo.cpp
+twsdo_SOURCES += tws_meta.cpp
+twsdo_SOURCES += tws_xml.cpp
+twsdo_SOURCES += tws_client.cpp
+twsdo_SOURCES += tws_util.cpp
+twsdo_SOURCES += tws_wrapper.cpp
+twsdo_CPPFLAGS = ${AM_CPPFLAGS}
+twsdo_LDFLAGS = ${AM_LDFLAGS}
+twsdo_LDFLAGS += ${libxml2_DEPS_LIBS}
+twsdo_LDADD =
+twsdo_LDADD += ${libtwsapi_LIBS}
+twsdo_LDADD += -lpopt
 
 twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp
 twsgen_SOURCES += tws_xml.cpp
 twsgen_SOURCES += tws_meta.cpp
-twsgen_SOURCES += twsUtil.cpp
+twsgen_SOURCES += tws_util.cpp
 twsgen_CPPFLAGS = ${AM_CPPFLAGS}
 twsgen_LDFLAGS = ${AM_LDFLAGS}
 twsgen_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsgen_LDADD =
-twsgen_LDADD += -libtws
+twsgen_LDADD += ${libtwsapi_LIBS}
 twsgen_LDADD += -lpopt
 
 noinst_HEADERS =
-noinst_HEADERS += twsClient.h
-noinst_HEADERS += twsUtil.h
-noinst_HEADERS += twsWrapper.h
+noinst_HEADERS += tws_client.h
+noinst_HEADERS += tws_util.h
+noinst_HEADERS += tws_wrapper.h
 noinst_HEADERS += debug.h
-noinst_HEADERS += twsDL.h
+noinst_HEADERS += twsdo.h
 noinst_HEADERS += tws_meta.h
 noinst_HEADERS += tws_xml.h
 

@@ -1,7 +1,7 @@
 #ifndef GA_DEBUG_H
 #define GA_DEBUG_H
 
-#include "twsUtil.h"
+#include "tws_util.h"
 #include <assert.h>
 #include <stdio.h>
 
