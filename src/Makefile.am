@@ -7,21 +7,21 @@ AM_LDFLAGS =
 
 
 bin_PROGRAMS =
-bin_PROGRAMS += twsDL twsgen
+bin_PROGRAMS += twsdo twsgen
 
-twsDL_SOURCES =
-twsDL_SOURCES += twsdo.cpp
-twsDL_SOURCES += tws_meta.cpp
-twsDL_SOURCES += tws_xml.cpp
-twsDL_SOURCES += tws_client.cpp
-twsDL_SOURCES += tws_util.cpp
-twsDL_SOURCES += tws_wrapper.cpp
-twsDL_CPPFLAGS = ${AM_CPPFLAGS}
-twsDL_LDFLAGS = ${AM_LDFLAGS}
-twsDL_LDFLAGS += ${libxml2_DEPS_LIBS}
-twsDL_LDADD =
-twsDL_LDADD += ${libtwsapi_LIBS}
-twsDL_LDADD += -lpopt
+twsdo_SOURCES =
+twsdo_SOURCES += twsdo.cpp
+twsdo_SOURCES += tws_meta.cpp
+twsdo_SOURCES += tws_xml.cpp
+twsdo_SOURCES += tws_client.cpp
+twsdo_SOURCES += tws_util.cpp
+twsdo_SOURCES += tws_wrapper.cpp
+twsdo_CPPFLAGS = ${AM_CPPFLAGS}
+twsdo_LDFLAGS = ${AM_LDFLAGS}
+twsdo_LDFLAGS += ${libxml2_DEPS_LIBS}
+twsdo_LDADD =
+twsdo_LDADD += ${libtwsapi_LIBS}
+twsdo_LDADD += -lpopt
 
 twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp

@@ -14,7 +14,7 @@ ui_*
 Makefile
 Doxyfile
 src/twstool
-src/twsDL
+src/twsdo
 src/twsgen
 
 # specific dirs and files (auto generated at compile or run time)
