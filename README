@@ -1,0 +1,90 @@
+
+twstool - commandline tools around Interactive Brokers TWS API
+==============================================================
+
+This is a simple set of commandline tools around IB's TWS API with the intention
+to have a powerful scriptable toolbox to automate "jobs" like downloading
+historical data, tracking account info or submitting orders etc.
+
+
+
+
+Project's objective
+-------------------
+
+The twstool utils wants to be small, simple, _stable_, easy to use and easy to
+maintain.
+
+A general use case covered by the tool set looks like this:
+
+1. Create a job file (for example "get contract details for 10 lazy specified
+   option chains").
+2. Process the job file against TWS to get an output file containing the
+   complete response without any loss of information.
+
+3a. Parse the output file to get the information you are needing
+    currently.
+and/or
+3b. Parse the output file to generate further jobs from it (for
+    example generate a job file to get historical data for the received
+    5000 option contracts and goto 2.).
+
+
+The input/output file format is very simple xml which can be easily 
+generated/converted from and to csv using the tools itself or any other 
+tools. Per design the actual job processing tool is completely stupid - 
+just doing the given job but doing it very well.
+
+BTW the used xml format is intended to be independent from the tools 
+itself to be used to carry all IB/TWS specific structs/messages for 
+saving without loss of information and easy conversion to other 
+existing TWS/API applications.
+
+
+
+
+Installation
+------------
+
+Building from source requires a c++ compiler (tested with gcc/g++),
+libpopt and libxml2.
+Additionally we need twsapi from https://github.com/rudimeier/twsapi
+
+Windows has been not be tested yet but using cygwin (or even mingw) should
+work.
+
+ ./configure
+ make
+ make install
+
+(Within git repo type "autoreconf -fi" before.)
+
+
+
+
+Usage
+-----
+
+see scripts in sample/ directory and
+twsDL --help
+twsgen --help
+
+
+
+
+Known issues / TODO (feedback is welcome)
+-----------------------------------------
+
+Allthough particular use cases are working nice and stable twstool development
+is still in alpha state! The user interface and xml format is not stabilized
+yet. But don't worry all future changes will be made as compatible as possible.
+
+
+
+
+Contact Information
+-------------------
+
+  If you have questions, bug reports, patches etc., contact
+  Ruediger Meier <sweet_f_a@gmx.de> (in English or German).
+
