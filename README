@@ -1,5 +1,5 @@
 
-twstool - commandline tools around Interactive Brokers TWS API
+twstools - commandline tools around Interactive Brokers TWS API
 ==============================================================
 
 This is a simple set of commandline tools around IB's TWS API with the intention
@@ -12,7 +12,7 @@ historical data, tracking account info or submitting orders etc.
 Project's objective
 -------------------
 
-The twstool utils wants to be small, simple, _stable_, easy to use and easy to
+The twstools wants to be small, simple, _stable_, easy to use and easy to
 maintain.
 
 A general use case covered by the tool set looks like this:
@@ -110,7 +110,7 @@ file conatins one xml document only.
 Known issues / TODO (feedback is welcome)
 -----------------------------------------
 
-Allthough particular use cases are working nice and stable twstool development
+Allthough particular use cases are working nice and stable twstools development
 is still in alpha state! The user interface and xml format is not stabilized
 yet. But don't worry all future changes will be made as compatible as possible.
 
