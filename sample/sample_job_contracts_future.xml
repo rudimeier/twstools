@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<TWSXML>
+<request type="contract_details">
+  <query>
+    <reqContract symbol="K200" secType="FUT" exchange="KSE" includeExpired="0"/>
+  </query>
+</request>
+<request type="contract_details">
+  <query>
+    <reqContract symbol="MSFT" secType="FUT" exchange="ONE" includeExpired="0"/>
+  </query>
+</request>
+</TWSXML>
+
