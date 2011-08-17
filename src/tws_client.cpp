@@ -279,12 +279,13 @@ void TWSClient::reqHistoricalData ( int tickerId, const IB::Contract &contract,
 	const std::string &barSizeSetting, const std::string &whatToShow,
 	int useRTH, int formatDate )
 {
+#if 0
 	DEBUG_PRINTF("REQ_HISTORICAL_DATA %d "
 		"'%s' '%s' '%s' '%s' '%s' '%s' '%s' %d %d",
 		tickerId, contract.symbol.c_str(), contract.secType.c_str(),
 		contract.exchange.c_str(), endDateTime.c_str(), durationStr.c_str(),
 		barSizeSetting.c_str(), whatToShow.c_str(), useRTH, formatDate );
-	
+#endif
 	ePosixClient->reqHistoricalData( tickerId, contract, endDateTime,
 		durationStr, barSizeSetting, whatToShow, useRTH, formatDate );
 }

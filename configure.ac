@@ -21,5 +21,6 @@ PKG_CHECK_MODULES([libtwsapi], [libtwsapi >= 0.3.0])
 ## output
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([sample/Makefile])
 AC_OUTPUT
 

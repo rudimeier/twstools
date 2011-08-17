@@ -650,6 +650,8 @@ class DataFarmStates
 		static std::string getFarm( const std::string &prefix,
 			const std::string &msg );
 		
+		void check_edemo_hack( const std::string &farm );
+		
 		std::map<const std::string, State> &mStates;
 		std::map<const std::string, State> &hStates;
 		
@@ -663,6 +665,7 @@ class DataFarmStates
 		   states don't change. This is for optimizing repeatedly calls of
 		   learnHmds(). */
 		std::string last_learned_lazy_contract;
+		bool edemo_checked;
 };
 
 

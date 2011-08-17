@@ -566,7 +566,12 @@ bool TwsDL::finContracts()
 void TwsDL::waitData()
 {
 	if( !packet->finished() && (currentRequest.age() <= tws_reqTimeoutp) ) {
-		DEBUG_PRINTF( "still waiting for data." );
+		static int64_t last = 0;
+		int64_t now = nowInMsecs();
+		if( now - last > 2000 ) {
+			last = now;
+			DEBUG_PRINTF( "still waiting for data." );
+		}
 		return;
 	}
 	
@@ -1097,14 +1102,11 @@ void TwsDL::changeState( State s )
 	state = s;
 	
 	if( state == WAIT_TWS_CON ) {
-		DEBUG_PRINTF( "TTTTTTTTTTT %d", 50 );
 		curIdleTime = 50;
 	} else if( state == WAIT_DATA ) {
 		curIdleTime = 1000;
-		DEBUG_PRINTF( "TTTTTTTTTTT %d", 1000 );
 	} else {
 		curIdleTime = 0;
-		DEBUG_PRINTF( "TTTTTTTTTTT %d", 0 );
 	}
 }
 
@@ -1147,14 +1149,17 @@ void TwsDL::reqHistoricalData()
 	const HistRequest &hR = workTodo->getHistTodo().current();
 	pacingControl.addRequest( hR.ibContract() );
 	
-	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
+	const IB::Contract &c = hR.ibContract();
+	DEBUG_PRINTF( "REQ_HISTORICAL_DATA %p %d: %ld,%s,%s,%s,%s %s,%s,%s,%s",
 		&workTodo->getHistTodo().current(),
-		currentRequest.reqId(),
-		ibToString(hR.ibContract()).c_str() );
+		currentRequest.reqId(), c.conId,
+		c.symbol.c_str(), c.secType.c_str(),c.exchange.c_str(),c.expiry.c_str(),
+		hR.whatToShow().c_str(), hR.endDateTime().c_str(),
+		hR.durationStr().c_str(), hR.barSizeSetting().c_str() );
 	
 	p_histData->record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
-	                              hR.ibContract(),
+	                              c,
 	                              hR.endDateTime(),
 	                              hR.durationStr(),
 	                              hR.barSizeSetting(),

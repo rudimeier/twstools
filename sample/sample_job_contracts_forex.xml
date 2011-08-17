@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<TWSXML>
+<request type="contract_details">
+  <query>
+    <reqContract symbol="USD" secType="CASH" exchange="IDEALPRO"/>
+  </query>
+</request>
+<request type="contract_details">
+  <query>
+    <reqContract symbol="EUR" secType="CASH" exchange="IDEALPRO"/>
+  </query>
+</request>
+</TWSXML>
+
