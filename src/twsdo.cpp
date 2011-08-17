@@ -4,7 +4,7 @@
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
- * This file is part of atem.
+ * This file is part of twstools.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
