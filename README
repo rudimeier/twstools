@@ -1,9 +1,9 @@
 
-twstools - commandline tools around Interactive Brokers TWS API
+twstools - command line tools around Interactive Brokers TWS API
 ==============================================================
 
-This is a simple set of commandline tools around IB's TWS API with the intention
-to have a powerful scriptable toolbox to automate "jobs" like downloading
+This is a simple set of command line tools around IB's TWS API with the purpose
+of having a powerful scriptable toolbox to automate "jobs" like downloading
 historical data, tracking account info or submitting orders etc.
 
 
