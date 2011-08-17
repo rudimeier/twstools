@@ -38,7 +38,7 @@ just doing the given job but doing it very well.
 BTW the used xml format is intended to be independent from the tools 
 itself to be used to carry all IB/TWS specific structs/messages for 
 saving without loss of information and easy conversion to other 
-existing TWS/API applications.
+existing TWS/API applications, see "Notes on the twsxml format"
 
 
 
@@ -48,7 +48,8 @@ Installation
 
 Building from source requires a c++ compiler (tested with gcc/g++),
 libpopt and libxml2.
-Additionally we need twsapi from https://github.com/rudimeier/twsapi
+Additionally we need twsapi from
+https://github.com/rudimeier/twsapi
 
 Windows has been not be tested yet but using cygwin (or even mingw) should
 work.
@@ -65,9 +66,43 @@ work.
 Usage
 -----
 
-see scripts in sample/ directory and
+Currently we have just two commands. The job processer "twsDL" and job generator
+"twsgen".
+
+twsDL reads jobs from file and write TWS response to stdout.
+twsgen reads such response file, creates new jobs of it or just converts it to
+csv and writes to stdout.
+
+Note that both tools have not much fuctionality implemented yet, see
 twsDL --help
 twsgen --help
+
+Rather than using twsgen you may create job files using any other tools like
+editor, perl, sed, SQL, whatever.
+
+See example scripts in sample/ directory .
+
+
+
+
+Notes on the twsxml format
+--------------------------
+
+The purpose of twsxml format is to keep the data received by TWS as original as
+possible. Doing something useful with that data is a separate process. If you
+will notice that you misinterpreted the data then you are able to fix that and
+parse it again.
+This is the main advatage about a directly connected database backend.
+
+The output files do NOT contain plain xml but serveral xml documents separated
+by '\f' (form feed) characters.
+The advantage is that you can use these files already before they are finished.
+And if a tool is killed/crashed then the half ready output file contains always
+valid data of what has been done so far.
+The disadvantage is that existing xml tools can't handle them. However it just
+takes one sed command line to convert them into plain xml. The twstools itself
+are able to handle plain xml input because this is just the special case where a
+file conatins one xml document only.
 
 
 
