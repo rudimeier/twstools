@@ -1097,14 +1097,11 @@ void TwsDL::changeState( State s )
 	state = s;
 	
 	if( state == WAIT_TWS_CON ) {
-		DEBUG_PRINTF( "TTTTTTTTTTT %d", 50 );
 		curIdleTime = 50;
 	} else if( state == WAIT_DATA ) {
 		curIdleTime = 1000;
-		DEBUG_PRINTF( "TTTTTTTTTTT %d", 1000 );
 	} else {
 		curIdleTime = 0;
-		DEBUG_PRINTF( "TTTTTTTTTTT %d", 0 );
 	}
 }
 
