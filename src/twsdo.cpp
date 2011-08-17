@@ -1149,14 +1149,17 @@ void TwsDL::reqHistoricalData()
 	const HistRequest &hR = workTodo->getHistTodo().current();
 	pacingControl.addRequest( hR.ibContract() );
 	
-	DEBUG_PRINTF( "DOWNLOAD DATA %p %d %s",
+	const IB::Contract &c = hR.ibContract();
+	DEBUG_PRINTF( "REQ_HISTORICAL_DATA %p %d: %ld,%s,%s,%s,%s %s,%s,%s,%s",
 		&workTodo->getHistTodo().current(),
-		currentRequest.reqId(),
-		ibToString(hR.ibContract()).c_str() );
+		currentRequest.reqId(), c.conId,
+		c.symbol.c_str(), c.secType.c_str(),c.exchange.c_str(),c.expiry.c_str(),
+		hR.whatToShow().c_str(), hR.endDateTime().c_str(),
+		hR.durationStr().c_str(), hR.barSizeSetting().c_str() );
 	
 	p_histData->record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
-	                              hR.ibContract(),
+	                              c,
 	                              hR.endDateTime(),
 	                              hR.durationStr(),
 	                              hR.barSizeSetting(),
