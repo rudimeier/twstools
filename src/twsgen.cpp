@@ -289,7 +289,7 @@ void split_whatToShow()
 		wts++;
 	}
 	assert( *(wts - 1) == NULL );
-	assert( (wts - wts_list) <= (len/2 + 1) );
+	assert( (wts - wts_list) <= (ssize_t)(len/2 + 1) );
 }
 
 
