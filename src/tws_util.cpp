@@ -54,7 +54,7 @@ int64_t nowInMsecs()
 	int err = gettimeofday( &tv, NULL );
 	assert( err == 0 );
 	
-	const uint64_t now_ms = tv.tv_sec*1000 + tv.tv_usec/1000;
+	const int64_t now_ms = (int64_t)(tv.tv_sec*1000ULL) + (int64_t)(tv.tv_usec/1000ULL);
 	return now_ms;
 }
 
