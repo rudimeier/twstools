@@ -19,8 +19,8 @@ twsdo_SOURCES += tws_util.cpp
 twsdo_SOURCES += tws_wrapper.cpp
 twsdo_CPPFLAGS = ${AM_CPPFLAGS}
 twsdo_LDFLAGS = ${AM_LDFLAGS}
-twsdo_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsdo_LDADD =
+twsdo_LDADD += ${libxml2_DEPS_LIBS}
 twsdo_LDADD += ${libtwsapi_LIBS}
 twsdo_LDADD += -lpopt
 
@@ -31,8 +31,8 @@ twsgen_SOURCES += tws_meta.cpp
 twsgen_SOURCES += tws_util.cpp
 twsgen_CPPFLAGS = ${AM_CPPFLAGS}
 twsgen_LDFLAGS = ${AM_LDFLAGS}
-twsgen_LDFLAGS += ${libxml2_DEPS_LIBS}
 twsgen_LDADD =
+twsgen_LDADD += ${libxml2_DEPS_LIBS}
 twsgen_LDADD += ${libtwsapi_LIBS}
 twsgen_LDADD += -lpopt
 
