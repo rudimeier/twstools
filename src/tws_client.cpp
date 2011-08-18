@@ -51,7 +51,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-
+#include <sys/time.h>
 
 // debug verbosity 0...n
 #define tws_debug_level 1
