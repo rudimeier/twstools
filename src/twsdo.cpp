@@ -459,7 +459,7 @@ void TwsDL::connectTws()
 	int64_t w = nowInMsecs() - lastConnectionTime;
 	if( w < tws_conTimeoutp ) {
 		DEBUG_PRINTF( "Waiting %ldms before connecting again.",
-			(tws_conTimeoutp - w) );
+			(long)(tws_conTimeoutp - w) );
 		curIdleTime = tws_conTimeoutp - w;
 		return;
 	}
