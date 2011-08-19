@@ -46,6 +46,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -703,13 +704,26 @@ void TwsXml::resize_buf()
 
 bool TwsXml::openFile( const char *filename )
 {
-	file = fopen(filename, "rb");
-	
-	if( file == NULL ) {
-		fprintf( stderr, "error, %s: '%s'\n", strerror(errno), filename );
-		return false;
+	if( filename == NULL || *filename == '\0' ) {
+		int tty = isatty(STDIN_FILENO);
+		if( tty ) {
+			fprintf( stderr, "error, No file specified and stdin is a tty.\n" );
+			return false;
+		}
+		if( errno == EBADF ) {
+			fprintf( stderr, "error, %s\n", strerror(errno) );
+			return false;
+		}
+		file = stdin;
+	} else {
+		file = fopen(filename, "rb");
+		if( file == NULL ) {
+			fprintf( stderr, "error, %s: '%s'\n", strerror(errno), filename );
+			return false;
+		}
 	}
 	
+	assert( file != NULL );
 	return true;
 }
 
