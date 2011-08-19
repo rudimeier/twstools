@@ -52,8 +52,7 @@ libpopt and libxml2 which should be available by your distribution.
 Additionally we need to install twsapi from
 https://github.com/rudimeier/twsapi
 
-Windows has been not be tested yet but using cygwin (or even mingw) should
-work.
+Windows has been successfully tested using cygwin.
 
  ./configure
  make
