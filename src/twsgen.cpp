@@ -50,7 +50,7 @@
 enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
 static poptContext opt_ctx;
-static const char *filep = NULL;
+static const char *filep = "";
 static int skipdefp = 0;
 static int histjobp = 0;
 static const char *endDateTimep = "";
