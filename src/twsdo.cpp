@@ -183,11 +183,10 @@ void twsDL_parse_cl(size_t argc, const char *argv[])
 	}
 	
 	const char** rest = poptGetArgs(opt_ctx);
-	if( rest != NULL ) {
-		if( *rest != NULL ) {
-			workfilep = *rest;
-			rest++;
-		}
+	if( rest != NULL && *rest != NULL ) {
+		workfilep = *rest;
+		rest++;
+		
 		if( *rest != NULL ) {
 			fprintf( stderr, "error: bad usage\n" );
 			exit(2);

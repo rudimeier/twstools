@@ -50,7 +50,7 @@
 enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
 static poptContext opt_ctx;
-static const char *filep = NULL;
+static const char *filep = "";
 static int skipdefp = 0;
 static int histjobp = 0;
 static const char *endDateTimep = "";
@@ -162,7 +162,7 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
 	atexit(clear_popt);
 	
-	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... FILE");
+	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [FILE]");
 	
 	int rc;
 	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
@@ -185,9 +185,6 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 			fprintf( stderr, "error: bad usage\n" );
 			exit(2);
 		}
-	} else {
-			fprintf( stderr, "error: bad usage\n" );
-			exit(2);
 	}
 }
 
