@@ -105,6 +105,7 @@ class TwsXml
 		
 		void *file; // FILE*
 		long buf_size;
+		long buf_len;
 		char *buf;
 		xmlDocPtr curDoc;
 		xmlNodePtr curNode;

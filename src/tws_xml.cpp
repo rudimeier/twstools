@@ -678,6 +678,7 @@ static int find_form_feed( const char *s, int n )
 TwsXml::TwsXml() :
 	file(NULL),
 	buf_size(0),
+	buf_len(0),
 	buf(NULL),
 	curDoc(NULL),
 	curNode(NULL)
@@ -734,26 +735,36 @@ xmlDocPtr TwsXml::nextXmlDoc()
 		return doc;
 	}
 	
+	/* This is ugly code. If we will rewrite it to use xml push parser then we
+	   could avoid resize_buf(), memmove() and even find_form_feed(). */
+	int jump_ff = 0;
 	char *cp = buf;
-	int tmp_len;
-	while( (tmp_len = fread(cp, 1, CHUNK_SIZE, (FILE*)file)) > 0 ) {
+	int tmp_len = buf_len;
+	while( true ) {
 		int ff = find_form_feed(cp, tmp_len);
 		if( ff < tmp_len ) {
-			int suc = fseek( (FILE*)file, -(tmp_len - (ff + 1)), SEEK_CUR);
-			assert( suc == 0 );
 			cp += ff;
+			jump_ff = 1;
 			break;
-		} else {
-			cp += tmp_len;
-			long cur_len = cp - buf;
-			if( (cur_len + CHUNK_SIZE) >= buf_size ) {
-				resize_buf();
-				cp = buf + cur_len;
-			}
 		}
+		cp += tmp_len;
+		
+		if( (buf_len + CHUNK_SIZE) >= buf_size ) {
+			resize_buf();
+			cp = buf + buf_len;
+		}
+		tmp_len = fread(cp, 1, CHUNK_SIZE, (FILE*)file);
+		if( tmp_len <=0 ) {
+			jump_ff = 0;
+			break;
+		}
+		buf_len += tmp_len;
 	}
 	
 	doc = xmlReadMemory( buf, cp-buf, "URL", NULL, 0 );
+	
+	buf_len -= cp - buf + jump_ff;
+	memmove( buf, cp + jump_ff, buf_len );
 	
 	return doc;
 }
