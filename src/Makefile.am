@@ -26,7 +26,6 @@ twsdo_LDFLAGS = ${AM_LDFLAGS}
 twsdo_LDADD =
 twsdo_LDADD += ${libxml2_DEPS_LIBS}
 twsdo_LDADD += ${libtwsapi_LIBS}
-twsdo_LDADD += -lpopt
 
 twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp
@@ -38,7 +37,6 @@ twsgen_LDFLAGS = ${AM_LDFLAGS}
 twsgen_LDADD =
 twsgen_LDADD += ${libxml2_DEPS_LIBS}
 twsgen_LDADD += ${libtwsapi_LIBS}
-twsgen_LDADD += -lpopt
 
 noinst_HEADERS =
 noinst_HEADERS += tws_client.h

@@ -49,7 +49,6 @@
 // from global installed twsapi
 #include "twsapi/Contract.h"
 
-#include <popt.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -60,7 +59,6 @@ static gengetopt_args_info args_info;
 
 enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
-static poptContext opt_ctx;
 static const char *workfilep = "";
 static int skipdefp = 0;
 static const char *tws_hostp = "localhost";
@@ -103,65 +101,6 @@ static void check_display_args()
 	exit(0);
 }
 
-static struct poptOption flow_opts[] = {
-	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
-		"Never skip xml default values.", NULL},
-	{"host", 'h', POPT_ARG_STRING, &tws_hostp, 0,
-		"TWS host name or ip (default: localhost).", NULL},
-	{"port", 'p', POPT_ARG_INT, &tws_portp, 0,
-		"TWS port number (default: 7474).", NULL},
-	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
-		"TWS client connection id (default: 123).", NULL},
-	{"get-account", 'A', POPT_ARG_NONE, &get_accountp, 0,
-		"Request account status.", NULL},
-	{"accountName", '\0', POPT_ARG_STRING, &tws_account_namep, 0,
-		"IB account name (default: \"\").", NULL},
-	{"get-exec", 'E', POPT_ARG_NONE, &get_execp, 0,
-		"Request executions.", NULL},
-	{"get-order", 'O', POPT_ARG_NONE, &get_orderp, 0,
-		"Request open orders.", NULL},
-	POPT_TABLEEND
-};
-
-static struct poptOption tws_tweak_opts[] = {
-	{"conTimeout", '\0', POPT_ARG_INT, &tws_conTimeoutp, 0,
-	"Connection timeout (default: 30000).", "ms"},
-	{"reqTimeout", '\0', POPT_ARG_INT, &tws_reqTimeoutp, 0,
-	"Request timeout (default: 1200000).", "ms"},
-	{"maxRequests", '\0', POPT_ARG_INT, &tws_maxRequestsp, 0,
-	"Max requests per pacing interval (default: 60).", NULL},
-	{"pacingInterval", '\0', POPT_ARG_INT, &tws_pacingIntervalp, 0,
-	"Pacing interval (default: 605000).", "ms"},
-	{"minPacingTime", '\0', POPT_ARG_INT, &tws_minPacingTimep, 0,
-	"Minimum time to wait between requests (default: 1000).", "ms"},
-	{"violationPause", '\0', POPT_ARG_INT, &tws_violationPausep, 0,
-	"Time to wait if pacing violation occurs (default: 60000).", "ms"},
-	POPT_TABLEEND
-};
-
-static struct poptOption help_opts[] = {
-#if 0
-	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
-#endif
-	{"help", '\0', POPT_ARG_NONE, NULL, POPT_HELP,
-		"Show this help message.", NULL},
-	{"version", '\0', POPT_ARG_NONE, NULL, POPT_VERSION,
-		"Print version string and exit.", NULL},
-	{"usage", '\0', POPT_ARG_NONE, NULL, POPT_USAGE,
-		"Display brief usage message." , NULL},
-	POPT_TABLEEND
-};
-
-static const struct poptOption twsDL_opts[] = {
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, flow_opts, 0,
-	 "Program advice:", NULL},
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, tws_tweak_opts, 0,
-	 "TWS tweaks:", NULL},
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, help_opts, 0,
-	 "Help options:", NULL},
-	POPT_TABLEEND
-};
-
 static void gengetopt_check_opts()
 {
 	if( args_info.inputs_num == 1 ) {
@@ -175,31 +114,6 @@ static void gengetopt_check_opts()
 static void gengetopt_free()
 {
 	cmdline_parser_free( &args_info );
-}
-
-void clear_popt()
-{
-	poptFreeContext(opt_ctx);
-}
-
-void twsDL_parse_cl(size_t argc, const char *argv[])
-{
-	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
-	atexit(clear_popt);
-	
-	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [WORK_FILE]");
-	
-	int rc;
-	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
-		// handle options when we have returning ones
-		assert(false);
-	}
-	
-	if( rc != -1 ) {
-		fprintf( stderr, "error: %s '%s'\n",
-			poptStrerror(rc), poptBadOption(opt_ctx, 0) );
-		exit(2);
-	}
 }
 
 
@@ -1224,8 +1138,6 @@ int main(int argc, char *argv[])
 	
 	check_display_args();
 	gengetopt_check_opts();
-	
-	twsDL_parse_cl(argc,(const char **)argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	
