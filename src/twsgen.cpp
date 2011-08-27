@@ -156,6 +156,16 @@ static const struct poptOption twsDL_opts[] = {
 	POPT_TABLEEND
 };
 
+static void gengetopt_check_opts()
+{
+	if( args_info.inputs_num == 1 ) {
+		filep = args_info.inputs[0];
+	} else if( args_info.inputs_num > 1 ) {
+		fprintf( stderr, "error: bad usage\n" );
+		exit(2);
+	}
+}
+
 static void gengetopt_free()
 {
 	cmdline_parser_free( &args_info );
@@ -183,17 +193,6 @@ void twsgen_parse_cl(size_t argc, const char *argv[])
 		fprintf( stderr, "error: %s '%s'\n",
 			poptStrerror(rc), poptBadOption(opt_ctx, 0) );
 		exit(2);
-	}
-	
-	const char** rest = poptGetArgs(opt_ctx);
-	if( rest != NULL && *rest != NULL ) {
-		filep = *rest;
-		rest++;
-		
-		if( *rest != NULL ) {
-			fprintf( stderr, "error: bad usage\n" );
-			exit(2);
-		}
 	}
 }
 
@@ -379,6 +378,7 @@ int main(int argc, char *argv[])
 	}
 	
 	check_display_args();
+	gengetopt_check_opts();
 	
 	twsgen_parse_cl(argc, (const char **)argv);
 	
