@@ -38,6 +38,7 @@
 #include "twsdo.h"
 #include "tws_meta.h"
 
+#include "twsdo_ggo.h"
 #include "tws_util.h"
 #include "tws_client.h"
 #include "tws_wrapper.h"
@@ -52,6 +53,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "twsdo_ggo.c"
+
+
+static gengetopt_args_info args_info;
 
 enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
@@ -157,6 +162,11 @@ static const struct poptOption twsDL_opts[] = {
 	 "Help options:", NULL},
 	POPT_TABLEEND
 };
+
+static void gengetopt_free()
+{
+	cmdline_parser_free( &args_info );
+}
 
 void clear_popt()
 {
@@ -1206,9 +1216,15 @@ void TwsDL::reqOrders()
 
 
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
-	twsDL_parse_cl(argc, argv);
+	atexit( gengetopt_free );
+	
+	if( cmdline_parser(argc, argv, &args_info) != 0 ) {
+		return 2; // exit
+	}
+	
+	twsDL_parse_cl(argc,(const char **)argv);
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	
