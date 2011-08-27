@@ -79,11 +79,11 @@ Usage
 Currently we have just two commands. The job processer "twsdo" and job generator
 "twsgen".
 
-twsdo reads jobs from file and write TWS response to stdout.
+twsdo reads jobs from file and writes TWS response to stdout.
 twsgen reads such response file, creates new jobs of it or just converts it to
 csv and writes to stdout.
 
-Note that both tools have not much fuctionality implemented yet, see
+Note that both tools have not much functionality implemented yet, see
 twsdo --help
 twsgen --help
 
@@ -102,7 +102,7 @@ The purpose of twsxml format is to keep the data received by TWS as original as
 possible. Doing something useful with that data is a separate process. If you
 will notice that you misinterpreted the data then you are able to fix that and
 parse it again.
-This is the main advatage about a directly connected database backend.
+This is the main advantage about a directly connected database backend.
 
 The output files do NOT contain plain xml but serveral xml documents separated
 by '\f' (form feed) characters.
