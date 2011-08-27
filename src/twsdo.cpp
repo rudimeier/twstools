@@ -86,21 +86,18 @@ Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
 License: BSD 3-Clause\n"
 
 
-static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
-	poptOption *key, const char */*arg*/, void */*data*/ )
+static void check_display_args()
 {
-	switch( key->val ) {
-	case POPT_HELP:
-		poptPrintHelp(con, stdout, 0);
-		break;
-	case POPT_VERSION:
-		fprintf(stdout, VERSION_MSG);
-		break;
-	case POPT_USAGE:
-		poptPrintUsage(con, stdout, 0);
-		break;
-	default:
-		assert(false);
+	if( args_info.help_given ) {
+		gengetopt_args_info_usage =
+			"Usage: " PACKAGE " [OPTION]... [WORK_FILE]";
+		cmdline_parser_print_help();
+	} else if( args_info.usage_given ) {
+		printf( "%s\n", gengetopt_args_info_usage );
+	} else if( args_info.version_given ) {
+		printf( VERSION_MSG );
+ 	} else {
+		return;
 	}
 	
 	exit(0);
@@ -143,7 +140,9 @@ static struct poptOption tws_tweak_opts[] = {
 };
 
 static struct poptOption help_opts[] = {
+#if 0
 	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
+#endif
 	{"help", '\0', POPT_ARG_NONE, NULL, POPT_HELP,
 		"Show this help message.", NULL},
 	{"version", '\0', POPT_ARG_NONE, NULL, POPT_VERSION,
@@ -1223,6 +1222,8 @@ int main(int argc, char *argv[])
 	if( cmdline_parser(argc, argv, &args_info) != 0 ) {
 		return 2; // exit
 	}
+	
+	check_display_args();
 	
 	twsDL_parse_cl(argc,(const char **)argv);
 	
