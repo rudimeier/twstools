@@ -6,6 +6,10 @@ AM_CXXFLAGS =
 AM_CXXFLAGS += $(DEFAULT_CXXFLAGS)
 AM_LDFLAGS =
 
+EXTRA_DIST =
+EXTRA_DIST += twsdo.ggo
+EXTRA_DIST += twsgen.ggo
+EXTRA_DIST += $(BUILT_SOURCES)
 
 bin_PROGRAMS =
 bin_PROGRAMS += twsdo twsgen
@@ -45,12 +49,19 @@ noinst_HEADERS += twsdo.h
 noinst_HEADERS += tws_meta.h
 noinst_HEADERS += tws_xml.h
 
+BUILT_SOURCES =
+BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
+BUILT_SOURCES += twsgen_ggo.c twsgen_ggo.h
 
 
 
 CLEANFILES =
 CLEANFILES += *.s
 CLEANFILES += *.i
+
+
+%_ggo.c %_ggo.h: %.ggo
+	gengetopt --no-help --no-version -i $< -F $*_ggo
 
 # 
 # Help the developers get nice post-processed source files
