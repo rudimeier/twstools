@@ -38,6 +38,7 @@
 #include "twsdo.h"
 #include "tws_meta.h"
 
+#include "twsdo_ggo.h"
 #include "tws_util.h"
 #include "tws_client.h"
 #include "tws_wrapper.h"
@@ -48,14 +49,16 @@
 // from global installed twsapi
 #include "twsapi/Contract.h"
 
-#include <popt.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "twsdo_ggo.c"
+
+
+static gengetopt_args_info args_info;
 
 enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
-static poptContext opt_ctx;
 static const char *workfilep = "";
 static int skipdefp = 0;
 static const char *tws_hostp = "localhost";
@@ -81,117 +84,72 @@ Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
 License: BSD 3-Clause\n"
 
 
-static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
-	poptOption *key, const char */*arg*/, void */*data*/ )
+static void check_display_args()
 {
-	switch( key->val ) {
-	case POPT_HELP:
-		poptPrintHelp(con, stdout, 0);
-		break;
-	case POPT_VERSION:
-		fprintf(stdout, VERSION_MSG);
-		break;
-	case POPT_USAGE:
-		poptPrintUsage(con, stdout, 0);
-		break;
-	default:
-		assert(false);
+	if( args_info.help_given ) {
+		gengetopt_args_info_usage =
+			"Usage: " PACKAGE " [OPTION]... [WORK_FILE]";
+		cmdline_parser_print_help();
+	} else if( args_info.usage_given ) {
+		printf( "%s\n", gengetopt_args_info_usage );
+	} else if( args_info.version_given ) {
+		printf( VERSION_MSG );
+ 	} else {
+		return;
 	}
 	
 	exit(0);
 }
 
-static struct poptOption flow_opts[] = {
-	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
-		"Never skip xml default values.", NULL},
-	{"host", 'h', POPT_ARG_STRING, &tws_hostp, 0,
-		"TWS host name or ip (default: localhost).", NULL},
-	{"port", 'p', POPT_ARG_INT, &tws_portp, 0,
-		"TWS port number (default: 7474).", NULL},
-	{"id", 'i', POPT_ARG_INT, &tws_client_idp, 0,
-		"TWS client connection id (default: 123).", NULL},
-	{"get-account", 'A', POPT_ARG_NONE, &get_accountp, 0,
-		"Request account status.", NULL},
-	{"accountName", '\0', POPT_ARG_STRING, &tws_account_namep, 0,
-		"IB account name (default: \"\").", NULL},
-	{"get-exec", 'E', POPT_ARG_NONE, &get_execp, 0,
-		"Request executions.", NULL},
-	{"get-order", 'O', POPT_ARG_NONE, &get_orderp, 0,
-		"Request open orders.", NULL},
-	POPT_TABLEEND
-};
-
-static struct poptOption tws_tweak_opts[] = {
-	{"conTimeout", '\0', POPT_ARG_INT, &tws_conTimeoutp, 0,
-	"Connection timeout (default: 30000).", "ms"},
-	{"reqTimeout", '\0', POPT_ARG_INT, &tws_reqTimeoutp, 0,
-	"Request timeout (default: 1200000).", "ms"},
-	{"maxRequests", '\0', POPT_ARG_INT, &tws_maxRequestsp, 0,
-	"Max requests per pacing interval (default: 60).", NULL},
-	{"pacingInterval", '\0', POPT_ARG_INT, &tws_pacingIntervalp, 0,
-	"Pacing interval (default: 605000).", "ms"},
-	{"minPacingTime", '\0', POPT_ARG_INT, &tws_minPacingTimep, 0,
-	"Minimum time to wait between requests (default: 1000).", "ms"},
-	{"violationPause", '\0', POPT_ARG_INT, &tws_violationPausep, 0,
-	"Time to wait if pacing violation occurs (default: 60000).", "ms"},
-	POPT_TABLEEND
-};
-
-static struct poptOption help_opts[] = {
-	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
-	{"help", '\0', POPT_ARG_NONE, NULL, POPT_HELP,
-		"Show this help message.", NULL},
-	{"version", '\0', POPT_ARG_NONE, NULL, POPT_VERSION,
-		"Print version string and exit.", NULL},
-	{"usage", '\0', POPT_ARG_NONE, NULL, POPT_USAGE,
-		"Display brief usage message." , NULL},
-	POPT_TABLEEND
-};
-
-static const struct poptOption twsDL_opts[] = {
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, flow_opts, 0,
-	 "Program advice:", NULL},
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, tws_tweak_opts, 0,
-	 "TWS tweaks:", NULL},
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, help_opts, 0,
-	 "Help options:", NULL},
-	POPT_TABLEEND
-};
-
-void clear_popt()
+static void gengetopt_check_opts()
 {
-	poptFreeContext(opt_ctx);
-}
-
-void twsDL_parse_cl(size_t argc, const char *argv[])
-{
-	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
-	atexit(clear_popt);
-	
-	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [WORK_FILE]");
-	
-	int rc;
-	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
-		// handle options when we have returning ones
-		assert(false);
-	}
-	
-	if( rc != -1 ) {
-		fprintf( stderr, "error: %s '%s'\n",
-			poptStrerror(rc), poptBadOption(opt_ctx, 0) );
+	if( args_info.inputs_num == 1 ) {
+		workfilep = args_info.inputs[0];
+	} else if( args_info.inputs_num > 1 ) {
+		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
 	
-	const char** rest = poptGetArgs(opt_ctx);
-	if( rest != NULL && *rest != NULL ) {
-		workfilep = *rest;
-		rest++;
-		
-		if( *rest != NULL ) {
-			fprintf( stderr, "error: bad usage\n" );
-			exit(2);
-		}
+	skipdefp = args_info.verbose_xml_given;
+	if( args_info.host_given ) {
+		tws_hostp = args_info.host_arg;
 	}
+	if( args_info.port_given ) {
+		tws_portp = args_info.port_arg;
+	}
+	if( args_info.id_given ) {
+		tws_client_idp = args_info.id_arg;
+	}
+	get_accountp = args_info.get_account_given;
+	if( args_info.accountName_given ) {
+		tws_account_namep = args_info.accountName_arg;
+	}
+	get_execp = args_info.get_exec_given;
+	get_orderp = args_info.get_order_given;
+	
+	if( args_info.conTimeout_given ) {
+		tws_conTimeoutp = args_info.conTimeout_arg;
+	}
+	if( args_info.reqTimeout_given ) {
+		tws_reqTimeoutp = args_info.reqTimeout_arg;
+	}
+	if( args_info.maxRequests_given ) {
+		tws_maxRequestsp = args_info.maxRequests_arg;
+	}
+	if( args_info.pacingInterval_given ) {
+		tws_pacingIntervalp = args_info.pacingInterval_arg;
+	}
+	if( args_info.minPacingTime_given ) {
+		tws_minPacingTimep = args_info.minPacingTime_arg;
+	}
+	if( args_info.violationPause_given ) {
+		tws_violationPausep = args_info.violationPause_arg;
+	}
+}
+
+static void gengetopt_free()
+{
+	cmdline_parser_free( &args_info );
 }
 
 
@@ -1206,9 +1164,16 @@ void TwsDL::reqOrders()
 
 
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
-	twsDL_parse_cl(argc, argv);
+	atexit( gengetopt_free );
+	
+	if( cmdline_parser(argc, argv, &args_info) != 0 ) {
+		return 2; // exit
+	}
+	
+	check_display_args();
+	gengetopt_check_opts();
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	

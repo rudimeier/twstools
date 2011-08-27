@@ -35,21 +35,24 @@
  *
  ***/
 
+#include "twsgen_ggo.h"
 #include "tws_xml.h"
 #include "tws_meta.h"
 #include "debug.h"
 #include "config.h"
 
-#include <popt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <libxml/tree.h>
 
+#include "twsgen_ggo.c"
+
+
+static gengetopt_args_info args_info;
 
 enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
 
-static poptContext opt_ctx;
 static const char *filep = "";
 static int skipdefp = 0;
 static int histjobp = 0;
@@ -85,107 +88,58 @@ Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
 License: BSD 3-Clause\n"
 
 
-static void displayArgs( poptContext con, poptCallbackReason /*foo*/,
-	poptOption *key, const char */*arg*/, void */*data*/ )
+static void check_display_args()
 {
-	switch( key->val ) {
-	case POPT_HELP:
-		poptPrintHelp(con, stdout, 0);
-		break;
-	case POPT_VERSION:
-		fprintf(stdout, VERSION_MSG);
-		break;
-	case POPT_USAGE:
-		poptPrintUsage(con, stdout, 0);
-		break;
-	default:
-		assert(false);
+	if( args_info.help_given ) {
+		gengetopt_args_info_usage =
+			"Usage: " PACKAGE " [OPTION]... [WORK_FILE]";
+		cmdline_parser_print_help();
+	} else if( args_info.usage_given ) {
+		printf( "%s\n", gengetopt_args_info_usage );
+	} else if( args_info.version_given ) {
+		printf( VERSION_MSG );
+ 	} else {
+		return;
 	}
 	
 	exit(0);
 }
 
-static struct poptOption flow_opts[] = {
-	{"verbose-xml", 'x', POPT_ARG_NONE, &skipdefp, 0,
-		"Never skip xml default values.", NULL},
-	{"histjob", 'H', POPT_ARG_NONE, &histjobp, 0,
-		"generate hist job", NULL},
-	{"endDateTime", 'e', POPT_ARG_STRING, &endDateTimep, 0,
-		"Query end date time, default is \"\" which means now.", "DATETIME"},
-	{"durationStr", 'd', POPT_ARG_STRING, &durationStrp, 0,
-		"Query duration, default is maximum dependent on bar size.", NULL},
-	{"barSizeSetting", 'b', POPT_ARG_STRING, &barSizeSettingp, 0,
-		"Size of the bars, default is \"1 hour\".", NULL},
-	{"whatToShow", 'w', POPT_ARG_STRING, &whatToShowp, 0,
-		"List of data types, valid types are: TRADES, BID, ASK, etc., "
-		"default: TRADES", "LIST"},
-	{"useRTH", '\0', POPT_ARG_NONE, &useRTHp, 0,
-		"Return only data within regular trading hours (useRTH=1).", NULL},
-	{"utc", '\0', POPT_ARG_NONE, &utcp, 0,
-		"Dates are returned as seconds since unix epoch (formatDate=2).", NULL},
-	{"includeExpired", '\0', POPT_ARG_STRING, &includeExpiredp, 0,
-		"How to set includeExpired, valid args: auto, always, never, keep. "
-		"Default is auto (dependent on secType).", NULL},
-	{"to-csv", 'C', POPT_ARG_NONE, &to_csvp, 0,
-		"Just convert xml to csv.", NULL},
-	{"no-conv", '\0', POPT_ARG_NONE, &no_convp, 0,
-		"For testing, output xml again.", NULL},
-	POPT_TABLEEND
-};
-
-static struct poptOption help_opts[] = {
-	{NULL, '\0', POPT_ARG_CALLBACK, (void*)displayArgs, 0, NULL, NULL},
-	{"help", '\0', POPT_ARG_NONE, NULL, POPT_HELP,
-		"Show this help message.", NULL},
-	{"version", '\0', POPT_ARG_NONE, NULL, POPT_VERSION,
-		"Print version string and exit.", NULL},
-	{"usage", '\0', POPT_ARG_NONE, NULL, POPT_USAGE,
-		"Display brief usage message." , NULL},
-	POPT_TABLEEND
-};
-
-static const struct poptOption twsDL_opts[] = {
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, flow_opts, 0,
-	 "Program advice:", NULL},
-	{NULL, '\0', POPT_ARG_INCLUDE_TABLE, help_opts, 0,
-	 "Help options:", NULL},
-	POPT_TABLEEND
-};
-
-void clear_popt()
+static void gengetopt_check_opts()
 {
-	poptFreeContext(opt_ctx);
-}
-
-void twsgen_parse_cl(size_t argc, const char *argv[])
-{
-	opt_ctx = poptGetContext(NULL, argc, argv, twsDL_opts, 0);
-	atexit(clear_popt);
-	
-	poptSetOtherOptionHelp( opt_ctx, "[OPTION]... [FILE]");
-	
-	int rc;
-	while( (rc = poptGetNextOpt(opt_ctx)) > 0 ) {
-		// handle options when we have returning ones
-		assert(false);
-	}
-	
-	if( rc != -1 ) {
-		fprintf( stderr, "error: %s '%s'\n",
-			poptStrerror(rc), poptBadOption(opt_ctx, 0) );
+	if( args_info.inputs_num == 1 ) {
+		filep = args_info.inputs[0];
+	} else if( args_info.inputs_num > 1 ) {
+		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
 	
-	const char** rest = poptGetArgs(opt_ctx);
-	if( rest != NULL && *rest != NULL ) {
-		filep = *rest;
-		rest++;
-		
-		if( *rest != NULL ) {
-			fprintf( stderr, "error: bad usage\n" );
-			exit(2);
-		}
+	skipdefp = args_info.verbose_xml_given;
+	histjobp = args_info.histjob_given;
+	if( args_info.endDateTime_given ) {
+		endDateTimep = args_info.endDateTime_arg;
 	}
+	if( args_info.durationStr_given ) {
+		durationStrp = args_info.durationStr_arg;
+	}
+	if( args_info.barSizeSetting_given ) {
+		barSizeSettingp = args_info.barSizeSetting_arg;
+	}
+	if( args_info.whatToShow_given ) {
+		whatToShowp = args_info.whatToShow_arg;
+	}
+	useRTHp = args_info.useRTH_given;
+	utcp = args_info.utc_given;
+	if( args_info.includeExpired_given ) {
+		includeExpiredp = args_info.includeExpired_arg;
+	}
+	to_csvp = args_info.to_csv_given;
+	no_convp = args_info.no_conv_given;
+}
+
+static void gengetopt_free()
+{
+	cmdline_parser_free( &args_info );
 }
 
 
@@ -361,9 +315,16 @@ bool gen_csv()
 }
 
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
-	twsgen_parse_cl(argc, argv);
+	atexit( gengetopt_free );
+	
+	if( cmdline_parser(argc, argv, &args_info) != 0 ) {
+		return 2; // exit
+	}
+	
+	check_display_args();
+	gengetopt_check_opts();
 	
 	TwsXml::setSkipDefaults( !skipdefp );
 	if( !durationStrp ) {

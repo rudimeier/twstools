@@ -1,0 +1,118 @@
+# atem.ggo -- gengetopt input file for twsdo's command line options
+#
+# Copyright (C) 2011 Ruediger Meier
+#
+# Author:  Ruediger Meier <sweet_f_a@gmx.de>
+#
+# This file is part of twstools.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the author nor the names of any contributors
+#    may be used to endorse or promote products derived from this
+#    software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+
+args "--no-handle-error --long-help --unamed-opts=DATA_DIR"
+
+
+# section
+section "Program advice"
+
+option "verbose-xml" x
+"Never skip xml default values."
+optional
+
+option "host" h
+"TWS host name or ip (default: localhost)."
+string optional
+
+option "port" p
+"TWS port number (default: 7474)."
+int optional
+
+option "id" i
+"TWS client connection id (default: 123)."
+int optional
+
+option "get-account" A
+"Request account status."
+optional
+
+option "accountName" -
+"IB account name (default: \"\")."
+string optional
+
+option "get-exec" E
+"Request executions."
+optional
+
+option "get-order" O
+"Request open orders."
+optional
+
+
+# section
+section "TWS tweaks"
+
+option "conTimeout" -
+"Connection timeout (default: 30000)."
+int typestr="ms" optional
+
+option "reqTimeout" -
+"Request timeout (default: 1200000)."
+int typestr="ms" optional
+
+option "maxRequests" -
+"Max requests per pacing interval (default: 60)."
+int optional
+
+option "pacingInterval" -
+"Pacing interval (default: 605000)."
+int typestr="ms" optional
+
+option "minPacingTime" -
+"Minimum time to wait between requests (default: 1000)."
+int typestr="ms" optional
+
+option "violationPause" -
+"Time to wait if pacing violation occurs (default: 60000)."
+int typestr="ms" optional
+
+
+# section
+section "Help options"
+
+option "help" -
+"Show this help message."
+optional
+
+option "version" -
+"Print version string and exit."
+optional
+
+option "usage" -
+"Display brief usage message."
+optional
