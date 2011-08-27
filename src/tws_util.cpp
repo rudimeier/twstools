@@ -100,10 +100,15 @@ int ib_strptime( struct tm *tm, const std::string &ib_datetime )
 }
 
 
+/**
+ * Convert IB style date or date time string to standard format "%F" or "%F %T".
+ * The converted string is always a valid date.
+ * Return empty string on parse errors or invalid dates.
+ */
 std::string ib_date2iso( const std::string &ibDate )
 {
 	struct tm tm;
-	char buf[255];
+	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
 	char *tmp;
 	
 	memset(&tm, 0, sizeof(struct tm));
