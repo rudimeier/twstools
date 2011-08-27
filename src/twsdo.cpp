@@ -109,6 +109,42 @@ static void gengetopt_check_opts()
 		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
+	
+	skipdefp = args_info.verbose_xml_given;
+	if( args_info.host_given ) {
+		tws_hostp = args_info.host_arg;
+	}
+	if( args_info.port_given ) {
+		tws_portp = args_info.port_arg;
+	}
+	if( args_info.id_given ) {
+		tws_client_idp = args_info.id_arg;
+	}
+	get_accountp = args_info.get_account_given;
+	if( args_info.accountName_given ) {
+		tws_account_namep = args_info.accountName_arg;
+	}
+	get_execp = args_info.get_exec_given;
+	get_orderp = args_info.get_order_given;
+	
+	if( args_info.conTimeout_given ) {
+		tws_conTimeoutp = args_info.conTimeout_arg;
+	}
+	if( args_info.reqTimeout_given ) {
+		tws_reqTimeoutp = args_info.reqTimeout_arg;
+	}
+	if( args_info.maxRequests_given ) {
+		tws_maxRequestsp = args_info.maxRequests_arg;
+	}
+	if( args_info.pacingInterval_given ) {
+		tws_pacingIntervalp = args_info.pacingInterval_arg;
+	}
+	if( args_info.minPacingTime_given ) {
+		tws_minPacingTimep = args_info.minPacingTime_arg;
+	}
+	if( args_info.violationPause_given ) {
+		tws_violationPausep = args_info.violationPause_arg;
+	}
 }
 
 static void gengetopt_free()

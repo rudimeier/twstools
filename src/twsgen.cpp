@@ -113,6 +113,28 @@ static void gengetopt_check_opts()
 		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
+	
+	skipdefp = args_info.verbose_xml_given;
+	histjobp = args_info.histjob_given;
+	if( args_info.endDateTime_given ) {
+		endDateTimep = args_info.endDateTime_arg;
+	}
+	if( args_info.durationStr_given ) {
+		durationStrp = args_info.durationStr_arg;
+	}
+	if( args_info.barSizeSetting_given ) {
+		barSizeSettingp = args_info.barSizeSetting_arg;
+	}
+	if( args_info.whatToShow_given ) {
+		whatToShowp = args_info.whatToShow_arg;
+	}
+	useRTHp = args_info.useRTH_given;
+	utcp = args_info.utc_given;
+	if( args_info.includeExpired_given ) {
+		includeExpiredp = args_info.includeExpired_arg;
+	}
+	to_csvp = args_info.to_csv_given;
+	no_convp = args_info.no_conv_given;
 }
 
 static void gengetopt_free()
