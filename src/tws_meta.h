@@ -55,9 +55,6 @@ typedef struct _xmlDoc * xmlDocPtr;
 
 
 
-/// stupid static helper
-std::string ibDate2ISO( const std::string &ibDate );
-
 const char* short_wts( const char* wts );
 const char* short_bar_size( const char* bar_size );
 

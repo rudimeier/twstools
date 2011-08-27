@@ -45,6 +45,7 @@
 
 #include <string.h>
 #include <sys/time.h>
+#include <time.h>
 
 
 
@@ -96,6 +97,30 @@ int ib_strptime( struct tm *tm, const std::string &ib_datetime )
 		return 0;
 	}
 	return -1;
+}
+
+
+std::string ib_date2iso( const std::string &ibDate )
+{
+	struct tm tm;
+	char buf[255];
+	char *tmp;
+	
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d", &tm);
+	if( tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F", &tm);
+		return buf;
+	}
+	
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d%t%H:%M:%S", &tm);
+	if(  tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F %T", &tm);
+		return buf;
+	}
+	
+	return "";
 }
 
 
