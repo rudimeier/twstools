@@ -43,6 +43,7 @@
 #include "twsapi/Execution.h"
 #include "twsapi/Contract.h"
 
+#include <limits.h>
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
@@ -126,6 +127,53 @@ std::string ib_date2iso( const std::string &ibDate )
 	}
 	
 	return "";
+}
+
+
+/**
+ * Convert IB's duration string to seconds.
+ * Return -1 on parse error.
+ */
+int ib_duration2secs( const std::string &dur )
+{
+	const char *_dur = dur.c_str();
+	int len = strlen(_dur);
+	const char *space = _dur + len-2;
+	if( *space != ' ' ) {
+		return -1;
+	}
+	
+	int unit;
+	switch( _dur[len-1] ) {
+	case 'S':
+		unit = 1;
+		break;
+	case 'D':
+		unit = 86400;
+		break;
+	case 'W':
+		unit = 86400 * 7;
+		break;
+	case 'M':
+		unit = 86400 * 30;
+		break;
+	case 'Y':
+		unit = 86400 * 365;
+		break;
+	default:
+		return -1;
+	}
+	
+	char *tmp;
+	long val = strtol(_dur, &tmp, 10);
+	if( tmp != space ) {
+		return -1;
+	}
+	if( val < 0 || val > INT_MAX/unit ) {
+		return -1;
+	}
+	
+	return val * unit;
 }
 
 
