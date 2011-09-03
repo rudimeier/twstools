@@ -4,7 +4,7 @@
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
- * This file is part of atem.
+ * This file is part of twstools.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,7 +61,7 @@ int64_t nowInMsecs()
 std::string msecs_to_string( int64_t msecs )
 {
 	const time_t s = msecs / 1000;
-	const uint ms = msecs % 1000;
+	const unsigned int ms = msecs % 1000;
 	char buf[ 19 + 4 + 1 ]; // "yyyy-mm-dd hh:mm:ss.zzz"
 	const struct tm *tmp_tm = localtime( &s );
 	size_t tmp_sz;
