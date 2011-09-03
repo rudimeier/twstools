@@ -321,7 +321,8 @@ bool gen_hist_job()
 	}
 	
 	time_t t_begin = min_begin_date( endDateTimep, durationStrp );
-	DEBUG_PRINTF("skipping expiries before: '%s'", ctime(&t_begin) );
+	DEBUG_PRINTF("skipping expiries before: '%s'",
+		time_t_local(t_begin).c_str() );
 	
 	xmlNodePtr xn;
 	int count_docs = 0;
@@ -346,7 +347,7 @@ bool gen_hist_job()
 			}
 			
 			if( skip_expiry(c.expiry, t_begin) ) {
-				DEBUG_PRINTF("skipping expiry: '%s'", c.expiry.c_str());
+// 				DEBUG_PRINTF("skipping expiry: '%s'", c.expiry.c_str());
 				continue;
 			}
 			
