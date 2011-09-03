@@ -66,6 +66,7 @@ static int utcp = 0;
 static const char *includeExpiredp = "auto";
 static int to_csvp = 0;
 static int no_convp = 0;
+static const char *max_expiryp = NULL;
 
 
 static char** wts_list = NULL;
@@ -136,6 +137,9 @@ static void gengetopt_check_opts()
 	}
 	to_csvp = args_info.to_csv_given;
 	no_convp = args_info.no_conv_given;
+	if( args_info.max_expiry_given ) {
+		max_expiryp = args_info.max_expiry_arg;
+	}
 }
 
 static void gengetopt_free()
@@ -245,12 +249,89 @@ void split_whatToShow()
 }
 
 
+
+
+/* frist _business_ day data is expected, TODO review */
+time_t min_begin_date( const std::string &end, const std::string dur )
+{
+	struct tm tm_tmp;
+	time_t t_begin;
+	
+	memset(&tm_tmp, 0, sizeof(struct tm));
+	if( ib_strptime( &tm_tmp, end ) == -1 ) {
+		// TODO use current date time
+		return 0;
+	}
+	tm_tmp.tm_isdst = -1; // set "auto dst", strptime() does not set it
+	
+	int minus_busy_days = ib_duration2secs( dur );
+	if( minus_busy_days == -1  ) {
+		return 0;
+	}
+	minus_busy_days /= 86400; 
+	
+	/* saturday or sunday jumps to friday for free */
+	if( tm_tmp.tm_wday == 0 ) {
+		tm_tmp.tm_mday -= 2;
+		tm_tmp.tm_wday = 5;
+		minus_busy_days--;
+	} else if( tm_tmp.tm_wday == 6 ) {
+		tm_tmp.tm_mday -= 1;
+		tm_tmp.tm_wday = 5;
+		minus_busy_days--;
+	}
+	
+	/* jump over full weeks */
+	tm_tmp.tm_mday -= 7 * (minus_busy_days / 5);
+	minus_busy_days = minus_busy_days % 5;
+	
+	while( minus_busy_days > 0 ) {
+		if( tm_tmp.tm_wday == 1 ) {
+			/* monday jumps to friday */
+			tm_tmp.tm_mday -= 3;
+			tm_tmp.tm_wday = 5;
+		} else {
+			tm_tmp.tm_mday -= 1;
+			tm_tmp.tm_wday -= 1;
+		}
+		minus_busy_days--;
+	}
+	
+	t_begin = mktime( &tm_tmp );
+	assert( t_begin != -1 );
+	
+	return t_begin;
+}
+
+
+bool skip_expiry( const std::string &expiry, time_t t_before )
+{
+	struct tm tm_tmp;
+	time_t t_expiry;
+	
+	// expiry
+	memset(&tm_tmp, 0, sizeof(struct tm));
+	if( ib_strptime( &tm_tmp, expiry.c_str() ) == -1 ) {
+		assert(false);
+	}
+	tm_tmp.tm_isdst = -1; // set "auto dst", strptime() does not set it
+	t_expiry = mktime( &tm_tmp );
+	assert( t_expiry != -1 );
+	
+	return ( t_expiry < t_before);
+}
+
+
 bool gen_hist_job()
 {
 	TwsXml file;
 	if( ! file.openFile(filep) ) {
 		return false;
 	}
+	
+	time_t t_begin = min_begin_date( endDateTimep, durationStrp );
+	DEBUG_PRINTF("skipping expiries before: '%s'",
+		time_t_local(t_begin).c_str() );
 	
 	xmlNodePtr xn;
 	int count_docs = 0;
@@ -265,12 +346,20 @@ bool gen_hist_job()
 			
 			const IB::ContractDetails &cd = pcd->constList()[i];
 			IB::Contract c = cd.summary;
+// 			DEBUG_PRINTF("contract, %s %s", c.symbol.c_str(), c.expiry.c_str());
+			
 			if( exp_mode != EXP_KEEP ) {
 				c.includeExpired = get_inc_exp(c.secType.c_str());
 			}
 			if( myProp_reqMaxContractsPerSpec > 0 && (size_t)myProp_reqMaxContractsPerSpec <= i ) {
 				break;
 			}
+			
+			if( skip_expiry(c.expiry, t_begin) ) {
+// 				DEBUG_PRINTF("skipping expiry: '%s'", c.expiry.c_str());
+				continue;
+			}
+			
 			
 			for( char **wts = wts_list; *wts != NULL; wts++ ) {
 				HistRequest hR;
@@ -297,16 +386,37 @@ bool gen_csv()
 	if( ! file.openFile(filep) ) {
 		return false;
 	}
+	
+	if( max_expiryp != NULL ) {
+		struct tm tm_tmp;
+		memset(&tm_tmp, 0, sizeof(struct tm));
+		if( ib_strptime( &tm_tmp, max_expiryp ) == -1 ) {
+			fprintf( stderr, "error, "
+				"max-expiry must be IB's format YYYYMMDD.\n" );
+			return false;
+		}
+		DEBUG_PRINTF("skipping expiries newer than: '%s'", max_expiryp );
+	}
+	
 	xmlNodePtr xn;
 	int count_docs = 0;
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
 		PacketHistData *phd = PacketHistData::fromXml( xn );
+		
+		if( max_expiryp != NULL ) {
+			const std::string &expiry = phd->getRequest().ibContract().expiry;
+			if( !expiry.empty() && strcmp(max_expiryp, expiry.c_str() ) < 0 ) {
+				goto cont;
+			}
+		}
+		
 		if( !no_convp ) {
 			phd->dump( true /* printFormatDates */);
 		} else {
 			phd->dumpXml();
 		}
+cont:
 		delete phd;
 	}
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",

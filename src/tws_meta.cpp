@@ -47,7 +47,6 @@
 
 #include <limits.h>
 #include <string.h>
-#include <time.h>
 
 
 
@@ -55,29 +54,6 @@
 
 
 
-/// stupid static helper
-std::string ibDate2ISO( const std::string &ibDate )
-{
-	struct tm tm;
-	char buf[255];
-	char *tmp;
-	
-	memset(&tm, 0, sizeof(struct tm));
-	tmp = strptime( ibDate.c_str(), "%Y%m%d", &tm);
-	if( tmp != NULL && *tmp == '\0' ) {
-		strftime(buf, sizeof(buf), "%F", &tm);
-		return buf;
-	}
-	
-	memset(&tm, 0, sizeof(struct tm));
-	tmp = strptime( ibDate.c_str(), "%Y%m%d%t%H:%M:%S", &tm);
-	if(  tmp != NULL && *tmp == '\0' ) {
-		strftime(buf, sizeof(buf), "%F %T", &tm);
-		return buf;
-	}
-	
-	return "";
-}
 
 typedef const char* string_pair[2];
 
@@ -1030,9 +1006,9 @@ void PacketHistData::dump( bool printFormatDates )
 			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
-				expiry = ibDate2ISO( c.expiry );
+				expiry = ib_date2iso( c.expiry );
 			}
-			dateTime = ibDate2ISO(it->date);
+			dateTime = ib_date2iso(it->date);
 			assert( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
 		

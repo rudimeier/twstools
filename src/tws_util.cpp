@@ -43,7 +43,10 @@
 #include "twsapi/Execution.h"
 #include "twsapi/Contract.h"
 
+#include <limits.h>
+#include <string.h>
 #include <sys/time.h>
+#include <time.h>
 
 
 
@@ -72,6 +75,124 @@ std::string msecs_to_string( int64_t msecs )
 	assert( tmp_sz == 4);
 	
 	return std::string(buf);
+}
+
+
+/**
+ * Convert IB style date or date time string to struct tm.
+ * Return 0 on success or -1 on error;
+ */
+int ib_strptime( struct tm *tm, const std::string &ib_datetime )
+{
+	char *tmp;
+	
+	memset(tm, 0, sizeof(struct tm));
+	tmp = strptime( ib_datetime.c_str(), "%Y%m%d", tm);
+	if( tmp != NULL && *tmp == '\0' ) {
+		return 0;
+	}
+	
+	memset(tm, 0, sizeof(struct tm));
+	tmp = strptime( ib_datetime.c_str(), "%Y%m%d%t%H:%M:%S", tm);
+	if(  tmp != NULL && *tmp == '\0' ) {
+		return 0;
+	}
+	return -1;
+}
+
+
+/**
+ * Convert IB style date or date time string to standard format "%F" or "%F %T".
+ * The converted string is always a valid date.
+ * Return empty string on parse errors or invalid dates.
+ */
+std::string ib_date2iso( const std::string &ibDate )
+{
+	struct tm tm;
+	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
+	char *tmp;
+	
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d", &tm);
+	if( tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F", &tm);
+		return buf;
+	}
+	
+	memset(&tm, 0, sizeof(struct tm));
+	tmp = strptime( ibDate.c_str(), "%Y%m%d%t%H:%M:%S", &tm);
+	if(  tmp != NULL && *tmp == '\0' ) {
+		strftime(buf, sizeof(buf), "%F %T", &tm);
+		return buf;
+	}
+	
+	return "";
+}
+
+
+/**
+ * Convert time_t to local time string.
+ */
+std::string time_t_local( time_t t )
+{
+	struct tm tm;
+	struct tm *tmp; 
+	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
+	
+	tmp = localtime_r( &t, &tm );
+	assert( tmp != NULL );
+	
+	if( strftime(buf, sizeof(buf), "%F %T", &tm) == 0) {
+		assert( false );
+	}
+	return buf;
+}
+
+
+/**
+ * Convert IB's duration string to seconds.
+ * Return -1 on parse error.
+ */
+int ib_duration2secs( const std::string &dur )
+{
+	const char *_dur = dur.c_str();
+	int len = strlen(_dur);
+	const char *space = _dur + len-2;
+	if( *space != ' ' ) {
+		return -1;
+	}
+	
+	int unit;
+	switch( _dur[len-1] ) {
+	case 'S':
+		unit = 1;
+		break;
+	case 'D':
+		unit = 86400;
+		break;
+	case 'W':
+		unit = 86400 * 7;
+		break;
+	case 'M':
+		unit = 86400 * 30;
+		break;
+	case 'Y':
+		unit = 86400 * 365;
+		break;
+	default:
+		return -1;
+	}
+	
+	char *tmp;
+	long val = strtol(_dur, &tmp, 10);
+	if( tmp != space ) {
+		return -1;
+	}
+	if( val < 0 || val > INT_MAX/unit ) {
+		return -1;
+	}
+	
+	return val * unit;
 }
 
 
