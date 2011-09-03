@@ -254,12 +254,16 @@ time_t min_begin_date( const std::string &end, const std::string dur )
 	
 	memset(&tm_tmp, 0, sizeof(struct tm));
 	if( ib_strptime( &tm_tmp, end ) == -1 ) {
-		assert(false);
+		// TODO use current date time
+		return 0;
 	}
 	tm_tmp.tm_isdst = -1; // set "auto dst", strptime() does not set it
 	
-	int minus_busy_days = 34; /* TODO dur */
-	
+	int minus_busy_days = ib_duration2secs( dur );
+	if( minus_busy_days == -1  ) {
+		return 0;
+	}
+	minus_busy_days /= 86400; 
 	
 	/* saturday or sunday jumps to friday for free */
 	if( tm_tmp.tm_wday == 0 ) {
