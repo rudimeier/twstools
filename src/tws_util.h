@@ -52,6 +52,7 @@ std::string msecs_to_string( int64_t msecs );
 
 int ib_strptime( struct tm *tm, const std::string &ib_datetime );
 std::string ib_date2iso( const std::string &ibDate );
+std::string time_t_local( time_t t );
 
 int ib_duration2secs( const std::string &dur );
 

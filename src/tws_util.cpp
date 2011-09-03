@@ -131,6 +131,25 @@ std::string ib_date2iso( const std::string &ibDate )
 
 
 /**
+ * Convert time_t to local time string.
+ */
+std::string time_t_local( time_t t )
+{
+	struct tm tm;
+	struct tm *tmp; 
+	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
+	
+	tmp = localtime_r( &t, &tm );
+	assert( tmp != NULL );
+	
+	if( strftime(buf, sizeof(buf), "%F %T", &tm) == 0) {
+		assert( false );
+	}
+	return buf;
+}
+
+
+/**
  * Convert IB's duration string to seconds.
  * Return -1 on parse error.
  */
