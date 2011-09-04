@@ -4,6 +4,20 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
+0.3.1 - not yet released -------------------------------------------------------
+
+Many build fixes and some minor features added.
+
+  - Build on cygwin is now possible.
+  - Minor build fixes for several linux platforms.
+  - Replace libpopt (compile and run time dependency) by gengetopt (only
+    requiered at "make dist" time)
+  - NEW: tools can read twsxml files from stdin to combine them with pipes
+  - NEW: twsgen, skip useless expiries when generating histjobs
+  - NEW: twsgen, add filter option --max-expiry
+
+
+
 0.3.0 - 2011-08-17  ------------------------------------------------------------
 
 This is the first published alpha version.
