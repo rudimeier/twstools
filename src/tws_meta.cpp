@@ -329,11 +329,11 @@ HistTodo::~HistTodo()
 }
 
 
-void HistTodo::dumpLeft( FILE *stream ) const
+void HistTodo::dumpLeft() const
 {
 	std::list<HistRequest*>::const_iterator it = leftRequests.begin();
 	while( it != leftRequests.end() ) {
-		fprintf( stream, "[%p]\t%s\n",
+		fprintf( stderr, "[%p]\t%s\n",
 		         *it,
 		         (*it)->toString().c_str() );
 		it++;

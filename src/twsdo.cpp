@@ -1038,7 +1038,7 @@ void TwsDL::dumpWorkTodo() const
 	static bool firstTime = true;
 	if( firstTime ) {
 		firstTime = false;
-		workTodo->getHistTodo().dumpLeft( stderr );
+		workTodo->getHistTodo().dumpLeft();
 	}
 }
 

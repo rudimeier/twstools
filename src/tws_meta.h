@@ -205,7 +205,7 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		void dumpLeft( FILE *stream ) const;
+		void dumpLeft() const;
 		
 		int countDone() const;
 		int countLeft() const;
