@@ -48,10 +48,20 @@
 #include "twsapi/EWrapper.h"
 #include "twsapi/EPosixClientSocket.h"
 
+#if defined HAVE_CONFIG_H
+# include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/time.h>
+
+#if ! defined __CYGWIN__
+# if defined HAVE_WINSOCK2_H
+#  include "winsock2.h"
+# endif
+#endif /* __CYGWIN__ */
 
 // debug verbosity 0...n
 #define tws_debug_level 1
