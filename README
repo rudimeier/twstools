@@ -6,6 +6,8 @@ This is a simple set of command line tools around IB's TWS API with the purpose
 of having a powerful scriptable toolbox to automate "jobs" like downloading
 historical data, tracking account info or submitting orders etc.
 
+Check out the latest version at https://github.com/rudimeier/twstools
+
 
 
 
@@ -135,4 +137,3 @@ Contact Information
 
   If you have questions, bug reports, patches etc., contact
   Ruediger Meier <sweet_f_a@gmx.de> (in English or German).
-
