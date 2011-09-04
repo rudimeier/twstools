@@ -19,6 +19,9 @@ PKG_CHECK_MODULES([libxml2_DEPS], [libxml-2.0 >= 2.7])
 PKG_CHECK_MODULES([libtwsapi], [libtwsapi >= 0.3.0])
 
 
+AC_CHECK_HEADERS([winsock2.h])
+
+
 AC_CHECK_FUNCS(localtime)
 AC_CHECK_FUNCS(localtime_r)
 
