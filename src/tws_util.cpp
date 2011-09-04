@@ -43,6 +43,10 @@
 #include "twsapi/Execution.h"
 #include "twsapi/Contract.h"
 
+#if defined HAVE_CONFIG_H
+# include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include <limits.h>
 #include <string.h>
 #include <sys/time.h>
@@ -66,7 +70,14 @@ std::string msecs_to_string( int64_t msecs )
 	const time_t s = msecs / 1000;
 	const unsigned int ms = msecs % 1000;
 	char buf[ 19 + 4 + 1 ]; // "yyyy-mm-dd hh:mm:ss.zzz"
-	const struct tm *tmp_tm = localtime( &s );
+	struct tm *tmp_tm;
+#ifdef HAVE_LOCALTIME_R
+	struct tm tm;
+	tmp_tm = localtime_r( &s, &tm );
+#else
+	tmp_tm = localtime( &s );
+#endif
+	assert(tmp_tm != NULL );
 	size_t tmp_sz;
 	
 	tmp_sz = strftime(buf, 19+1 , "%F %T", tmp_tm);
@@ -135,14 +146,18 @@ std::string ib_date2iso( const std::string &ibDate )
  */
 std::string time_t_local( time_t t )
 {
-	struct tm tm;
 	struct tm *tmp; 
 	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
 	
+#ifdef HAVE_LOCALTIME_R
+	struct tm tm;
 	tmp = localtime_r( &t, &tm );
+#else
+	tmp = localtime( &t );
+#endif
 	assert( tmp != NULL );
 	
-	if( strftime(buf, sizeof(buf), "%F %T", &tm) == 0) {
+	if( strftime(buf, sizeof(buf), "%F %T", tmp) == 0) {
 		assert( false );
 	}
 	return buf;

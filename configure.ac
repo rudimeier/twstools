@@ -18,6 +18,11 @@ AC_SUBST([DEFAULT_CXXFLAGS])
 PKG_CHECK_MODULES([libxml2_DEPS], [libxml-2.0 >= 2.7])
 PKG_CHECK_MODULES([libtwsapi], [libtwsapi >= 0.3.0])
 
+
+AC_CHECK_FUNCS(localtime)
+AC_CHECK_FUNCS(localtime_r)
+
+
 ## output
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
