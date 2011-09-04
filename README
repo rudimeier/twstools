@@ -6,6 +6,8 @@ This is a simple set of command line tools around IB's TWS API with the purpose
 of having a powerful scriptable toolbox to automate "jobs" like downloading
 historical data, tracking account info or submitting orders etc.
 
+Check out the latest version at https://github.com/rudimeier/twstools
+
 
 
 
@@ -46,19 +48,23 @@ existing TWS/API applications, see "Notes on the twsxml format"
 Installation
 ------------
 
-Building from source requires a c++ compiler (tested with gcc/g++),
-libpopt and libxml2 which should be available by your distribution.
+Building from source requires a C++ compiler and libxml2 which should be
+available by your distribution.
+Tested compilers are gcc/g++ and icc/icpc. Windows has been successfully tested
+using cygwin.
+
+To make life easier pkg-config should be installed.
 
 Additionally we need to install twsapi from
 https://github.com/rudimeier/twsapi
 
-Windows has been successfully tested using cygwin.
+When building from git checkout you need the autotools and gengetopt and don't
+forget to type "autoreconf -vfi" first.
+
 
  ./configure
  make
  make install
-
-(Within git repo type "autoreconf -fi" before.)
 
 
 Now you may just try such quick shot like getting account info:
@@ -131,4 +137,3 @@ Contact Information
 
   If you have questions, bug reports, patches etc., contact
   Ruediger Meier <sweet_f_a@gmx.de> (in English or German).
-
