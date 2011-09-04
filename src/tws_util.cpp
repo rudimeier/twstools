@@ -53,6 +53,16 @@
 #include <time.h>
 
 
+#if ! defined HAVE_STRPTIME
+static char *strptime(const char * __restrict,
+	const char * __restrict, struct tm * __restrict)
+{
+	assert(false);
+	return 0;
+}
+#endif
+
+
 
 
 int64_t nowInMsecs()

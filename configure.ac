@@ -24,6 +24,7 @@ AC_CHECK_HEADERS([winsock2.h])
 
 AC_CHECK_FUNCS(localtime)
 AC_CHECK_FUNCS(localtime_r)
+AC_CHECK_FUNCS(strptime)
 
 
 ## output
