@@ -86,6 +86,8 @@ class ContractDetailsRequest
 class HistRequest
 {
 	public:
+		HistRequest();
+		
 		static HistRequest * fromXml( xmlNodePtr );
 		
 		const IB::Contract& ibContract() const;

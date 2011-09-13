@@ -150,6 +150,14 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 
 
 
+HistRequest::HistRequest()
+{
+	/* TODO these defaults are duplicated defined within dumpXml() */
+	_useRTH = 0;
+	_formatDate = 0; // set invalid (IB allows 1 or 2)
+}
+
+
 bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
 	const std::string &d, const std::string &b,
 	const std::string &w, int u, int f )
