@@ -86,6 +86,8 @@ class ContractDetailsRequest
 class HistRequest
 {
 	public:
+		HistRequest();
+		
 		static HistRequest * fromXml( xmlNodePtr );
 		
 		const IB::Contract& ibContract() const;
@@ -205,7 +207,7 @@ class HistTodo
 		HistTodo();
 		~HistTodo();
 		
-		void dumpLeft( FILE *stream ) const;
+		void dumpLeft() const;
 		
 		int countDone() const;
 		int countLeft() const;

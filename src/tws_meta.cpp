@@ -150,6 +150,14 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 
 
 
+HistRequest::HistRequest()
+{
+	/* TODO these defaults are duplicated defined within dumpXml() */
+	_useRTH = 0;
+	_formatDate = 0; // set invalid (IB allows 1 or 2)
+}
+
+
 bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
 	const std::string &d, const std::string &b,
 	const std::string &w, int u, int f )
@@ -329,11 +337,11 @@ HistTodo::~HistTodo()
 }
 
 
-void HistTodo::dumpLeft( FILE *stream ) const
+void HistTodo::dumpLeft() const
 {
 	std::list<HistRequest*>::const_iterator it = leftRequests.begin();
 	while( it != leftRequests.end() ) {
-		fprintf( stream, "[%p]\t%s\n",
+		fprintf( stderr, "[%p]\t%s\n",
 		         *it,
 		         (*it)->toString().c_str() );
 		it++;
