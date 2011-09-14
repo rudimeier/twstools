@@ -1001,7 +1001,6 @@ void PacketHistData::closeError( Error e )
 
 void PacketHistData::dump( bool printFormatDates )
 {
-	assert( mode == CLOSED && error == ERR_NONE );
 	const IB::Contract &c = request->ibContract();
 	const char *wts = short_wts( request->whatToShow().c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting().c_str());
