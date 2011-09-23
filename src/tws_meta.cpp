@@ -1945,6 +1945,8 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["OMS"] = "euhmds2";
 	hLearn["SFB"] = "euhmds2";
 	hLearn["SOFFEX"] = "euhmds2";
+	hLearn["VIRTX"] = "euhmds2";
+	hLearn["VSE"] = "euhmds2";
 	
 	hLearn["AMEX"] = "ushmds2a";
 	hLearn["AQS"] = "ushmds2a";
@@ -1966,6 +1968,7 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["ONE"] = "ushmds2a";
 	hLearn["PHLX"] = "ushmds2a";
 	hLearn["PSE"] = "ushmds2a";
+	hLearn["RUSSELL"] = "ushmds2a";
 	hLearn["TSE"] = "ushmds2a";
 	
 	hLearn["ASX"] = "hkhmds2";
@@ -1976,6 +1979,7 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["SGX"] = "hkhmds2";
 	hLearn["SNFE"] = "hkhmds2";
 	hLearn["TSE.JPN"] = "hkhmds2";
+	hLearn["TSEJ"] = "hkhmds2";
 }
 
 
