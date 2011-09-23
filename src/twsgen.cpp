@@ -309,6 +309,10 @@ bool skip_expiry( const std::string &expiry, time_t t_before )
 	struct tm tm_tmp;
 	time_t t_expiry;
 	
+	if( expiry.empty() ) {
+		return false;
+	}
+	
 	// expiry
 	memset(&tm_tmp, 0, sizeof(struct tm));
 	if( ib_strptime( &tm_tmp, expiry.c_str() ) == -1 ) {
