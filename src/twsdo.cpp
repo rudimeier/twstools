@@ -522,14 +522,19 @@ bool TwsDL::finContracts()
 
 void TwsDL::waitData()
 {
-	if( !packet->finished() && (currentRequest.age() <= tws_reqTimeoutp) ) {
-		static int64_t last = 0;
-		int64_t now = nowInMsecs();
-		if( now - last > 2000 ) {
-			last = now;
-			DEBUG_PRINTF( "still waiting for data." );
+	if( !packet->finished() ) {
+		if( currentRequest.age() <= tws_reqTimeoutp ) {
+			static int64_t last = 0;
+			int64_t now = nowInMsecs();
+			if( now - last > 2000 ) {
+				last = now;
+				DEBUG_PRINTF( "Still waiting for data." );
+			}
+			return;
+		} else {
+			DEBUG_PRINTF( "Timeout waiting for data." );
+			packet->closeError( REQ_ERR_TIMEOUT );
 		}
-		return;
 	}
 	
 	bool ok = false;
@@ -565,11 +570,6 @@ void TwsDL::waitData()
 
 bool TwsDL::finHist()
 {
-	if( !packet->finished() ) {
-		DEBUG_PRINTF( "Timeout waiting for data." );
-		packet->closeError( REQ_ERR_TIMEOUT );
-	}
-	
 	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( packet->getError() ) {
