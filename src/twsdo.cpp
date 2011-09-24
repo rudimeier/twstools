@@ -567,12 +567,12 @@ bool TwsDL::finHist()
 {
 	if( !packet->finished() ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
-		((PacketHistData*)packet)->closeError( REQ_ERR_TIMEOUT );
+		packet->closeError( REQ_ERR_TIMEOUT );
 	}
 	
 	HistTodo *histTodo = workTodo->histTodo();
 	
-	switch( ((PacketHistData*)packet)->getError() ) {
+	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
@@ -669,14 +669,14 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				((PacketHistData*)packet)->closeError( REQ_ERR_TWSCON );
+				packet->closeError( REQ_ERR_TWSCON );
 			}
 			break;
 		case 1102:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				((PacketHistData*)packet)->closeError( REQ_ERR_TWSCON );
+				packet->closeError( REQ_ERR_TWSCON );
 			}
 			break;
 		case 1300:
@@ -816,7 +816,7 @@ void TwsDL::twsConnectionClosed()
 				assert(false); // TODO repeat
 				break;
 			case GenericRequest::HIST_REQUEST:
-				((PacketHistData*)packet)->closeError( REQ_ERR_TWSCON );
+				packet->closeError( REQ_ERR_TWSCON );
 				break;
 			case GenericRequest::NONE:
 				assert(false);
