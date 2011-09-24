@@ -943,7 +943,7 @@ const HistRequest& PacketHistData::getRequest() const
 }
 
 
-PacketHistData::Error PacketHistData::getError() const
+Error PacketHistData::getError() const
 {
 	return error;
 }

@@ -54,6 +54,17 @@ typedef struct _xmlDoc * xmlDocPtr;
 
 
 
+enum Error
+{
+	ERR_NONE,
+	ERR_NODATA,
+	ERR_NAV,
+	ERR_TWSCON,
+	ERR_TIMEOUT,
+	ERR_REQUEST
+};
+
+
 
 const char* short_wts( const char* wts );
 const char* short_bar_size( const char* bar_size );
@@ -351,9 +362,6 @@ class PacketHistData
 	: public  Packet
 {
 	public:
-		enum Error { ERR_NONE, ERR_NODATA, ERR_NAV,
-			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
-		
 		PacketHistData();
 		virtual ~PacketHistData();
 		
