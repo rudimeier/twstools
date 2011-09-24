@@ -708,7 +708,12 @@ void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 	switch( errorCode ) {
 		// No security definition has been found for the request"
 		case 200:
-		twsContractDetailsEnd( id );
+		if( connectivity_IB_TWS ) {
+			packet->closeError( REQ_ERR_REQUEST );
+		} else {
+			/* using ERR_TIMEOUT instead ERR_TWSCON to push_back this request */
+			packet->closeError( REQ_ERR_TIMEOUT );
+		}
 		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
