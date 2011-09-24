@@ -305,12 +305,15 @@ class Packet
 		
 		bool empty() const;
 		bool finished() const;
+		req_err getError() const;
+		void closeError( req_err );
 		
 		virtual void clear() = 0;
 		virtual void dumpXml() = 0;
 		
 	protected:
 		Mode mode;
+		req_err error;
 };
 
 
@@ -368,13 +371,11 @@ class PacketHistData
 		static PacketHistData * fromXml( xmlNodePtr );
 		
 		const HistRequest& getRequest() const;
-		req_err getError() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
 		void append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
-		void closeError( req_err );
 		void dump( bool printFormatDates );
 		
 		void dumpXml();
@@ -396,8 +397,6 @@ class PacketHistData
 				double WAP;
 				bool hasGaps;
 		};
-		
-		req_err error;
 		
 		int reqId;
 		HistRequest *request;

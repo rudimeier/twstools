@@ -629,7 +629,8 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 Packet::Packet() :
-	mode(CLEAN)
+	mode(CLEAN),
+	error(REQ_ERR_NONE)
 {
 }
 
@@ -645,6 +646,18 @@ bool Packet::empty() const
 bool Packet::finished() const
 {
 	return (mode == CLOSED);
+}
+
+req_err Packet::getError() const
+{
+	return error;
+}
+
+void Packet::closeError( req_err e )
+{
+	assert( mode == RECORD);
+	mode = CLOSED;
+	error = e;
 }
 
 
@@ -801,7 +814,6 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<Row>()))
 {
-	error = REQ_ERR_NONE;
 	reqId = -1;
 	request = NULL;
 }
@@ -943,12 +955,6 @@ const HistRequest& PacketHistData::getRequest() const
 }
 
 
-req_err PacketHistData::getError() const
-{
-	return error;
-}
-
-
 void PacketHistData::clear()
 {
 	mode = CLEAN;
@@ -988,14 +994,6 @@ void PacketHistData::append( int reqId, const std::string &date,
 	} else {
 		rows.push_back( row );
 	}
-}
-
-
-void PacketHistData::closeError( req_err e )
-{
-	assert( mode == RECORD);
-	mode = CLOSED;
-	error = e;
 }
 
 
