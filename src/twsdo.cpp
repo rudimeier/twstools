@@ -567,25 +567,25 @@ bool TwsDL::finHist()
 {
 	if( !packet->finished() ) {
 		DEBUG_PRINTF( "Timeout waiting for data." );
-		((PacketHistData*)packet)->closeError( ERR_TIMEOUT );
+		((PacketHistData*)packet)->closeError( REQ_ERR_TIMEOUT );
 	}
 	
 	HistTodo *histTodo = workTodo->histTodo();
 	
 	switch( ((PacketHistData*)packet)->getError() ) {
-	case ERR_NONE:
+	case REQ_ERR_NONE:
 		packet->dumpXml();
-	case ERR_NODATA:
-	case ERR_NAV:
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
 		histTodo->tellDone();
 		break;
-	case ERR_TWSCON:
+	case REQ_ERR_TWSCON:
 		histTodo->cancelForRepeat(0);
 		break;
-	case ERR_TIMEOUT:
+	case REQ_ERR_TIMEOUT:
 		histTodo->cancelForRepeat(1);
 		break;
-	case ERR_REQUEST:
+	case REQ_ERR_REQUEST:
 		histTodo->cancelForRepeat(2);
 		break;
 	}
@@ -669,14 +669,14 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
 			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				((PacketHistData*)packet)->closeError( ERR_TWSCON );
+				((PacketHistData*)packet)->closeError( REQ_ERR_TWSCON );
 			}
 			break;
 		case 1102:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
 			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
-				((PacketHistData*)packet)->closeError( ERR_TWSCON );
+				((PacketHistData*)packet)->closeError( REQ_ERR_TWSCON );
 			}
 			break;
 		case 1300:
@@ -724,32 +724,32 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	// Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
-			p_histData.closeError( ERR_TWSCON );
+			p_histData.closeError( REQ_ERR_TWSCON );
 			pacingControl.notifyViolation( curContract );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
 			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
-			p_histData.closeError( ERR_NODATA );
+			p_histData.closeError( REQ_ERR_NODATA );
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE on HMDS server. "
 				"%p %d", cur_hR, id );
 			dataFarms.learnHmds( curContract );
-			p_histData.closeError( ERR_NAV );
+			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
 				"%p %d", cur_hR, id );
-			p_histData.closeError( ERR_NAV );
+			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
-			p_histData.closeError( ERR_REQUEST );
+			p_histData.closeError( REQ_ERR_REQUEST );
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
-			p_histData.closeError( ERR_REQUEST );
+			p_histData.closeError( REQ_ERR_REQUEST );
 		} else {
 			DEBUG_PRINTF( "Warning, unhandled error message." );
 			// seen: "TWS exited during processing of HMDS query"
@@ -771,10 +771,10 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 		// NOTE we could find out more to throw away similar worktodo
 		// TODO "The contract description specified for DESX5 is ambiguous;\nyou must specify the multiplier."
 		if( connectivity_IB_TWS ) {
-			p_histData.closeError( ERR_REQUEST );
+			p_histData.closeError( REQ_ERR_REQUEST );
 		} else {
 			/* using ERR_TIMEOUT instead ERR_TWSCON to push_back this request */
-			p_histData.closeError( ERR_TIMEOUT );
+			p_histData.closeError( REQ_ERR_TIMEOUT );
 		}
 		break;
 	// Order rejected - Reason:
@@ -791,7 +791,7 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	case 321:
 		// comes directly from TWS whith prefix "Error validating request:-"
 		// NOTE we could find out more to throw away similar worktodo
-		p_histData.closeError( ERR_REQUEST );
+		p_histData.closeError( REQ_ERR_REQUEST );
 		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
@@ -816,7 +816,7 @@ void TwsDL::twsConnectionClosed()
 				assert(false); // TODO repeat
 				break;
 			case GenericRequest::HIST_REQUEST:
-				((PacketHistData*)packet)->closeError( ERR_TWSCON );
+				((PacketHistData*)packet)->closeError( REQ_ERR_TWSCON );
 				break;
 			case GenericRequest::NONE:
 				assert(false);

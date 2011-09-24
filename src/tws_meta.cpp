@@ -801,7 +801,7 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<Row>()))
 {
-	error = ERR_NONE;
+	error = REQ_ERR_NONE;
 	reqId = -1;
 	request = NULL;
 }
@@ -943,7 +943,7 @@ const HistRequest& PacketHistData::getRequest() const
 }
 
 
-Error PacketHistData::getError() const
+req_err PacketHistData::getError() const
 {
 	return error;
 }
@@ -952,7 +952,7 @@ Error PacketHistData::getError() const
 void PacketHistData::clear()
 {
 	mode = CLEAN;
-	error = ERR_NONE;
+	error = REQ_ERR_NONE;
 	reqId = -1;
 	if( request != NULL ) {
 		delete request;
@@ -965,7 +965,7 @@ void PacketHistData::clear()
 
 void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	assert( mode == CLEAN && error == ERR_NONE && request == NULL );
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
 	this->request = new HistRequest( hR );
@@ -976,7 +976,7 @@ void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
-	assert( mode == RECORD && error == ERR_NONE );
+	assert( mode == RECORD && error == REQ_ERR_NONE );
 	assert( this->reqId == reqId );
 	
 	Row row = { date, open, high, low, close,
@@ -991,7 +991,7 @@ void PacketHistData::append( int reqId, const std::string &date,
 }
 
 
-void PacketHistData::closeError( Error e )
+void PacketHistData::closeError( req_err e )
 {
 	assert( mode == RECORD);
 	mode = CLOSED;
