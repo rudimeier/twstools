@@ -503,23 +503,6 @@ void TwsDL::idle()
 }
 
 
-bool TwsDL::finContracts()
-{
-	if( !packet->finished() ) {
-		DEBUG_PRINTF( "Timeout waiting for data." );
-		// TODO repeat
-		return false;
-	}
-	
-	DEBUG_PRINTF( "Contracts received: %zu",
-		((PacketContractDetails*)packet)->constList().size() );
-	
-	packet->dumpXml();
-	
-	return true;
-}
-
-
 void TwsDL::waitData()
 {
 	if( !packet->finished() ) {
@@ -565,6 +548,25 @@ void TwsDL::waitData()
 	delete packet;
 	packet = NULL;
 	currentRequest.close();
+}
+
+
+bool TwsDL::finContracts()
+{
+	switch( packet->getError() ) {
+	case REQ_ERR_NONE:
+		DEBUG_PRINTF( "Contracts received: %zu",
+		((PacketContractDetails*)packet)->constList().size() );
+		packet->dumpXml();
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
+		break;
+	case REQ_ERR_TWSCON:
+	case REQ_ERR_TIMEOUT:
+	case REQ_ERR_REQUEST:
+		return false;
+	}
+	return true;
 }
 
 
