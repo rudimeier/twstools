@@ -4,7 +4,7 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
-0.3.1 - not yet released -------------------------------------------------------
+0.3.1 - 2011-09-15  ------------------------------------------------------------
 
 Many build fixes and some minor features added.
 
