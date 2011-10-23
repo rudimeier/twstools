@@ -1505,7 +1505,13 @@ void PacingControl::addRequest()
 
 void PacingControl::notifyViolation()
 {
-	assert( !violations.empty() );
+	if( violations.empty() ) {
+		/* Either we have cleared violations for no good reason or TWS itself
+		   made requests where we don't know about */
+		DEBUG_PRINTF( "Warning, pacing violation occured while HMDS farm "
+			"looks clear.");
+		addRequest();
+	}
 	violations.back() = true;
 }
 
