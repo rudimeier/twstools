@@ -52,8 +52,6 @@
 
 static gengetopt_args_info args_info;
 
-enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
-
 static const char *filep = "";
 static int skipdefp = 0;
 static int histjobp = 0;

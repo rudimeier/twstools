@@ -57,8 +57,6 @@
 
 static gengetopt_args_info args_info;
 
-enum { POPT_HELP, POPT_VERSION, POPT_USAGE };
-
 static const char *workfilep = "";
 static int skipdefp = 0;
 static const char *tws_hostp = "localhost";
