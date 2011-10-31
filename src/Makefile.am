@@ -1,6 +1,6 @@
 AM_CPPFLAGS =
 AM_CPPFLAGS += -DDEBUG -D_GNU_SOURCE
-AM_CPPFLAGS += $(libxml2_DEPS_CFLAGS)
+AM_CPPFLAGS += $(libxml2_CFLAGS)
 AM_CPPFLAGS += $(libtwsapi_CFLAGS)
 AM_CXXFLAGS =
 AM_CXXFLAGS += $(DEFAULT_CXXFLAGS)
@@ -24,7 +24,7 @@ twsdo_SOURCES += tws_wrapper.cpp
 twsdo_CPPFLAGS = $(AM_CPPFLAGS)
 twsdo_LDFLAGS = $(AM_LDFLAGS)
 twsdo_LDADD =
-twsdo_LDADD += $(libxml2_DEPS_LIBS)
+twsdo_LDADD += $(libxml2_LIBS)
 twsdo_LDADD += $(libtwsapi_LIBS)
 
 twsgen_SOURCES =
@@ -35,7 +35,7 @@ twsgen_SOURCES += tws_util.cpp
 twsgen_CPPFLAGS = $(AM_CPPFLAGS)
 twsgen_LDFLAGS = $(AM_LDFLAGS)
 twsgen_LDADD =
-twsgen_LDADD += $(libxml2_DEPS_LIBS)
+twsgen_LDADD += $(libxml2_LIBS)
 twsgen_LDADD += $(libtwsapi_LIBS)
 
 noinst_HEADERS =
