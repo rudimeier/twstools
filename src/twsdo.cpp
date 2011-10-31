@@ -560,10 +560,10 @@ bool TwsDL::finContracts()
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
+	case REQ_ERR_REQUEST:
 		break;
 	case REQ_ERR_TWSCON:
 	case REQ_ERR_TIMEOUT:
-	case REQ_ERR_REQUEST:
 		return false;
 	}
 	return true;
