@@ -629,7 +629,8 @@ int WorkTodo::read_file( const std::string & fileName )
 
 
 Packet::Packet() :
-	mode(CLEAN)
+	mode(CLEAN),
+	error(REQ_ERR_NONE)
 {
 }
 
@@ -645,6 +646,18 @@ bool Packet::empty() const
 bool Packet::finished() const
 {
 	return (mode == CLOSED);
+}
+
+req_err Packet::getError() const
+{
+	return error;
+}
+
+void Packet::closeError( req_err e )
+{
+	assert( mode == RECORD);
+	mode = CLOSED;
+	error = e;
 }
 
 
@@ -801,7 +814,6 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<Row>()))
 {
-	error = ERR_NONE;
 	reqId = -1;
 	request = NULL;
 }
@@ -943,16 +955,10 @@ const HistRequest& PacketHistData::getRequest() const
 }
 
 
-PacketHistData::Error PacketHistData::getError() const
-{
-	return error;
-}
-
-
 void PacketHistData::clear()
 {
 	mode = CLEAN;
-	error = ERR_NONE;
+	error = REQ_ERR_NONE;
 	reqId = -1;
 	if( request != NULL ) {
 		delete request;
@@ -965,7 +971,7 @@ void PacketHistData::clear()
 
 void PacketHistData::record( int reqId, const HistRequest& hR )
 {
-	assert( mode == CLEAN && error == ERR_NONE && request == NULL );
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
 	mode = RECORD;
 	this->reqId = reqId;
 	this->request = new HistRequest( hR );
@@ -976,7 +982,7 @@ void PacketHistData::append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps )
 {
-	assert( mode == RECORD && error == ERR_NONE );
+	assert( mode == RECORD && error == REQ_ERR_NONE );
 	assert( this->reqId == reqId );
 	
 	Row row = { date, open, high, low, close,
@@ -988,14 +994,6 @@ void PacketHistData::append( int reqId, const std::string &date,
 	} else {
 		rows.push_back( row );
 	}
-}
-
-
-void PacketHistData::closeError( Error e )
-{
-	assert( mode == RECORD);
-	mode = CLOSED;
-	error = e;
 }
 
 

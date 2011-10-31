@@ -54,6 +54,17 @@ typedef struct _xmlDoc * xmlDocPtr;
 
 
 
+enum req_err
+{
+	REQ_ERR_NONE,
+	REQ_ERR_NODATA,
+	REQ_ERR_NAV,
+	REQ_ERR_TWSCON,
+	REQ_ERR_TIMEOUT,
+	REQ_ERR_REQUEST
+};
+
+
 
 const char* short_wts( const char* wts );
 const char* short_bar_size( const char* bar_size );
@@ -294,12 +305,15 @@ class Packet
 		
 		bool empty() const;
 		bool finished() const;
+		req_err getError() const;
+		void closeError( req_err );
 		
 		virtual void clear() = 0;
 		virtual void dumpXml() = 0;
 		
 	protected:
 		Mode mode;
+		req_err error;
 };
 
 
@@ -351,22 +365,17 @@ class PacketHistData
 	: public  Packet
 {
 	public:
-		enum Error { ERR_NONE, ERR_NODATA, ERR_NAV,
-			ERR_TWSCON, ERR_TIMEOUT, ERR_REQUEST };
-		
 		PacketHistData();
 		virtual ~PacketHistData();
 		
 		static PacketHistData * fromXml( xmlNodePtr );
 		
 		const HistRequest& getRequest() const;
-		Error getError() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
 		void append( int reqId, const std::string &date,
 			double open, double high, double low, double close,
 			int volume, int count, double WAP, bool hasGaps );
-		void closeError( Error );
 		void dump( bool printFormatDates );
 		
 		void dumpXml();
@@ -388,8 +397,6 @@ class PacketHistData
 				double WAP;
 				bool hasGaps;
 		};
-		
-		Error error;
 		
 		int reqId;
 		HistRequest *request;
