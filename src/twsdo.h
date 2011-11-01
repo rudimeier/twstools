@@ -109,7 +109,7 @@ class TwsDL
 			QUIT
 		};
 		
-		TwsDL( const std::string& workFile );
+		TwsDL( const ConfigTwsdo& );
 		~TwsDL();
 		
 		int start();
@@ -176,6 +176,7 @@ class TwsDL
 		bool connectivity_IB_TWS;
 		int curIdleTime;
 		
+		ConfigTwsdo cfg;
 		std::string workFile;
 		
 		TwsDlWrapper *twsWrapper;

@@ -333,14 +333,15 @@ void TwsDlWrapper::currentTime( long time )
 
 
 
-TwsDL::TwsDL( const std::string& workFile ) :
+TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	state(IDLE),
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
-	workFile(workFile),
+	cfg(c),
+	workFile(c.workfile),
 	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
@@ -1187,7 +1188,7 @@ int main(int argc, char *argv[])
 	
 	TwsXml::setSkipDefaults( !cfg.skipdef );
 	
-	TwsDL twsDL( cfg.workfile );
+	TwsDL twsDL( cfg );
 	int ret = twsDL.start();
 	
 	assert( twsDL.currentState() == TwsDL::QUIT );
