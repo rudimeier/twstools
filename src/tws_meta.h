@@ -278,7 +278,7 @@ class WorkTodo
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
-		int read_file( const std::string & fileName);
+		int read_file( const char *fileName);
 		
 	private:
 		mutable bool acc_status_todo;
