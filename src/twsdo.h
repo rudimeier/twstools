@@ -54,6 +54,29 @@ namespace IB {
 
 
 
+struct ConfigTwsdo
+{
+	ConfigTwsdo();
+	
+	const char *workfile;
+	int skipdef;
+	const char *tws_host;
+	int tws_port;
+	int tws_client_id;
+	
+	int get_account;
+	const char* tws_account_name;
+	int get_exec;
+	int get_order;
+	
+	int tws_conTimeout;
+	int tws_reqTimeout;
+	int tws_maxRequests;
+	int tws_pacingInterval;
+	int tws_minPacingTime;
+	int tws_violationPause;
+};
+
 
 
 
@@ -86,7 +109,7 @@ class TwsDL
 			QUIT
 		};
 		
-		TwsDL( const std::string& workFile );
+		TwsDL( const ConfigTwsdo& );
 		~TwsDL();
 		
 		int start();
@@ -153,7 +176,7 @@ class TwsDL
 		bool connectivity_IB_TWS;
 		int curIdleTime;
 		
-		std::string workFile;
+		ConfigTwsdo cfg;
 		
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;

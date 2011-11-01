@@ -583,12 +583,12 @@ void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 }
 
 
-int WorkTodo::read_file( const std::string & fileName )
+int WorkTodo::read_file( const char *fileName )
 {
 	int retVal = -1;
 	
 	TwsXml file;
-	if( ! file.openFile(fileName.c_str()) ) {
+	if( ! file.openFile(fileName) ) {
 		return retVal;
 	}
 	retVal = 0;
