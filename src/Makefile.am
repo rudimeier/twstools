@@ -15,6 +15,7 @@ bin_PROGRAMS =
 bin_PROGRAMS += twsdo twsgen
 
 twsdo_SOURCES =
+twsdo_SOURCES += twsdo_main.cpp
 twsdo_SOURCES += twsdo.cpp
 twsdo_SOURCES += tws_meta.cpp
 twsdo_SOURCES += tws_xml.cpp
