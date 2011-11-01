@@ -341,7 +341,6 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
 	cfg(c),
-	workFile(c.workfile),
 	twsWrapper(NULL),
 	twsClient(NULL),
 	msgCounter(0),
@@ -1026,8 +1025,8 @@ void TwsDL::initWork()
 		workTodo->addSimpleRequest(GenericRequest::ORDERS_REQUEST);
 	}
 	
-	int cnt = workTodo->read_file(workFile);
-	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, workFile.c_str() );
+	int cnt = workTodo->read_file(cfg.workfile);
+	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, cfg.workfile );
 	
 	if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
 		DEBUG_PRINTF( "getting contracts from TWS, %d",

@@ -177,7 +177,6 @@ class TwsDL
 		int curIdleTime;
 		
 		ConfigTwsdo cfg;
-		std::string workFile;
 		
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
