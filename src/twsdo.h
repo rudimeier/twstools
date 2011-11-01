@@ -54,6 +54,29 @@ namespace IB {
 
 
 
+struct ConfigTwsdo
+{
+	ConfigTwsdo();
+	
+	const char *workfile;
+	int skipdef;
+	const char *tws_host;
+	int tws_port;
+	int tws_client_id;
+	
+	int get_account;
+	const char* tws_account_name;
+	int get_exec;
+	int get_order;
+	
+	int tws_conTimeout;
+	int tws_reqTimeout;
+	int tws_maxRequests;
+	int tws_pacingInterval;
+	int tws_minPacingTime;
+	int tws_violationPause;
+};
+
 
 
 

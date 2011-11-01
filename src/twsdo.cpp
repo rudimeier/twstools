@@ -56,24 +56,31 @@
 
 
 static gengetopt_args_info args_info;
+static ConfigTwsdo cfg;
 
-static const char *workfilep = "";
-static int skipdefp = 0;
-static const char *tws_hostp = "localhost";
-static int tws_portp = 7474;
-static int tws_client_idp = 123;
 
-static int get_accountp = 0;
-static const char* tws_account_namep = "";
-static int get_execp = 0;
-static int get_orderp = 0;
+ConfigTwsdo::ConfigTwsdo()
+{
+	workfile = "";
+	skipdef = 0;
+	tws_host = "localhost";
+	tws_port = 7474;
+	tws_client_id = 123;
+	
+	get_account = 0;
+	tws_account_name = "";
+	get_exec = 0;
+	get_order = 0;
+	
+	tws_conTimeout = 30000;
+	tws_reqTimeout = 1200000;
+	tws_maxRequests = 60;
+	tws_pacingInterval = 605000;
+	tws_minPacingTime = 1000;
+	tws_violationPause = 60000;
+}
 
-static int tws_conTimeoutp = 30000;
-static int tws_reqTimeoutp = 1200000;
-static int tws_maxRequestsp = 60;
-static int tws_pacingIntervalp = 605000;
-static int tws_minPacingTimep = 1000;
-static int tws_violationPausep = 60000;
+
 
 
 #define VERSION_MSG \
@@ -102,46 +109,46 @@ static void check_display_args()
 static void gengetopt_check_opts()
 {
 	if( args_info.inputs_num == 1 ) {
-		workfilep = args_info.inputs[0];
+		cfg.workfile = args_info.inputs[0];
 	} else if( args_info.inputs_num > 1 ) {
 		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
 	
-	skipdefp = args_info.verbose_xml_given;
+	cfg.skipdef = args_info.verbose_xml_given;
 	if( args_info.host_given ) {
-		tws_hostp = args_info.host_arg;
+		cfg.tws_host = args_info.host_arg;
 	}
 	if( args_info.port_given ) {
-		tws_portp = args_info.port_arg;
+		cfg.tws_port = args_info.port_arg;
 	}
 	if( args_info.id_given ) {
-		tws_client_idp = args_info.id_arg;
+		cfg.tws_client_id = args_info.id_arg;
 	}
-	get_accountp = args_info.get_account_given;
+	cfg.get_account = args_info.get_account_given;
 	if( args_info.accountName_given ) {
-		tws_account_namep = args_info.accountName_arg;
+		cfg.tws_account_name = args_info.accountName_arg;
 	}
-	get_execp = args_info.get_exec_given;
-	get_orderp = args_info.get_order_given;
+	cfg.get_exec = args_info.get_exec_given;
+	cfg.get_order = args_info.get_order_given;
 	
 	if( args_info.conTimeout_given ) {
-		tws_conTimeoutp = args_info.conTimeout_arg;
+		cfg.tws_conTimeout = args_info.conTimeout_arg;
 	}
 	if( args_info.reqTimeout_given ) {
-		tws_reqTimeoutp = args_info.reqTimeout_arg;
+		cfg.tws_reqTimeout = args_info.reqTimeout_arg;
 	}
 	if( args_info.maxRequests_given ) {
-		tws_maxRequestsp = args_info.maxRequests_arg;
+		cfg.tws_maxRequests = args_info.maxRequests_arg;
 	}
 	if( args_info.pacingInterval_given ) {
-		tws_pacingIntervalp = args_info.pacingInterval_arg;
+		cfg.tws_pacingInterval = args_info.pacingInterval_arg;
 	}
 	if( args_info.minPacingTime_given ) {
-		tws_minPacingTimep = args_info.minPacingTime_arg;
+		cfg.tws_minPacingTime = args_info.minPacingTime_arg;
 	}
 	if( args_info.violationPause_given ) {
-		tws_violationPausep = args_info.violationPause_arg;
+		cfg.tws_violationPause = args_info.violationPause_arg;
 	}
 }
 
@@ -343,9 +350,9 @@ TwsDL::TwsDL( const std::string& workFile ) :
 	dataFarms( *(new DataFarmStates()) ),
 	pacingControl( *(new PacingGod(dataFarms)) )
 {
-	pacingControl.setPacingTime( tws_maxRequestsp, tws_pacingIntervalp,
-		tws_minPacingTimep );
-	pacingControl.setViolationPause( tws_violationPausep );
+	pacingControl.setPacingTime( cfg.tws_maxRequests,
+		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
+	pacingControl.setViolationPause( cfg.tws_violationPause );
 	initTwsClient();
 	initWork();
 }
@@ -412,10 +419,10 @@ void TwsDL::connectTws()
 	assert( !twsClient->isConnected() && !connectivity_IB_TWS );
 	
 	int64_t w = nowInMsecs() - lastConnectionTime;
-	if( w < tws_conTimeoutp ) {
+	if( w < cfg.tws_conTimeout ) {
 		DEBUG_PRINTF( "Waiting %ldms before connecting again.",
-			(long)(tws_conTimeoutp - w) );
-		curIdleTime = tws_conTimeoutp - w;
+			(long)(cfg.tws_conTimeout - w) );
+		curIdleTime = cfg.tws_conTimeout - w;
 		return;
 	}
 	
@@ -423,7 +430,8 @@ void TwsDL::connectTws()
 	changeState( WAIT_TWS_CON );
 	
 	/* this may callback (negative) error messages only */
-	bool con = twsClient->connectTWS( tws_hostp, tws_portp, tws_client_idp );
+	bool con = twsClient->connectTWS( cfg.tws_host, cfg.tws_port,
+		cfg.tws_client_id );
 	assert( con == twsClient->isConnected() );
 	
 	if( !con ) {
@@ -443,7 +451,7 @@ void TwsDL::connectTws()
 
 void TwsDL::waitTwsCon()
 {
-	int64_t w = tws_conTimeoutp - (nowInMsecs() - lastConnectionTime);
+	int64_t w = cfg.tws_conTimeout - (nowInMsecs() - lastConnectionTime);
 	
 	if( twsClient->isConnected() ) {
 		if( tws_time != 0 ) {
@@ -504,7 +512,7 @@ void TwsDL::idle()
 void TwsDL::waitData()
 {
 	if( !packet->finished() ) {
-		if( currentRequest.age() <= tws_reqTimeoutp ) {
+		if( currentRequest.age() <= cfg.tws_reqTimeout ) {
 			static int64_t last = 0;
 			int64_t now = nowInMsecs();
 			if( now - last > 2000 ) {
@@ -663,7 +671,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		case 1100:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
 			connectivity_IB_TWS = false;
-			curIdleTime = tws_reqTimeoutp;
+			curIdleTime = cfg.tws_reqTimeout;
 			break;
 		case 1101:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
@@ -764,7 +772,7 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	case 165:
 		if( ERR_MATCH("HMDS server disconnect occurred.  Attempting reconnection") ||
 		    ERR_MATCH("HMDS connection attempt failed.  Connection will be re-attempted") ) {
-			curIdleTime = tws_reqTimeoutp;
+			curIdleTime = cfg.tws_reqTimeout;
 		} else if( ERR_MATCH("HMDS server connection was successful") ) {
 			dataFarms.learnHmdsLastOk( msgCounter, curContract );
 		} else {
@@ -1007,13 +1015,13 @@ void TwsDL::twsCurrentTime( long time )
 
 void TwsDL::initWork()
 {
-	if( get_accountp ) {
+	if( cfg.get_account ) {
 		workTodo->addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	}
-	if( get_execp ) {
+	if( cfg.get_exec ) {
 		workTodo->addSimpleRequest(GenericRequest::EXECUTIONS_REQUEST);
 	}
-	if( get_orderp ) {
+	if( cfg.get_order ) {
 		workTodo->addSimpleRequest(GenericRequest::ORDERS_REQUEST);
 	}
 	
@@ -1134,8 +1142,8 @@ void TwsDL::reqAccStatus()
 	packet = accStatus;
 	currentRequest.nextRequest( GenericRequest::ACC_STATUS_REQUEST );
 	
-	accStatus->record( tws_account_namep );
-	twsClient->reqAccountUpdates(true, tws_account_namep);
+	accStatus->record( cfg.tws_account_name );
+	twsClient->reqAccountUpdates(true, cfg.tws_account_name);
 	changeState( WAIT_DATA );
 }
 
@@ -1177,9 +1185,9 @@ int main(int argc, char *argv[])
 	check_display_args();
 	gengetopt_check_opts();
 	
-	TwsXml::setSkipDefaults( !skipdefp );
+	TwsXml::setSkipDefaults( !cfg.skipdef );
 	
-	TwsDL twsDL( workfilep );
+	TwsDL twsDL( cfg.workfile );
 	int ret = twsDL.start();
 	
 	assert( twsDL.currentState() == TwsDL::QUIT );
