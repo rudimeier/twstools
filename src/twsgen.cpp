@@ -407,7 +407,7 @@ bool gen_csv()
 		PacketHistData *phd = PacketHistData::fromXml( xn );
 		
 		if( max_expiryp != NULL ) {
-			const std::string &expiry = phd->getRequest().ibContract().expiry;
+			const std::string &expiry = phd->getRequest().ibContract.expiry;
 			if( !expiry.empty() && strcmp(max_expiryp, expiry.c_str() ) < 0 ) {
 				goto cont;
 			}

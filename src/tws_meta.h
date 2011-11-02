@@ -101,71 +101,20 @@ class HistRequest
 		
 		static HistRequest * fromXml( xmlNodePtr );
 		
-		const IB::Contract& ibContract() const;
-		const std::string& endDateTime() const;
-		const std::string& durationStr() const;
-		const std::string& barSizeSetting() const;
-		const std::string& whatToShow() const;
-		int useRTH() const;
-		int formatDate() const;
-		
 		bool initialize( const IB::Contract&, const std::string &endDateTime,
 			const std::string &durationStr, const std::string &barSizeSetting,
 			const std::string &whatToShow, int useRTH, int formatDate );
 		std::string toString() const;
 		void clear();
 		
-	private:
-		IB::Contract _ibContract;
-		std::string _endDateTime;
-		std::string _durationStr;
-		std::string _barSizeSetting;
-		std::string _whatToShow;
-		int _useRTH;
-		int _formatDate;
+		IB::Contract ibContract;
+		std::string endDateTime;
+		std::string durationStr;
+		std::string barSizeSetting;
+		std::string whatToShow;
+		int useRTH;
+		int formatDate;
 };
-
-
-inline const IB::Contract& HistRequest::ibContract() const
-{
-	return _ibContract;
-}
-
-
-inline const std::string& HistRequest::endDateTime() const
-{
-	return _endDateTime;
-}
-
-
-inline const std::string& HistRequest::durationStr() const
-{
-	return _durationStr;
-}
-
-
-inline const std::string& HistRequest::barSizeSetting() const
-{
-	return _barSizeSetting;
-}
-
-
-inline const std::string& HistRequest::whatToShow() const
-{
-	return _whatToShow;
-}
-
-
-inline int HistRequest::useRTH() const
-{
-	return _useRTH;
-}
-
-
-inline int HistRequest::formatDate() const
-{
-	return _formatDate;
-}
 
 
 

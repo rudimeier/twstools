@@ -646,7 +646,7 @@ void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 
 void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 {
-	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract();
+	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract;
 	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
 	PacketHistData &p_histData = *((PacketHistData*)packet);
 	switch( errorCode ) {
@@ -824,7 +824,7 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	}
 	
 	// TODO we shouldn't do this each row
-	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract() );
+	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract );
 	
 	assert( !packet->finished() );
 	((PacketHistData*)packet)->append( reqId, date, open, high, low,
@@ -1030,25 +1030,25 @@ void TwsDL::reqHistoricalData()
 	
 	
 	const HistRequest &hR = workTodo->getHistTodo().current();
-	pacingControl.addRequest( hR.ibContract() );
+	pacingControl.addRequest( hR.ibContract );
 	
-	const IB::Contract &c = hR.ibContract();
+	const IB::Contract &c = hR.ibContract;
 	DEBUG_PRINTF( "REQ_HISTORICAL_DATA %p %d: %ld,%s,%s,%s,%s %s,%s,%s,%s",
 		&workTodo->getHistTodo().current(),
 		currentRequest.reqId(), c.conId,
 		c.symbol.c_str(), c.secType.c_str(),c.exchange.c_str(),c.expiry.c_str(),
-		hR.whatToShow().c_str(), hR.endDateTime().c_str(),
-		hR.durationStr().c_str(), hR.barSizeSetting().c_str() );
+		hR.whatToShow.c_str(), hR.endDateTime.c_str(),
+		hR.durationStr.c_str(), hR.barSizeSetting.c_str() );
 	
 	p_histData->record( currentRequest.reqId(), hR );
 	twsClient->reqHistoricalData( currentRequest.reqId(),
 	                              c,
-	                              hR.endDateTime(),
-	                              hR.durationStr(),
-	                              hR.barSizeSetting(),
-	                              hR.whatToShow(),
-	                              hR.useRTH(),
-	                              hR.formatDate() );
+	                              hR.endDateTime,
+	                              hR.durationStr,
+	                              hR.barSizeSetting,
+	                              hR.whatToShow,
+	                              hR.useRTH,
+	                              hR.formatDate );
 	changeState( WAIT_DATA );
 }
 
