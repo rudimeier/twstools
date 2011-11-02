@@ -152,7 +152,6 @@ bool ContractDetailsRequest::initialize( const IB::Contract& c )
 
 HistRequest::HistRequest()
 {
-	/* TODO these defaults are duplicated defined within dumpXml() */
 	useRTH = 0;
 	formatDate = 0; // set invalid (IB allows 1 or 2)
 }
@@ -867,28 +866,17 @@ void PacketHistData::dumpXml()
 		(const xmlChar*)"historical_data" );
 	
 	{
-		struct s_bla {
-			const std::string endDateTime;
-			const std::string durationStr;
-			const std::string barSizeSetting;
-			const std::string whatToShow;
-			int useRTH;
-			int formatDate;
-		};
-		static const s_bla dflt = {"", "", "", "", 0, 0 };
+		static const HistRequest dflt;
 		const IB::Contract &c = request->ibContract;
-		s_bla bla = { request->endDateTime, request->durationStr,
-			request->barSizeSetting, request->whatToShow, request->useRTH,
-			request->formatDate };
 		
 		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
 		conv_ib2xml( nqry, "reqContract", c );
-		ADD_ATTR_STRING( nqry, bla, endDateTime );
-		ADD_ATTR_STRING( nqry, bla, durationStr );
-		ADD_ATTR_STRING( nqry, bla, barSizeSetting );
-		ADD_ATTR_STRING( nqry, bla, whatToShow );
-		ADD_ATTR_INT( nqry, bla, useRTH );
-		ADD_ATTR_INT( nqry, bla, formatDate );
+		ADD_ATTR_STRING( nqry, (*request), endDateTime );
+		ADD_ATTR_STRING( nqry, (*request), durationStr );
+		ADD_ATTR_STRING( nqry, (*request), barSizeSetting );
+		ADD_ATTR_STRING( nqry, (*request), whatToShow );
+		ADD_ATTR_INT( nqry, (*request), useRTH );
+		ADD_ATTR_INT( nqry, (*request), formatDate );
 	}
 	
 	if( mode == CLOSED ) {
