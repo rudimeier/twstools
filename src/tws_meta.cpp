@@ -199,12 +199,6 @@ std::string HistRequest::toString() const
 }
 
 
-void HistRequest::clear()
-{
-	ibContract = IB::Contract();
-	whatToShow.clear();
-}
-
 
 
 #define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \

@@ -105,7 +105,6 @@ class HistRequest
 			const std::string &durationStr, const std::string &barSizeSetting,
 			const std::string &whatToShow, int useRTH, int formatDate );
 		std::string toString() const;
-		void clear();
 		
 		IB::Contract ibContract;
 		std::string endDateTime;
