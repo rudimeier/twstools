@@ -1,0 +1,13 @@
+## -*- shell-script -*-
+
+TOOL=twsgen
+CMDLINE="-C --no-conv"
+PURPOSE="not using -x should omit default values again"
+
+## STDIN
+stdin="file.02.xml"
+
+## STDOUT
+stdout="file.01.xml"
+
+## defaults.02.twst ends here

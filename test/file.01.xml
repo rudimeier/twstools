@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query durationStr="20 D" barSizeSetting="15 mins" whatToShow="BID_ASK" formatDate="1">
+      <reqContract conId="12087820" symbol="USD" secType="CASH" exchange="IDEALPRO" currency="CHF" localSymbol="USD.CHF"/>
+    </query>
+    <response>
+      <row date="20111006  00:00:00" open="0.92385" high="0.9245" low="0.92315" close="0.92405"/>
+      <row date="20111006  00:15:00" open="0.9245" high="0.92525" low="0.9238" close="0.9247"/>
+      <row date="20111006  00:30:00" open="0.92385" high="0.9246" low="0.92335" close="0.92415"/>
+      <row date="20111006  00:45:00" open="0.92385" high="0.9246" low="0.9236" close="0.9241"/>
+      <row date="20111006  01:00:00" open="0.9235" high="0.92415" low="0.92315" close="0.9237"/>
+      <row date="20111006  01:15:00" open="0.9239" high="0.92445" low="0.9233" close="0.9241"/>
+      <row date="20111006  01:30:00" open="0.92305" high="0.9238" low="0.92265" close="0.9233"/>
+      <row date="20111006  01:45:00" open="0.923" high="0.92375" low="0.9218" close="0.9232"/>
+      <row date="20111006  02:00:00" open="0.9234" high="0.92385" low="0.923" close="0.92355"/>
+      <row date="20111006  02:15:00" open="0.92385" high="0.92475" low="0.9232" close="0.924"/>
+      <fin date="finished-20111013  15:44:33-20111102  15:44:33"/>
+    </response>
+  </request>
+</TWSXML>
+
