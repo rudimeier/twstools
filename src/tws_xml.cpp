@@ -361,32 +361,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
 
 
 
-#define GET_ATTR_INT( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_LONG( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atol( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_BOOL( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_STRING( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? std::string(tmp) : dflt._attr_; \
-	free(tmp)
-
-
 void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 {
 	char* tmp;
