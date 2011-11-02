@@ -55,38 +55,6 @@
 
 
 
-
-#define ADD_ATTR_INT( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_LONG( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_BOOL( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, \
-			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
-	}
-
-#define ADD_ATTR_STRING( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, \
-			(xmlChar*) _struct_._attr_.c_str() ); \
-	}
-
-
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
 	char tmp[128];
