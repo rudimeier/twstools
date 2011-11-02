@@ -13,4 +13,9 @@ TWST_LOG_COMPILER = $(srcdir)/tws-test.sh
 AM_TWST_LOG_FLAGS = --builddir $(top_builddir)/src --hash sha1sum
 LOG_COMPILER = echo
 
+TESTS += defaults.01.twst
+TESTS += defaults.02.twst
+TESTS += defaults.03.twst
+TESTS += defaults.04.twst
+
 ## Makefile.am ends here
