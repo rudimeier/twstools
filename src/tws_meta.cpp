@@ -830,31 +830,6 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 	return phd;
 }
 
-
-#define ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-			(xmlChar*) _struct_._attr_.c_str() ); \
-	}
-
-#define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_BOOL( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
-	}
-
 void PacketHistData::dumpXml()
 {
 	char tmp[128];
@@ -869,14 +844,14 @@ void PacketHistData::dumpXml()
 		static const HistRequest dflt;
 		const IB::Contract &c = request->ibContract;
 		
-		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( nqry, "reqContract", c );
-		ADD_ATTR_STRING( nqry, (*request), endDateTime );
-		ADD_ATTR_STRING( nqry, (*request), durationStr );
-		ADD_ATTR_STRING( nqry, (*request), barSizeSetting );
-		ADD_ATTR_STRING( nqry, (*request), whatToShow );
-		ADD_ATTR_INT( nqry, (*request), useRTH );
-		ADD_ATTR_INT( nqry, (*request), formatDate );
+		xmlNodePtr ne = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
+		conv_ib2xml( ne, "reqContract", c );
+		ADD_ATTR_STRING( (*request), endDateTime );
+		ADD_ATTR_STRING( (*request), durationStr );
+		ADD_ATTR_STRING( (*request), barSizeSetting );
+		ADD_ATTR_STRING( (*request), whatToShow );
+		ADD_ATTR_INT( (*request), useRTH );
+		ADD_ATTR_INT( (*request), formatDate );
 	}
 	
 	if( mode == CLOSED ) {
@@ -884,27 +859,27 @@ void PacketHistData::dumpXml()
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 		for( size_t i=0; i<rows.size(); i++ ) {
-			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
-			ADD_ATTR_STRING( nrow, rows[i], date );
-			ADD_ATTR_DOUBLE( nrow, rows[i], open );
-			ADD_ATTR_DOUBLE( nrow, rows[i], high );
-			ADD_ATTR_DOUBLE( nrow, rows[i], low );
-			ADD_ATTR_DOUBLE( nrow, rows[i], close );
-			ADD_ATTR_INT( nrow, rows[i], volume );
-			ADD_ATTR_INT( nrow, rows[i], count );
-			ADD_ATTR_DOUBLE( nrow, rows[i], WAP );
-			ADD_ATTR_BOOL( nrow, rows[i], hasGaps );
+			xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
+			ADD_ATTR_STRING( rows[i], date );
+			ADD_ATTR_DOUBLE( rows[i], open );
+			ADD_ATTR_DOUBLE( rows[i], high );
+			ADD_ATTR_DOUBLE( rows[i], low );
+			ADD_ATTR_DOUBLE( rows[i], close );
+			ADD_ATTR_INT( rows[i], volume );
+			ADD_ATTR_INT( rows[i], count );
+			ADD_ATTR_DOUBLE( rows[i], WAP );
+			ADD_ATTR_BOOL( rows[i], hasGaps );
 		}
-		xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
-		ADD_ATTR_STRING( nrow, finishRow, date );
-		ADD_ATTR_DOUBLE( nrow, finishRow, open );
-		ADD_ATTR_DOUBLE( nrow, finishRow, high );
-		ADD_ATTR_DOUBLE( nrow, finishRow, low );
-		ADD_ATTR_DOUBLE( nrow, finishRow, close );
-		ADD_ATTR_INT( nrow, finishRow, volume );
-		ADD_ATTR_INT( nrow, finishRow, count );
-		ADD_ATTR_DOUBLE( nrow, finishRow, WAP );
-		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
+		xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
+		ADD_ATTR_STRING( finishRow, date );
+		ADD_ATTR_DOUBLE( finishRow, open );
+		ADD_ATTR_DOUBLE( finishRow, high );
+		ADD_ATTR_DOUBLE( finishRow, low );
+		ADD_ATTR_DOUBLE( finishRow, close );
+		ADD_ATTR_INT( finishRow, volume );
+		ADD_ATTR_INT( finishRow, count );
+		ADD_ATTR_DOUBLE( finishRow, WAP );
+		ADD_ATTR_BOOL( finishRow, hasGaps );
 	}
 	}
 	TwsXml::dumpAndFree( root );
