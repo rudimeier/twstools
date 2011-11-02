@@ -4,7 +4,7 @@ AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_HEADER([src/config.h])
 AC_CONFIG_SRCDIR([src/])
 
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
 
 ## compiler check
 AC_PROG_CXX
@@ -31,5 +31,6 @@ AC_CHECK_FUNCS(strptime)
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([sample/Makefile])
+AC_CONFIG_FILES([test/Makefile])
 AC_OUTPUT
 
