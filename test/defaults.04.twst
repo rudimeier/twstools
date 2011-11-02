@@ -5,9 +5,9 @@ CMDLINE="-C --no-conv"
 PURPOSE="not using -x on a file without defaults should not strip off stuff"
 
 ## STDIN
-stdin="file.01.xml"
+stdin="hist_data_no_defaults.xml"
 
 ## STDOUT
-stdout="file.01.xml"
+stdout="hist_data_no_defaults.xml"
 
 ## defaults.04.twst ends here

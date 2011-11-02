@@ -5,9 +5,9 @@ CMDLINE="-C --no-conv -x"
 PURPOSE="using -x should enrich input with default values"
 
 ## STDIN
-stdin="file.01.xml"
+stdin="hist_data_no_defaults.xml"
 
 ## STDOUT
-stdout="file.02.xml"
+stdout="hist_data_with_defaults.xml"
 
 ## defaults.01.twst ends here
