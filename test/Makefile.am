@@ -15,5 +15,7 @@ LOG_COMPILER = echo
 
 TESTS += defaults.01.twst
 TESTS += defaults.02.twst
+TESTS += defaults.03.twst
+TESTS += defaults.04.twst
 
 ## Makefile.am ends here
