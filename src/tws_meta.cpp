@@ -201,27 +201,6 @@ std::string HistRequest::toString() const
 
 
 
-#define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? std::string(tmp) \
-		: dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_INT( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_DOUBLE( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
-	free(tmp)
-#define GET_ATTR_BOOL( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-
 HistRequest * HistRequest::fromXml( xmlNodePtr node )
 {
 	char* tmp;
@@ -236,12 +215,12 @@ HistRequest * HistRequest::fromXml( xmlNodePtr node )
 		}
 	}
 	
-	GET_ATTR_STRING( hR, "endDateTime", endDateTime );
-	GET_ATTR_STRING( hR, "durationStr", durationStr );
-	GET_ATTR_STRING( hR, "barSizeSetting", barSizeSetting );
-	GET_ATTR_STRING( hR, "whatToShow", whatToShow );
-	GET_ATTR_INT( hR, "useRTH", useRTH );
-	GET_ATTR_INT( hR, "formatDate", formatDate );
+	GET_ATTR_STRING( hR, endDateTime );
+	GET_ATTR_STRING( hR, durationStr );
+	GET_ATTR_STRING( hR, barSizeSetting );
+	GET_ATTR_STRING( hR, whatToShow );
+	GET_ATTR_INT( hR, useRTH );
+	GET_ATTR_INT( hR, formatDate );
 	
 	return hR;
 }
@@ -791,15 +770,15 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 	static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 	Row *row = new Row();
 	
-	GET_ATTR_STRING( row, "date", date );
-	GET_ATTR_DOUBLE( row, "open", open );
-	GET_ATTR_DOUBLE( row, "high", high );
-	GET_ATTR_DOUBLE( row, "low", low );
-	GET_ATTR_DOUBLE( row, "close", close );
-	GET_ATTR_INT( row, "volume", volume );
-	GET_ATTR_INT( row, "count", count );
-	GET_ATTR_DOUBLE( row, "WAP", WAP );
-	GET_ATTR_BOOL( row, "hasGaps", hasGaps );
+	GET_ATTR_STRING( row, date );
+	GET_ATTR_DOUBLE( row, open );
+	GET_ATTR_DOUBLE( row, high );
+	GET_ATTR_DOUBLE( row, low );
+	GET_ATTR_DOUBLE( row, close );
+	GET_ATTR_INT( row, volume );
+	GET_ATTR_INT( row, count );
+	GET_ATTR_DOUBLE( row, WAP );
+	GET_ATTR_BOOL( row, hasGaps );
 	
 	return row;
 }
