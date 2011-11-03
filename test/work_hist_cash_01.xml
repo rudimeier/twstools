@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="14433401" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="USD" localSymbol="AUD.USD"/>
+    </query>
+  </request>
+</TWSXML>
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="15016125" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="CHF" localSymbol="AUD.CHF"/>
+    </query>
+  </request>
+</TWSXML>
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="15016128" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="HKD" localSymbol="AUD.HKD"/>
+    </query>
+  </request>
+</TWSXML>
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="15016133" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="JPY" localSymbol="AUD.JPY"/>
+    </query>
+  </request>
+</TWSXML>
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="15016138" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="CAD" localSymbol="AUD.CAD"/>
+    </query>
+  </request>
+</TWSXML>
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="61664938" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="SGD" localSymbol="AUD.SGD"/>
+    </query>
+  </request>
+</TWSXML>
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="historical_data">
+    <query endDateTime="20111001 00:00:00" durationStr="34 D" barSizeSetting="1 hour" whatToShow="BID" useRTH="1" formatDate="2">
+      <reqContract conId="39453424" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="NZD" localSymbol="AUD.NZD"/>
+    </query>
+  </request>
+</TWSXML>
+

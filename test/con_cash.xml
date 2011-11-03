@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="contract_details">
+    <query>
+      <reqContract symbol="AUD" secType="CASH" exchange="IDEALPRO" includeExpired="1"/>
+    </query>
+    <response>
+      <ContractDetails marketName="AUD.USD" tradingClass="AUD.USD" minTick="5e-05" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700,1715-2359">
+        <summary conId="14433401" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="USD" localSymbol="AUD.USD"/>
+      </ContractDetails>
+      <ContractDetails marketName="AUD.CHF" tradingClass="AUD.CHF" minTick="5e-05" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700,1715-2359">
+        <summary conId="15016125" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="CHF" localSymbol="AUD.CHF"/>
+      </ContractDetails>
+      <ContractDetails marketName="AUD.HKD" tradingClass="AUD.HKD" minTick="0.0001" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700,1715-2359">
+        <summary conId="15016128" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="HKD" localSymbol="AUD.HKD"/>
+      </ContractDetails>
+      <ContractDetails marketName="AUD.JPY" tradingClass="AUD.JPY" minTick="0.005" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700,1715-2359">
+        <summary conId="15016133" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="JPY" localSymbol="AUD.JPY"/>
+      </ContractDetails>
+      <ContractDetails marketName="AUD.CAD" tradingClass="AUD.CAD" minTick="5e-05" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700,1715-2359">
+        <summary conId="15016138" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="CAD" localSymbol="AUD.CAD"/>
+      </ContractDetails>
+      <ContractDetails marketName="AUD.SGD" tradingClass="AUD.SGD" minTick="0.0001" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700,1715-2359">
+        <summary conId="61664938" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="SGD" localSymbol="AUD.SGD"/>
+      </ContractDetails>
+      <ContractDetails marketName="AUD.NZD" tradingClass="AUD.NZD" minTick="5e-05" orderTypes="ACTIVETIM,ADJUST,ALERT,ALGO,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,IOC,LIT,LMT,MIT,MKT,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IDEALPRO" priceMagnifier="1" longName="Australian dollar" timeZoneId="EST" tradingHours="20111103:1715-1700;20111104:1715-1700" liquidHours="20111103:0000-1700,1715-2359;20111104:0000-1700">
+        <summary conId="39453424" symbol="AUD" secType="CASH" exchange="IDEALPRO" currency="NZD" localSymbol="AUD.NZD"/>
+      </ContractDetails>
+    </response>
+  </request>
+</TWSXML>
+
