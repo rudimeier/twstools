@@ -1,0 +1,13 @@
+## -*- shell-script -*-
+
+TOOL=twsgen
+CMDLINE='-H --endDateTime="20111001 00:00:00" --barSizeSetting="1 hour" --whatToShow=BID --useRTH --utc'
+PURPOSE="create work file, don't skip any contracts (no expiry)"
+
+## STDIN
+stdin="con_cash.xml"
+
+## STDOUT
+stdout="work_hist_con_01.xml"
+
+## twsgen_hist.04.twst ends here

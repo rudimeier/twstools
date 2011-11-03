@@ -1,0 +1,13 @@
+## -*- shell-script -*-
+
+TOOL=twsgen
+CMDLINE='-C --no-conv --max-expiry=20111216'
+PURPOSE="don't filter out any contract (no expiry)"
+
+## STDIN
+stdin="work_hist_cash_01.xml"
+
+## STDOUT
+stdout="work_hist_cash_01.xml"
+
+## twsgen_hist.05.twst ends here
