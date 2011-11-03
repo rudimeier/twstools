@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<TWSXML>
+  <request type="contract_details">
+    <query>
+      <reqContract symbol="A" secType="FUT" exchange="ONE" includeExpired="1"/>
+    </query>
+    <response>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="200912" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="59485907" symbol="A" secType="FUT" expiry="20091218" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CZ9"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201003" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="61819918" symbol="A" secType="FUT" expiry="20100319" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CH0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="200911" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="68812935" symbol="A" secType="FUT" expiry="20091120" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CX9"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201006" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="69569855" symbol="A" secType="FUT" expiry="20100618" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CM0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201001" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="70421140" symbol="A" secType="FUT" expiry="20100115" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CF0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201002" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="71115711" symbol="A" secType="FUT" expiry="20100219" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CG0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201009" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="71832143" symbol="A" secType="FUT" expiry="20100917" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CU0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201004" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="72753293" symbol="A" secType="FUT" expiry="20100416" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CJ0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201005" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="73553831" symbol="A" secType="FUT" expiry="20100521" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CK0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201012" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="74376990" symbol="A" secType="FUT" expiry="20101217" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CZ0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201007" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="75533306" symbol="A" secType="FUT" expiry="20100716" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CN0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201008" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="76405242" symbol="A" secType="FUT" expiry="20100820" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CQ0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201103" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="77193931" symbol="A" secType="FUT" expiry="20110318" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CH1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201010" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="78102596" symbol="A" secType="FUT" expiry="20101015" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CV0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201011" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="79125024" symbol="A" secType="FUT" expiry="20101119" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CX0"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201106" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="80012334" symbol="A" secType="FUT" expiry="20110617" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CM1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201101" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="81250147" symbol="A" secType="FUT" expiry="20110121" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CF1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201102" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="82021239" symbol="A" secType="FUT" expiry="20110218" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CG1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201109" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="83067192" symbol="A" secType="FUT" expiry="20110916" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CU1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201104" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="84236556" symbol="A" secType="FUT" expiry="20110415" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CJ1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201103" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="84824485" symbol="A" secType="FUT" expiry="20110318" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DH1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201104" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="84824490" symbol="A" secType="FUT" expiry="20110415" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DJ1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201106" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="84824495" symbol="A" secType="FUT" expiry="20110617" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DM1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201109" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="84824497" symbol="A" secType="FUT" expiry="20110916" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DU1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201105" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="85679196" symbol="A" secType="FUT" expiry="20110520" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CK1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201105" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="85679200" symbol="A" secType="FUT" expiry="20110520" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DK1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201112" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="86887275" symbol="A" secType="FUT" expiry="20111216" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CZ1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201112" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="86887278" symbol="A" secType="FUT" expiry="20111216" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DZ1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201107" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="88474549" symbol="A" secType="FUT" expiry="20110715" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CN1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201107" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="88474554" symbol="A" secType="FUT" expiry="20110715" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DN1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201108" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="89687374" symbol="A" secType="FUT" expiry="20110819" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CQ1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201108" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="89687376" symbol="A" secType="FUT" expiry="20110819" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DQ1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201203" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="90965006" symbol="A" secType="FUT" expiry="20120316" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CH2"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201203" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="90965008" symbol="A" secType="FUT" expiry="20120316" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DH2"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201110" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="93176902" symbol="A" secType="FUT" expiry="20111021" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CV1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201110" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="93176905" symbol="A" secType="FUT" expiry="20111021" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DV1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201111" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="94542173" symbol="A" secType="FUT" expiry="20111118" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CX1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201111" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="94542177" symbol="A" secType="FUT" expiry="20111118" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DX1"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1C" tradingClass="A1C" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201206" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="96236895" symbol="A" secType="FUT" expiry="20120615" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CM2"/>
+      </ContractDetails>
+      <ContractDetails marketName="A1D" tradingClass="A1D" minTick="0.01" orderTypes="ACTIVETIM,ADJUST,ALERT,ALLOC,AVGCOST,BASKET,COND,CONDORDER,DAY,DEACT,DEACTDIS,DEACTEOD,GAT,GTC,GTD,GTT,HID,ICE,LIT,LMT,MIT,MKT,MTL,NONALGO,OCA,REL,SCALE,SCALERST,STP,STPLMT,TRAIL,TRAILLIT,TRAILLMT,TRAILMIT,WHATIF," validExchanges="IBSX,MIBSX,ONE" priceMagnifier="1" underConId="1715006" longName="AGILENT TECHNOLOGIES INC" contractMonth="201206" industry="Industrial" category="Electronics" subcategory="Electronic Measur Instr" timeZoneId="CTT" tradingHours="20111103:0830-1500;20111104:0830-1500" liquidHours="20111103:0830-1500;20111104:0830-1500">
+        <summary conId="96236899" symbol="A" secType="FUT" expiry="20120615" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DM2"/>
+      </ContractDetails>
+    </response>
+  </request>
+</TWSXML>
+

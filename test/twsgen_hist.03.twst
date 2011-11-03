@@ -1,0 +1,13 @@
+## -*- shell-script -*-
+
+TOOL=twsgen
+CMDLINE='-C --no-conv --max-expiry=20111216'
+PURPOSE="filter out newer expiries from hist work files"
+
+## STDIN
+stdin="work_hist_fut_01.xml"
+
+## STDOUT
+stdout="work_hist_fut_02.xml"
+
+## twsgen_hist.03.twst ends here

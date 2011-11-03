@@ -17,5 +17,8 @@ TESTS += defaults.01.twst
 TESTS += defaults.02.twst
 TESTS += defaults.03.twst
 TESTS += defaults.04.twst
+TESTS += twsgen_hist.01.twst
+TESTS += twsgen_hist.02.twst
+TESTS += twsgen_hist.03.twst
 
 ## Makefile.am ends here

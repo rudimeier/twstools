@@ -1,0 +1,15 @@
+## -*- shell-script -*-
+
+TOOL=twsgen
+CMDLINE='-H --endDateTime="20111027 00:00:00" --barSizeSetting="1 min"'
+PURPOSE="concatenated input gives concatenated output"
+
+## STDIN
+stdin=$(mktemp "/tmp/tmp.XXXXXXXXXX")
+cat ${srcdir}/con_fut.xml ${srcdir}/con_fut.xml >${stdin}
+
+## STDOUT
+stdout=$(mktemp "/tmp/tmp.XXXXXXXXXX")
+cat ${srcdir}/work_hist_fut_01.xml ${srcdir}/work_hist_fut_01.xml >$stdout
+
+## twsgen_hist.02.twst ends here

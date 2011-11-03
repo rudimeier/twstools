@@ -1,0 +1,13 @@
+## -*- shell-script -*-
+
+TOOL=twsgen
+CMDLINE='-H --endDateTime="20111027 00:00:00" --barSizeSetting="1 min"'
+PURPOSE="skip expiry dates when outside duration"
+
+## STDIN
+stdin="con_fut.xml"
+
+## STDOUT
+stdout="work_hist_fut_01.xml"
+
+## twsgen_hist.01.twst ends here
