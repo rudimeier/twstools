@@ -7,6 +7,7 @@ LC_ALL = C
 EXTRA_DIST = $(TESTS)
 EXTRA_DIST += $(TWST_LOG_COMPILER)
 TESTS =
+dist_noinst_DATA =
 
 TEST_EXTENSIONS = .twst
 TWST_LOG_COMPILER = $(srcdir)/tws-test.sh
@@ -20,5 +21,11 @@ TESTS += defaults.04.twst
 TESTS += twsgen_hist.01.twst
 TESTS += twsgen_hist.02.twst
 TESTS += twsgen_hist.03.twst
+
+dist_noinst_DATA += con_fut.xml
+dist_noinst_DATA += hist_data_no_defaults.xml
+dist_noinst_DATA += hist_data_with_defaults.xml
+dist_noinst_DATA += work_hist_fut_01.xml
+dist_noinst_DATA += work_hist_fut_02.xml
 
 ## Makefile.am ends here
