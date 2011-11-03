@@ -6,10 +6,13 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 0.3.2 - not yet released -------------------------------------------------------
 
-Major bug fixes.
+Major bug fixes, minor build fixes.
 
   - fix twsgen, don't skip empty expiries
   - fix twsdo, solve long time bug assert( !violations.empty() )
+  - build fix, missing define IB_USE_STD_STRING (thanks Matt Flax)
+  - provide simple test suite (make check)
+  - a little internal code refactoring to prepare new features
 
 
 
