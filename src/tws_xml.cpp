@@ -601,6 +601,18 @@ void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 }
 
 
+void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
+{
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			IB::Contract c;
+			conv_xml2ib( &c, p);
+			cdr->initialize(c);
+		}
+	}
+}
+
 void from_xml( HistRequest *hR, const xmlNodePtr node )
 {
 	char* tmp;

@@ -78,8 +78,6 @@ const char* short_bar_size( const char* bar_size );
 class ContractDetailsRequest
 {
 	public:
-		static ContractDetailsRequest * fromXml( xmlNodePtr );
-		
 		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
 		
