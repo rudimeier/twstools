@@ -75,48 +75,6 @@ const char* short_bar_size( const char* bar_size );
 
 
 
-class ContractDetailsRequest
-{
-	public:
-		const IB::Contract& ibContract() const;
-		bool initialize( const IB::Contract& );
-		
-	private:
-		IB::Contract _ibContract;
-};
-
-
-
-
-
-
-
-
-class HistRequest
-{
-	public:
-		HistRequest();
-		
-		bool initialize( const IB::Contract&, const std::string &endDateTime,
-			const std::string &durationStr, const std::string &barSizeSetting,
-			const std::string &whatToShow, int useRTH, int formatDate );
-		std::string toString() const;
-		
-		IB::Contract ibContract;
-		std::string endDateTime;
-		std::string durationStr;
-		std::string barSizeSetting;
-		std::string whatToShow;
-		int useRTH;
-		int formatDate;
-};
-
-
-
-
-
-
-
 
 class GenericRequest
 {
@@ -152,6 +110,7 @@ class GenericRequest
 
 
 
+class HistRequest;
 class PacingGod;
 class DataFarmStates;
 class WorkTodo;
@@ -186,6 +145,7 @@ class HistTodo
 
 
 
+class ContractDetailsRequest;
 
 class ContractDetailsTodo
 {

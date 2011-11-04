@@ -38,6 +38,7 @@
 #include "twsgen_ggo.h"
 #include "tws_xml.h"
 #include "tws_meta.h"
+#include "tws_query.h"
 #include "debug.h"
 #include "config.h"
 

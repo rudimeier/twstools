@@ -37,7 +37,7 @@
 
 #include "twsdo.h"
 #include "tws_meta.h"
-
+#include "tws_query.h"
 #include "tws_util.h"
 #include "tws_client.h"
 #include "tws_wrapper.h"
