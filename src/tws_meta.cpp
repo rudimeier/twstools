@@ -37,7 +37,7 @@
 
 #include "tws_meta.h"
 #include "tws_xml.h"
-
+#include "tws_query.h"
 #include "tws_util.h"
 #include "debug.h"
 
@@ -111,150 +111,6 @@ const char* short_bar_size( const char* bar_size )
 {
 	return short_string( short_bar_size_, bar_size );
 }
-
-
-
-
-
-ContractDetailsRequest * ContractDetailsRequest::fromXml( xmlNodePtr xn )
-{
-	ContractDetailsRequest *cdr = new ContractDetailsRequest();
-	
-	for( xmlNodePtr p = xn->children; p!= NULL; p=p->next) {
-		if( p->type == XML_ELEMENT_NODE
-			&& strcmp((char*)p->name, "reqContract") == 0 )  {
-			IB::Contract c;
-			conv_xml2ib( &c, p);
-			cdr->initialize(c);
-		}
-	}
-	
-	return cdr;
-}
-
-const IB::Contract& ContractDetailsRequest::ibContract() const
-{
-	return _ibContract;
-}
-
-bool ContractDetailsRequest::initialize( const IB::Contract& c )
-{
-	_ibContract = c;
-	return true;
-}
-
-
-
-
-
-
-
-
-HistRequest::HistRequest()
-{
-	/* TODO these defaults are duplicated defined within dumpXml() */
-	_useRTH = 0;
-	_formatDate = 0; // set invalid (IB allows 1 or 2)
-}
-
-
-bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
-	const std::string &d, const std::string &b,
-	const std::string &w, int u, int f )
-{
-	_ibContract = c;
-	_endDateTime = e;
-	_durationStr = d;
-	_barSizeSetting = b;
-	_whatToShow = w;
-	_useRTH = u;
-	_formatDate = f;
-	return true;
-}
-
-
-std::string HistRequest::toString() const
-{
-	char buf_c[512];
-	char buf_a[1024];
-	snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
-		_ibContract.symbol.c_str(),
-		_ibContract.secType.c_str(),
-		_ibContract.exchange.c_str(),
-		_ibContract.currency.c_str(),
-		_ibContract.expiry.c_str(),
-		_ibContract.strike,
-		_ibContract.right.c_str() );
-	
-	snprintf( buf_a, sizeof(buf_a), "%s\t%s\t%s\t%s\t%d\t%d\t%s",
-		_endDateTime.c_str(),
-		_durationStr.c_str(),
-		_barSizeSetting.c_str(),
-		_whatToShow.c_str(),
-		_useRTH,
-		_formatDate,
-		buf_c );
-	
-	return std::string(buf_a);
-}
-
-
-void HistRequest::clear()
-{
-	_ibContract = IB::Contract();
-	_whatToShow.clear();
-}
-
-
-
-#define GET_ATTR_STRING( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? std::string(tmp) \
-		: dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_INT( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_DOUBLE( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
-	free(tmp)
-#define GET_ATTR_BOOL( _struct_, _name_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (const xmlChar*) _name_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-
-HistRequest * HistRequest::fromXml( xmlNodePtr node )
-{
-	char* tmp;
-	static const HistRequest dflt;
-	
-	HistRequest *hR = new HistRequest();
-	
-	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if( p->type == XML_ELEMENT_NODE
-			&& strcmp((char*)p->name, "reqContract") == 0 )  {
-			conv_xml2ib( &hR->_ibContract, p);
-		}
-	}
-	
-	GET_ATTR_STRING( hR, "endDateTime", _endDateTime );
-	GET_ATTR_STRING( hR, "durationStr", _durationStr );
-	GET_ATTR_STRING( hR, "barSizeSetting", _barSizeSetting );
-	GET_ATTR_STRING( hR, "whatToShow", _whatToShow );
-	GET_ATTR_INT( hR, "useRTH", _useRTH );
-	GET_ATTR_INT( hR, "formatDate", _formatDate );
-	
-	return hR;
-}
-
-
-
-
 
 
 
@@ -377,7 +233,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 	std::map<std::string, int> countByFarm;
 	for( std::list<HistRequest*>::const_iterator it = leftRequests.begin();
 		it != leftRequests.end(); it++ ) {
-		std::string farm = dfs->getHmdsFarm((*it)->ibContract());
+		std::string farm = dfs->getHmdsFarm((*it)->ibContract);
 		if( hashByFarm.find(farm) == hashByFarm.end() ) {
 			hashByFarm[farm] = *it;
 			countByFarm[farm] = 1;
@@ -392,7 +248,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		    it = hashByFarm.begin(); it != hashByFarm.end(); it++ ) {
 		const std::string &farm = it->first;
 		HistRequest *tmp_hR = it->second;
-		const IB::Contract& c = tmp_hR->ibContract();
+		const IB::Contract& c = tmp_hR->ibContract;
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.empty() ) {
 				// 1. the unknown ones to learn farm quickly
@@ -414,7 +270,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		it++;
 	}
 	assert( it != leftRequests.end() );
-	int wait = pG->goodTime( todo_hR->ibContract() );
+	int wait = pG->goodTime( todo_hR->ibContract );
 	if( wait <= 0 ) {
 		leftRequests.erase( it );
 		checkedOutRequest = todo_hR;
@@ -689,7 +545,8 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
-				pcd->request = ContractDetailsRequest::fromXml(p);
+				pcd->request = new ContractDetailsRequest();
+				from_xml(pcd->request, p);
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
@@ -797,15 +654,15 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 	static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 	Row *row = new Row();
 	
-	GET_ATTR_STRING( row, "date", date );
-	GET_ATTR_DOUBLE( row, "open", open );
-	GET_ATTR_DOUBLE( row, "high", high );
-	GET_ATTR_DOUBLE( row, "low", low );
-	GET_ATTR_DOUBLE( row, "close", close );
-	GET_ATTR_INT( row, "volume", volume );
-	GET_ATTR_INT( row, "count", count );
-	GET_ATTR_DOUBLE( row, "WAP", WAP );
-	GET_ATTR_BOOL( row, "hasGaps", hasGaps );
+	GET_ATTR_STRING( row, date );
+	GET_ATTR_DOUBLE( row, open );
+	GET_ATTR_DOUBLE( row, high );
+	GET_ATTR_DOUBLE( row, low );
+	GET_ATTR_DOUBLE( row, close );
+	GET_ATTR_INT( row, volume );
+	GET_ATTR_INT( row, count );
+	GET_ATTR_DOUBLE( row, WAP );
+	GET_ATTR_BOOL( row, hasGaps );
 	
 	return row;
 }
@@ -833,7 +690,8 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
-				phd->request = HistRequest::fromXml(p);
+				phd->request = new HistRequest();
+				from_xml(phd->request, p);
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
@@ -858,31 +716,6 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 	return phd;
 }
 
-
-#define ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-			(xmlChar*) _struct_._attr_.c_str() ); \
-	}
-
-#define ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_BOOL( _ne_, _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
-	}
-
 void PacketHistData::dumpXml()
 {
 	char tmp[128];
@@ -894,28 +727,17 @@ void PacketHistData::dumpXml()
 		(const xmlChar*)"historical_data" );
 	
 	{
-		struct s_bla {
-			const std::string endDateTime;
-			const std::string durationStr;
-			const std::string barSizeSetting;
-			const std::string whatToShow;
-			int useRTH;
-			int formatDate;
-		};
-		static const s_bla dflt = {"", "", "", "", 0, 0 };
-		const IB::Contract &c = request->ibContract();
-		s_bla bla = { request->endDateTime(), request->durationStr(),
-			request->barSizeSetting(), request->whatToShow(), request->useRTH(),
-			request->formatDate() };
+		static const HistRequest dflt;
+		const IB::Contract &c = request->ibContract;
 		
-		xmlNodePtr nqry = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( nqry, "reqContract", c );
-		ADD_ATTR_STRING( nqry, bla, endDateTime );
-		ADD_ATTR_STRING( nqry, bla, durationStr );
-		ADD_ATTR_STRING( nqry, bla, barSizeSetting );
-		ADD_ATTR_STRING( nqry, bla, whatToShow );
-		ADD_ATTR_INT( nqry, bla, useRTH );
-		ADD_ATTR_INT( nqry, bla, formatDate );
+		xmlNodePtr ne = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
+		conv_ib2xml( ne, "reqContract", c );
+		ADD_ATTR_STRING( (*request), endDateTime );
+		ADD_ATTR_STRING( (*request), durationStr );
+		ADD_ATTR_STRING( (*request), barSizeSetting );
+		ADD_ATTR_STRING( (*request), whatToShow );
+		ADD_ATTR_INT( (*request), useRTH );
+		ADD_ATTR_INT( (*request), formatDate );
 	}
 	
 	if( mode == CLOSED ) {
@@ -923,27 +745,27 @@ void PacketHistData::dumpXml()
 	{
 		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
 		for( size_t i=0; i<rows.size(); i++ ) {
-			xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
-			ADD_ATTR_STRING( nrow, rows[i], date );
-			ADD_ATTR_DOUBLE( nrow, rows[i], open );
-			ADD_ATTR_DOUBLE( nrow, rows[i], high );
-			ADD_ATTR_DOUBLE( nrow, rows[i], low );
-			ADD_ATTR_DOUBLE( nrow, rows[i], close );
-			ADD_ATTR_INT( nrow, rows[i], volume );
-			ADD_ATTR_INT( nrow, rows[i], count );
-			ADD_ATTR_DOUBLE( nrow, rows[i], WAP );
-			ADD_ATTR_BOOL( nrow, rows[i], hasGaps );
+			xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
+			ADD_ATTR_STRING( rows[i], date );
+			ADD_ATTR_DOUBLE( rows[i], open );
+			ADD_ATTR_DOUBLE( rows[i], high );
+			ADD_ATTR_DOUBLE( rows[i], low );
+			ADD_ATTR_DOUBLE( rows[i], close );
+			ADD_ATTR_INT( rows[i], volume );
+			ADD_ATTR_INT( rows[i], count );
+			ADD_ATTR_DOUBLE( rows[i], WAP );
+			ADD_ATTR_BOOL( rows[i], hasGaps );
 		}
-		xmlNodePtr nrow = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
-		ADD_ATTR_STRING( nrow, finishRow, date );
-		ADD_ATTR_DOUBLE( nrow, finishRow, open );
-		ADD_ATTR_DOUBLE( nrow, finishRow, high );
-		ADD_ATTR_DOUBLE( nrow, finishRow, low );
-		ADD_ATTR_DOUBLE( nrow, finishRow, close );
-		ADD_ATTR_INT( nrow, finishRow, volume );
-		ADD_ATTR_INT( nrow, finishRow, count );
-		ADD_ATTR_DOUBLE( nrow, finishRow, WAP );
-		ADD_ATTR_BOOL( nrow, finishRow, hasGaps );
+		xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
+		ADD_ATTR_STRING( finishRow, date );
+		ADD_ATTR_DOUBLE( finishRow, open );
+		ADD_ATTR_DOUBLE( finishRow, high );
+		ADD_ATTR_DOUBLE( finishRow, low );
+		ADD_ATTR_DOUBLE( finishRow, close );
+		ADD_ATTR_INT( finishRow, volume );
+		ADD_ATTR_INT( finishRow, count );
+		ADD_ATTR_DOUBLE( finishRow, WAP );
+		ADD_ATTR_BOOL( finishRow, hasGaps );
 	}
 	}
 	TwsXml::dumpAndFree( root );
@@ -999,9 +821,9 @@ void PacketHistData::append( int reqId, const std::string &date,
 
 void PacketHistData::dump( bool printFormatDates )
 {
-	const IB::Contract &c = request->ibContract();
-	const char *wts = short_wts( request->whatToShow().c_str() );
-	const char *bss = short_bar_size( request->barSizeSetting().c_str());
+	const IB::Contract &c = request->ibContract;
+	const char *wts = short_wts( request->whatToShow.c_str() );
+	const char *bss = short_bar_size( request->barSizeSetting.c_str());
 	
 	for( std::vector<Row>::const_iterator it = rows.begin();
 		it != rows.end(); it++ ) {

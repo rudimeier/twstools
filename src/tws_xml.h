@@ -79,6 +79,13 @@ void conv_xml2ib( IB::Order*, const xmlNodePtr node );
 void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
 
 
+class ContractDetailsRequest;
+class HistRequest;
+
+void from_xml( ContractDetailsRequest*, const xmlNodePtr node );
+void from_xml( HistRequest*, const xmlNodePtr node );
+
+
 
 
 class TwsXml
@@ -112,6 +119,63 @@ class TwsXml
 };
 
 
+
+
+#define GET_ATTR_INT( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_LONG( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atol( tmp ) : dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_BOOL( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
+	free(tmp)
+
+#define GET_ATTR_STRING( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? std::string(tmp) : dflt._attr_; \
+	free(tmp)
+
+
+#define ADD_ATTR_INT( _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_LONG( _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_BOOL( _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, \
+			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
+	}
+
+#define ADD_ATTR_STRING( _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, \
+			(xmlChar*) _struct_._attr_.c_str() ); \
+	}
 
 
 #endif

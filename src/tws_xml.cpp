@@ -38,6 +38,7 @@
 #include "tws_xml.h"
 
 #include "debug.h"
+#include "tws_query.h"
 #include "tws_util.h"
 #include "twsapi/Contract.h"
 #include "twsapi/Execution.h"
@@ -53,38 +54,6 @@
 #include <libxml/tree.h>
 
 
-
-
-
-#define ADD_ATTR_INT( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_LONG( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_DOUBLE( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
-	}
-
-#define ADD_ATTR_BOOL( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, \
-			(xmlChar*) (_struct_._attr_ ? "1" : "0") ); \
-	}
-
-#define ADD_ATTR_STRING( _struct_, _attr_ ) \
-	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		xmlNewProp ( ne, (xmlChar*) #_attr_, \
-			(xmlChar*) _struct_._attr_.c_str() ); \
-	}
 
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
@@ -361,32 +330,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
 
 
 
-#define GET_ATTR_INT( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_LONG( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atol( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_BOOL( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
-
-#define GET_ATTR_STRING( _struct_, _attr_ ) \
-	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? std::string(tmp) : dflt._attr_; \
-	free(tmp)
-
-
 void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 {
 	char* tmp;
@@ -655,6 +598,39 @@ void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 	GET_ATTR_DOUBLE( os, maxCommission );
 	GET_ATTR_STRING( os, commissionCurrency );
 	GET_ATTR_STRING( os, warningText );
+}
+
+
+void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
+{
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			IB::Contract c;
+			conv_xml2ib( &c, p);
+			cdr->initialize(c);
+		}
+	}
+}
+
+void from_xml( HistRequest *hR, const xmlNodePtr node )
+{
+	char* tmp;
+	static const HistRequest dflt;
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &hR->ibContract, p);
+		}
+	}
+	
+	GET_ATTR_STRING( hR, endDateTime );
+	GET_ATTR_STRING( hR, durationStr );
+	GET_ATTR_STRING( hR, barSizeSetting );
+	GET_ATTR_STRING( hR, whatToShow );
+	GET_ATTR_INT( hR, useRTH );
+	GET_ATTR_INT( hR, formatDate );
 }
 
 
