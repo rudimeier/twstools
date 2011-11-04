@@ -38,6 +38,7 @@
 #include "tws_xml.h"
 
 #include "debug.h"
+#include "tws_meta.h"
 #include "tws_util.h"
 #include "twsapi/Contract.h"
 #include "twsapi/Execution.h"
@@ -597,6 +598,27 @@ void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 	GET_ATTR_DOUBLE( os, maxCommission );
 	GET_ATTR_STRING( os, commissionCurrency );
 	GET_ATTR_STRING( os, warningText );
+}
+
+
+void from_xml( HistRequest *hR, const xmlNodePtr node )
+{
+	char* tmp;
+	static const HistRequest dflt;
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &hR->ibContract, p);
+		}
+	}
+	
+	GET_ATTR_STRING( hR, endDateTime );
+	GET_ATTR_STRING( hR, durationStr );
+	GET_ATTR_STRING( hR, barSizeSetting );
+	GET_ATTR_STRING( hR, whatToShow );
+	GET_ATTR_INT( hR, useRTH );
+	GET_ATTR_INT( hR, formatDate );
 }
 
 

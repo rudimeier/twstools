@@ -79,6 +79,11 @@ void conv_xml2ib( IB::Order*, const xmlNodePtr node );
 void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
 
 
+class HistRequest;
+
+void from_xml( HistRequest*, const xmlNodePtr node );
+
+
 
 
 class TwsXml

@@ -200,33 +200,6 @@ std::string HistRequest::toString() const
 
 
 
-HistRequest * HistRequest::fromXml( xmlNodePtr node )
-{
-	char* tmp;
-	static const HistRequest dflt;
-	
-	HistRequest *hR = new HistRequest();
-	
-	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if( p->type == XML_ELEMENT_NODE
-			&& strcmp((char*)p->name, "reqContract") == 0 )  {
-			conv_xml2ib( &hR->ibContract, p);
-		}
-	}
-	
-	GET_ATTR_STRING( hR, endDateTime );
-	GET_ATTR_STRING( hR, durationStr );
-	GET_ATTR_STRING( hR, barSizeSetting );
-	GET_ATTR_STRING( hR, whatToShow );
-	GET_ATTR_INT( hR, useRTH );
-	GET_ATTR_INT( hR, formatDate );
-	
-	return hR;
-}
-
-
-
-
 
 
 
@@ -805,7 +778,8 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
-				phd->request = HistRequest::fromXml(p);
+				phd->request = new HistRequest();
+				from_xml(phd->request, p);
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {

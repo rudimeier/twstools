@@ -99,8 +99,6 @@ class HistRequest
 	public:
 		HistRequest();
 		
-		static HistRequest * fromXml( xmlNodePtr );
-		
 		bool initialize( const IB::Contract&, const std::string &endDateTime,
 			const std::string &durationStr, const std::string &barSizeSetting,
 			const std::string &whatToShow, int useRTH, int formatDate );
