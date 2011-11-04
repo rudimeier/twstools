@@ -617,8 +617,7 @@ void PacketContractDetails::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"contract_details" );
 	
-	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "reqContract", request->ibContract() );
+	to_xml(npcd, *request );
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	for( size_t i=0; i<cdList->size(); i++ ) {

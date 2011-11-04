@@ -601,6 +601,13 @@ void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 }
 
 
+void to_xml( xmlNodePtr parent, const ContractDetailsRequest& cdr)
+{
+	xmlNodePtr nqry = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "reqContract", cdr.ibContract() );
+}
+
+
 void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
 {
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {

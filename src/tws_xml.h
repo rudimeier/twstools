@@ -82,6 +82,8 @@ void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
 class ContractDetailsRequest;
 class HistRequest;
 
+void to_xml( xmlNodePtr parent, const ContractDetailsRequest& );
+
 void from_xml( ContractDetailsRequest*, const xmlNodePtr node );
 void from_xml( HistRequest*, const xmlNodePtr node );
 
