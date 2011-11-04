@@ -607,6 +607,21 @@ void to_xml( xmlNodePtr parent, const ContractDetailsRequest& cdr)
 	conv_ib2xml( nqry, "reqContract", cdr.ibContract() );
 }
 
+void to_xml( xmlNodePtr parent, const HistRequest& hr)
+{
+	char tmp[128];
+	static const HistRequest dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( ne, "reqContract", hr.ibContract );
+	ADD_ATTR_STRING( hr, endDateTime );
+	ADD_ATTR_STRING( hr, durationStr );
+	ADD_ATTR_STRING( hr, barSizeSetting );
+	ADD_ATTR_STRING( hr, whatToShow );
+	ADD_ATTR_INT( hr, useRTH );
+	ADD_ATTR_INT( hr, formatDate );
+}
+
 
 void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
 {

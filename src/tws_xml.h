@@ -83,6 +83,7 @@ class ContractDetailsRequest;
 class HistRequest;
 
 void to_xml( xmlNodePtr parent, const ContractDetailsRequest& );
+void to_xml( xmlNodePtr parent, const HistRequest& );
 
 void from_xml( ContractDetailsRequest*, const xmlNodePtr node );
 void from_xml( HistRequest*, const xmlNodePtr node );

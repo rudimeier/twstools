@@ -725,19 +725,7 @@ void PacketHistData::dumpXml()
 	xmlNewProp( nphd, (const xmlChar*)"type",
 		(const xmlChar*)"historical_data" );
 	
-	{
-		static const HistRequest dflt;
-		const IB::Contract &c = request->ibContract;
-		
-		xmlNodePtr ne = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( ne, "reqContract", c );
-		ADD_ATTR_STRING( (*request), endDateTime );
-		ADD_ATTR_STRING( (*request), durationStr );
-		ADD_ATTR_STRING( (*request), barSizeSetting );
-		ADD_ATTR_STRING( (*request), whatToShow );
-		ADD_ATTR_INT( (*request), useRTH );
-		ADD_ATTR_INT( (*request), formatDate );
-	}
+	to_xml(nphd, *request);
 	
 	if( mode == CLOSED ) {
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
