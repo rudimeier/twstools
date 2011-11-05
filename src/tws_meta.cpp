@@ -652,19 +652,6 @@ void PacketContractDetails::dumpXml()
 const PacketHistData::Row PacketHistData::Row::dflt
 	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
 
-void PacketHistData::Row::clear()
-{
-	date = "";
-	open = 0.0;
-	high = 0.0;
-	low = 0.0;
-	close = 0.0;
-	volume = 0;
-	count = 0;
-	WAP = 0.0;
-	hasGaps = false;
-}
-
 PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 {
 	char* tmp;
@@ -792,7 +779,7 @@ void PacketHistData::clear()
 		request = NULL;
 	}
 	rows.clear();
-	finishRow.clear();
+	finishRow = Row::dflt;
 }
 
 

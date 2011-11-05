@@ -291,7 +291,6 @@ class PacketHistData
 		{
 			public:
 				static const Row dflt;
-				void clear();
 				static Row * fromXml( xmlNodePtr );
 				
 				std::string date;
