@@ -185,6 +185,8 @@ class WorkTodo
 		int read_file( const char *fileName);
 		
 	private:
+		int read_req( const xmlNodePtr xn );
+		
 		mutable bool acc_status_todo;
 		mutable bool executions_todo;
 		mutable bool orders_todo;

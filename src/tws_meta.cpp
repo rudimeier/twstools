@@ -439,6 +439,29 @@ void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 }
 
 
+int WorkTodo::read_req( const xmlNodePtr xn )
+{
+	int ret = 1;
+	char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
+	
+	if( tmp == NULL ) {
+		fprintf(stderr, "Warning, no request type specified.\n");
+		ret = 0;
+	} else if( strcmp( tmp, "contract_details") == 0 ) {
+		PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
+		_contractDetailsTodo->add(pcd->getRequest());
+	} else if ( strcmp( tmp, "historical_data") == 0 ) {
+		PacketHistData *phd = PacketHistData::fromXml(xn);
+		_histTodo->add( phd->getRequest() );
+	} else {
+		fprintf(stderr, "Warning, unknown request type '%s' ignored.\n", tmp );
+		ret = 0;
+	}
+	
+	free(tmp);
+	return ret;
+}
+
 int WorkTodo::read_file( const char *fileName )
 {
 	int retVal = -1;
@@ -452,22 +475,7 @@ int WorkTodo::read_file( const char *fileName )
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		assert( xn->type == XML_ELEMENT_NODE  );
 		if( strcmp((char*)xn->name, "request") == 0 ) {
-			char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
-			if( tmp == NULL ) {
-				fprintf(stderr, "Warning, no request type specified.\n");
-			} else if( strcmp( tmp, "contract_details") == 0 ) {
-				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-				_contractDetailsTodo->add(pcd->getRequest());
-				retVal++;
-			} else if ( strcmp( tmp, "historical_data") == 0 ) {
-				PacketHistData *phd = PacketHistData::fromXml(xn);
-				_histTodo->add( phd->getRequest() );
-				retVal++;
-			} else {
-				fprintf(stderr, "Warning, unknown request type '%s' ignored.\n",
-					tmp );
-			}
-			free(tmp);
+			retVal += read_req( xn );
 		} else {
 			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
 				xn->name );
