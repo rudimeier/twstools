@@ -263,7 +263,6 @@ PacketContractDetails::constList() const
 struct RowHist
 {
 	static const RowHist dflt;
-	static RowHist * fromXml( xmlNodePtr );
 	
 	std::string date;
 	double open;

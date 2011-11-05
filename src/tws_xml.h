@@ -98,6 +98,11 @@ void from_xml( ExecutionsRequest*, const xmlNodePtr node );
 void from_xml( OrdersRequest*, const xmlNodePtr node );
 
 
+class RowHist;
+
+void from_xml( RowHist*, const xmlNodePtr node );
+
+
 
 
 class TwsXml

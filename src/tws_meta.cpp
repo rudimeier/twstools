@@ -588,26 +588,6 @@ void PacketContractDetails::dumpXml()
 const RowHist RowHist::dflt
 	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
 
-RowHist* RowHist::fromXml( xmlNodePtr node )
-{
-	char* tmp;
-	static const RowHist &dflt = RowHist::dflt;
-	RowHist *row = new RowHist();
-	
-	GET_ATTR_STRING( row, date );
-	GET_ATTR_DOUBLE( row, open );
-	GET_ATTR_DOUBLE( row, high );
-	GET_ATTR_DOUBLE( row, low );
-	GET_ATTR_DOUBLE( row, close );
-	GET_ATTR_INT( row, volume );
-	GET_ATTR_INT( row, count );
-	GET_ATTR_DOUBLE( row, WAP );
-	GET_ATTR_BOOL( row, hasGaps );
-	
-	return row;
-}
-
-
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<RowHist>()))
 {
@@ -639,11 +619,13 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 						continue;
 					}
 					if( strcmp((char*)q->name, "row") == 0 ) {
-						RowHist *row = RowHist::fromXml( q );
+						RowHist *row = new RowHist();
+						from_xml( row, q );
 						phd->rows.push_back(*row);
 						delete row;
 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
-						RowHist *fin = RowHist::fromXml( q );
+						RowHist *fin = new RowHist();
+						from_xml( fin, q );
 						phd->finishRow = *fin;
 						phd->mode = CLOSED;
 						delete fin;

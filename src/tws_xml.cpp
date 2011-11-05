@@ -38,6 +38,7 @@
 #include "tws_xml.h"
 
 #include "debug.h"
+#include "tws_meta.h"
 #include "tws_query.h"
 #include "tws_util.h"
 #include "twsapi/Contract.h"
@@ -698,6 +699,25 @@ void from_xml( ExecutionsRequest *eR, const xmlNodePtr node )
 
 void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 {
+}
+
+
+
+
+void from_xml( RowHist *row, const xmlNodePtr node )
+{
+	char* tmp;
+	static const RowHist &dflt = RowHist::dflt;
+	
+	GET_ATTR_STRING( row, date );
+	GET_ATTR_DOUBLE( row, open );
+	GET_ATTR_DOUBLE( row, high );
+	GET_ATTR_DOUBLE( row, low );
+	GET_ATTR_DOUBLE( row, close );
+	GET_ATTR_INT( row, volume );
+	GET_ATTR_INT( row, count );
+	GET_ATTR_DOUBLE( row, WAP );
+	GET_ATTR_BOOL( row, hasGaps );
 }
 
 
