@@ -265,6 +265,21 @@ PacketContractDetails::constList() const
 
 
 
+struct RowHist
+{
+	static const RowHist dflt;
+	static RowHist * fromXml( xmlNodePtr );
+	
+	std::string date;
+	double open;
+	double high;
+	double low;
+	double close;
+	int volume;
+	int count;
+	double WAP;
+	bool hasGaps;
+};
 
 
 class PacketHistData
@@ -287,27 +302,10 @@ class PacketHistData
 		void dumpXml();
 		
 	private:
-		class Row
-		{
-			public:
-				static const Row dflt;
-				static Row * fromXml( xmlNodePtr );
-				
-				std::string date;
-				double open;
-				double high;
-				double low;
-				double close;
-				int volume;
-				int count;
-				double WAP;
-				bool hasGaps;
-		};
-		
 		int reqId;
 		HistRequest *request;
-		std::vector<Row> &rows;
-		Row finishRow;
+		std::vector<RowHist> &rows;
+		RowHist finishRow;
 };
 
 

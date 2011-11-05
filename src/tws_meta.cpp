@@ -649,14 +649,14 @@ void PacketContractDetails::dumpXml()
 
 
 /* we need a default object but want to avoid a slow default constructor */
-const PacketHistData::Row PacketHistData::Row::dflt
+const RowHist RowHist::dflt
 	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
 
-PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
+RowHist* RowHist::fromXml( xmlNodePtr node )
 {
 	char* tmp;
-	static const Row &dflt = Row::dflt;
-	Row *row = new Row();
+	static const RowHist &dflt = RowHist::dflt;
+	RowHist *row = new RowHist();
 	
 	GET_ATTR_STRING( row, date );
 	GET_ATTR_DOUBLE( row, open );
@@ -673,7 +673,7 @@ PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 
 
 PacketHistData::PacketHistData() :
-		rows(*(new std::vector<Row>()))
+		rows(*(new std::vector<RowHist>()))
 {
 	reqId = -1;
 	request = NULL;
@@ -703,11 +703,11 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 						continue;
 					}
 					if( strcmp((char*)q->name, "row") == 0 ) {
-						Row *row = Row::fromXml( q );
+						RowHist *row = RowHist::fromXml( q );
 						phd->rows.push_back(*row);
 						delete row;
 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
-						Row *fin = Row::fromXml( q );
+						RowHist *fin = RowHist::fromXml( q );
 						phd->finishRow = *fin;
 						phd->mode = CLOSED;
 						delete fin;
@@ -735,7 +735,7 @@ void PacketHistData::dumpXml()
 	if( mode == CLOSED ) {
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
-		static const Row &dflt = Row::dflt;
+		static const RowHist &dflt = RowHist::dflt;
 		for( size_t i=0; i<rows.size(); i++ ) {
 			xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
 			ADD_ATTR_STRING( rows[i], date );
@@ -779,7 +779,7 @@ void PacketHistData::clear()
 		request = NULL;
 	}
 	rows.clear();
-	finishRow = Row::dflt;
+	finishRow = RowHist::dflt;
 }
 
 
@@ -799,7 +799,7 @@ void PacketHistData::append( int reqId, const std::string &date,
 	assert( mode == RECORD && error == REQ_ERR_NONE );
 	assert( this->reqId == reqId );
 	
-	Row row = { date, open, high, low, close,
+	RowHist row = { date, open, high, low, close,
 		volume, count, WAP, hasGaps };
 	
 	if( strncmp(date.c_str(), "finished", 8) == 0) {
@@ -817,7 +817,7 @@ void PacketHistData::dump( bool printFormatDates )
 	const char *wts = short_wts( request->whatToShow.c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting.c_str());
 	
-	for( std::vector<Row>::const_iterator it = rows.begin();
+	for( std::vector<RowHist>::const_iterator it = rows.begin();
 		it != rows.end(); it++ ) {
 		std::string expiry = c.expiry;
 		std::string dateTime = it->date;
