@@ -721,6 +721,57 @@ void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
 	ADD_ATTR_BOOL( r, hasGaps );
 }
 
+void to_xml( xmlNodePtr parent, const RowAcc& row )
+{
+	char tmp[128];
+	switch( row.type ) {
+	case RowAcc::t_AccVal:
+		{
+			const RowAccVal &d = *(RowAccVal*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"AccVal", NULL);
+			A_ADD_ATTR_STRING( nrow, d, key );
+			A_ADD_ATTR_STRING( nrow, d, val );
+			A_ADD_ATTR_STRING( nrow, d, currency );
+			A_ADD_ATTR_STRING( nrow, d, accountName );
+		}
+		break;
+	case RowAcc::t_Prtfl:
+		{
+			const RowPrtfl &d = *(RowPrtfl*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"Prtfl", NULL);
+			conv_ib2xml( nrow, "contract", d.contract );
+			A_ADD_ATTR_INT( nrow, d, position );
+			A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
+			A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
+			A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
+			A_ADD_ATTR_DOUBLE( nrow, d, unrealizedPNL );
+			A_ADD_ATTR_DOUBLE( nrow, d, realizedPNL );
+			A_ADD_ATTR_STRING( nrow, d, accountName );
+		}
+		break;
+	case RowAcc::t_stamp:
+		{
+			const std::string &d = *(std::string*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"stamp", NULL);
+			xmlNewProp ( nrow, (xmlChar*) "timeStamp",
+				(const xmlChar*) d.c_str() );
+		}
+		break;
+	case RowAcc::t_end:
+		{
+			const std::string &d = *(std::string*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"end", NULL);
+			xmlNewProp ( nrow, (xmlChar*) "accountName",
+				(const xmlChar*) d.c_str() );
+		}
+		break;
+	}
+}
+
 
 
 
@@ -738,6 +789,12 @@ void from_xml( RowHist *row, const xmlNodePtr node )
 	GET_ATTR_INT( row, count );
 	GET_ATTR_DOUBLE( row, WAP );
 	GET_ATTR_BOOL( row, hasGaps );
+}
+
+void from_xml( RowAcc* /*row*/, const xmlNodePtr /*node*/ )
+{
+	/* not implemented yet */
+	assert( false );
 }
 
 

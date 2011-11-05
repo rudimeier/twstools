@@ -99,10 +99,13 @@ void from_xml( OrdersRequest*, const xmlNodePtr node );
 
 
 class RowHist;
+class RowAcc;
 
 void to_xml( xmlNodePtr parent, const char* name, const RowHist& );
+void to_xml( xmlNodePtr parent, const RowAcc& );
 
 void from_xml( RowHist*, const xmlNodePtr node );
+void from_xml( RowAcc*, const xmlNodePtr node );
 
 
 

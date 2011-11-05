@@ -837,59 +837,6 @@ void PacketAccStatus::appendAccountDownloadEnd( const std::string& accountName )
 	mode = CLOSED;
 }
 
-
-
-static void conv2xml( xmlNodePtr parent, const RowAcc *row )
-{
-		char tmp[128];
-		switch( row->type ) {
-		case RowAcc::t_AccVal:
-			{
-				const RowAccVal &d = *(RowAccVal*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"AccVal", NULL);
-				A_ADD_ATTR_STRING( nrow, d, key );
-				A_ADD_ATTR_STRING( nrow, d, val );
-				A_ADD_ATTR_STRING( nrow, d, currency );
-				A_ADD_ATTR_STRING( nrow, d, accountName );
-			}
-			break;
-		case RowAcc::t_Prtfl:
-			{
-				const RowPrtfl &d = *(RowPrtfl*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"Prtfl", NULL);
-				conv_ib2xml( nrow, "contract", d.contract );
-				A_ADD_ATTR_INT( nrow, d, position );
-				A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
-				A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
-				A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
-				A_ADD_ATTR_DOUBLE( nrow, d, unrealizedPNL );
-				A_ADD_ATTR_DOUBLE( nrow, d, realizedPNL );
-				A_ADD_ATTR_STRING( nrow, d, accountName );
-			}
-			break;
-		case RowAcc::t_stamp:
-			{
-				const std::string &d = *(std::string*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"stamp", NULL);
-				xmlNewProp ( nrow, (xmlChar*) "timeStamp",
-					(const xmlChar*) d.c_str() );
-			}
-			break;
-		case RowAcc::t_end:
-			{
-				const std::string &d = *(std::string*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"end", NULL);
-				xmlNewProp ( nrow, (xmlChar*) "accountName",
-					(const xmlChar*) d.c_str() );
-			}
-			break;
-		}
-}
-
 void PacketAccStatus::dumpXml()
 {
 	xmlNodePtr root = TwsXml::newDocRoot();
@@ -903,7 +850,7 @@ void PacketAccStatus::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowAcc*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		conv2xml( nrsp, (*it) );
+		to_xml( nrsp, **it );
 	}
 	
 	TwsXml::dumpAndFree( root );
