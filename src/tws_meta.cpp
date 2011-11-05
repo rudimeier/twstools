@@ -1081,12 +1081,9 @@ void PacketExecutions::record(  const int reqId, const ExecutionsRequest &eR )
 	this->request = new ExecutionsRequest( eR );
 }
 
-void PacketExecutions::append( int reqId,
-	const IB::Contract& c, const IB::Execution& e)
+void PacketExecutions::append( int reqId, const RowExecution &row )
 {
-	RowExecution *arow = new RowExecution();
-	arow->contract = c;
-	arow->execution = e;
+	RowExecution *arow = new RowExecution(row);
 	list->push_back( arow );
 }
 

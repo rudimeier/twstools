@@ -207,7 +207,8 @@ void TwsDlWrapper::accountDownloadEnd( const IB::IBString& accountName )
 void TwsDlWrapper::execDetails( int reqId, const IB::Contract& contract,
 	const IB::Execution& execution )
 {
-	parentTwsDL->twsExecDetails(  reqId, contract, execution  );
+	RowExecution row = { contract, execution };
+	parentTwsDL->twsExecDetails(  reqId, row );
 }
 
 void TwsDlWrapper::execDetailsEnd( int reqId )
@@ -869,14 +870,13 @@ void TwsDL::twsAccountDownloadEnd( const std::string& accountName )
 	((PacketAccStatus*)packet)->appendAccountDownloadEnd( accountName );
 }
 
-void TwsDL::twsExecDetails( int reqId, const IB::Contract& contract,
-	const IB::Execution& execution )
+void TwsDL::twsExecDetails( int reqId, const RowExecution &row )
 {
 	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
 		DEBUG_PRINTF( "Warning, unexpected tws callback.");
 		return;
 	}
-	((PacketExecutions*)packet)->append( reqId, contract, execution );
+	((PacketExecutions*)packet)->append( reqId, row );
 }
 
 void TwsDL::twsExecDetailsEnd( int reqId )

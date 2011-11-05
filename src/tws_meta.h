@@ -388,7 +388,7 @@ class PacketExecutions
 		
 		void clear();
 		void record( const int reqId, const ExecutionsRequest& );
-		void append( int reqId, const IB::Contract&, const IB::Execution& );
+		void append( int reqId, const RowExecution& );
 		void appendExecutionsEnd( int reqId );
 		
 		void dumpXml();

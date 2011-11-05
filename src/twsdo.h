@@ -90,6 +90,7 @@ class Packet;
 class RowHist;
 class RowAccVal;
 class RowPrtfl;
+class RowExecution;
 class RowOrderStatus;
 class RowOpenOrder;
 class PacingGod;
@@ -158,8 +159,7 @@ class TwsDL
 		void twsUpdatePortfolio( const RowPrtfl& );
 		void twsUpdateAccountTime( const std::string& timeStamp );
 		void twsAccountDownloadEnd( const std::string& accountName );
-		void twsExecDetails( int reqId, const IB::Contract&,
-			const IB::Execution& );
+		void twsExecDetails( int reqId, const RowExecution& );
 		void twsExecDetailsEnd( int reqId );
 		void twsOrderStatus( const RowOrderStatus& );
 		void twsOpenOrder( const RowOpenOrder& );
