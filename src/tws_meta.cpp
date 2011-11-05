@@ -453,6 +453,12 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 	} else if ( strcmp( tmp, "historical_data") == 0 ) {
 		PacketHistData *phd = PacketHistData::fromXml(xn);
 		_histTodo->add( phd->getRequest() );
+	} else if ( strcmp( tmp, "account") == 0 ) {
+		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
+	} else if ( strcmp( tmp, "executions") == 0 ) {
+		addSimpleRequest(GenericRequest::EXECUTIONS_REQUEST);
+	} else if ( strcmp( tmp, "open_orders") == 0 ) {
+		addSimpleRequest(GenericRequest::ORDERS_REQUEST);
 	} else {
 		fprintf(stderr, "Warning, unknown request type '%s' ignored.\n", tmp );
 		ret = 0;
