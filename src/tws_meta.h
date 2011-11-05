@@ -314,6 +314,7 @@ class PacketHistData
 
 
 
+class AccStatusRequest;
 
 struct RowAcc
 {
@@ -350,7 +351,7 @@ class PacketAccStatus
 		virtual ~PacketAccStatus();
 		
 		void clear();
-		void record( const std::string &acctCode );
+		void record( const AccStatusRequest& );
 		void append( const RowAccVal& );
 		void append( const RowPrtfl& );
 		void appendUpdateAccountTime( const std::string& timeStamp );
@@ -361,7 +362,7 @@ class PacketAccStatus
 	private:
 		void del_list_elements();
 		
-		std::string accountName;
+		AccStatusRequest *request;
 		
 		std::vector<RowAcc*> * const list;
 };
@@ -372,6 +373,7 @@ class PacketAccStatus
 
 
 
+class ExecutionsRequest;
 
 struct RowExecution
 {
@@ -387,7 +389,7 @@ class PacketExecutions
 		virtual ~PacketExecutions();
 		
 		void clear();
-		void record( const int reqId, const IB::ExecutionFilter& );
+		void record( const int reqId, const ExecutionsRequest& );
 		void append( int reqId, const IB::Contract&, const IB::Execution& );
 		void appendExecutionsEnd( int reqId );
 		
@@ -397,7 +399,7 @@ class PacketExecutions
 		void del_list_elements();
 		
 		int reqId;
-		IB::ExecutionFilter *executionFilter;
+		ExecutionsRequest *request;
 		
 		std::vector<RowExecution*> * const list;
 };
@@ -408,6 +410,7 @@ class PacketExecutions
 
 
 
+class OrdersRequest;
 
 struct RowOrd
 {
@@ -446,7 +449,7 @@ class PacketOrders
 		virtual ~PacketOrders();
 		
 		void clear();
-		void record();
+		void record( const OrdersRequest& );
 		void append( const RowOrderStatus& );
 		void append( const RowOpenOrder& );
 		void appendOpenOrderEnd();
@@ -455,6 +458,8 @@ class PacketOrders
 		
 	private:
 		void del_list_elements();
+		
+		OrdersRequest *request;
 		
 		std::vector<RowOrd*> * const list;
 };

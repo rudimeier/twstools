@@ -855,6 +855,7 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 PacketAccStatus::PacketAccStatus() :
+	request(NULL),
 	list( new std::vector<RowAcc*>() )
 {
 }
@@ -863,6 +864,9 @@ PacketAccStatus::~PacketAccStatus()
 {
 	del_list_elements();
 	delete list;
+	if( request != NULL ) {
+		delete request;
+	}
 }
 
 void PacketAccStatus::clear()
@@ -871,6 +875,10 @@ void PacketAccStatus::clear()
 	mode = CLEAN;
 	del_list_elements();
 	list->clear();
+	if( request != NULL ) {
+		delete request;
+	}
+	request = NULL;
 }
 
 void PacketAccStatus::del_list_elements()
@@ -893,11 +901,11 @@ void PacketAccStatus::del_list_elements()
 	}
 }
 
-void PacketAccStatus::record( const std::string &acctCode )
+void PacketAccStatus::record( const AccStatusRequest& aR )
 {
 	assert( empty() );
 	mode = RECORD;
-	this->accountName = acctCode;
+	this->request = new AccStatusRequest(aR);
 }
 
 void PacketAccStatus::append( const RowAccVal& row )
@@ -1011,9 +1019,7 @@ void PacketAccStatus::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"account" );
 	
-	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
-	xmlNewProp ( nqry, (xmlChar*) "accountName",
-		(const xmlChar*) accountName.c_str() );
+	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowAcc*>::const_iterator it;
@@ -1033,7 +1039,7 @@ void PacketAccStatus::dumpXml()
 
 PacketExecutions::PacketExecutions() :
 	reqId(-1),
-	executionFilter(NULL),
+	request(NULL),
 	list( new std::vector<RowExecution*>() )
 {
 }
@@ -1042,8 +1048,8 @@ PacketExecutions::~PacketExecutions()
 {
 	del_list_elements();
 	delete list;
-	if( executionFilter != NULL ) {
-		delete executionFilter;
+	if( request != NULL ) {
+		delete request;
 	}
 }
 
@@ -1053,10 +1059,10 @@ void PacketExecutions::clear()
 	mode = CLEAN;
 	del_list_elements();
 	list->clear();
-	if( executionFilter != NULL ) {
-		delete executionFilter;
+	if( request != NULL ) {
+		delete request;
 	}
-	executionFilter = NULL;
+	request = NULL;
 }
 
 void PacketExecutions::del_list_elements()
@@ -1067,12 +1073,12 @@ void PacketExecutions::del_list_elements()
 	}
 }
 
-void PacketExecutions::record(  const int reqId, const IB::ExecutionFilter &eF )
+void PacketExecutions::record(  const int reqId, const ExecutionsRequest &eR )
 {
 	assert( empty() );
 	mode = RECORD;
 	this->reqId = reqId;
-	this->executionFilter = new IB::ExecutionFilter( eF );
+	this->request = new ExecutionsRequest( eR );
 }
 
 void PacketExecutions::append( int reqId,
@@ -1105,8 +1111,7 @@ void PacketExecutions::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"executions" );
 	
-	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "executionFilter", *executionFilter );
+	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowExecution*>::const_iterator it;
@@ -1124,6 +1129,7 @@ void PacketExecutions::dumpXml()
 
 
 PacketOrders::PacketOrders() :
+	request(NULL),
 	list( new std::vector<RowOrd*>() )
 {
 }
@@ -1132,6 +1138,9 @@ PacketOrders::~PacketOrders()
 {
 	del_list_elements();
 	delete list;
+	if( request != NULL ) {
+		delete request;
+	}
 }
 
 void PacketOrders::clear()
@@ -1140,6 +1149,10 @@ void PacketOrders::clear()
 	mode = CLEAN;
 	del_list_elements();
 	list->clear();
+	if( request != NULL ) {
+		delete request;
+	}
+	request = NULL;
 }
 
 void PacketOrders::del_list_elements()
@@ -1158,10 +1171,11 @@ void PacketOrders::del_list_elements()
 	}
 }
 
-void PacketOrders::record()
+void PacketOrders::record( const OrdersRequest &oR )
 {
 	assert( empty() );
 	mode = RECORD;
+	this->request = new OrdersRequest( oR );
 }
 
 void PacketOrders::append( const RowOrderStatus& row )
@@ -1229,7 +1243,7 @@ void PacketOrders::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"open_orders" );
 	
-	/*xmlNodePtr nqry = */xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowOrd*>::const_iterator it;

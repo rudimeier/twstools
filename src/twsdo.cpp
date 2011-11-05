@@ -1058,8 +1058,12 @@ void TwsDL::reqAccStatus()
 	packet = accStatus;
 	currentRequest.nextRequest( GenericRequest::ACC_STATUS_REQUEST );
 	
-	accStatus->record( cfg.tws_account_name );
-	twsClient->reqAccountUpdates(true, cfg.tws_account_name);
+	AccStatusRequest aR;
+	aR.subscribe = true;
+	aR.acctCode = cfg.tws_account_name;
+	
+	accStatus->record( aR );
+	twsClient->reqAccountUpdates(aR.subscribe, aR.acctCode);
 	changeState( WAIT_DATA );
 }
 
@@ -1069,10 +1073,10 @@ void TwsDL::reqExecutions()
 	packet = executions;
 	currentRequest.nextRequest( GenericRequest::EXECUTIONS_REQUEST );
 	
-	IB::ExecutionFilter eF;
+	ExecutionsRequest eR;
 	
-	executions->record( currentRequest.reqId(), eF );
-	twsClient->reqExecutions( currentRequest.reqId(), eF);
+	executions->record( currentRequest.reqId(), eR );
+	twsClient->reqExecutions( currentRequest.reqId(), eR.executionFilter);
 	changeState( WAIT_DATA );
 }
 
@@ -1082,7 +1086,9 @@ void TwsDL::reqOrders()
 	packet = orders;
 	currentRequest.nextRequest( GenericRequest::ORDERS_REQUEST );
 	
-	orders->record();
+	OrdersRequest oR;
+	
+	orders->record( oR );
 	twsClient->reqAllOpenOrders();
 	changeState( WAIT_DATA );
 }
