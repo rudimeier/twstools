@@ -773,6 +773,14 @@ void to_xml( xmlNodePtr parent, const RowAcc& row )
 }
 
 
+void to_xml( xmlNodePtr parent, const RowExecution &row )
+{
+	xmlNodePtr nrow = xmlNewChild( parent,
+		NULL, (const xmlChar*)"ExecDetails", NULL);
+	conv_ib2xml( nrow, "contract", row.contract );
+	conv_ib2xml( nrow, "execution", row.execution );
+}
+
 
 
 void from_xml( RowHist *row, const xmlNodePtr node )
@@ -792,6 +800,12 @@ void from_xml( RowHist *row, const xmlNodePtr node )
 }
 
 void from_xml( RowAcc* /*row*/, const xmlNodePtr /*node*/ )
+{
+	/* not implemented yet */
+	assert( false );
+}
+
+void from_xml( RowExecution* /*row*/, const xmlNodePtr /*node*/ )
 {
 	/* not implemented yet */
 	assert( false );

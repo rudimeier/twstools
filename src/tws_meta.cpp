@@ -918,14 +918,6 @@ void PacketExecutions::appendExecutionsEnd( int reqId )
 	mode = CLOSED;
 }
 
-static void conv2xml( xmlNodePtr parent, const RowExecution *row )
-{
-		xmlNodePtr nrow = xmlNewChild( parent,
-			NULL, (const xmlChar*)"ExecDetails", NULL);
-		conv_ib2xml( nrow, "contract", row->contract );
-		conv_ib2xml( nrow, "execution", row->execution );
-}
-
 void PacketExecutions::dumpXml()
 {
 	xmlNodePtr root = TwsXml::newDocRoot();
@@ -939,7 +931,7 @@ void PacketExecutions::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowExecution*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		conv2xml( nrsp, (*it) );
+		to_xml( nrsp, **it );
 	}
 	
 	TwsXml::dumpAndFree( root );
