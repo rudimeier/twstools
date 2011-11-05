@@ -100,3 +100,11 @@ std::string HistRequest::toString() const
 	
 	return std::string(buf_a);
 }
+
+
+
+
+AccStatusRequest::AccStatusRequest() :
+	subscribe(true)
+{
+}

@@ -39,6 +39,7 @@
 #define TWS_QUERY_H
 
 #include "twsapi/Contract.h"
+#include "twsapi/Execution.h"
 
 
 class ContractDetailsRequest
@@ -72,5 +73,34 @@ class HistRequest
 		int useRTH;
 		int formatDate;
 };
+
+
+
+
+class AccStatusRequest
+{
+	public:
+		AccStatusRequest();
+		
+		bool subscribe;
+		std::string acctCode;
+};
+
+
+
+
+class ExecutionsRequest
+{
+	public:
+		IB::ExecutionFilter executionFilter;
+};
+
+
+
+
+class OrdersRequest
+{
+};
+
 
 #endif
