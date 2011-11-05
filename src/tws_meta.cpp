@@ -640,8 +640,6 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 
 void PacketHistData::dumpXml()
 {
-	char tmp[128];
-	
 	xmlNodePtr root = TwsXml::newDocRoot();
 	xmlNodePtr nphd = xmlNewChild( root, NULL,
 		(const xmlChar*)"request", NULL );
@@ -651,32 +649,11 @@ void PacketHistData::dumpXml()
 	to_xml(nphd, *request);
 	
 	if( mode == CLOSED ) {
-	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
-	{
-		static const RowHist &dflt = RowHist::dflt;
+		xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 		for( size_t i=0; i<rows.size(); i++ ) {
-			xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
-			ADD_ATTR_STRING( rows[i], date );
-			ADD_ATTR_DOUBLE( rows[i], open );
-			ADD_ATTR_DOUBLE( rows[i], high );
-			ADD_ATTR_DOUBLE( rows[i], low );
-			ADD_ATTR_DOUBLE( rows[i], close );
-			ADD_ATTR_INT( rows[i], volume );
-			ADD_ATTR_INT( rows[i], count );
-			ADD_ATTR_DOUBLE( rows[i], WAP );
-			ADD_ATTR_BOOL( rows[i], hasGaps );
+			to_xml( nrsp, "row", rows[i] );
 		}
-		xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
-		ADD_ATTR_STRING( finishRow, date );
-		ADD_ATTR_DOUBLE( finishRow, open );
-		ADD_ATTR_DOUBLE( finishRow, high );
-		ADD_ATTR_DOUBLE( finishRow, low );
-		ADD_ATTR_DOUBLE( finishRow, close );
-		ADD_ATTR_INT( finishRow, volume );
-		ADD_ATTR_INT( finishRow, count );
-		ADD_ATTR_DOUBLE( finishRow, WAP );
-		ADD_ATTR_BOOL( finishRow, hasGaps );
-	}
+		to_xml( nrsp, "fin", finishRow );
 	}
 	TwsXml::dumpAndFree( root );
 }

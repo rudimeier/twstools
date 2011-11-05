@@ -704,6 +704,26 @@ void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 
 
 
+void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
+{
+	char tmp[128];
+	static const RowHist &dflt = RowHist::dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)name, NULL);
+	ADD_ATTR_STRING( r, date );
+	ADD_ATTR_DOUBLE( r, open );
+	ADD_ATTR_DOUBLE( r, high );
+	ADD_ATTR_DOUBLE( r, low );
+	ADD_ATTR_DOUBLE( r, close );
+	ADD_ATTR_INT( r, volume );
+	ADD_ATTR_INT( r, count );
+	ADD_ATTR_DOUBLE( r, WAP );
+	ADD_ATTR_BOOL( r, hasGaps );
+}
+
+
+
+
 void from_xml( RowHist *row, const xmlNodePtr node )
 {
 	char* tmp;

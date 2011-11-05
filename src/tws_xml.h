@@ -100,6 +100,8 @@ void from_xml( OrdersRequest*, const xmlNodePtr node );
 
 class RowHist;
 
+void to_xml( xmlNodePtr parent, const char* name, const RowHist& );
+
 void from_xml( RowHist*, const xmlNodePtr node );
 
 
