@@ -81,12 +81,21 @@ void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
 
 class ContractDetailsRequest;
 class HistRequest;
+class AccStatusRequest;
+class ExecutionsRequest;
+class OrdersRequest;
 
 void to_xml( xmlNodePtr parent, const ContractDetailsRequest& );
 void to_xml( xmlNodePtr parent, const HistRequest& );
+void to_xml( xmlNodePtr parent, const AccStatusRequest& );
+void to_xml( xmlNodePtr parent, const ExecutionsRequest& );
+void to_xml( xmlNodePtr parent, const OrdersRequest& );
 
 void from_xml( ContractDetailsRequest*, const xmlNodePtr node );
 void from_xml( HistRequest*, const xmlNodePtr node );
+void from_xml( AccStatusRequest*, const xmlNodePtr node );
+void from_xml( ExecutionsRequest*, const xmlNodePtr node );
+void from_xml( OrdersRequest*, const xmlNodePtr node );
 
 
 
