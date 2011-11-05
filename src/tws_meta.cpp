@@ -648,6 +648,10 @@ void PacketContractDetails::dumpXml()
 
 
 
+/* we need a default object but want to avoid a slow default constructor */
+const PacketHistData::Row PacketHistData::Row::dflt
+	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
+
 void PacketHistData::Row::clear()
 {
 	date = "";
@@ -664,7 +668,7 @@ void PacketHistData::Row::clear()
 PacketHistData::Row * PacketHistData::Row::fromXml( xmlNodePtr node )
 {
 	char* tmp;
-	static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
+	static const Row &dflt = Row::dflt;
 	Row *row = new Row();
 	
 	GET_ATTR_STRING( row, date );
@@ -744,7 +748,7 @@ void PacketHistData::dumpXml()
 	if( mode == CLOSED ) {
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 	{
-		static const Row dflt = {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, 0 };
+		static const Row &dflt = Row::dflt;
 		for( size_t i=0; i<rows.size(); i++ ) {
 			xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
 			ADD_ATTR_STRING( rows[i], date );

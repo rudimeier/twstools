@@ -290,6 +290,7 @@ class PacketHistData
 		class Row
 		{
 			public:
+				static const Row dflt;
 				void clear();
 				static Row * fromXml( xmlNodePtr );
 				
