@@ -169,11 +169,10 @@ void TwsDlWrapper::contractDetailsEnd( int reqId )
 
 void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 	double open, double high, double low, double close, int volume,
-	int barCount, double WAP, int hasGaps )
+	int count, double WAP, int hasGaps )
 {
-	parentTwsDL->twsHistoricalData(
-		reqId, date, open, high, low, close, volume,
-		barCount, WAP, hasGaps);
+	RowHist row = { date, open, high, low, close, volume, count, WAP, hasGaps };
+	parentTwsDL->twsHistoricalData( reqId, row );
 }
 
 
@@ -810,8 +809,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 }
 
 
-void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, double high, double low,
-			double close, int volume, int count, double WAP, bool hasGaps )
+void TwsDL::twsHistoricalData( int reqId, const RowHist &row )
 {
 	if( currentRequest.reqType() != GenericRequest::HIST_REQUEST ) {
 		DEBUG_PRINTF( "Warning, unexpected tws callback.");
@@ -827,8 +825,7 @@ void TwsDL::twsHistoricalData( int reqId, const std::string &date, double open, 
 	dataFarms.learnHmds( workTodo->getHistTodo().current().ibContract );
 	
 	assert( !packet->finished() );
-	((PacketHistData*)packet)->append( reqId, date, open, high, low,
-		close, volume, count, WAP, hasGaps );
+	((PacketHistData*)packet)->append( reqId, row );
 	
 	if( packet->finished() ) {
 		DEBUG_PRINTF( "READY %p %d",

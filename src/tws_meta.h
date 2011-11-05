@@ -294,9 +294,7 @@ class PacketHistData
 		const HistRequest& getRequest() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
-		void append( int reqId, const std::string &date,
-			double open, double high, double low, double close,
-			int volume, int count, double WAP, bool hasGaps );
+		void append( int reqId, const RowHist& );
 		void dump( bool printFormatDates );
 		
 		void dumpXml();

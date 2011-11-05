@@ -792,17 +792,12 @@ void PacketHistData::record( int reqId, const HistRequest& hR )
 }
 
 
-void PacketHistData::append( int reqId, const std::string &date,
-			double open, double high, double low, double close,
-			int volume, int count, double WAP, bool hasGaps )
+void PacketHistData::append( int reqId,  const RowHist &row )
 {
 	assert( mode == RECORD && error == REQ_ERR_NONE );
 	assert( this->reqId == reqId );
 	
-	RowHist row = { date, open, high, low, close,
-		volume, count, WAP, hasGaps };
-	
-	if( strncmp(date.c_str(), "finished", 8) == 0) {
+	if( strncmp( row.date.c_str(), "finished", 8) == 0) {
 		mode = CLOSED;
 		finishRow = row;
 	} else {

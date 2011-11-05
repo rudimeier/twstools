@@ -87,6 +87,7 @@ class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class Packet;
+class RowHist;
 class RowAccVal;
 class RowPrtfl;
 class RowOrderStatus;
@@ -152,9 +153,7 @@ class TwsDL
 		void twsBondContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
 		void twsContractDetailsEnd( int reqId );
-		void twsHistoricalData( int reqId, const std::string &date, double open,
-			double high, double low, double close, int volume, int count,
-			double WAP, bool hasGaps );
+		void twsHistoricalData( int reqId, const RowHist& );
 		void twsUpdateAccountValue( const RowAccVal& );
 		void twsUpdatePortfolio( const RowPrtfl& );
 		void twsUpdateAccountTime( const std::string& timeStamp );
