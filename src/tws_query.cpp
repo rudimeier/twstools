@@ -1,4 +1,4 @@
-/*** tws_req.cpp -- structs for IB/API requests
+/*** tws_query.cpp -- structs for IB/API requests
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *
