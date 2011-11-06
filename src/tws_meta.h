@@ -66,11 +66,6 @@ enum req_err
 
 
 
-const char* short_wts( const char* wts );
-const char* short_bar_size( const char* bar_size );
-
-
-
 
 
 

@@ -60,6 +60,8 @@ std::string ibToString( int ibTickType);
 std::string ibToString( const IB::Execution& );
 std::string ibToString( const IB::Contract&, bool showFields = false );
 
+const char* short_wts( const char* wts );
+const char* short_bar_size( const char* bar_size );
 
 
 #endif
