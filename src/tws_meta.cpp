@@ -439,6 +439,35 @@ void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 }
 
 
+int WorkTodo::read_req( const xmlNodePtr xn )
+{
+	int ret = 1;
+	char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
+	
+	if( tmp == NULL ) {
+		fprintf(stderr, "Warning, no request type specified.\n");
+		ret = 0;
+	} else if( strcmp( tmp, "contract_details") == 0 ) {
+		PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
+		_contractDetailsTodo->add(pcd->getRequest());
+	} else if ( strcmp( tmp, "historical_data") == 0 ) {
+		PacketHistData *phd = PacketHistData::fromXml(xn);
+		_histTodo->add( phd->getRequest() );
+	} else if ( strcmp( tmp, "account") == 0 ) {
+		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
+	} else if ( strcmp( tmp, "executions") == 0 ) {
+		addSimpleRequest(GenericRequest::EXECUTIONS_REQUEST);
+	} else if ( strcmp( tmp, "open_orders") == 0 ) {
+		addSimpleRequest(GenericRequest::ORDERS_REQUEST);
+	} else {
+		fprintf(stderr, "Warning, unknown request type '%s' ignored.\n", tmp );
+		ret = 0;
+	}
+	
+	free(tmp);
+	return ret;
+}
+
 int WorkTodo::read_file( const char *fileName )
 {
 	int retVal = -1;
@@ -452,22 +481,7 @@ int WorkTodo::read_file( const char *fileName )
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		assert( xn->type == XML_ELEMENT_NODE  );
 		if( strcmp((char*)xn->name, "request") == 0 ) {
-			char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
-			if( tmp == NULL ) {
-				fprintf(stderr, "Warning, no request type specified.\n");
-			} else if( strcmp( tmp, "contract_details") == 0 ) {
-				PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
-				_contractDetailsTodo->add(pcd->getRequest());
-				retVal++;
-			} else if ( strcmp( tmp, "historical_data") == 0 ) {
-				PacketHistData *phd = PacketHistData::fromXml(xn);
-				_histTodo->add( phd->getRequest() );
-				retVal++;
-			} else {
-				fprintf(stderr, "Warning, unknown request type '%s' ignored.\n",
-					tmp );
-			}
-			free(tmp);
+			retVal += read_req( xn );
 		} else {
 			fprintf(stderr, "Warning, unknown request tag '%s' ignored.\n",
 				xn->name );
@@ -617,8 +631,7 @@ void PacketContractDetails::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"contract_details" );
 	
-	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "reqContract", request->ibContract() );
+	to_xml(npcd, *request );
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	for( size_t i=0; i<cdList->size(); i++ ) {
@@ -726,19 +739,7 @@ void PacketHistData::dumpXml()
 	xmlNewProp( nphd, (const xmlChar*)"type",
 		(const xmlChar*)"historical_data" );
 	
-	{
-		static const HistRequest dflt;
-		const IB::Contract &c = request->ibContract;
-		
-		xmlNodePtr ne = xmlNewChild( nphd, NULL, (xmlChar*)"query", NULL);
-		conv_ib2xml( ne, "reqContract", c );
-		ADD_ATTR_STRING( (*request), endDateTime );
-		ADD_ATTR_STRING( (*request), durationStr );
-		ADD_ATTR_STRING( (*request), barSizeSetting );
-		ADD_ATTR_STRING( (*request), whatToShow );
-		ADD_ATTR_INT( (*request), useRTH );
-		ADD_ATTR_INT( (*request), formatDate );
-	}
+	to_xml(nphd, *request);
 	
 	if( mode == CLOSED ) {
 	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
@@ -868,6 +869,7 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 PacketAccStatus::PacketAccStatus() :
+	request(NULL),
 	list( new std::vector<RowAcc*>() )
 {
 }
@@ -876,6 +878,9 @@ PacketAccStatus::~PacketAccStatus()
 {
 	del_list_elements();
 	delete list;
+	if( request != NULL ) {
+		delete request;
+	}
 }
 
 void PacketAccStatus::clear()
@@ -884,6 +889,10 @@ void PacketAccStatus::clear()
 	mode = CLEAN;
 	del_list_elements();
 	list->clear();
+	if( request != NULL ) {
+		delete request;
+	}
+	request = NULL;
 }
 
 void PacketAccStatus::del_list_elements()
@@ -906,11 +915,11 @@ void PacketAccStatus::del_list_elements()
 	}
 }
 
-void PacketAccStatus::record( const std::string &acctCode )
+void PacketAccStatus::record( const AccStatusRequest& aR )
 {
 	assert( empty() );
 	mode = RECORD;
-	this->accountName = acctCode;
+	this->request = new AccStatusRequest(aR);
 }
 
 void PacketAccStatus::append( const RowAccVal& row )
@@ -1024,9 +1033,7 @@ void PacketAccStatus::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"account" );
 	
-	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
-	xmlNewProp ( nqry, (xmlChar*) "accountName",
-		(const xmlChar*) accountName.c_str() );
+	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowAcc*>::const_iterator it;
@@ -1046,7 +1053,7 @@ void PacketAccStatus::dumpXml()
 
 PacketExecutions::PacketExecutions() :
 	reqId(-1),
-	executionFilter(NULL),
+	request(NULL),
 	list( new std::vector<RowExecution*>() )
 {
 }
@@ -1055,8 +1062,8 @@ PacketExecutions::~PacketExecutions()
 {
 	del_list_elements();
 	delete list;
-	if( executionFilter != NULL ) {
-		delete executionFilter;
+	if( request != NULL ) {
+		delete request;
 	}
 }
 
@@ -1066,10 +1073,10 @@ void PacketExecutions::clear()
 	mode = CLEAN;
 	del_list_elements();
 	list->clear();
-	if( executionFilter != NULL ) {
-		delete executionFilter;
+	if( request != NULL ) {
+		delete request;
 	}
-	executionFilter = NULL;
+	request = NULL;
 }
 
 void PacketExecutions::del_list_elements()
@@ -1080,12 +1087,12 @@ void PacketExecutions::del_list_elements()
 	}
 }
 
-void PacketExecutions::record(  const int reqId, const IB::ExecutionFilter &eF )
+void PacketExecutions::record(  const int reqId, const ExecutionsRequest &eR )
 {
 	assert( empty() );
 	mode = RECORD;
 	this->reqId = reqId;
-	this->executionFilter = new IB::ExecutionFilter( eF );
+	this->request = new ExecutionsRequest( eR );
 }
 
 void PacketExecutions::append( int reqId,
@@ -1118,8 +1125,7 @@ void PacketExecutions::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"executions" );
 	
-	xmlNodePtr nqry = xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
-	conv_ib2xml( nqry, "executionFilter", *executionFilter );
+	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowExecution*>::const_iterator it;
@@ -1137,6 +1143,7 @@ void PacketExecutions::dumpXml()
 
 
 PacketOrders::PacketOrders() :
+	request(NULL),
 	list( new std::vector<RowOrd*>() )
 {
 }
@@ -1145,6 +1152,9 @@ PacketOrders::~PacketOrders()
 {
 	del_list_elements();
 	delete list;
+	if( request != NULL ) {
+		delete request;
+	}
 }
 
 void PacketOrders::clear()
@@ -1153,6 +1163,10 @@ void PacketOrders::clear()
 	mode = CLEAN;
 	del_list_elements();
 	list->clear();
+	if( request != NULL ) {
+		delete request;
+	}
+	request = NULL;
 }
 
 void PacketOrders::del_list_elements()
@@ -1171,10 +1185,11 @@ void PacketOrders::del_list_elements()
 	}
 }
 
-void PacketOrders::record()
+void PacketOrders::record( const OrdersRequest &oR )
 {
 	assert( empty() );
 	mode = RECORD;
+	this->request = new OrdersRequest( oR );
 }
 
 void PacketOrders::append( const RowOrderStatus& row )
@@ -1242,7 +1257,7 @@ void PacketOrders::dumpXml()
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"open_orders" );
 	
-	/*xmlNodePtr nqry = */xmlNewChild( npcd, NULL, (xmlChar*)"query", NULL);
+	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowOrd*>::const_iterator it;

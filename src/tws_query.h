@@ -1,4 +1,4 @@
-/*** tws_req.h -- structs for IB/API requests
+/*** tws_query.h -- structs for IB/API requests
  *
  * Copyright (C) 2010, 2011 Ruediger Meier
  *
@@ -39,6 +39,7 @@
 #define TWS_QUERY_H
 
 #include "twsapi/Contract.h"
+#include "twsapi/Execution.h"
 
 
 class ContractDetailsRequest
@@ -72,5 +73,34 @@ class HistRequest
 		int useRTH;
 		int formatDate;
 };
+
+
+
+
+class AccStatusRequest
+{
+	public:
+		AccStatusRequest();
+		
+		bool subscribe;
+		std::string acctCode;
+};
+
+
+
+
+class ExecutionsRequest
+{
+	public:
+		IB::ExecutionFilter executionFilter;
+};
+
+
+
+
+class OrdersRequest
+{
+};
+
 
 #endif

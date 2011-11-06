@@ -601,6 +601,50 @@ void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 }
 
 
+void to_xml( xmlNodePtr parent, const ContractDetailsRequest& cdr)
+{
+	xmlNodePtr nqry = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( nqry, "reqContract", cdr.ibContract() );
+}
+
+void to_xml( xmlNodePtr parent, const HistRequest& hr)
+{
+	char tmp[128];
+	static const HistRequest dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( ne, "reqContract", hr.ibContract );
+	ADD_ATTR_STRING( hr, endDateTime );
+	ADD_ATTR_STRING( hr, durationStr );
+	ADD_ATTR_STRING( hr, barSizeSetting );
+	ADD_ATTR_STRING( hr, whatToShow );
+	ADD_ATTR_INT( hr, useRTH );
+	ADD_ATTR_INT( hr, formatDate );
+}
+
+void to_xml( xmlNodePtr parent, const AccStatusRequest &aR )
+{
+	static const AccStatusRequest dflt;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+	ADD_ATTR_BOOL( aR, subscribe );
+	ADD_ATTR_STRING( aR, acctCode );
+}
+
+void to_xml( xmlNodePtr parent, const ExecutionsRequest &eR )
+{
+	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+	conv_ib2xml( ne, "executionFilter", eR.executionFilter );
+}
+
+void to_xml( xmlNodePtr parent, const OrdersRequest& /*oR*/)
+{
+	/*xmlNodePtr ne =*/ xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
+}
+
+
+
+
 void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
 {
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
@@ -631,6 +675,29 @@ void from_xml( HistRequest *hR, const xmlNodePtr node )
 	GET_ATTR_STRING( hR, whatToShow );
 	GET_ATTR_INT( hR, useRTH );
 	GET_ATTR_INT( hR, formatDate );
+}
+
+void from_xml( AccStatusRequest *aR, const xmlNodePtr node )
+{
+	char* tmp;
+	static const AccStatusRequest dflt;
+	
+	GET_ATTR_BOOL( aR, subscribe );
+	GET_ATTR_STRING( aR, acctCode );
+}
+
+void from_xml( ExecutionsRequest *eR, const xmlNodePtr node )
+{
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "executionFilter") == 0 )  {
+			conv_xml2ib( &eR->executionFilter, p);
+		}
+	}
+}
+
+void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
+{
 }
 
 
