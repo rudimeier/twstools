@@ -265,6 +265,21 @@ PacketContractDetails::constList() const
 
 
 
+struct RowHist
+{
+	static const RowHist dflt;
+	static RowHist * fromXml( xmlNodePtr );
+	
+	std::string date;
+	double open;
+	double high;
+	double low;
+	double close;
+	int volume;
+	int count;
+	double WAP;
+	bool hasGaps;
+};
 
 
 class PacketHistData
@@ -279,35 +294,16 @@ class PacketHistData
 		const HistRequest& getRequest() const;
 		void clear();
 		void record( int reqId, const HistRequest& );
-		void append( int reqId, const std::string &date,
-			double open, double high, double low, double close,
-			int volume, int count, double WAP, bool hasGaps );
+		void append( int reqId, const RowHist& );
 		void dump( bool printFormatDates );
 		
 		void dumpXml();
 		
 	private:
-		class Row
-		{
-			public:
-				void clear();
-				static Row * fromXml( xmlNodePtr );
-				
-				std::string date;
-				double open;
-				double high;
-				double low;
-				double close;
-				int volume;
-				int count;
-				double WAP;
-				bool hasGaps;
-		};
-		
 		int reqId;
 		HistRequest *request;
-		std::vector<Row> &rows;
-		Row finishRow;
+		std::vector<RowHist> &rows;
+		RowHist finishRow;
 };
 
 
@@ -392,7 +388,7 @@ class PacketExecutions
 		
 		void clear();
 		void record( const int reqId, const ExecutionsRequest& );
-		void append( int reqId, const IB::Contract&, const IB::Execution& );
+		void append( int reqId, const RowExecution& );
 		void appendExecutionsEnd( int reqId );
 		
 		void dumpXml();
