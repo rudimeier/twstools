@@ -13,6 +13,7 @@ Major bug fixes, minor build fixes.
   - build fix, missing define IB_USE_STD_STRING (thanks Matt Flax)
   - provide simple test suite (make check)
   - a little internal code refactoring to prepare new features
+  - account status requests can be read from file
 
 
 
