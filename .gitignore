@@ -8,6 +8,7 @@ ui_*
 *.a
 *.so
 *.so.*
+*.spec
 *.cfg
 *.cfg.*
 *.log

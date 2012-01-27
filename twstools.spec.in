@@ -1,0 +1,42 @@
+#
+# spec file for package @PACKAGE@
+#
+
+
+Name:           @PACKAGE@
+Version:        @VERSION@
+Release:        1%{?dist}
+Summary:        Interactive Brokers Data Download tool
+License:        BSD-3-Clause
+Group:          System Environment/Libraries
+URL:            http://www.interactivebrokers.com/
+Source:         @PACKAGE@-%{version}.tar.gz
+Requires:       twsapi
+BuildRequires:  gengetopt
+BuildRequires:  twsapi-devel
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+
+%description
+Data download tool for Interactive Brokers TWS
+
+%prep
+%setup -q
+
+%build
+%configure
+%{__make}
+
+%install
+%{__rm} -rf %{buildroot}
+make DESTDIR=%{buildroot} install
+# add samples to docs.
+%{__cp} -p --parent sample/*.sh sample/*.xml %{buildroot}%{_docdir}/%{name}/
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/twsdo
+%{_bindir}/twsgen
+%doc %{_docdir}/%{name}/
