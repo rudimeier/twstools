@@ -6,11 +6,11 @@
 Name:           @PACKAGE@
 Version:        @VERSION@
 Release:        1%{?dist}
-Summary:        Interactive Brokers Data Download tool
+Summary:        Command line tools around Interactive Brokers TWS API
 License:        BSD-3-Clause
-Group:          System Environment/Libraries
-URL:            http://www.interactivebrokers.com/
-Source:         @PACKAGE@-%{version}.tar.gz
+Group:          Productivity/Text/Utilities
+URL:            https://github.com/rudimeier/twstools/
+Source:         %{name}-%{version}.tar.gz
 BuildRequires:  gcc-c++
 BuildRequires:  libxml2-devel >= 2.7
 BuildRequires:  pkgconfig
@@ -18,7 +18,10 @@ BuildRequires:  twsapi-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
-Data download tool for Interactive Brokers TWS
+This is a simple set of command line tools around IB's TWS API with the
+purpose of having a powerful scriptable toolbox to automate "jobs" like
+downloading historical data, tracking account info or submitting orders
+etc.
 
 %prep
 %setup -q
