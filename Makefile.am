@@ -9,3 +9,10 @@ doc_DATA += ChangeLog
 
 dist_doc_DATA =
 dist_doc_DATA += LICENSE
+
+EXTRA_DIST =
+EXTRA_DIST += $(PACKAGE).spec
+
+# Rule to build RPM distribution package
+rpm: dist-gzip
+	rpmbuild -ta $(distdir).tar.gz
