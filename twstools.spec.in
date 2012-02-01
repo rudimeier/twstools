@@ -11,8 +11,9 @@ License:        BSD-3-Clause
 Group:          System Environment/Libraries
 URL:            http://www.interactivebrokers.com/
 Source:         @PACKAGE@-%{version}.tar.gz
-Requires:       twsapi
-BuildRequires:  gengetopt
+BuildRequires:  gcc-c++
+BuildRequires:  libxml2-devel >= 2.7
+BuildRequires:  pkgconfig
 BuildRequires:  twsapi-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
