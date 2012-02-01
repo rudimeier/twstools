@@ -24,16 +24,15 @@ Data download tool for Interactive Brokers TWS
 
 %build
 %configure --docdir=%{_docdir}/%{name}
-%{__make}
+make %{?_smp_mflags}
 
 %install
-%{__rm} -rf %{buildroot}
-make DESTDIR=%{buildroot} install
+%{?make_install} %{!?make_install:make install DESTDIR=%{buildroot}}
 # add samples to docs.
-%{__cp} -p --parent sample/*.sh sample/*.xml %{buildroot}%{_docdir}/%{name}/
+cp -p --parent sample/*.sh sample/*.xml %{buildroot}%{_docdir}/%{name}/
 
 %clean
-%{__rm} -rf %{buildroot}
+rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
