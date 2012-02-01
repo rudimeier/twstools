@@ -23,7 +23,7 @@ Data download tool for Interactive Brokers TWS
 %setup -q
 
 %build
-%configure
+%configure --docdir=%{_docdir}/%{name}
 %{__make}
 
 %install
