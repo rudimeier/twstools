@@ -30,6 +30,9 @@ etc.
 %configure --docdir=%{_docdir}/%{name}
 make %{?_smp_mflags}
 
+%check
+make check
+
 %install
 %{?make_install} %{!?make_install:make install DESTDIR=%{buildroot}}
 # add samples to docs.
