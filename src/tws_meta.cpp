@@ -584,10 +584,6 @@ void PacketContractDetails::dumpXml()
 
 
 
-/* we need a default object but want to avoid a slow default constructor */
-const RowHist RowHist::dflt
-	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
-
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<RowHist>()))
 {
@@ -674,7 +670,7 @@ void PacketHistData::clear()
 		request = NULL;
 	}
 	rows.clear();
-	finishRow = RowHist::dflt;
+	finishRow = dflt_RowHist;
 }
 
 

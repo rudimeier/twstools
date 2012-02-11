@@ -707,7 +707,7 @@ void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
 {
 	char tmp[128];
-	static const RowHist &dflt = RowHist::dflt;
+	static const RowHist &dflt = dflt_RowHist;
 	
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)name, NULL);
 	ADD_ATTR_STRING( r, date );
@@ -822,7 +822,7 @@ void to_xml( xmlNodePtr parent, const RowOrd &row)
 void from_xml( RowHist *row, const xmlNodePtr node )
 {
 	char* tmp;
-	static const RowHist &dflt = RowHist::dflt;
+	static const RowHist &dflt = dflt_RowHist;
 	
 	GET_ATTR_STRING( row, date );
 	GET_ATTR_DOUBLE( row, open );
