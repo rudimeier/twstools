@@ -40,6 +40,7 @@
 
 #include "twsapi/Contract.h"
 #include "twsapi/Execution.h"
+#include "twsapi/Order.h"
 
 
 class ContractDetailsRequest
@@ -100,6 +101,16 @@ class ExecutionsRequest
 
 class OrdersRequest
 {
+};
+
+
+
+
+class PlaceOrder
+{
+	public:
+		IB::Contract contract;
+		IB::Order order;
 };
 
 
