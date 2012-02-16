@@ -98,6 +98,22 @@ void from_xml( ExecutionsRequest*, const xmlNodePtr node );
 void from_xml( OrdersRequest*, const xmlNodePtr node );
 
 
+class RowHist;
+class RowAcc;
+class RowExecution;
+class RowOrd;
+
+void to_xml( xmlNodePtr parent, const char* name, const RowHist& );
+void to_xml( xmlNodePtr parent, const RowAcc& );
+void to_xml( xmlNodePtr parent, const RowExecution& );
+void to_xml( xmlNodePtr parent, const RowOrd& );
+
+void from_xml( RowHist*, const xmlNodePtr node );
+void from_xml( RowAcc*, const xmlNodePtr node );
+void from_xml( RowExecution*, const xmlNodePtr node );
+void from_xml( RowOrd*, const xmlNodePtr node );
+
+
 
 
 class TwsXml
@@ -188,6 +204,23 @@ class TwsXml
 		xmlNewProp ( ne, (xmlChar*) #_attr_, \
 			(xmlChar*) _struct_._attr_.c_str() ); \
 	}
+
+
+#define A_ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_LONG( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
+	snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
+
+#define A_ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
+	xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
+		(const xmlChar*) _struct_._attr_.c_str() )
 
 
 #endif

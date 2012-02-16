@@ -262,9 +262,6 @@ PacketContractDetails::constList() const
 
 struct RowHist
 {
-	static const RowHist dflt;
-	static RowHist * fromXml( xmlNodePtr );
-	
 	std::string date;
 	double open;
 	double high;
@@ -276,6 +273,9 @@ struct RowHist
 	bool hasGaps;
 };
 
+/* we need a default object but want to avoid a slow default constructor */
+static const RowHist dflt_RowHist
+ 	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
 
 class PacketHistData
 	: public  Packet

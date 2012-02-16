@@ -38,6 +38,7 @@
 #include "tws_xml.h"
 
 #include "debug.h"
+#include "tws_meta.h"
 #include "tws_query.h"
 #include "tws_util.h"
 #include "twsapi/Contract.h"
@@ -698,6 +699,158 @@ void from_xml( ExecutionsRequest *eR, const xmlNodePtr node )
 
 void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 {
+}
+
+
+
+
+void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
+{
+	char tmp[128];
+	static const RowHist &dflt = dflt_RowHist;
+	
+	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)name, NULL);
+	ADD_ATTR_STRING( r, date );
+	ADD_ATTR_DOUBLE( r, open );
+	ADD_ATTR_DOUBLE( r, high );
+	ADD_ATTR_DOUBLE( r, low );
+	ADD_ATTR_DOUBLE( r, close );
+	ADD_ATTR_INT( r, volume );
+	ADD_ATTR_INT( r, count );
+	ADD_ATTR_DOUBLE( r, WAP );
+	ADD_ATTR_BOOL( r, hasGaps );
+}
+
+void to_xml( xmlNodePtr parent, const RowAcc& row )
+{
+	char tmp[128];
+	switch( row.type ) {
+	case RowAcc::t_AccVal:
+		{
+			const RowAccVal &d = *(RowAccVal*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"AccVal", NULL);
+			A_ADD_ATTR_STRING( nrow, d, key );
+			A_ADD_ATTR_STRING( nrow, d, val );
+			A_ADD_ATTR_STRING( nrow, d, currency );
+			A_ADD_ATTR_STRING( nrow, d, accountName );
+		}
+		break;
+	case RowAcc::t_Prtfl:
+		{
+			const RowPrtfl &d = *(RowPrtfl*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"Prtfl", NULL);
+			conv_ib2xml( nrow, "contract", d.contract );
+			A_ADD_ATTR_INT( nrow, d, position );
+			A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
+			A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
+			A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
+			A_ADD_ATTR_DOUBLE( nrow, d, unrealizedPNL );
+			A_ADD_ATTR_DOUBLE( nrow, d, realizedPNL );
+			A_ADD_ATTR_STRING( nrow, d, accountName );
+		}
+		break;
+	case RowAcc::t_stamp:
+		{
+			const std::string &d = *(std::string*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"stamp", NULL);
+			xmlNewProp ( nrow, (xmlChar*) "timeStamp",
+				(const xmlChar*) d.c_str() );
+		}
+		break;
+	case RowAcc::t_end:
+		{
+			const std::string &d = *(std::string*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"end", NULL);
+			xmlNewProp ( nrow, (xmlChar*) "accountName",
+				(const xmlChar*) d.c_str() );
+		}
+		break;
+	}
+}
+
+
+void to_xml( xmlNodePtr parent, const RowExecution &row )
+{
+	xmlNodePtr nrow = xmlNewChild( parent,
+		NULL, (const xmlChar*)"ExecDetails", NULL);
+	conv_ib2xml( nrow, "contract", row.contract );
+	conv_ib2xml( nrow, "execution", row.execution );
+}
+
+void to_xml( xmlNodePtr parent, const RowOrd &row)
+{
+	char tmp[128];
+	switch( row.type ) {
+	case RowOrd::t_OrderStatus:
+		{
+			const RowOrderStatus &d = *(RowOrderStatus*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"OrderStatus", NULL);
+			A_ADD_ATTR_LONG(nrow, d, id);
+			A_ADD_ATTR_STRING( nrow, d, status );
+			A_ADD_ATTR_INT( nrow, d, filled );
+			A_ADD_ATTR_INT( nrow, d, remaining );
+			A_ADD_ATTR_DOUBLE( nrow, d, avgFillPrice );
+			A_ADD_ATTR_INT( nrow, d, permId );
+			A_ADD_ATTR_INT( nrow, d, parentId );
+			A_ADD_ATTR_DOUBLE( nrow, d, lastFillPrice );
+			A_ADD_ATTR_INT( nrow, d, clientId );
+			A_ADD_ATTR_STRING( nrow, d, whyHeld );
+		}
+		break;
+	case RowOrd::t_OpenOrder:
+		{
+			const RowOpenOrder &d = *(RowOpenOrder*)row.data;
+			xmlNodePtr nrow = xmlNewChild( parent,
+				NULL, (const xmlChar*)"OpenOrder", NULL);
+			A_ADD_ATTR_LONG(nrow, d, orderId);
+			conv_ib2xml( nrow, "contract", d.contract );
+			conv_ib2xml( nrow, "order", d.order );
+			conv_ib2xml( nrow, "orderState", d.orderState );
+		}
+		break;
+	}
+}
+
+
+
+
+void from_xml( RowHist *row, const xmlNodePtr node )
+{
+	char* tmp;
+	static const RowHist &dflt = dflt_RowHist;
+	
+	GET_ATTR_STRING( row, date );
+	GET_ATTR_DOUBLE( row, open );
+	GET_ATTR_DOUBLE( row, high );
+	GET_ATTR_DOUBLE( row, low );
+	GET_ATTR_DOUBLE( row, close );
+	GET_ATTR_INT( row, volume );
+	GET_ATTR_INT( row, count );
+	GET_ATTR_DOUBLE( row, WAP );
+	GET_ATTR_BOOL( row, hasGaps );
+}
+
+void from_xml( RowAcc* /*row*/, const xmlNodePtr /*node*/ )
+{
+	/* not implemented yet */
+	assert( false );
+}
+
+void from_xml( RowExecution* /*row*/, const xmlNodePtr /*node*/ )
+{
+	/* not implemented yet */
+	assert( false );
+}
+
+void from_xml( RowOrd* /*row*/, const xmlNodePtr /*node*/ )
+{
+	/* not implemented yet */
+	assert( false );
 }
 
 

@@ -584,30 +584,6 @@ void PacketContractDetails::dumpXml()
 
 
 
-/* we need a default object but want to avoid a slow default constructor */
-const RowHist RowHist::dflt
-	= {"", -1.0, -1.0, -1.0, -1.0, -1, -1, -1.0, false };
-
-RowHist* RowHist::fromXml( xmlNodePtr node )
-{
-	char* tmp;
-	static const RowHist &dflt = RowHist::dflt;
-	RowHist *row = new RowHist();
-	
-	GET_ATTR_STRING( row, date );
-	GET_ATTR_DOUBLE( row, open );
-	GET_ATTR_DOUBLE( row, high );
-	GET_ATTR_DOUBLE( row, low );
-	GET_ATTR_DOUBLE( row, close );
-	GET_ATTR_INT( row, volume );
-	GET_ATTR_INT( row, count );
-	GET_ATTR_DOUBLE( row, WAP );
-	GET_ATTR_BOOL( row, hasGaps );
-	
-	return row;
-}
-
-
 PacketHistData::PacketHistData() :
 		rows(*(new std::vector<RowHist>()))
 {
@@ -639,11 +615,13 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 						continue;
 					}
 					if( strcmp((char*)q->name, "row") == 0 ) {
-						RowHist *row = RowHist::fromXml( q );
+						RowHist *row = new RowHist();
+						from_xml( row, q );
 						phd->rows.push_back(*row);
 						delete row;
 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
-						RowHist *fin = RowHist::fromXml( q );
+						RowHist *fin = new RowHist();
+						from_xml( fin, q );
 						phd->finishRow = *fin;
 						phd->mode = CLOSED;
 						delete fin;
@@ -658,8 +636,6 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 
 void PacketHistData::dumpXml()
 {
-	char tmp[128];
-	
 	xmlNodePtr root = TwsXml::newDocRoot();
 	xmlNodePtr nphd = xmlNewChild( root, NULL,
 		(const xmlChar*)"request", NULL );
@@ -669,32 +645,11 @@ void PacketHistData::dumpXml()
 	to_xml(nphd, *request);
 	
 	if( mode == CLOSED ) {
-	xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
-	{
-		static const RowHist &dflt = RowHist::dflt;
+		xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 		for( size_t i=0; i<rows.size(); i++ ) {
-			xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"row", NULL);
-			ADD_ATTR_STRING( rows[i], date );
-			ADD_ATTR_DOUBLE( rows[i], open );
-			ADD_ATTR_DOUBLE( rows[i], high );
-			ADD_ATTR_DOUBLE( rows[i], low );
-			ADD_ATTR_DOUBLE( rows[i], close );
-			ADD_ATTR_INT( rows[i], volume );
-			ADD_ATTR_INT( rows[i], count );
-			ADD_ATTR_DOUBLE( rows[i], WAP );
-			ADD_ATTR_BOOL( rows[i], hasGaps );
+			to_xml( nrsp, "row", rows[i] );
 		}
-		xmlNodePtr ne = xmlNewChild( nrsp, NULL, (xmlChar*)"fin", NULL);
-		ADD_ATTR_STRING( finishRow, date );
-		ADD_ATTR_DOUBLE( finishRow, open );
-		ADD_ATTR_DOUBLE( finishRow, high );
-		ADD_ATTR_DOUBLE( finishRow, low );
-		ADD_ATTR_DOUBLE( finishRow, close );
-		ADD_ATTR_INT( finishRow, volume );
-		ADD_ATTR_INT( finishRow, count );
-		ADD_ATTR_DOUBLE( finishRow, WAP );
-		ADD_ATTR_BOOL( finishRow, hasGaps );
-	}
+		to_xml( nrsp, "fin", finishRow );
 	}
 	TwsXml::dumpAndFree( root );
 }
@@ -715,7 +670,7 @@ void PacketHistData::clear()
 		request = NULL;
 	}
 	rows.clear();
-	finishRow = RowHist::dflt;
+	finishRow = dflt_RowHist;
 }
 
 
@@ -878,75 +833,6 @@ void PacketAccStatus::appendAccountDownloadEnd( const std::string& accountName )
 	mode = CLOSED;
 }
 
-
-#define A_ADD_ATTR_STRING( _ne_, _struct_, _attr_ ) \
-	xmlNewProp ( _ne_, (xmlChar*) #_attr_, \
-		(const xmlChar*) _struct_._attr_.c_str() )
-
-#define A_ADD_ATTR_INT( _ne_, _struct_, _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%d",_struct_._attr_ ); \
-	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
-
-#define A_ADD_ATTR_LONG( _ne_, _struct_, _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
-	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
-
-#define A_ADD_ATTR_DOUBLE( _ne_, _struct_, _attr_ ) \
-	snprintf(tmp, sizeof(tmp), "%.10g", _struct_._attr_ ); \
-	xmlNewProp ( _ne_, (xmlChar*) #_attr_, (xmlChar*) tmp )
-
-
-static void conv2xml( xmlNodePtr parent, const RowAcc *row )
-{
-		char tmp[128];
-		switch( row->type ) {
-		case RowAcc::t_AccVal:
-			{
-				const RowAccVal &d = *(RowAccVal*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"AccVal", NULL);
-				A_ADD_ATTR_STRING( nrow, d, key );
-				A_ADD_ATTR_STRING( nrow, d, val );
-				A_ADD_ATTR_STRING( nrow, d, currency );
-				A_ADD_ATTR_STRING( nrow, d, accountName );
-			}
-			break;
-		case RowAcc::t_Prtfl:
-			{
-				const RowPrtfl &d = *(RowPrtfl*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"Prtfl", NULL);
-				conv_ib2xml( nrow, "contract", d.contract );
-				A_ADD_ATTR_INT( nrow, d, position );
-				A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
-				A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
-				A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
-				A_ADD_ATTR_DOUBLE( nrow, d, unrealizedPNL );
-				A_ADD_ATTR_DOUBLE( nrow, d, realizedPNL );
-				A_ADD_ATTR_STRING( nrow, d, accountName );
-			}
-			break;
-		case RowAcc::t_stamp:
-			{
-				const std::string &d = *(std::string*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"stamp", NULL);
-				xmlNewProp ( nrow, (xmlChar*) "timeStamp",
-					(const xmlChar*) d.c_str() );
-			}
-			break;
-		case RowAcc::t_end:
-			{
-				const std::string &d = *(std::string*)row->data;
-				xmlNodePtr nrow = xmlNewChild( parent,
-					NULL, (const xmlChar*)"end", NULL);
-				xmlNewProp ( nrow, (xmlChar*) "accountName",
-					(const xmlChar*) d.c_str() );
-			}
-			break;
-		}
-}
-
 void PacketAccStatus::dumpXml()
 {
 	xmlNodePtr root = TwsXml::newDocRoot();
@@ -960,7 +846,7 @@ void PacketAccStatus::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowAcc*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		conv2xml( nrsp, (*it) );
+		to_xml( nrsp, **it );
 	}
 	
 	TwsXml::dumpAndFree( root );
@@ -1028,14 +914,6 @@ void PacketExecutions::appendExecutionsEnd( int reqId )
 	mode = CLOSED;
 }
 
-static void conv2xml( xmlNodePtr parent, const RowExecution *row )
-{
-		xmlNodePtr nrow = xmlNewChild( parent,
-			NULL, (const xmlChar*)"ExecDetails", NULL);
-		conv_ib2xml( nrow, "contract", row->contract );
-		conv_ib2xml( nrow, "execution", row->execution );
-}
-
 void PacketExecutions::dumpXml()
 {
 	xmlNodePtr root = TwsXml::newDocRoot();
@@ -1049,7 +927,7 @@ void PacketExecutions::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowExecution*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		conv2xml( nrsp, (*it) );
+		to_xml( nrsp, **it );
 	}
 	
 	TwsXml::dumpAndFree( root );
@@ -1132,42 +1010,6 @@ void PacketOrders::appendOpenOrderEnd()
 	mode = CLOSED;
 }
 
-
-static void conv2xml( xmlNodePtr parent, const RowOrd *row )
-{
-	char tmp[128];
-	switch( row->type ) {
-	case RowOrd::t_OrderStatus:
-		{
-			const RowOrderStatus &d = *(RowOrderStatus*)row->data;
-			xmlNodePtr nrow = xmlNewChild( parent,
-				NULL, (const xmlChar*)"OrderStatus", NULL);
-			A_ADD_ATTR_LONG(nrow, d, id);
-			A_ADD_ATTR_STRING( nrow, d, status );
-			A_ADD_ATTR_INT( nrow, d, filled );
-			A_ADD_ATTR_INT( nrow, d, remaining );
-			A_ADD_ATTR_DOUBLE( nrow, d, avgFillPrice );
-			A_ADD_ATTR_INT( nrow, d, permId );
-			A_ADD_ATTR_INT( nrow, d, parentId );
-			A_ADD_ATTR_DOUBLE( nrow, d, lastFillPrice );
-			A_ADD_ATTR_INT( nrow, d, clientId );
-			A_ADD_ATTR_STRING( nrow, d, whyHeld );
-		}
-		break;
-	case RowOrd::t_OpenOrder:
-		{
-			const RowOpenOrder &d = *(RowOpenOrder*)row->data;
-			xmlNodePtr nrow = xmlNewChild( parent,
-				NULL, (const xmlChar*)"OpenOrder", NULL);
-			A_ADD_ATTR_LONG(nrow, d, orderId);
-			conv_ib2xml( nrow, "contract", d.contract );
-			conv_ib2xml( nrow, "order", d.order );
-			conv_ib2xml( nrow, "orderState", d.orderState );
-		}
-		break;
-	}
-}
-
 void PacketOrders::dumpXml()
 {
 	xmlNodePtr root = TwsXml::newDocRoot();
@@ -1181,7 +1023,7 @@ void PacketOrders::dumpXml()
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowOrd*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		conv2xml( nrsp, (*it) );
+		to_xml( nrsp, **it );
 	}
 	
 	TwsXml::dumpAndFree( root );
