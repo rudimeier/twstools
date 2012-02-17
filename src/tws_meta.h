@@ -161,6 +161,23 @@ class ContractDetailsTodo
 
 
 
+class PlaceOrder;
+
+class PlaceOrderTodo
+{
+	public:
+		PlaceOrderTodo();
+		virtual ~PlaceOrderTodo();
+
+		int countLeft() const;
+		void checkout();
+		const PlaceOrder& current() const;
+		void add( const PlaceOrder& );
+
+	private:
+		int curIndex;
+		std::vector<PlaceOrder> &placeOrders;
+};
 
 
 

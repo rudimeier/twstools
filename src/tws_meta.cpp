@@ -294,6 +294,38 @@ void ContractDetailsTodo::add( const ContractDetailsRequest& cdr )
 
 
 
+PlaceOrderTodo::PlaceOrderTodo() :
+	curIndex(-1),
+	placeOrders(*(new std::vector<PlaceOrder>()))
+{
+}
+
+PlaceOrderTodo::~PlaceOrderTodo()
+{
+	delete &placeOrders;
+}
+
+int PlaceOrderTodo::countLeft() const
+{
+	return placeOrders.size() - curIndex - 1;
+}
+
+void PlaceOrderTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+const PlaceOrder& PlaceOrderTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)placeOrders.size() );
+	return placeOrders.at(curIndex);
+}
+
+void PlaceOrderTodo::add( const PlaceOrder& po )
+{
+	placeOrders.push_back(po);
+}
 
 
 
