@@ -332,13 +332,17 @@ void PlaceOrderTodo::add( const PlaceOrder& po )
 
 WorkTodo::WorkTodo() :
 	_contractDetailsTodo( new ContractDetailsTodo() ),
-	_histTodo( new HistTodo() )
+	_histTodo( new HistTodo() ),
+	_place_order_todo( new PlaceOrderTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _place_order_todo != NULL ) {
+		delete _place_order_todo;
+	}
 	if( _histTodo != NULL ) {
 		delete _histTodo;
 	}
@@ -359,6 +363,8 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 	} else if( orders_todo ) {
 		orders_todo = false;
 		return GenericRequest::ORDERS_REQUEST;
+	} else if( _place_order_todo->countLeft() > 0 ) {
+		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {
@@ -386,6 +392,16 @@ HistTodo* WorkTodo::histTodo() const
 const HistTodo& WorkTodo::getHistTodo() const
 {
 	return *_histTodo;
+}
+
+PlaceOrderTodo* WorkTodo::placeOrderTodo() const
+{
+	return _place_order_todo;
+}
+
+const PlaceOrderTodo& WorkTodo::getPlaceOrderTodo() const
+{
+	return *_place_order_todo;
 }
 
 
@@ -421,6 +437,9 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 	} else if ( strcmp( tmp, "historical_data") == 0 ) {
 		PacketHistData *phd = PacketHistData::fromXml(xn);
 		_histTodo->add( phd->getRequest() );
+	} else if ( strcmp( tmp, "place_order") == 0 ) {
+		PacketPlaceOrder *ppo = PacketPlaceOrder::fromXml(xn);
+		_place_order_todo->add( ppo->getRequest() );
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {

@@ -80,7 +80,8 @@ class GenericRequest
 			EXECUTIONS_REQUEST,
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
-			HIST_REQUEST
+			HIST_REQUEST,
+			PLACE_ORDER
 		};
 		
 		GenericRequest();
@@ -193,6 +194,8 @@ class WorkTodo
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
+		PlaceOrderTodo* placeOrderTodo() const;
+		const PlaceOrderTodo& getPlaceOrderTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 		
@@ -204,6 +207,7 @@ class WorkTodo
 		mutable bool orders_todo;
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
+		PlaceOrderTodo *_place_order_todo;
 };
 
 
