@@ -821,7 +821,7 @@ void to_xml( xmlNodePtr parent, const RowExecution &row )
 	conv_ib2xml( nrow, "execution", row.execution );
 }
 
-void to_xml( xmlNodePtr parent, const RowOrd &row)
+void to_xml( xmlNodePtr parent, const TwsRow &row)
 {
 	char tmp[128];
 	switch( row.type ) {
@@ -894,7 +894,7 @@ void from_xml( RowExecution* /*row*/, const xmlNodePtr /*node*/ )
 	assert( false );
 }
 
-void from_xml( RowOrd* /*row*/, const xmlNodePtr /*node*/ )
+void from_xml( TwsRow* /*row*/, const xmlNodePtr /*node*/ )
 {
 	/* not implemented yet */
 	assert( false );

@@ -465,12 +465,6 @@ class PacketExecutions
 
 class OrdersRequest;
 
-struct RowOrd
-{
-	tws_row_type type;
-	void *data;
-};
-
 struct RowOrderStatus
 {
 	IB::OrderId id;
@@ -513,7 +507,7 @@ class PacketOrders
 		
 		OrdersRequest *request;
 		
-		std::vector<RowOrd*> * const list;
+		std::vector<TwsRow*> * const list;
 };
 
 
