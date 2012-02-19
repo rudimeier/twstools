@@ -357,11 +357,13 @@ class PacketPlaceOrder
 		const PlaceOrder& getRequest() const;
 		virtual void clear();
 		void record( long orderId, const PlaceOrder& );
+		void append( const RowError& );
 
 		virtual void dumpXml();
 
 	private:
 		PlaceOrder *request;
+		std::vector<TwsRow> * const list;
 };
 
 

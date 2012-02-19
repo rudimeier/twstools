@@ -818,13 +818,16 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 
-PacketPlaceOrder::PacketPlaceOrder()
+PacketPlaceOrder::PacketPlaceOrder() :
+	request(NULL),
+	list( new std::vector<TwsRow>() )
 {
-	request = NULL;
 }
 
 PacketPlaceOrder::~PacketPlaceOrder()
 {
+	del_tws_rows(list);
+	delete list;
 	if( request != NULL ) {
 		delete request;
 	}
@@ -879,6 +882,8 @@ void PacketPlaceOrder::clear()
 {
 	mode = CLEAN;
 	error = REQ_ERR_NONE;
+	del_tws_rows(list);
+	list->clear();
 	if( request != NULL ) {
 		delete request;
 		request = NULL;
@@ -891,6 +896,12 @@ void PacketPlaceOrder::record( long orderId, const PlaceOrder& oP )
 	mode = RECORD;
 	this->request = new PlaceOrder( oP );
 	this->request->orderId = orderId;
+}
+
+void PacketPlaceOrder::append( const RowError& err )
+{
+	TwsRow arow = { t_error, new RowError(err) };
+	list->push_back( arow );
 }
 
 
