@@ -165,6 +165,7 @@ class TwsDL
 		void twsOpenOrder( const RowOpenOrder& );
 		void twsOpenOrderEnd();
 		void twsCurrentTime( long time );
+		void nextValidId( long orderId );
 		
 		
 		State state;
@@ -172,6 +173,7 @@ class TwsDL
 		std::string _lastError;
 		int64_t lastConnectionTime;
 		long tws_time;
+		long tws_valid_orderId;
 		bool connectivity_IB_TWS;
 		int curIdleTime;
 		

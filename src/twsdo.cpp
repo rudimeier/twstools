@@ -114,6 +114,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 			const IB::Order&, const IB::OrderState& );
 		void openOrderEnd();
 		void currentTime( long time );
+		void nextValidId( IB::OrderId orderId );
 		
 	private:
 		TwsDL* parentTwsDL;
@@ -246,6 +247,12 @@ void TwsDlWrapper::currentTime( long time )
 	parentTwsDL->twsCurrentTime( time );
 }
 
+void TwsDlWrapper::nextValidId( IB::OrderId orderId )
+{
+	DebugTwsWrapper::nextValidId(orderId);
+	parentTwsDL->nextValidId( orderId );
+}
+
 
 
 
@@ -254,6 +261,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
+	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
 	cfg(c),
@@ -922,6 +930,13 @@ void TwsDL::twsCurrentTime( long time )
 {
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
+	}
+}
+
+void TwsDL::nextValidId( long orderId )
+{
+	if( state == WAIT_TWS_CON ) {
+		tws_valid_orderId = orderId;
 	}
 }
 
