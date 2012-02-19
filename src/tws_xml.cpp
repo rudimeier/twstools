@@ -733,6 +733,17 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 
 
 
+static void to_xml( xmlNodePtr parent, const RowError& row )
+{
+	char tmp[128];
+
+	xmlNodePtr nrow = xmlNewChild( parent,
+		NULL, (const xmlChar*)"error", NULL);
+	A_ADD_ATTR_INT( nrow, row, id );
+	A_ADD_ATTR_INT( nrow, row, code );
+	A_ADD_ATTR_STRING( nrow, row, msg );
+}
+
 void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
 {
 	char tmp[128];
@@ -847,6 +858,13 @@ void to_xml( xmlNodePtr parent, const RowOrd &row)
 
 
 
+
+
+static void from_xml( RowError*, const xmlNodePtr /*node*/ )
+{
+	/* not implemented yet */
+	assert( false );
+}
 
 void from_xml( RowHist *row, const xmlNodePtr node )
 {
