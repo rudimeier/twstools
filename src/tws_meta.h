@@ -215,8 +215,22 @@ class WorkTodo
 
 
 
+enum tws_row_type {
+	t_error
+};
 
+struct TwsRow
+{
+	tws_row_type type;
+	void *data;
+};
 
+struct RowError
+{
+	int id;
+	int code;
+	IB::IBString msg;
+};
 
 
 class Packet

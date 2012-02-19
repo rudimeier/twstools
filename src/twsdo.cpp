@@ -141,7 +141,8 @@ void TwsDlWrapper::connectionClosed()
 void TwsDlWrapper::error( const int id, const int errorCode,
 	const IB::IBString errorString )
 {
-	parentTwsDL->twsError( id, errorCode, errorString );
+	RowError row = { id, errorCode, errorString };
+	parentTwsDL->twsError( row );
 }
 
 
@@ -559,42 +560,42 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	( errorMsg.find(_strg_) != std::string::npos )
+	( err.msg.find(_strg_) != std::string::npos )
 
-void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::twsError( const RowError& err )
 {
 	msgCounter++;
 	
 	if( !twsClient->isConnected() ) {
-		switch( errorCode ) {
+		switch( err.code ) {
 		default:
 		case 504: /* NOT_CONNECTED */
-			DEBUG_PRINTF( "fatal: %d %d %s", id, errorCode, errorMsg.c_str() );
+			DEBUG_PRINTF( "fatal: %d %d %s", err.id, err.code, err.msg.c_str());
 			assert(false);
 			break;
 		case 503: /* UPDATE_TWS */
-			DEBUG_PRINTF( "error: %s", errorMsg.c_str() );
+			DEBUG_PRINTF( "error: %s", err.msg.c_str() );
 			break;
 		case 502: /* CONNECT_FAIL */
-			DEBUG_PRINTF( "connection failed: %s", errorMsg.c_str());
+			DEBUG_PRINTF( "connection failed: %s", err.msg.c_str());
 			break;
 		}
 		return;
 	}
 	
-	if( id == currentRequest.reqId() ) {
+	if( err.id == currentRequest.reqId() ) {
 		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
-			id, errorCode, errorMsg.c_str() );
+			err.id, err.code, err.msg.c_str() );
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				errorContracts( id, errorCode, errorMsg );
+				errorContracts( err );
 				break;
 			case GenericRequest::HIST_REQUEST:
-				errorHistData( id, errorCode, errorMsg );
+				errorHistData( err );
 				break;
 			case GenericRequest::PLACE_ORDER:
-				errorPlaceOrder( id, errorCode, errorMsg );
+				errorPlaceOrder( err );
 				break;
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -609,16 +610,16 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		return;
 	}
 	
-	if( id != -1 ) {
+	if( err.id != -1 ) {
 		DEBUG_PRINTF( "TWS message for unexpected request %d: %d '%s'",
-			id, errorCode, errorMsg.c_str() );
+			err.id, err.code, err.msg.c_str() );
 		return;
 	}
 	
-	DEBUG_PRINTF( "TWS message generic: %d %s", errorCode, errorMsg.c_str() );
+	DEBUG_PRINTF( "TWS message generic: %d %s", err.code, err.msg.c_str() );
 	
 	// TODO do better
-	switch( errorCode ) {
+	switch( err.code ) {
 		case 1100:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
 			connectivity_IB_TWS = false;
@@ -647,7 +648,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		case 2106:
 		case 2107:
 		case 2108:
-			dataFarms.notify( msgCounter, errorCode, errorMsg );
+			dataFarms.notify( msgCounter, err.code, err.msg );
 			pacingControl.clear();
 			break;
 		case 2110:
@@ -659,10 +660,10 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 }
 
 
-void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::errorContracts( const RowError& err )
 {
 	// TODO
-	switch( errorCode ) {
+	switch( err.code ) {
 		// No security definition has been found for the request"
 		case 200:
 		if( connectivity_IB_TWS ) {
@@ -679,32 +680,32 @@ void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 }
 
 
-void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::errorHistData( const RowError& err )
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract;
 	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
 	PacketHistData &p_histData = *((PacketHistData*)packet);
-	switch( errorCode ) {
+	switch( err.code ) {
 	// Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( REQ_ERR_TWSCON );
 			pacingControl.notifyViolation( curContract );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
-			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, id );
+			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, err.id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_NODATA );
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE on HMDS server. "
-				"%p %d", cur_hR, id );
+				"%p %d", cur_hR, err.id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
-				"%p %d", cur_hR, id );
+				"%p %d", cur_hR, err.id );
 			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
@@ -764,10 +765,10 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 }
 
 
-void TwsDL::errorPlaceOrder(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::errorPlaceOrder( const RowError& err )
 {
 	PacketPlaceOrder &p_pO = *((PacketPlaceOrder*)packet);
-	switch( errorCode ) {
+	switch( err.code ) {
 	case 321:
 		p_pO.closeError( REQ_ERR_REQUEST );
 		break;

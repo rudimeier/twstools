@@ -87,6 +87,7 @@ class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class Packet;
+class RowError;
 class RowHist;
 class RowAccVal;
 class RowPrtfl;
@@ -144,12 +145,12 @@ class TwsDL
 		void reqOrders();
 		void placeOrder();
 		
-		void errorContracts(int, int, const std::string &);
-		void errorHistData(int, int, const std::string &);
-		void errorPlaceOrder(int, int, const std::string &);
+		void errorContracts( const RowError& );
+		void errorHistData( const RowError& );
+		void errorPlaceOrder( const RowError& );
 		
 		// callbacks from our twsWrapper
-		void twsError(int, int, const std::string &);
+		void twsError( const RowError& );
 		
 		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
