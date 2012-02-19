@@ -304,6 +304,27 @@ class PacketHistData
 
 
 
+class PlaceOrder;
+
+class PacketPlaceOrder
+	: public  Packet
+{
+	public:
+		PacketPlaceOrder();
+		virtual ~PacketPlaceOrder();
+
+		static PacketPlaceOrder * fromXml( xmlNodePtr );
+
+		const PlaceOrder& getRequest() const;
+		virtual void clear();
+		void record( long orderId, const PlaceOrder& );
+
+		virtual void dumpXml();
+
+	private:
+		PlaceOrder *request;
+};
+
 
 
 

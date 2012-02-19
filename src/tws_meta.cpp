@@ -741,6 +741,80 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 
+PacketPlaceOrder::PacketPlaceOrder()
+{
+	request = NULL;
+}
+
+PacketPlaceOrder::~PacketPlaceOrder()
+{
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketPlaceOrder * PacketPlaceOrder::fromXml( xmlNodePtr root )
+{
+	PacketPlaceOrder *ppo = new PacketPlaceOrder();
+
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				ppo->request = new PlaceOrder();
+				from_xml(ppo->request, p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+					/* there is no response so far */
+				}
+			}
+		}
+	}
+	return ppo;
+}
+
+void PacketPlaceOrder::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr nppo = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( nppo, (const xmlChar*)"type",
+		(const xmlChar*)"place_order" );
+
+	to_xml(nppo, *request);
+
+	if( mode == CLOSED ) {
+		xmlNodePtr nrsp = xmlNewChild( nppo, NULL, (xmlChar*)"response", NULL);
+		/* there is no response so far */
+	}
+	TwsXml::dumpAndFree( root );
+}
+
+const PlaceOrder& PacketPlaceOrder::getRequest() const
+{
+	return *request;
+}
+
+void PacketPlaceOrder::clear()
+{
+	mode = CLEAN;
+	error = REQ_ERR_NONE;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
+}
+
+void PacketPlaceOrder::record( long orderId, const PlaceOrder& oP )
+{
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
+	mode = RECORD;
+	this->request = new PlaceOrder( oP );
+	this->request->orderId = orderId;
+}
 
 
 
