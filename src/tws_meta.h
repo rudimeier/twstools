@@ -233,7 +233,8 @@ struct RowError
 	int code;
 	IB::IBString msg;
 };
-
+struct RowOrderStatus;
+struct RowOpenOrder;
 
 class Packet
 {
@@ -358,6 +359,8 @@ class PacketPlaceOrder
 		virtual void clear();
 		void record( long orderId, const PlaceOrder& );
 		void append( const RowError& );
+		void append( const RowOrderStatus& );
+		void append( const RowOpenOrder& );
 
 		virtual void dumpXml();
 

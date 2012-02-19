@@ -909,6 +909,18 @@ void PacketPlaceOrder::append( const RowError& err )
 	list->push_back( arow );
 }
 
+void PacketPlaceOrder::append( const RowOrderStatus& row )
+{
+	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
+	list->push_back( arow );
+}
+
+void PacketPlaceOrder::append( const RowOpenOrder& row )
+{
+	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
+	list->push_back( arow );
+}
+
 
 
 
