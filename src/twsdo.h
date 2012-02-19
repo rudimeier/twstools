@@ -130,6 +130,7 @@ class TwsDL
 		void idle();
 		bool finContracts();
 		bool finHist();
+		bool finPlaceOrder();
 		void waitData();
 		
 		void changeState( State );
@@ -141,9 +142,11 @@ class TwsDL
 		void reqAccStatus();
 		void reqExecutions();
 		void reqOrders();
+		void placeOrder();
 		
 		void errorContracts(int, int, const std::string &);
 		void errorHistData(int, int, const std::string &);
+		void errorPlaceOrder(int, int, const std::string &);
 		
 		// callbacks from our twsWrapper
 		void twsError(int, int, const std::string &);

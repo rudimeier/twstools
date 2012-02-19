@@ -422,6 +422,9 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
+	case GenericRequest::PLACE_ORDER:
+		placeOrder();
+		break;
 	case GenericRequest::NONE:
 		break;
 	}
@@ -435,7 +438,8 @@ void TwsDL::idle()
 
 void TwsDL::waitData()
 {
-	if( !packet->finished() ) {
+	if( !packet->finished()
+		/*HACK*/ && currentRequest.reqType() != GenericRequest::PLACE_ORDER ) {
 		if( currentRequest.age() <= cfg.tws_reqTimeout ) {
 			static int64_t last = 0;
 			int64_t now = nowInMsecs();
@@ -457,6 +461,9 @@ void TwsDL::waitData()
 		break;
 	case GenericRequest::HIST_REQUEST:
 		ok = finHist();
+		break;
+	case GenericRequest::PLACE_ORDER:
+		ok = finPlaceOrder();
 		break;
 	case GenericRequest::ACC_STATUS_REQUEST:
 	case GenericRequest::EXECUTIONS_REQUEST:
@@ -525,6 +532,23 @@ bool TwsDL::finHist()
 }
 
 
+bool TwsDL::finPlaceOrder()
+{
+	switch( packet->getError() ) {
+	case REQ_ERR_NONE:
+		packet->dumpXml();
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
+	case REQ_ERR_REQUEST:
+		break;
+	case REQ_ERR_TWSCON:
+	case REQ_ERR_TIMEOUT:
+		return false;
+	}
+	return true;
+}
+
+
 void TwsDL::initTwsClient()
 {
 	assert( twsClient == NULL && twsWrapper == NULL );
@@ -568,6 +592,9 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 				break;
 			case GenericRequest::HIST_REQUEST:
 				errorHistData( id, errorCode, errorMsg );
+				break;
+			case GenericRequest::PLACE_ORDER:
+				errorPlaceOrder( id, errorCode, errorMsg );
 				break;
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -736,6 +763,21 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	}
 }
 
+
+void TwsDL::errorPlaceOrder(int id, int errorCode, const std::string &errorMsg)
+{
+	PacketPlaceOrder &p_pO = *((PacketPlaceOrder*)packet);
+	switch( errorCode ) {
+	case 321:
+		p_pO.closeError( REQ_ERR_REQUEST );
+		break;
+	default:
+		DEBUG_PRINTF( "Warning, unhandled error code." );
+		break;
+	}
+}
+
+
 #undef ERR_MATCH
 
 
@@ -747,6 +789,7 @@ void TwsDL::twsConnectionClosed()
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::PLACE_ORDER:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
@@ -1102,5 +1145,27 @@ void TwsDL::reqOrders()
 	
 	orders->record( oR );
 	twsClient->reqAllOpenOrders();
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::placeOrder()
+{
+	workTodo->placeOrderTodo()->checkout();
+	const PlaceOrder &pO = workTodo->getPlaceOrderTodo().current();
+
+	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
+	packet = p_placeOrder;
+
+	long orderId;
+	if( pO.orderId == 0 ) {
+		orderId = tws_valid_orderId;
+		tws_valid_orderId++;
+	} else {
+		orderId = pO.orderId;
+	}
+	currentRequest.nextOrderRequest( GenericRequest::PLACE_ORDER, orderId );
+
+	p_placeOrder->record( orderId, pO );
+	twsClient->placeOrder( orderId, pO.contract, pO.order );
 	changeState( WAIT_DATA );
 }
