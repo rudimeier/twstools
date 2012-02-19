@@ -54,6 +54,7 @@
 GenericRequest::GenericRequest() :
 	_reqType(NONE),
 	_reqId(0),
+	_orderId(0),
 	_ctime(0)
 {
 }
@@ -67,6 +68,9 @@ GenericRequest::ReqType GenericRequest::reqType() const
 
 int GenericRequest::reqId() const
 {
+	if( _reqType == PLACE_ORDER ) {
+		return _orderId;
+	}
 	return _reqId;
 }
 
@@ -84,6 +88,12 @@ void GenericRequest::nextRequest( ReqType t )
 	_ctime = nowInMsecs();
 }
 
+void GenericRequest::nextOrderRequest( ReqType t, int orderId )
+{
+	_reqType = t;
+	_orderId = orderId;
+	_ctime = nowInMsecs();
+}
 
 void GenericRequest::close()
 {
