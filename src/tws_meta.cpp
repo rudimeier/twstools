@@ -848,7 +848,8 @@ PacketPlaceOrder * PacketPlaceOrder::fromXml( xmlNodePtr root )
 					if( q->type != XML_ELEMENT_NODE ) {
 						continue;
 					}
-					/* there is no response so far */
+					/* not implemented yet */
+					assert( false );
 				}
 			}
 		}
@@ -868,8 +869,12 @@ void PacketPlaceOrder::dumpXml()
 
 	if( mode == CLOSED ) {
 		xmlNodePtr nrsp = xmlNewChild( nppo, NULL, (xmlChar*)"response", NULL);
-		/* there is no response so far */
+		std::vector<TwsRow>::const_iterator it;
+		for( it = list->begin(); it < list->end(); it++ ) {
+			to_xml( nrsp, *it );
+		}
 	}
+
 	TwsXml::dumpAndFree( root );
 }
 
