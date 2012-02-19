@@ -216,7 +216,9 @@ class WorkTodo
 
 
 enum tws_row_type {
-	t_error
+	t_error,
+	t_orderStatus,
+	t_openOrder
 };
 
 struct TwsRow
@@ -465,8 +467,7 @@ class OrdersRequest;
 
 struct RowOrd
 {
-	enum row_ord_type { t_OrderStatus, t_OpenOrder };
-	row_ord_type type;
+	tws_row_type type;
 	void *data;
 };
 

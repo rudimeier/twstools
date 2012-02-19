@@ -825,7 +825,7 @@ void to_xml( xmlNodePtr parent, const RowOrd &row)
 {
 	char tmp[128];
 	switch( row.type ) {
-	case RowOrd::t_OrderStatus:
+	case t_orderStatus:
 		{
 			const RowOrderStatus &d = *(RowOrderStatus*)row.data;
 			xmlNodePtr nrow = xmlNewChild( parent,
@@ -842,7 +842,7 @@ void to_xml( xmlNodePtr parent, const RowOrd &row)
 			A_ADD_ATTR_STRING( nrow, d, whyHeld );
 		}
 		break;
-	case RowOrd::t_OpenOrder:
+	case t_openOrder:
 		{
 			const RowOpenOrder &d = *(RowOpenOrder*)row.data;
 			xmlNodePtr nrow = xmlNewChild( parent,

@@ -1106,10 +1106,10 @@ void PacketOrders::del_list_elements()
 	std::vector<RowOrd*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
 		switch( (*it)->type ) {
-		case RowOrd::t_OrderStatus:
+		case t_orderStatus:
 			delete (RowOrderStatus*) (*it)->data;
 			break;
-		case RowOrd::t_OpenOrder:
+		case t_openOrder:
 			delete (RowOpenOrder*) (*it)->data;
 			break;
 		}
@@ -1127,7 +1127,7 @@ void PacketOrders::record( const OrdersRequest &oR )
 void PacketOrders::append( const RowOrderStatus& row )
 {
 	RowOrd *arow = new RowOrd();
-	arow->type = RowOrd::t_OrderStatus;
+	arow->type = t_orderStatus;
 	arow->data = new RowOrderStatus(row);
 	list->push_back( arow );
 }
@@ -1135,7 +1135,7 @@ void PacketOrders::append( const RowOrderStatus& row )
 void PacketOrders::append( const RowOpenOrder& row )
 {
 	RowOrd *arow = new RowOrd();
-	arow->type = RowOrd::t_OpenOrder;
+	arow->type = t_openOrder;
 	arow->data = new RowOpenOrder(row);
 	list->push_back( arow );
 }
