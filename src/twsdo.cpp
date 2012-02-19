@@ -537,13 +537,13 @@ bool TwsDL::finPlaceOrder()
 {
 	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
+	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
-	case REQ_ERR_REQUEST:
 		break;
 	case REQ_ERR_TWSCON:
-	case REQ_ERR_TIMEOUT:
 		return false;
 	}
 	return true;
@@ -768,12 +768,10 @@ void TwsDL::errorHistData( const RowError& err )
 void TwsDL::errorPlaceOrder( const RowError& err )
 {
 	PacketPlaceOrder &p_pO = *((PacketPlaceOrder*)packet);
+	p_pO.append( err );
 	switch( err.code ) {
-	case 321:
-		p_pO.closeError( REQ_ERR_REQUEST );
-		break;
 	default:
-		DEBUG_PRINTF( "Warning, unhandled error code." );
+		p_pO.closeError( REQ_ERR_REQUEST );
 		break;
 	}
 }
