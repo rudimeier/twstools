@@ -109,6 +109,9 @@ class OrdersRequest
 class PlaceOrder
 {
 	public:
+		PlaceOrder();
+
+		long orderId;
 		IB::Contract contract;
 		IB::Order order;
 };

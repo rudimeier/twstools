@@ -645,9 +645,13 @@ void to_xml( xmlNodePtr parent, const OrdersRequest& /*oR*/)
 
 void to_xml( xmlNodePtr parent, const PlaceOrder& po)
 {
+	char tmp[128];
+	static const PlaceOrder dflt;
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
 	conv_ib2xml( ne, "contract", po.contract );
 	conv_ib2xml( ne, "order", po.order );
+	ADD_ATTR_LONG( po, orderId );
 }
 
 
@@ -710,6 +714,9 @@ void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 
 void from_xml( PlaceOrder* po, const xmlNodePtr node )
 {
+	char* tmp;
+	static const PlaceOrder dflt;
+
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "contract") == 0 )  {
@@ -719,6 +726,8 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 			}
 		}
 	}
+
+	GET_ATTR_LONG( po, orderId );
 }
 
 

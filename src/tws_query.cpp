@@ -108,3 +108,11 @@ AccStatusRequest::AccStatusRequest() :
 	subscribe(true)
 {
 }
+
+
+
+
+PlaceOrder::PlaceOrder() :
+	orderId(0)
+{
+}
