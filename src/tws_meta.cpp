@@ -917,12 +917,22 @@ void PacketPlaceOrder::append( const RowOrderStatus& row )
 {
 	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
 	list->push_back( arow );
+
+	/* HACK we expect at least one OpenOrder callback too */
+	if( list->size() >= 2 ) {
+		mode = CLOSED;
+	}
 }
 
 void PacketPlaceOrder::append( const RowOpenOrder& row )
 {
 	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
 	list->push_back( arow );
+
+	/* HACK if not whatIf we expect at least one OrderStatus callback too */
+	if( request->order.whatIf || list->size() >= 2 ) {
+		mode = CLOSED;
+	}
 }
 
 

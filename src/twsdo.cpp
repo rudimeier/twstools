@@ -439,8 +439,7 @@ void TwsDL::idle()
 
 void TwsDL::waitData()
 {
-	if( !packet->finished()
-		/*HACK*/ && currentRequest.reqType() != GenericRequest::PLACE_ORDER ) {
+	if( !packet->finished() ) {
 		if( currentRequest.age() <= cfg.tws_reqTimeout ) {
 			static int64_t last = 0;
 			int64_t now = nowInMsecs();
@@ -940,20 +939,28 @@ void TwsDL::twsExecDetailsEnd( int reqId )
 
 void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 {
-	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
+		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	((PacketOrders*)packet)->append(row);
+	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
+		((PacketPlaceOrder*)packet)->append(row);
+		return;
+	}
+	DEBUG_PRINTF( "Warning, unexpected tws callback.");
 }
 
 void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 {
-	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback..");
+	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
+		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	((PacketOrders*)packet)->append(row);
+	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
+		((PacketPlaceOrder*)packet)->append(row);
+		return;
+	}
+	DEBUG_PRINTF( "Warning, unexpected tws callback..");
 }
 
 void TwsDL::twsOpenOrderEnd()
