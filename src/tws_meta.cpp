@@ -491,7 +491,23 @@ int WorkTodo::read_file( const char *fileName )
 
 
 
-
+static void del_tws_rows( std::vector<TwsRow>* v )
+{
+	std::vector<TwsRow>::const_iterator it;
+	for( it = v->begin(); it < v->end(); it++ ) {
+		switch( it->type ) {
+		case t_error:
+			delete (RowError*)it->data;
+			break;
+		case t_orderStatus:
+			delete (RowOrderStatus*)it->data;
+			break;
+		case t_openOrder:
+			delete (RowOpenOrder*)it->data;
+			break;
+		}
+	}
+}
 
 
 
