@@ -503,11 +503,8 @@ class PacketOrders
 		void dumpXml();
 		
 	private:
-		void del_list_elements();
-		
 		OrdersRequest *request;
-		
-		std::vector<TwsRow*> * const list;
+		std::vector<TwsRow> * const list;
 };
 
 

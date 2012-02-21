@@ -1092,13 +1092,13 @@ void PacketExecutions::dumpXml()
 
 PacketOrders::PacketOrders() :
 	request(NULL),
-	list( new std::vector<TwsRow*>() )
+	list( new std::vector<TwsRow>() )
 {
 }
 
 PacketOrders::~PacketOrders()
 {
-	del_list_elements();
+	del_tws_rows(list);
 	delete list;
 	if( request != NULL ) {
 		delete request;
@@ -1109,28 +1109,12 @@ void PacketOrders::clear()
 {
 	assert( finished() );
 	mode = CLEAN;
-	del_list_elements();
+	del_tws_rows(list);
 	list->clear();
 	if( request != NULL ) {
 		delete request;
 	}
 	request = NULL;
-}
-
-void PacketOrders::del_list_elements()
-{
-	std::vector<TwsRow*>::const_iterator it;
-	for( it = list->begin(); it < list->end(); it++ ) {
-		switch( (*it)->type ) {
-		case t_orderStatus:
-			delete (RowOrderStatus*) (*it)->data;
-			break;
-		case t_openOrder:
-			delete (RowOpenOrder*) (*it)->data;
-			break;
-		}
-		delete (*it);
-	}
 }
 
 void PacketOrders::record( const OrdersRequest &oR )
@@ -1142,17 +1126,13 @@ void PacketOrders::record( const OrdersRequest &oR )
 
 void PacketOrders::append( const RowOrderStatus& row )
 {
-	TwsRow *arow = new TwsRow();
-	arow->type = t_orderStatus;
-	arow->data = new RowOrderStatus(row);
+	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
 	list->push_back( arow );
 }
 
 void PacketOrders::append( const RowOpenOrder& row )
 {
-	TwsRow *arow = new TwsRow();
-	arow->type = t_openOrder;
-	arow->data = new RowOpenOrder(row);
+	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
 	list->push_back( arow );
 }
 
@@ -1172,9 +1152,9 @@ void PacketOrders::dumpXml()
 	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
-	std::vector<TwsRow*>::const_iterator it;
+	std::vector<TwsRow>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		to_xml( nrsp, **it );
+		to_xml( nrsp, *it );
 	}
 	
 	TwsXml::dumpAndFree( root );
