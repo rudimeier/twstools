@@ -538,7 +538,11 @@ req_err Packet::getError() const
 
 void Packet::closeError( req_err e )
 {
-	assert( mode == RECORD);
+	if( mode != RECORD ) {
+		DEBUG_PRINTF( "Warning, closeError closed packet.");
+		assert( mode == CLOSED );
+		return;
+	}
 	mode = CLOSED;
 	error = e;
 }
