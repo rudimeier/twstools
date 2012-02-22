@@ -4,6 +4,16 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
+0.3.3 - not yet released -------------------------------------------------------
+
+Order suport and minor improvements.
+
+  - new build target: make rpm
+  - minor internal cleanup
+  - support fire and forget orders
+
+
+
 0.3.2 - 2011-11-06  ------------------------------------------------------------
 
 Major bug fixes, minor build fixes and refactoring.
