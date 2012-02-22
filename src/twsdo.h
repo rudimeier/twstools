@@ -87,6 +87,7 @@ class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class Packet;
+class RowError;
 class RowHist;
 class RowAccVal;
 class RowPrtfl;
@@ -130,6 +131,7 @@ class TwsDL
 		void idle();
 		bool finContracts();
 		bool finHist();
+		bool finPlaceOrder();
 		void waitData();
 		
 		void changeState( State );
@@ -141,12 +143,14 @@ class TwsDL
 		void reqAccStatus();
 		void reqExecutions();
 		void reqOrders();
+		void placeOrder();
 		
-		void errorContracts(int, int, const std::string &);
-		void errorHistData(int, int, const std::string &);
+		void errorContracts( const RowError& );
+		void errorHistData( const RowError& );
+		void errorPlaceOrder( const RowError& );
 		
 		// callbacks from our twsWrapper
-		void twsError(int, int, const std::string &);
+		void twsError( const RowError& );
 		
 		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
@@ -165,6 +169,7 @@ class TwsDL
 		void twsOpenOrder( const RowOpenOrder& );
 		void twsOpenOrderEnd();
 		void twsCurrentTime( long time );
+		void nextValidId( long orderId );
 		
 		
 		State state;
@@ -172,6 +177,7 @@ class TwsDL
 		std::string _lastError;
 		int64_t lastConnectionTime;
 		long tws_time;
+		long tws_valid_orderId;
 		bool connectivity_IB_TWS;
 		int curIdleTime;
 		

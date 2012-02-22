@@ -54,6 +54,7 @@
 GenericRequest::GenericRequest() :
 	_reqType(NONE),
 	_reqId(0),
+	_orderId(0),
 	_ctime(0)
 {
 }
@@ -67,6 +68,9 @@ GenericRequest::ReqType GenericRequest::reqType() const
 
 int GenericRequest::reqId() const
 {
+	if( _reqType == PLACE_ORDER ) {
+		return _orderId;
+	}
 	return _reqId;
 }
 
@@ -84,6 +88,12 @@ void GenericRequest::nextRequest( ReqType t )
 	_ctime = nowInMsecs();
 }
 
+void GenericRequest::nextOrderRequest( ReqType t, int orderId )
+{
+	_reqType = t;
+	_orderId = orderId;
+	_ctime = nowInMsecs();
+}
 
 void GenericRequest::close()
 {
@@ -294,19 +304,55 @@ void ContractDetailsTodo::add( const ContractDetailsRequest& cdr )
 
 
 
+PlaceOrderTodo::PlaceOrderTodo() :
+	curIndex(-1),
+	placeOrders(*(new std::vector<PlaceOrder>()))
+{
+}
+
+PlaceOrderTodo::~PlaceOrderTodo()
+{
+	delete &placeOrders;
+}
+
+int PlaceOrderTodo::countLeft() const
+{
+	return placeOrders.size() - curIndex - 1;
+}
+
+void PlaceOrderTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+const PlaceOrder& PlaceOrderTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)placeOrders.size() );
+	return placeOrders.at(curIndex);
+}
+
+void PlaceOrderTodo::add( const PlaceOrder& po )
+{
+	placeOrders.push_back(po);
+}
 
 
 
 
 WorkTodo::WorkTodo() :
 	_contractDetailsTodo( new ContractDetailsTodo() ),
-	_histTodo( new HistTodo() )
+	_histTodo( new HistTodo() ),
+	_place_order_todo( new PlaceOrderTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _place_order_todo != NULL ) {
+		delete _place_order_todo;
+	}
 	if( _histTodo != NULL ) {
 		delete _histTodo;
 	}
@@ -327,6 +373,8 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 	} else if( orders_todo ) {
 		orders_todo = false;
 		return GenericRequest::ORDERS_REQUEST;
+	} else if( _place_order_todo->countLeft() > 0 ) {
+		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {
@@ -354,6 +402,16 @@ HistTodo* WorkTodo::histTodo() const
 const HistTodo& WorkTodo::getHistTodo() const
 {
 	return *_histTodo;
+}
+
+PlaceOrderTodo* WorkTodo::placeOrderTodo() const
+{
+	return _place_order_todo;
+}
+
+const PlaceOrderTodo& WorkTodo::getPlaceOrderTodo() const
+{
+	return *_place_order_todo;
 }
 
 
@@ -389,6 +447,9 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 	} else if ( strcmp( tmp, "historical_data") == 0 ) {
 		PacketHistData *phd = PacketHistData::fromXml(xn);
 		_histTodo->add( phd->getRequest() );
+	} else if ( strcmp( tmp, "place_order") == 0 ) {
+		PacketPlaceOrder *ppo = PacketPlaceOrder::fromXml(xn);
+		_place_order_todo->add( ppo->getRequest() );
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
@@ -430,7 +491,23 @@ int WorkTodo::read_file( const char *fileName )
 
 
 
-
+static void del_tws_rows( std::vector<TwsRow>* v )
+{
+	std::vector<TwsRow>::const_iterator it;
+	for( it = v->begin(); it < v->end(); it++ ) {
+		switch( it->type ) {
+		case t_error:
+			delete (RowError*)it->data;
+			break;
+		case t_orderStatus:
+			delete (RowOrderStatus*)it->data;
+			break;
+		case t_openOrder:
+			delete (RowOpenOrder*)it->data;
+			break;
+		}
+	}
+}
 
 
 
@@ -461,7 +538,11 @@ req_err Packet::getError() const
 
 void Packet::closeError( req_err e )
 {
-	assert( mode == RECORD);
+	if( mode != RECORD ) {
+		DEBUG_PRINTF( "Warning, closeError closed packet.");
+		assert( mode == CLOSED );
+		return;
+	}
 	mode = CLOSED;
 	error = e;
 }
@@ -741,6 +822,118 @@ void PacketHistData::dump( bool printFormatDates )
 
 
 
+PacketPlaceOrder::PacketPlaceOrder() :
+	request(NULL),
+	list( new std::vector<TwsRow>() )
+{
+}
+
+PacketPlaceOrder::~PacketPlaceOrder()
+{
+	del_tws_rows(list);
+	delete list;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketPlaceOrder * PacketPlaceOrder::fromXml( xmlNodePtr root )
+{
+	PacketPlaceOrder *ppo = new PacketPlaceOrder();
+
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				ppo->request = new PlaceOrder();
+				from_xml(ppo->request, p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+					/* not implemented yet */
+					assert( false );
+				}
+			}
+		}
+	}
+	return ppo;
+}
+
+void PacketPlaceOrder::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr nppo = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( nppo, (const xmlChar*)"type",
+		(const xmlChar*)"place_order" );
+
+	to_xml(nppo, *request);
+
+	if( mode == CLOSED ) {
+		xmlNodePtr nrsp = xmlNewChild( nppo, NULL, (xmlChar*)"response", NULL);
+		std::vector<TwsRow>::const_iterator it;
+		for( it = list->begin(); it < list->end(); it++ ) {
+			to_xml( nrsp, *it );
+		}
+	}
+
+	TwsXml::dumpAndFree( root );
+}
+
+const PlaceOrder& PacketPlaceOrder::getRequest() const
+{
+	return *request;
+}
+
+void PacketPlaceOrder::clear()
+{
+	mode = CLEAN;
+	error = REQ_ERR_NONE;
+	del_tws_rows(list);
+	list->clear();
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
+}
+
+void PacketPlaceOrder::record( long orderId, const PlaceOrder& oP )
+{
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
+	mode = RECORD;
+	this->request = new PlaceOrder( oP );
+	this->request->orderId = orderId;
+}
+
+void PacketPlaceOrder::append( const RowError& err )
+{
+	TwsRow arow = { t_error, new RowError(err) };
+	list->push_back( arow );
+}
+
+void PacketPlaceOrder::append( const RowOrderStatus& row )
+{
+	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
+	list->push_back( arow );
+
+	/* HACK we expect at least one OpenOrder callback too */
+	if( list->size() >= 2 ) {
+		mode = CLOSED;
+	}
+}
+
+void PacketPlaceOrder::append( const RowOpenOrder& row )
+{
+	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
+	list->push_back( arow );
+
+	/* HACK if not whatIf we expect at least one OrderStatus callback too */
+	if( request->order.whatIf || list->size() >= 2 ) {
+		mode = CLOSED;
+	}
+}
 
 
 
@@ -941,13 +1134,13 @@ void PacketExecutions::dumpXml()
 
 PacketOrders::PacketOrders() :
 	request(NULL),
-	list( new std::vector<RowOrd*>() )
+	list( new std::vector<TwsRow>() )
 {
 }
 
 PacketOrders::~PacketOrders()
 {
-	del_list_elements();
+	del_tws_rows(list);
 	delete list;
 	if( request != NULL ) {
 		delete request;
@@ -958,28 +1151,12 @@ void PacketOrders::clear()
 {
 	assert( finished() );
 	mode = CLEAN;
-	del_list_elements();
+	del_tws_rows(list);
 	list->clear();
 	if( request != NULL ) {
 		delete request;
 	}
 	request = NULL;
-}
-
-void PacketOrders::del_list_elements()
-{
-	std::vector<RowOrd*>::const_iterator it;
-	for( it = list->begin(); it < list->end(); it++ ) {
-		switch( (*it)->type ) {
-		case RowOrd::t_OrderStatus:
-			delete (RowOrderStatus*) (*it)->data;
-			break;
-		case RowOrd::t_OpenOrder:
-			delete (RowOpenOrder*) (*it)->data;
-			break;
-		}
-		delete (*it);
-	}
 }
 
 void PacketOrders::record( const OrdersRequest &oR )
@@ -991,17 +1168,13 @@ void PacketOrders::record( const OrdersRequest &oR )
 
 void PacketOrders::append( const RowOrderStatus& row )
 {
-	RowOrd *arow = new RowOrd();
-	arow->type = RowOrd::t_OrderStatus;
-	arow->data = new RowOrderStatus(row);
+	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
 	list->push_back( arow );
 }
 
 void PacketOrders::append( const RowOpenOrder& row )
 {
-	RowOrd *arow = new RowOrd();
-	arow->type = RowOrd::t_OpenOrder;
-	arow->data = new RowOpenOrder(row);
+	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
 	list->push_back( arow );
 }
 
@@ -1021,9 +1194,9 @@ void PacketOrders::dumpXml()
 	to_xml(npcd, *request);
 	
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
-	std::vector<RowOrd*>::const_iterator it;
+	std::vector<TwsRow>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
-		to_xml( nrsp, **it );
+		to_xml( nrsp, *it );
 	}
 	
 	TwsXml::dumpAndFree( root );

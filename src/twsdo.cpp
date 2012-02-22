@@ -114,6 +114,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 			const IB::Order&, const IB::OrderState& );
 		void openOrderEnd();
 		void currentTime( long time );
+		void nextValidId( IB::OrderId orderId );
 		
 	private:
 		TwsDL* parentTwsDL;
@@ -140,7 +141,8 @@ void TwsDlWrapper::connectionClosed()
 void TwsDlWrapper::error( const int id, const int errorCode,
 	const IB::IBString errorString )
 {
-	parentTwsDL->twsError( id, errorCode, errorString );
+	RowError row = { id, errorCode, errorString };
+	parentTwsDL->twsError( row );
 }
 
 
@@ -246,6 +248,12 @@ void TwsDlWrapper::currentTime( long time )
 	parentTwsDL->twsCurrentTime( time );
 }
 
+void TwsDlWrapper::nextValidId( IB::OrderId orderId )
+{
+	DebugTwsWrapper::nextValidId(orderId);
+	parentTwsDL->nextValidId( orderId );
+}
+
 
 
 
@@ -254,6 +262,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
+	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
 	cfg(c),
@@ -414,6 +423,9 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
+	case GenericRequest::PLACE_ORDER:
+		placeOrder();
+		break;
 	case GenericRequest::NONE:
 		break;
 	}
@@ -449,6 +461,9 @@ void TwsDL::waitData()
 		break;
 	case GenericRequest::HIST_REQUEST:
 		ok = finHist();
+		break;
+	case GenericRequest::PLACE_ORDER:
+		ok = finPlaceOrder();
 		break;
 	case GenericRequest::ACC_STATUS_REQUEST:
 	case GenericRequest::EXECUTIONS_REQUEST:
@@ -517,6 +532,23 @@ bool TwsDL::finHist()
 }
 
 
+bool TwsDL::finPlaceOrder()
+{
+	switch( packet->getError() ) {
+	case REQ_ERR_NONE:
+	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
+		packet->dumpXml();
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
+		break;
+	case REQ_ERR_TWSCON:
+		return false;
+	}
+	return true;
+}
+
+
 void TwsDL::initTwsClient()
 {
 	assert( twsClient == NULL && twsWrapper == NULL );
@@ -527,39 +559,42 @@ void TwsDL::initTwsClient()
 
 
 #define ERR_MATCH( _strg_  ) \
-	( errorMsg.find(_strg_) != std::string::npos )
+	( err.msg.find(_strg_) != std::string::npos )
 
-void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::twsError( const RowError& err )
 {
 	msgCounter++;
 	
 	if( !twsClient->isConnected() ) {
-		switch( errorCode ) {
+		switch( err.code ) {
 		default:
 		case 504: /* NOT_CONNECTED */
-			DEBUG_PRINTF( "fatal: %d %d %s", id, errorCode, errorMsg.c_str() );
+			DEBUG_PRINTF( "fatal: %d %d %s", err.id, err.code, err.msg.c_str());
 			assert(false);
 			break;
 		case 503: /* UPDATE_TWS */
-			DEBUG_PRINTF( "error: %s", errorMsg.c_str() );
+			DEBUG_PRINTF( "error: %s", err.msg.c_str() );
 			break;
 		case 502: /* CONNECT_FAIL */
-			DEBUG_PRINTF( "connection failed: %s", errorMsg.c_str());
+			DEBUG_PRINTF( "connection failed: %s", err.msg.c_str());
 			break;
 		}
 		return;
 	}
 	
-	if( id == currentRequest.reqId() ) {
+	if( err.id == currentRequest.reqId() ) {
 		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
-			id, errorCode, errorMsg.c_str() );
+			err.id, err.code, err.msg.c_str() );
 		if( state == WAIT_DATA ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-				errorContracts( id, errorCode, errorMsg );
+				errorContracts( err );
 				break;
 			case GenericRequest::HIST_REQUEST:
-				errorHistData( id, errorCode, errorMsg );
+				errorHistData( err );
+				break;
+			case GenericRequest::PLACE_ORDER:
+				errorPlaceOrder( err );
 				break;
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -574,16 +609,16 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		return;
 	}
 	
-	if( id != -1 ) {
+	if( err.id != -1 ) {
 		DEBUG_PRINTF( "TWS message for unexpected request %d: %d '%s'",
-			id, errorCode, errorMsg.c_str() );
+			err.id, err.code, err.msg.c_str() );
 		return;
 	}
 	
-	DEBUG_PRINTF( "TWS message generic: %d %s", errorCode, errorMsg.c_str() );
+	DEBUG_PRINTF( "TWS message generic: %d %s", err.code, err.msg.c_str() );
 	
 	// TODO do better
-	switch( errorCode ) {
+	switch( err.code ) {
 		case 1100:
 			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
 			connectivity_IB_TWS = false;
@@ -612,7 +647,7 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 		case 2106:
 		case 2107:
 		case 2108:
-			dataFarms.notify( msgCounter, errorCode, errorMsg );
+			dataFarms.notify( msgCounter, err.code, err.msg );
 			pacingControl.clear();
 			break;
 		case 2110:
@@ -624,10 +659,10 @@ void TwsDL::twsError(int id, int errorCode, const std::string &errorMsg)
 }
 
 
-void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::errorContracts( const RowError& err )
 {
 	// TODO
-	switch( errorCode ) {
+	switch( err.code ) {
 		// No security definition has been found for the request"
 		case 200:
 		if( connectivity_IB_TWS ) {
@@ -644,32 +679,32 @@ void TwsDL::errorContracts(int id, int errorCode, const std::string &errorMsg)
 }
 
 
-void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
+void TwsDL::errorHistData( const RowError& err )
 {
 	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract;
 	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
 	PacketHistData &p_histData = *((PacketHistData*)packet);
-	switch( errorCode ) {
+	switch( err.code ) {
 	// Historical Market Data Service error message:
 	case 162:
 		if( ERR_MATCH("Historical data request pacing violation") ) {
 			p_histData.closeError( REQ_ERR_TWSCON );
 			pacingControl.notifyViolation( curContract );
 		} else if( ERR_MATCH("HMDS query returned no data:") ) {
-			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, id );
+			DEBUG_PRINTF( "READY - NO DATA %p %d", cur_hR, err.id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_NODATA );
 		} else if( ERR_MATCH("No historical market data for") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE on HMDS server. "
-				"%p %d", cur_hR, id );
+				"%p %d", cur_hR, err.id );
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
 			ERR_MATCH("No data of type DayChart is available") ) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
-				"%p %d", cur_hR, id );
+				"%p %d", cur_hR, err.id );
 			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
@@ -728,6 +763,19 @@ void TwsDL::errorHistData(int id, int errorCode, const std::string &errorMsg)
 	}
 }
 
+
+void TwsDL::errorPlaceOrder( const RowError& err )
+{
+	PacketPlaceOrder &p_pO = *((PacketPlaceOrder*)packet);
+	p_pO.append( err );
+	switch( err.code ) {
+	default:
+		p_pO.closeError( REQ_ERR_REQUEST );
+		break;
+	}
+}
+
+
 #undef ERR_MATCH
 
 
@@ -739,6 +787,7 @@ void TwsDL::twsConnectionClosed()
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::PLACE_ORDER:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
@@ -890,20 +939,28 @@ void TwsDL::twsExecDetailsEnd( int reqId )
 
 void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 {
-	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
+		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	((PacketOrders*)packet)->append(row);
+	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
+		((PacketPlaceOrder*)packet)->append(row);
+		return;
+	}
+	DEBUG_PRINTF( "Warning, unexpected tws callback.");
 }
 
 void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 {
-	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback..");
+	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
+		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	((PacketOrders*)packet)->append(row);
+	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
+		((PacketPlaceOrder*)packet)->append(row);
+		return;
+	}
+	DEBUG_PRINTF( "Warning, unexpected tws callback..");
 }
 
 void TwsDL::twsOpenOrderEnd()
@@ -922,6 +979,17 @@ void TwsDL::twsCurrentTime( long time )
 {
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
+	}
+	if( state == WAIT_DATA
+		&& currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
+		packet->closeError( REQ_ERR_NONE );
+	}
+}
+
+void TwsDL::nextValidId( long orderId )
+{
+	if( state == WAIT_TWS_CON ) {
+		tws_valid_orderId = orderId;
 	}
 }
 
@@ -1087,5 +1155,34 @@ void TwsDL::reqOrders()
 	
 	orders->record( oR );
 	twsClient->reqAllOpenOrders();
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::placeOrder()
+{
+	workTodo->placeOrderTodo()->checkout();
+	const PlaceOrder &pO = workTodo->getPlaceOrderTodo().current();
+
+	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
+	packet = p_placeOrder;
+
+	long orderId;
+	if( pO.orderId == 0 ) {
+		orderId = tws_valid_orderId;
+		tws_valid_orderId++;
+	} else {
+		orderId = pO.orderId;
+	}
+	currentRequest.nextOrderRequest( GenericRequest::PLACE_ORDER, orderId );
+
+	p_placeOrder->record( orderId, pO );
+	twsClient->placeOrder( orderId, pO.contract, pO.order );
+
+	if( ! pO.order.transmit ) {
+		/* HACK no response is expected on success, in case of error we hope
+		   that current time comes after that error */
+		twsClient->reqCurrentTime();
+	}
+
 	changeState( WAIT_DATA );
 }

@@ -80,7 +80,8 @@ class GenericRequest
 			EXECUTIONS_REQUEST,
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
-			HIST_REQUEST
+			HIST_REQUEST,
+			PLACE_ORDER
 		};
 		
 		GenericRequest();
@@ -89,11 +90,13 @@ class GenericRequest
 		int reqId() const;
 		int age() const;
 		void nextRequest( ReqType );
+		void nextOrderRequest( ReqType, int orderId );
 		void close();
 		
 	private:
 		ReqType _reqType;
 		int _reqId;
+		int _orderId;
 		
 		int64_t _ctime;
 };
@@ -161,6 +164,23 @@ class ContractDetailsTodo
 
 
 
+class PlaceOrder;
+
+class PlaceOrderTodo
+{
+	public:
+		PlaceOrderTodo();
+		virtual ~PlaceOrderTodo();
+
+		int countLeft() const;
+		void checkout();
+		const PlaceOrder& current() const;
+		void add( const PlaceOrder& );
+
+	private:
+		int curIndex;
+		std::vector<PlaceOrder> &placeOrders;
+};
 
 
 
@@ -176,6 +196,8 @@ class WorkTodo
 		const ContractDetailsTodo& getContractDetailsTodo() const;
 		HistTodo* histTodo() const;
 		const HistTodo& getHistTodo() const;
+		PlaceOrderTodo* placeOrderTodo() const;
+		const PlaceOrderTodo& getPlaceOrderTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 		
@@ -187,14 +209,32 @@ class WorkTodo
 		mutable bool orders_todo;
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
+		PlaceOrderTodo *_place_order_todo;
 };
 
 
 
 
+enum tws_row_type {
+	t_error,
+	t_orderStatus,
+	t_openOrder
+};
 
+struct TwsRow
+{
+	tws_row_type type;
+	void *data;
+};
 
-
+struct RowError
+{
+	int id;
+	int code;
+	IB::IBString msg;
+};
+struct RowOrderStatus;
+struct RowOpenOrder;
 
 class Packet
 {
@@ -304,6 +344,31 @@ class PacketHistData
 
 
 
+class PlaceOrder;
+
+class PacketPlaceOrder
+	: public  Packet
+{
+	public:
+		PacketPlaceOrder();
+		virtual ~PacketPlaceOrder();
+
+		static PacketPlaceOrder * fromXml( xmlNodePtr );
+
+		const PlaceOrder& getRequest() const;
+		virtual void clear();
+		void record( long orderId, const PlaceOrder& );
+		void append( const RowError& );
+		void append( const RowOrderStatus& );
+		void append( const RowOpenOrder& );
+
+		virtual void dumpXml();
+
+	private:
+		PlaceOrder *request;
+		std::vector<TwsRow> * const list;
+};
+
 
 
 
@@ -405,13 +470,6 @@ class PacketExecutions
 
 class OrdersRequest;
 
-struct RowOrd
-{
-	enum row_ord_type { t_OrderStatus, t_OpenOrder };
-	row_ord_type type;
-	void *data;
-};
-
 struct RowOrderStatus
 {
 	IB::OrderId id;
@@ -450,11 +508,8 @@ class PacketOrders
 		void dumpXml();
 		
 	private:
-		void del_list_elements();
-		
 		OrdersRequest *request;
-		
-		std::vector<RowOrd*> * const list;
+		std::vector<TwsRow> * const list;
 };
 
 
