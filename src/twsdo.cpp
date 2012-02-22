@@ -980,6 +980,10 @@ void TwsDL::twsCurrentTime( long time )
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
 	}
+	if( state == WAIT_DATA
+		&& currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
+		packet->closeError( REQ_ERR_NONE );
+	}
 }
 
 void TwsDL::nextValidId( long orderId )
@@ -1173,5 +1177,12 @@ void TwsDL::placeOrder()
 
 	p_placeOrder->record( orderId, pO );
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
+
+	if( ! pO.order.transmit ) {
+		/* HACK no response is expected on success, in case of error we hope
+		   that current time comes after that error */
+		twsClient->reqCurrentTime();
+	}
+
 	changeState( WAIT_DATA );
 }
