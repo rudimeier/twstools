@@ -215,8 +215,24 @@ class WorkTodo
 
 
 
+enum tws_row_type {
+	t_error,
+	t_orderStatus,
+	t_openOrder
+};
 
+struct TwsRow
+{
+	tws_row_type type;
+	void *data;
+};
 
+struct RowError
+{
+	int id;
+	int code;
+	IB::IBString msg;
+};
 
 
 class Packet
@@ -449,13 +465,6 @@ class PacketExecutions
 
 class OrdersRequest;
 
-struct RowOrd
-{
-	enum row_ord_type { t_OrderStatus, t_OpenOrder };
-	row_ord_type type;
-	void *data;
-};
-
 struct RowOrderStatus
 {
 	IB::OrderId id;
@@ -494,11 +503,8 @@ class PacketOrders
 		void dumpXml();
 		
 	private:
-		void del_list_elements();
-		
 		OrdersRequest *request;
-		
-		std::vector<RowOrd*> * const list;
+		std::vector<TwsRow> * const list;
 };
 
 
