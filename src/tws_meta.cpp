@@ -341,6 +341,9 @@ void PlaceOrderTodo::add( const PlaceOrder& po )
 
 
 WorkTodo::WorkTodo() :
+	acc_status_todo(false),
+	executions_todo(false),
+	orders_todo(false),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
 	_place_order_todo( new PlaceOrderTodo() )
