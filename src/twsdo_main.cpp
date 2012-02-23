@@ -52,7 +52,7 @@ static ConfigTwsdo cfg;
 
 #define VERSION_MSG \
 CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") " PACKAGE_VERSION "\n\
-Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
+Copyright (C) 2010-2012 Ruediger Meier <sweet_f_a@gmx.de>\n\
 License: BSD 3-Clause\n"
 
 
