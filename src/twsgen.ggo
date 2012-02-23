@@ -1,6 +1,6 @@
 # atem.ggo -- gengetopt input file for twsgen's command line options
 #
-# Copyright (C) 2011 Ruediger Meier
+# Copyright (C) 2011-2012 Ruediger Meier
 #
 # Author:  Ruediger Meier <sweet_f_a@gmx.de>
 #
@@ -35,7 +35,8 @@
 #
 
 
-args "--no-handle-error --long-help --unamed-opts=DATA_DIR"
+args "--no-handle-error --long-help --unamed-opts=FILE"
+package "twsgen"
 
 
 # section
