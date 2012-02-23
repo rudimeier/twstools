@@ -17,7 +17,9 @@ AC_SUBST([DEFAULT_CXXFLAGS])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
 PKG_CHECK_MODULES([libtwsapi], [libtwsapi >= 0.3.0],
-  [
+  [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
+    ["$(pkg-config --modversion libtwsapi || echo "unknown")"],
+    [Define twsapi version at compile time.])
   if pkg-config --atleast-version="0.4.0" libtwsapi; then
     AC_DEFINE([TWSAPI_IPV6], [1], [Define to 1 if twsapi supports IPv6.])
   fi])
