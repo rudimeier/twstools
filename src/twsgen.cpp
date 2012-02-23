@@ -1,6 +1,6 @@
 /*** twsgen.cpp -- twsxml converter and job generator
  *
- * Copyright (C) 2011 Ruediger Meier
+ * Copyright (C) 2011-2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
