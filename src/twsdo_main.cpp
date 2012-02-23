@@ -51,7 +51,7 @@ static ConfigTwsdo cfg;
 
 
 #define VERSION_MSG \
-PACKAGE_NAME " " PACKAGE_VERSION "\n\
+CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") " PACKAGE_VERSION "\n\
 Copyright (C) 2010-2011 Ruediger Meier <sweet_f_a@gmx.de>\n\
 License: BSD 3-Clause\n"
 
@@ -60,7 +60,7 @@ static void check_display_args()
 {
 	if( args_info.help_given ) {
 		gengetopt_args_info_usage =
-			"Usage: " PACKAGE " [OPTION]... [WORK_FILE]";
+			"Usage: " CMDLINE_PARSER_PACKAGE_NAME " [OPTION]... [WORK_FILE]";
 		cmdline_parser_print_help();
 	} else if( args_info.usage_given ) {
 		printf( "%s\n", gengetopt_args_info_usage );

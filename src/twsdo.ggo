@@ -36,6 +36,7 @@
 
 
 args "--no-handle-error --long-help --unamed-opts=DATA_DIR"
+package "twsdo"
 
 
 # section
