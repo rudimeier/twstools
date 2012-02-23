@@ -35,7 +35,7 @@
 #
 
 
-args "--no-handle-error --long-help --unamed-opts=DATA_DIR"
+args "--no-handle-error --long-help --unamed-opts=JOB_FILE"
 package "twsdo"
 
 

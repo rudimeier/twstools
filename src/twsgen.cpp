@@ -93,7 +93,7 @@ static void check_display_args()
 {
 	if( args_info.help_given ) {
 		gengetopt_args_info_usage =
-			"Usage: " CMDLINE_PARSER_PACKAGE_NAME " [OPTION]... [WORK_FILE]";
+			"Usage: " CMDLINE_PARSER_PACKAGE_NAME " [OPTION]... [FILE]";
 		cmdline_parser_print_help();
 	} else if( args_info.usage_given ) {
 		printf( "%s\n", gengetopt_args_info_usage );
