@@ -92,6 +92,7 @@ static void gengetopt_check_opts()
 	if( args_info.id_given ) {
 		cfg.tws_client_id = args_info.id_arg;
 	}
+	cfg.init_ai_family( args_info.ipv4_given, args_info.ipv6_given );
 	cfg.get_account = args_info.get_account_given;
 	if( args_info.accountName_given ) {
 		cfg.tws_account_name = args_info.accountName_arg;
