@@ -391,7 +391,7 @@ void TwsDL::connectTws()
 	
 	/* this may callback (negative) error messages only */
 	bool con = twsClient->connectTWS( cfg.tws_host, cfg.tws_port,
-		cfg.tws_client_id );
+		cfg.tws_client_id, cfg.ai_family );
 	assert( con == twsClient->isConnected() );
 	
 	if( !con ) {
