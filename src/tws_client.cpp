@@ -92,11 +92,16 @@ bool TWSClient::isConnected() const
 }
 
 
-bool TWSClient::connectTWS( const std::string &host, int port, int clientId )
+bool TWSClient::connectTWS( const std::string &host, int port, int clientId,
+	int ai_family )
 {
 	DEBUG_PRINTF("connect: %s:%d, clientId: %d", host.c_str(), port, clientId);
 	
+#if defined TWSAPI_IPV6
+	return ePosixClient->eConnect2( host.c_str(), port, clientId, ai_family );
+#else
 	return ePosixClient->eConnect( host.c_str(), port, clientId );
+#endif
 }
 
 

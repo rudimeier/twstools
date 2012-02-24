@@ -64,7 +64,8 @@ class TWSClient
 		void selectStuff( int msec );
 		
 		/////////////////////////////////////////////////////
-		bool connectTWS( const std::string &host, int port, int clientId );
+		bool connectTWS( const std::string &host, int port, int clientId,
+			int ai_family );
 		void disconnectTWS();
 		
 		int serverVersion();
