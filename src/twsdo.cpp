@@ -46,8 +46,18 @@
 // from global installed twsapi
 #include "twsapi/Contract.h"
 
+#if defined HAVE_CONFIG_H
+# include "config.h"
+#endif  /* HAVE_CONFIG_H */
+
 #include <stdio.h>
 #include <string.h>
+
+#if defined _WIN32
+# include <winsock2.h>
+#else
+# include <sys/socket.h>
+#endif
 
 
 
@@ -59,6 +69,7 @@ ConfigTwsdo::ConfigTwsdo()
 	tws_host = "localhost";
 	tws_port = 7474;
 	tws_client_id = 123;
+	ai_family = AF_UNSPEC;
 	
 	get_account = 0;
 	tws_account_name = "";
@@ -71,6 +82,30 @@ ConfigTwsdo::ConfigTwsdo()
 	tws_pacingInterval = 605000;
 	tws_minPacingTime = 1000;
 	tws_violationPause = 60000;
+}
+
+void ConfigTwsdo::init_ai_family( int ipv4, int ipv6 )
+{
+	if( !ipv4 && !ipv6 ) {
+		/* default is ipv4 only */
+		ai_family = AF_INET;
+		return;
+	}
+#if ! defined TWSAPI_IPV6
+	DEBUG_PRINTF( "Warning, specifying address family is not supported in "
+		"twsapi (" TWSAPI_VERSION "), upgrade it and recompile.");
+#endif
+	if( ipv4 && ipv6 ) {
+		/* this will be the default one day */
+		ai_family = AF_UNSPEC;
+	} else if( ipv4 ) {
+		ai_family = AF_INET;
+	} else if( ipv6 ) {
+		ai_family = AF_INET6;
+	} else {
+		/* no more cases */
+		assert(false);
+	}
 }
 
 

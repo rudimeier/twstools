@@ -57,12 +57,15 @@ namespace IB {
 struct ConfigTwsdo
 {
 	ConfigTwsdo();
-	
+
+	void init_ai_family( int ipv4, int ipv6 );
+
 	const char *workfile;
 	int skipdef;
 	const char *tws_host;
 	int tws_port;
 	int tws_client_id;
+	int ai_family;
 	
 	int get_account;
 	const char* tws_account_name;
