@@ -66,6 +66,9 @@ option "ipv6" 6
 "Force twsapi to use IPv6 addresses only."
 optional
 
+# section
+section "Quick shot requests"
+
 option "get-account" A
 "Request account status."
 optional
