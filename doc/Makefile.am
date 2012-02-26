@@ -19,7 +19,7 @@ built_mans += twsgen.man
 
 ## help2man helpers
 %.man: $(top_srcdir)/src/%.ggo $(top_srcdir)/configure
-	$(HELP2MAN) -S "$(PACKAGE_STRING)" -p "($(PACKAGE))$*" \
+	$(HELP2MAN) -S "$(PACKAGE_STRING)" -N \
 		-I "$(srcdir)/$*.h2m" -I "$(builddir)/$*.h2m" \
 		-I "$(srcdir)/author.h2m" \
 		-o $@ $(top_builddir)/src/$*
