@@ -46,3 +46,5 @@ rm -rf %{buildroot}
 %{_bindir}/twsdo
 %{_bindir}/twsgen
 %doc %{_docdir}/%{name}/
+%doc %{_mandir}/man1/twsdo.1*
+%doc %{_mandir}/man1/twsgen.1*

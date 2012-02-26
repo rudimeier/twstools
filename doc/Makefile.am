@@ -13,6 +13,10 @@ man1_MANS += $(built_mans)
 EXTRA_DIST += author.h2m
 BUILT_SOURCES += $(built_mans)
 
+built_mans =
+built_mans += twsdo.man
+built_mans += twsgen.man
+
 ## help2man helpers
 %.man: $(top_srcdir)/src/%.ggo $(top_srcdir)/configure
 	$(HELP2MAN) -S "$(PACKAGE_STRING)" -p "($(PACKAGE))$*" \
