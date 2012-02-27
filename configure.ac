@@ -32,11 +32,13 @@ AC_CHECK_FUNCS(localtime)
 AC_CHECK_FUNCS(localtime_r)
 AC_CHECK_FUNCS(strptime)
 
+AM_MISSING_PROG([HELP2MAN], [help2man], ["${missing_dir}"])
 
 ## output
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([sample/Makefile])
+AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([test/Makefile])
 AC_CONFIG_FILES([twstools.spec])
 AC_OUTPUT
