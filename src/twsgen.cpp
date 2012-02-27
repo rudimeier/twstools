@@ -84,10 +84,12 @@ static int formatDate()
 
 
 #define VERSION_MSG \
-CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") " PACKAGE_VERSION "\n\
-compiled against twsapi "TWSAPI_VERSION" \n\
-Copyright (C) 2010-2012 Ruediger Meier <sweet_f_a@gmx.de>\n\
-License: BSD 3-Clause\n"
+CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") " PACKAGE_VERSION " [\
+built with twsapi " TWSAPI_VERSION "]\n\
+Copyright (C) 2010-2012 Ruediger Meier\n\
+License BSD 3-Clause\n\
+\n\
+Written by Ruediger Meier <sweet_f_a@gmx.de>\n"
 
 
 static void check_display_args()
