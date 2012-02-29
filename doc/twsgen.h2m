@@ -1,0 +1,6 @@
+[NAME]
+twsgen \- generate jobs for twsdo
+[DESCRIPTION]
+.\" Add any additional description here
+[SEE ALSO]
+twsdo(1)
