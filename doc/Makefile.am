@@ -14,11 +14,15 @@ EXTRA_DIST += author.h2m
 BUILT_SOURCES += $(built_mans)
 
 built_mans =
-built_mans += twsdo.man
-built_mans += twsgen.man
+built_mans += twsdo.1
+built_mans += twsgen.1
+
+## non generic deps per executable
+twsdo.1: $(top_srcdir)/src/twsdo_main.cpp
+twsgen.1: $(top_srcdir)/src/twsgen.cpp
 
 ## help2man helpers
-%.man: $(top_srcdir)/src/%.ggo $(top_srcdir)/configure
+%.1: $(top_srcdir)/src/%.ggo $(top_srcdir)/configure
 	$(HELP2MAN) -S "$(PACKAGE_STRING)" -N \
 		-I "$(srcdir)/$*.h2m" -I "$(builddir)/$*.h2m" \
 		-I "$(srcdir)/author.h2m" \
