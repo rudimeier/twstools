@@ -55,7 +55,8 @@ BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
 BUILT_SOURCES += twsgen_ggo.c twsgen_ggo.h
 
-
+# Build all executables at distribution time to generate the man pages.
+dist-hook: $(bin_PROGRAMS)
 
 CLEANFILES =
 CLEANFILES += *.s
