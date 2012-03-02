@@ -116,3 +116,11 @@ PlaceOrder::PlaceOrder() :
 	orderId(0)
 {
 }
+
+
+
+
+CancelOrder::CancelOrder() :
+	orderId(0)
+{
+}
