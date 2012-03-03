@@ -68,7 +68,7 @@ GenericRequest::ReqType GenericRequest::reqType() const
 
 int GenericRequest::reqId() const
 {
-	if( _reqType == PLACE_ORDER ) {
+	if( _reqType == PLACE_ORDER || _reqType == CANCEL_ORDER ) {
 		return _orderId;
 	}
 	return _reqId;
