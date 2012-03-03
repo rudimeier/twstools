@@ -382,13 +382,17 @@ WorkTodo::WorkTodo() :
 	orders_todo(false),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
-	_place_order_todo( new PlaceOrderTodo() )
+	_place_order_todo( new PlaceOrderTodo() ),
+	_cancel_order_todo( new CancelOrderTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _cancel_order_todo != NULL ) {
+		delete _cancel_order_todo;
+	}
 	if( _place_order_todo != NULL ) {
 		delete _place_order_todo;
 	}
@@ -412,6 +416,8 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 	} else if( orders_todo ) {
 		orders_todo = false;
 		return GenericRequest::ORDERS_REQUEST;
+	} else if( _cancel_order_todo->countLeft() > 0 ) {
+		return GenericRequest::CANCEL_ORDER;
 	} else if( _place_order_todo->countLeft() > 0 ) {
 		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
@@ -453,6 +459,16 @@ const PlaceOrderTodo& WorkTodo::getPlaceOrderTodo() const
 	return *_place_order_todo;
 }
 
+CancelOrderTodo* WorkTodo::cancelOrderTodo() const
+{
+	return _cancel_order_todo;
+}
+
+const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
+{
+	return *_cancel_order_todo;
+}
+
 
 void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 {
@@ -489,6 +505,9 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 	} else if ( strcmp( tmp, "place_order") == 0 ) {
 		PacketPlaceOrder *ppo = PacketPlaceOrder::fromXml(xn);
 		_place_order_todo->add( ppo->getRequest() );
+	} else if ( strcmp( tmp, "cancel_order") == 0 ) {
+		PacketCancelOrder *pco = PacketCancelOrder::fromXml(xn);
+		_cancel_order_todo->add( pco->getRequest() );
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {

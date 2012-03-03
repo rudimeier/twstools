@@ -81,7 +81,8 @@ class GenericRequest
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST,
-			PLACE_ORDER
+			PLACE_ORDER,
+			CANCEL_ORDER
 		};
 		
 		GenericRequest();
@@ -219,6 +220,8 @@ class WorkTodo
 		const HistTodo& getHistTodo() const;
 		PlaceOrderTodo* placeOrderTodo() const;
 		const PlaceOrderTodo& getPlaceOrderTodo() const;
+		CancelOrderTodo* cancelOrderTodo() const;
+		const CancelOrderTodo& getCancelOrderTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 		
@@ -231,6 +234,7 @@ class WorkTodo
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 		PlaceOrderTodo *_place_order_todo;
+		CancelOrderTodo *_cancel_order_todo;
 };
 
 
