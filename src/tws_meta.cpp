@@ -340,6 +340,42 @@ void PlaceOrderTodo::add( const PlaceOrder& po )
 
 
 
+CancelOrderTodo::CancelOrderTodo() :
+	curIndex(-1),
+	cancelOrders(*(new std::vector<CancelOrder>()))
+{
+}
+
+CancelOrderTodo::~CancelOrderTodo()
+{
+	delete &cancelOrders;
+}
+
+int CancelOrderTodo::countLeft() const
+{
+	return cancelOrders.size() - curIndex - 1;
+}
+
+void CancelOrderTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+const CancelOrder& CancelOrderTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)cancelOrders.size() );
+	return cancelOrders.at(curIndex);
+}
+
+void CancelOrderTodo::add( const CancelOrder& po )
+{
+	cancelOrders.push_back(po);
+}
+
+
+
+
 WorkTodo::WorkTodo() :
 	acc_status_todo(false),
 	executions_todo(false),

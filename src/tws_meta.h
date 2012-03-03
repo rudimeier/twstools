@@ -185,6 +185,27 @@ class PlaceOrderTodo
 
 
 
+class CancelOrder;
+
+class CancelOrderTodo
+{
+	public:
+		CancelOrderTodo();
+		virtual ~CancelOrderTodo();
+
+		int countLeft() const;
+		void checkout();
+		const CancelOrder& current() const;
+		void add( const CancelOrder& );
+
+	private:
+		int curIndex;
+		std::vector<CancelOrder> &cancelOrders;
+};
+
+
+
+
 class WorkTodo
 {
 	public:
