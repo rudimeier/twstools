@@ -81,7 +81,8 @@ class GenericRequest
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST,
-			PLACE_ORDER
+			PLACE_ORDER,
+			CANCEL_ORDER
 		};
 		
 		GenericRequest();
@@ -185,6 +186,27 @@ class PlaceOrderTodo
 
 
 
+class CancelOrder;
+
+class CancelOrderTodo
+{
+	public:
+		CancelOrderTodo();
+		virtual ~CancelOrderTodo();
+
+		int countLeft() const;
+		void checkout();
+		const CancelOrder& current() const;
+		void add( const CancelOrder& );
+
+	private:
+		int curIndex;
+		std::vector<CancelOrder> &cancelOrders;
+};
+
+
+
+
 class WorkTodo
 {
 	public:
@@ -198,6 +220,8 @@ class WorkTodo
 		const HistTodo& getHistTodo() const;
 		PlaceOrderTodo* placeOrderTodo() const;
 		const PlaceOrderTodo& getPlaceOrderTodo() const;
+		CancelOrderTodo* cancelOrderTodo() const;
+		const CancelOrderTodo& getCancelOrderTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 		
@@ -210,6 +234,7 @@ class WorkTodo
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 		PlaceOrderTodo *_place_order_todo;
+		CancelOrderTodo *_cancel_order_todo;
 };
 
 
@@ -366,6 +391,32 @@ class PacketPlaceOrder
 
 	private:
 		PlaceOrder *request;
+		std::vector<TwsRow> * const list;
+};
+
+
+
+
+class CancelOrder;
+
+class PacketCancelOrder
+	: public  Packet
+{
+	public:
+		PacketCancelOrder();
+		virtual ~PacketCancelOrder();
+
+		static PacketCancelOrder * fromXml( xmlNodePtr );
+
+		const CancelOrder& getRequest() const;
+		virtual void clear();
+		void record( long orderId, const CancelOrder& );
+		void append( const RowError& );
+
+		virtual void dumpXml();
+
+	private:
+		CancelOrder *request;
 		std::vector<TwsRow> * const list;
 };
 
