@@ -1081,6 +1081,12 @@ void PacketCancelOrder::record( long orderId, const CancelOrder& oP )
 	this->request->orderId = orderId;
 }
 
+void PacketCancelOrder::append( const RowError& err )
+{
+	TwsRow arow = { t_error, new RowError(err) };
+	list->push_back( arow );
+}
+
 
 
 
