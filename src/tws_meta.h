@@ -372,6 +372,31 @@ class PacketPlaceOrder
 
 
 
+class CancelOrder;
+
+class PacketCancelOrder
+	: public  Packet
+{
+	public:
+		PacketCancelOrder();
+		virtual ~PacketCancelOrder();
+
+		static PacketCancelOrder * fromXml( xmlNodePtr );
+
+		const CancelOrder& getRequest() const;
+		virtual void clear();
+		void record( long orderId, const CancelOrder& );
+
+		virtual void dumpXml();
+
+	private:
+		CancelOrder *request;
+		std::vector<TwsRow> * const list;
+};
+
+
+
+
 class AccStatusRequest;
 
 struct RowAcc
