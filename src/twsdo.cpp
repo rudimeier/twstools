@@ -461,6 +461,9 @@ void TwsDL::idle()
 	case GenericRequest::PLACE_ORDER:
 		placeOrder();
 		break;
+	case GenericRequest::CANCEL_ORDER:
+		cancelOrder();
+		break;
 	case GenericRequest::NONE:
 		break;
 	}
@@ -499,6 +502,9 @@ void TwsDL::waitData()
 		break;
 	case GenericRequest::PLACE_ORDER:
 		ok = finPlaceOrder();
+		break;
+	case GenericRequest::CANCEL_ORDER:
+		ok = finCancelOrder();
 		break;
 	case GenericRequest::ACC_STATUS_REQUEST:
 	case GenericRequest::EXECUTIONS_REQUEST:
@@ -584,6 +590,23 @@ bool TwsDL::finPlaceOrder()
 }
 
 
+bool TwsDL::finCancelOrder()
+{
+	switch( packet->getError() ) {
+	case REQ_ERR_NONE:
+	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
+		packet->dumpXml();
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
+		break;
+	case REQ_ERR_TWSCON:
+		return false;
+	}
+	return true;
+}
+
+
 void TwsDL::initTwsClient()
 {
 	assert( twsClient == NULL && twsWrapper == NULL );
@@ -630,6 +653,9 @@ void TwsDL::twsError( const RowError& err )
 				break;
 			case GenericRequest::PLACE_ORDER:
 				errorPlaceOrder( err );
+				break;
+			case GenericRequest::CANCEL_ORDER:
+				errorCancelOrder( err );
 				break;
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -811,6 +837,18 @@ void TwsDL::errorPlaceOrder( const RowError& err )
 }
 
 
+void TwsDL::errorCancelOrder( const RowError& err )
+{
+	PacketCancelOrder &p_cO = *((PacketCancelOrder*)packet);
+	p_cO.append( err );
+	switch( err.code ) {
+	default:
+		p_cO.closeError( REQ_ERR_REQUEST );
+		break;
+	}
+}
+
+
 #undef ERR_MATCH
 
 
@@ -823,6 +861,7 @@ void TwsDL::twsConnectionClosed()
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
 			case GenericRequest::PLACE_ORDER:
+			case GenericRequest::CANCEL_ORDER:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
@@ -1218,6 +1257,23 @@ void TwsDL::placeOrder()
 		   that current time comes after that error */
 		twsClient->reqCurrentTime();
 	}
+
+	changeState( WAIT_DATA );
+}
+
+void TwsDL::cancelOrder()
+{
+	workTodo->cancelOrderTodo()->checkout();
+	const CancelOrder &cO = workTodo->getCancelOrderTodo().current();
+
+	PacketCancelOrder *p_cancelOrder = new PacketCancelOrder();
+	packet = p_cancelOrder;
+
+	long orderId = cO.orderId;
+	currentRequest.nextOrderRequest( GenericRequest::CANCEL_ORDER, orderId );
+
+	p_cancelOrder->record( orderId, cO );
+	twsClient->cancelOrder( orderId );
 
 	changeState( WAIT_DATA );
 }
