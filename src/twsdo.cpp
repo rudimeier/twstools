@@ -1021,6 +1021,10 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 		((PacketPlaceOrder*)packet)->append(row);
 		return;
 	}
+	if( currentRequest.reqType() == GenericRequest::CANCEL_ORDER ) {
+		((PacketCancelOrder*)packet)->append(row);
+		return;
+	}
 	DEBUG_PRINTF( "Warning, unexpected tws callback (orderStatus).");
 }
 

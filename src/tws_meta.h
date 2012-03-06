@@ -412,6 +412,7 @@ class PacketCancelOrder
 		virtual void clear();
 		void record( long orderId, const CancelOrder& );
 		void append( const RowError& );
+		void append( const RowOrderStatus& );
 
 		virtual void dumpXml();
 
