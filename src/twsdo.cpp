@@ -960,7 +960,7 @@ void TwsDL::twsHistoricalData( int reqId, const RowHist &row )
 void TwsDL::twsUpdateAccountValue( const RowAccVal& row )
 {
 	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (updateAccountValue).");
 		return;
 	}
 	((PacketAccStatus*)packet)->append( row );
@@ -969,7 +969,7 @@ void TwsDL::twsUpdateAccountValue( const RowAccVal& row )
 void TwsDL::twsUpdatePortfolio( const RowPrtfl& row )
 {
 	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (updatePortfolio).");
 		return;
 	}
 	((PacketAccStatus*)packet)->append( row );
@@ -978,7 +978,7 @@ void TwsDL::twsUpdatePortfolio( const RowPrtfl& row )
 void TwsDL::twsUpdateAccountTime( const std::string& timeStamp )
 {
 	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (updateAccountTime).");
 		return;
 	}
 	((PacketAccStatus*)packet)->appendUpdateAccountTime( timeStamp );
@@ -987,7 +987,7 @@ void TwsDL::twsUpdateAccountTime( const std::string& timeStamp )
 void TwsDL::twsAccountDownloadEnd( const std::string& accountName )
 {
 	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (accountDownloadEnd).");
 		return;
 	}
 	((PacketAccStatus*)packet)->appendAccountDownloadEnd( accountName );
@@ -996,7 +996,7 @@ void TwsDL::twsAccountDownloadEnd( const std::string& accountName )
 void TwsDL::twsExecDetails( int reqId, const RowExecution &row )
 {
 	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (execDetails).");
 		return;
 	}
 	((PacketExecutions*)packet)->append( reqId, row );
@@ -1005,7 +1005,7 @@ void TwsDL::twsExecDetails( int reqId, const RowExecution &row )
 void TwsDL::twsExecDetailsEnd( int reqId )
 {
 	if( currentRequest.reqType() != GenericRequest::EXECUTIONS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (execDetailsEnd).");
 		return;
 	}
 	((PacketExecutions*)packet)->appendExecutionsEnd( reqId );
@@ -1021,7 +1021,7 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 		((PacketPlaceOrder*)packet)->append(row);
 		return;
 	}
-	DEBUG_PRINTF( "Warning, unexpected tws callback.");
+	DEBUG_PRINTF( "Warning, unexpected tws callback (orderStatus).");
 }
 
 void TwsDL::twsOpenOrder( const RowOpenOrder& row )
@@ -1034,7 +1034,7 @@ void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 		((PacketPlaceOrder*)packet)->append(row);
 		return;
 	}
-	DEBUG_PRINTF( "Warning, unexpected tws callback..");
+	DEBUG_PRINTF( "Warning, unexpected tws callback (openOrder).");
 }
 
 void TwsDL::twsOpenOrderEnd()
@@ -1042,7 +1042,7 @@ void TwsDL::twsOpenOrderEnd()
 	/* this messages usually comes unexpected right after connecting */
 	
 	if( currentRequest.reqType() != GenericRequest::ORDERS_REQUEST ) {
-		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		DEBUG_PRINTF( "Warning, unexpected tws callback (openOrderEnd).");
 		return;
 	}
 	
