@@ -121,14 +121,15 @@ void TWSClient::disconnectTWS()
 
 void TWSClient::selectStuff( int msec )
 {
+	assert( msec >= 0 );
 	struct timeval tval;
-	tval.tv_usec = msec * 1000;
-	tval.tv_sec = 0;
+	tval.tv_sec = msec / 1000 ;
+	tval.tv_usec = (msec % 1000) * 1000;
 	
 	fd_set readSet, writeSet;
 	
 	FD_ZERO( &readSet);
-	writeSet = readSet;
+	FD_ZERO( &writeSet);
 	
 	int fd = -1;
 	if( isConnected() ) {
@@ -149,8 +150,8 @@ void TWSClient::selectStuff( int msec )
 		TWS_DEBUG( 5 , "Select timeouted." );
 		return;
 	} else if( ret < 0) {
-		TWS_DEBUG( 1 , "Select failed with failed with errno: %s.",
-			strerror(errno) );
+		TWS_DEBUG( 1 , "Select failed: %s, fd: %d, timval: (%ds, %dus).",
+			strerror(errno), fd, tval.tv_sec, tval.tv_usec );
 		disconnectTWS();
 		return;
 	}
