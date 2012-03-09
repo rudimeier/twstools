@@ -121,9 +121,10 @@ void TWSClient::disconnectTWS()
 
 void TWSClient::selectStuff( int msec )
 {
+	assert( msec >= 0 );
 	struct timeval tval;
-	tval.tv_usec = msec * 1000;
-	tval.tv_sec = 0;
+	tval.tv_sec = msec / 1000 ;
+	tval.tv_usec = (msec % 1000) * 1000;
 	
 	fd_set readSet, writeSet;
 	
