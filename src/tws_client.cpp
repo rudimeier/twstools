@@ -129,7 +129,7 @@ void TWSClient::selectStuff( int msec )
 	fd_set readSet, writeSet;
 	
 	FD_ZERO( &readSet);
-	writeSet = readSet;
+	FD_ZERO( &writeSet);
 	
 	int fd = -1;
 	if( isConnected() ) {
