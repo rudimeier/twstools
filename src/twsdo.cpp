@@ -842,6 +842,10 @@ void TwsDL::errorCancelOrder( const RowError& err )
 	PacketCancelOrder &p_cO = *((PacketCancelOrder*)packet);
 	p_cO.append( err );
 	switch( err.code ) {
+	case 202:
+		/* "Order cancelled", this is expected here and we'll wait for some
+		   more orderStatus callbacks */
+		break;
 	default:
 		p_cO.closeError( REQ_ERR_REQUEST );
 		break;
