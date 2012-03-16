@@ -1087,6 +1087,14 @@ void PacketCancelOrder::append( const RowError& err )
 	list->push_back( arow );
 }
 
+void PacketCancelOrder::append( const RowOrderStatus& row )
+{
+	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
+	list->push_back( arow );
+
+	mode = CLOSED;
+}
+
 
 
 
