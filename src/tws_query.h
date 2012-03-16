@@ -117,4 +117,15 @@ class PlaceOrder
 };
 
 
+
+
+class CancelOrder
+{
+	public:
+		CancelOrder();
+
+		long orderId;
+};
+
+
 #endif

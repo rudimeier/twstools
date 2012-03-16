@@ -135,6 +135,7 @@ class TwsDL
 		bool finContracts();
 		bool finHist();
 		bool finPlaceOrder();
+		bool finCancelOrder();
 		void waitData();
 		
 		void changeState( State );
@@ -147,10 +148,12 @@ class TwsDL
 		void reqExecutions();
 		void reqOrders();
 		void placeOrder();
+		void cancelOrder();
 		
 		void errorContracts( const RowError& );
 		void errorHistData( const RowError& );
 		void errorPlaceOrder( const RowError& );
+		void errorCancelOrder( const RowError& );
 		
 		// callbacks from our twsWrapper
 		void twsError( const RowError& );

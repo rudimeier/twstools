@@ -68,7 +68,7 @@ GenericRequest::ReqType GenericRequest::reqType() const
 
 int GenericRequest::reqId() const
 {
-	if( _reqType == PLACE_ORDER ) {
+	if( _reqType == PLACE_ORDER || _reqType == CANCEL_ORDER ) {
 		return _orderId;
 	}
 	return _reqId;
@@ -340,19 +340,59 @@ void PlaceOrderTodo::add( const PlaceOrder& po )
 
 
 
+CancelOrderTodo::CancelOrderTodo() :
+	curIndex(-1),
+	cancelOrders(*(new std::vector<CancelOrder>()))
+{
+}
+
+CancelOrderTodo::~CancelOrderTodo()
+{
+	delete &cancelOrders;
+}
+
+int CancelOrderTodo::countLeft() const
+{
+	return cancelOrders.size() - curIndex - 1;
+}
+
+void CancelOrderTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+const CancelOrder& CancelOrderTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)cancelOrders.size() );
+	return cancelOrders.at(curIndex);
+}
+
+void CancelOrderTodo::add( const CancelOrder& po )
+{
+	cancelOrders.push_back(po);
+}
+
+
+
+
 WorkTodo::WorkTodo() :
 	acc_status_todo(false),
 	executions_todo(false),
 	orders_todo(false),
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
-	_place_order_todo( new PlaceOrderTodo() )
+	_place_order_todo( new PlaceOrderTodo() ),
+	_cancel_order_todo( new CancelOrderTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _cancel_order_todo != NULL ) {
+		delete _cancel_order_todo;
+	}
 	if( _place_order_todo != NULL ) {
 		delete _place_order_todo;
 	}
@@ -376,6 +416,8 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 	} else if( orders_todo ) {
 		orders_todo = false;
 		return GenericRequest::ORDERS_REQUEST;
+	} else if( _cancel_order_todo->countLeft() > 0 ) {
+		return GenericRequest::CANCEL_ORDER;
 	} else if( _place_order_todo->countLeft() > 0 ) {
 		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
@@ -417,6 +459,16 @@ const PlaceOrderTodo& WorkTodo::getPlaceOrderTodo() const
 	return *_place_order_todo;
 }
 
+CancelOrderTodo* WorkTodo::cancelOrderTodo() const
+{
+	return _cancel_order_todo;
+}
+
+const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
+{
+	return *_cancel_order_todo;
+}
+
 
 void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 {
@@ -453,6 +505,9 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 	} else if ( strcmp( tmp, "place_order") == 0 ) {
 		PacketPlaceOrder *ppo = PacketPlaceOrder::fromXml(xn);
 		_place_order_todo->add( ppo->getRequest() );
+	} else if ( strcmp( tmp, "cancel_order") == 0 ) {
+		PacketCancelOrder *pco = PacketCancelOrder::fromXml(xn);
+		_cancel_order_todo->add( pco->getRequest() );
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
@@ -936,6 +991,108 @@ void PacketPlaceOrder::append( const RowOpenOrder& row )
 	if( request->order.whatIf || list->size() >= 2 ) {
 		mode = CLOSED;
 	}
+}
+
+
+
+
+PacketCancelOrder::PacketCancelOrder() :
+	request(NULL),
+	list( new std::vector<TwsRow>() )
+{
+}
+
+PacketCancelOrder::~PacketCancelOrder()
+{
+	del_tws_rows(list);
+	delete list;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketCancelOrder * PacketCancelOrder::fromXml( xmlNodePtr root )
+{
+	PacketCancelOrder *pco = new PacketCancelOrder();
+
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				pco->request = new CancelOrder();
+				from_xml(pco->request, p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+					/* not implemented yet */
+					assert( false );
+				}
+			}
+		}
+	}
+	return pco;
+}
+
+void PacketCancelOrder::dumpXml()
+{
+	xmlNodePtr root = TwsXml::newDocRoot();
+	xmlNodePtr nppo = xmlNewChild( root, NULL,
+		(const xmlChar*)"request", NULL );
+	xmlNewProp( nppo, (const xmlChar*)"type",
+		(const xmlChar*)"cancel_order" );
+
+	to_xml(nppo, *request);
+
+	if( mode == CLOSED ) {
+		xmlNodePtr nrsp = xmlNewChild( nppo, NULL, (xmlChar*)"response", NULL);
+		std::vector<TwsRow>::const_iterator it;
+		for( it = list->begin(); it < list->end(); it++ ) {
+			to_xml( nrsp, *it );
+		}
+	}
+
+	TwsXml::dumpAndFree( root );
+}
+
+const CancelOrder& PacketCancelOrder::getRequest() const
+{
+	return *request;
+}
+
+void PacketCancelOrder::clear()
+{
+	mode = CLEAN;
+	error = REQ_ERR_NONE;
+	del_tws_rows(list);
+	list->clear();
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
+}
+
+void PacketCancelOrder::record( long orderId, const CancelOrder& oP )
+{
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
+	mode = RECORD;
+	this->request = new CancelOrder( oP );
+	this->request->orderId = orderId;
+}
+
+void PacketCancelOrder::append( const RowError& err )
+{
+	TwsRow arow = { t_error, new RowError(err) };
+	list->push_back( arow );
+}
+
+void PacketCancelOrder::append( const RowOrderStatus& row )
+{
+	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
+	list->push_back( arow );
+
+	mode = CLOSED;
 }
 
 
