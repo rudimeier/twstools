@@ -4,16 +4,20 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
-0.3.3 - not yet released -------------------------------------------------------
+0.3.3 - 2012-03-16 -------------------------------------------------------------
 
 Add order support, minor improvements and fixes.
 
   - new build target: make rpm
   - minor internal cleanup
-  - support fire and forget orders
+  - support fire and forget orders (experimental/undocumented)
   - correct and improve --help/--version output
   - fix, account info job queues were not initialized
   - optional IPv6 support when using twsapi >= 0.4.0 (new cmd options -4/-6)
+  - man pages added
+  - fix timout bug (select returned EINVAL because timeval was wrong)
+  - support for cancelling orders (experimental/undocumented)
+  - fix test suite, emulate readlink -f on systems where it's missed
 
 
 
