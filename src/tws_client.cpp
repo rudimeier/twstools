@@ -150,7 +150,7 @@ void TWSClient::selectStuff( int msec )
 		TWS_DEBUG( 5 , "Select timeouted." );
 		return;
 	} else if( ret < 0) {
-		TWS_DEBUG( 1 , "Select failed: %s, fd: %d, timval: (%ds, %dus).",
+		TWS_DEBUG( 1 , "Select failed: %s, fd: %d, timval: (%lds, %ldus).",
 			strerror(errno), fd, tval.tv_sec, tval.tv_usec );
 		disconnectTWS();
 		return;
