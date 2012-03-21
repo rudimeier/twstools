@@ -1,6 +1,8 @@
 LANG = C
 LC_ALL = C
 
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS = src sample doc test
 
 doc_DATA =
