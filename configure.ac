@@ -18,7 +18,13 @@ AC_PROG_RANLIB
 AC_LANG([C++])
 AX_COMPILER_VENDOR
 
-DEFAULT_CXXFLAGS="-Wall -W"
+# enable some warnings
+AX_CHECK_COMPILE_FLAG([-Wall],[warnflags="-Wall"])
+# intel's -Wextra is too verbose
+if test "$ax_cv_cxx_compiler_vendor" != "intel"; then
+	AX_CHECK_COMPILE_FLAG([-Wextra],[warnflags="$warnflags -Wextra"])
+fi
+DEFAULT_CXXFLAGS="$warnflags"
 AC_SUBST([DEFAULT_CXXFLAGS])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
