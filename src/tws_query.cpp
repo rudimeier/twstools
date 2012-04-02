@@ -124,3 +124,11 @@ CancelOrder::CancelOrder() :
 	orderId(0)
 {
 }
+
+
+
+
+MktDataRequest::MktDataRequest() :
+	snapshot(false)
+{
+}

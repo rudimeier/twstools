@@ -128,4 +128,17 @@ class CancelOrder
 };
 
 
+
+
+class MktDataRequest
+{
+	public:
+		MktDataRequest();
+
+		IB::Contract ibContract;
+		std::string genericTicks;
+		bool snapshot;
+};
+
+
 #endif
