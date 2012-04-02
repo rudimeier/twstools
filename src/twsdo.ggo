@@ -85,6 +85,10 @@ option "get-order" O
 "Request open orders."
 optional
 
+option "mm" -
+"Simple market making."
+optional
+
 
 # section
 section "TWS tweaks"

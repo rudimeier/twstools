@@ -102,6 +102,7 @@ static void gengetopt_check_opts()
 	}
 	cfg.get_exec = args_info.get_exec_given;
 	cfg.get_order = args_info.get_order_given;
+	cfg.do_mm = args_info.mm_given;
 	
 	if( args_info.conTimeout_given ) {
 		cfg.tws_conTimeout = args_info.conTimeout_arg;

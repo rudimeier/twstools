@@ -75,6 +75,7 @@ ConfigTwsdo::ConfigTwsdo()
 	tws_account_name = "";
 	get_exec = 0;
 	get_order = 0;
+	do_mm = 0;
 	
 	tws_conTimeout = 30000;
 	tws_reqTimeout = 1200000;
