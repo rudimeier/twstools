@@ -681,7 +681,7 @@ void TwsDL::twsError( const RowError& err )
 	// TODO do better
 	switch( err.code ) {
 		case 1100:
-			assert(ERR_MATCH("Connectivity between IB and TWS has been lost."));
+			assert(ERR_MATCH("Connectivity between IB and T"));
 			connectivity_IB_TWS = false;
 			curIdleTime = cfg.tws_reqTimeout;
 			break;
