@@ -682,18 +682,21 @@ void TwsDL::twsError( const RowError& err )
 	switch( err.code ) {
 		case 1100:
 			assert(ERR_MATCH("Connectivity between IB and T"));
+			assert(ERR_MATCH(" has been lost."));
 			connectivity_IB_TWS = false;
 			curIdleTime = cfg.tws_reqTimeout;
 			break;
 		case 1101:
-			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data lost."));
+			assert(ERR_MATCH("Connectivity between IB and T"));
+			assert(ERR_MATCH(" has been restored - data lost."));
 			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				packet->closeError( REQ_ERR_TWSCON );
 			}
 			break;
 		case 1102:
-			assert(ERR_MATCH("Connectivity between IB and TWS has been restored - data maintained."));
+			assert(ERR_MATCH("Connectivity between IB and T"));
+			assert(ERR_MATCH(" has been restored - data maintained."));
 			connectivity_IB_TWS = true;
 			if( currentRequest.reqType() == GenericRequest::HIST_REQUEST ) {
 				packet->closeError( REQ_ERR_TWSCON );
