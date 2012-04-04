@@ -499,15 +499,19 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 	} else if( strcmp( tmp, "contract_details") == 0 ) {
 		PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
 		_contractDetailsTodo->add(pcd->getRequest());
+		delete pcd;
 	} else if ( strcmp( tmp, "historical_data") == 0 ) {
 		PacketHistData *phd = PacketHistData::fromXml(xn);
 		_histTodo->add( phd->getRequest() );
+		delete phd;
 	} else if ( strcmp( tmp, "place_order") == 0 ) {
 		PacketPlaceOrder *ppo = PacketPlaceOrder::fromXml(xn);
 		_place_order_todo->add( ppo->getRequest() );
+		delete ppo;
 	} else if ( strcmp( tmp, "cancel_order") == 0 ) {
 		PacketCancelOrder *pco = PacketCancelOrder::fromXml(xn);
 		_cancel_order_todo->add( pco->getRequest() );
+		delete pco;
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
