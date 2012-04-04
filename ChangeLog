@@ -6,12 +6,13 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 0.3.4 - not yet released  ------------------------------------------------------
 
-Minor fixes.
+This is a bug fix release.
 
   - correct printf format spec for struct timeval
   - improve CXX and CXXFLAGS handling
   - disable extra warnings for Intel's verbose icpc compiler
   - fix, TWS-924.2e changed error "Connectivity between IB..."
+  - fix memleaks and reduce memory usage when reading xml files
 
 
 
