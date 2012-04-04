@@ -54,7 +54,13 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
+#if defined HAVE_MALLOC_TRIM
+# include <malloc.h>
+#endif
 
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
@@ -1111,6 +1117,9 @@ xmlNodePtr TwsXml::nextXmlNode()
 // 		fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
 	} else {
 // 		fprintf(stderr, "Notice, all elements parsed.\n");
+#if defined HAVE_MALLOC_TRIM
+		malloc_trim(0);
+#endif
 	}
 	
 	return curNode;
