@@ -4,7 +4,18 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
-0.3.3 - 2012-03-16 -------------------------------------------------------------
+0.3.4 - not yet released  ------------------------------------------------------
+
+Minor fixes.
+
+  - correct printf format spec for struct timeval
+  - improve CXX and CXXFLAGS handling
+  - disable extra warnings for Intel's verbose icpc compiler
+  - fix, TWS-924.2e changed error "Connectivity between IB..."
+
+
+
+0.3.3 - 2012-03-16  ------------------------------------------------------------
 
 Add order support, minor improvements and fixes.
 

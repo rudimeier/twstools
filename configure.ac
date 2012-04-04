@@ -1,5 +1,5 @@
 AC_PREREQ([2.61])
-AC_INIT([twstools], [0.3.3], [http://www.ga-group.nl/])
+AC_INIT([twstools], [0.3.4], [http://www.ga-group.nl/])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADER([src/config.h])
