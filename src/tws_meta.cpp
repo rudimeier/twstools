@@ -534,6 +534,10 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 		PacketCancelOrder *pco = PacketCancelOrder::fromXml(xn);
 		_cancel_order_todo->add( pco->getRequest() );
 		delete pco;
+	} else if ( strcmp( tmp, "market_data") == 0 ) {
+		PacketMktData *pmd = PacketMktData::fromXml(xn);
+		_market_data_todo->add( pmd->getRequest() );
+		delete pmd;
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
