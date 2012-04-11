@@ -669,6 +669,12 @@ void to_xml( xmlNodePtr parent, const CancelOrder& co)
 	ADD_ATTR_LONG( co, orderId );
 }
 
+void to_xml( xmlNodePtr parent, const MktDataRequest& co)
+{
+	/* not implemented yet */
+	assert( false );
+}
+
 
 
 
@@ -751,6 +757,22 @@ void from_xml( CancelOrder* co, const xmlNodePtr node )
 	static const CancelOrder dflt;
 
 	GET_ATTR_LONG( co, orderId );
+}
+
+void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
+{
+	char* tmp;
+	static const MktDataRequest dflt;
+
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &mdr->ibContract, p);
+		}
+	}
+
+	GET_ATTR_STRING( mdr, genericTicks );
+	GET_ATTR_BOOL( mdr, snapshot );
 }
 
 

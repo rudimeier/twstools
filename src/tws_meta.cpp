@@ -1418,7 +1418,7 @@ PacketMktData * PacketMktData::fromXml( xmlNodePtr root )
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
 				pmd->request = new MktDataRequest();
-// 				from_xml(pmd->request, p);
+				from_xml(pmd->request, p);
 			}
 			if( strcmp((char*)p->name, "response") == 0 ) {
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
