@@ -150,6 +150,7 @@ class TwsDL
 		void reqOrders();
 		void placeOrder();
 		void cancelOrder();
+		int reqMktData();
 		
 		void errorContracts( const RowError& );
 		void errorHistData( const RowError& );

@@ -1289,3 +1289,17 @@ void TwsDL::cancelOrder()
 
 	changeState( WAIT_DATA );
 }
+
+int TwsDL::reqMktData()
+{
+	const MktDataTodo &mdt = workTodo->getMktDataTodo();
+	const std::vector<MktDataRequest> &v =
+		workTodo->getMktDataTodo().mktDataRequests;
+	std::vector<MktDataRequest>::const_iterator it;
+	int reqId = 1;
+	for( it = v.begin(); it < v.end(); it++, reqId++ ) {
+		twsClient->reqMktData( reqId, it->ibContract, it->genericTicks,
+			it->snapshot );
+	}
+	return reqId;
+}
