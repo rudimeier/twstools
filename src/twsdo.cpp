@@ -441,7 +441,13 @@ void TwsDL::idle()
 		connectTws();
 		return;
 	}
-	
+
+	// HACK
+	static int fuckme = 0;
+	if( fuckme <= 0 ) {
+		fuckme = reqMktData();
+	}
+
 	GenericRequest::ReqType reqType = workTodo->nextReqType();
 	switch( reqType ) {
 	case GenericRequest::ACC_STATUS_REQUEST:
@@ -469,7 +475,7 @@ void TwsDL::idle()
 		break;
 	}
 	
-	if( reqType == GenericRequest::NONE ) {
+	if( reqType == GenericRequest::NONE && fuckme <= 1 ) {
 		_lastError = "No more work to do.";
 		changeState( QUIT );
 	}
