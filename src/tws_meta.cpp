@@ -376,6 +376,24 @@ void CancelOrderTodo::add( const CancelOrder& po )
 
 
 
+MktDataTodo::MktDataTodo() :
+	mktDataRequests(*(new std::vector<MktDataRequest>()))
+{
+}
+
+MktDataTodo::~MktDataTodo()
+{
+	delete &mktDataRequests;
+}
+
+void MktDataTodo::add( const MktDataRequest& mkr )
+{
+	mktDataRequests.push_back(mkr);
+}
+
+
+
+
 WorkTodo::WorkTodo() :
 	acc_status_todo(false),
 	executions_todo(false),
@@ -383,13 +401,17 @@ WorkTodo::WorkTodo() :
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
 	_place_order_todo( new PlaceOrderTodo() ),
-	_cancel_order_todo( new CancelOrderTodo() )
+	_cancel_order_todo( new CancelOrderTodo() ),
+	_market_data_todo( new MktDataTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _market_data_todo != NULL ) {
+		delete _market_data_todo;
+	}
 	if( _cancel_order_todo != NULL ) {
 		delete _cancel_order_todo;
 	}

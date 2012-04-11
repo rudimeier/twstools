@@ -82,7 +82,8 @@ class GenericRequest
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST,
 			PLACE_ORDER,
-			CANCEL_ORDER
+			CANCEL_ORDER,
+			MKT_DATA_REQUEST
 		};
 		
 		GenericRequest();
@@ -207,6 +208,21 @@ class CancelOrderTodo
 
 
 
+class MktDataRequest;
+
+class MktDataTodo
+{
+	public:
+		MktDataTodo();
+		virtual ~MktDataTodo();
+
+		void add( const MktDataRequest& );
+
+		std::vector<MktDataRequest> &mktDataRequests;
+};
+
+
+
 class WorkTodo
 {
 	public:
@@ -235,6 +251,7 @@ class WorkTodo
 		HistTodo *_histTodo;
 		PlaceOrderTodo *_place_order_todo;
 		CancelOrderTodo *_cancel_order_todo;
+		MktDataTodo *_market_data_todo;
 };
 
 
