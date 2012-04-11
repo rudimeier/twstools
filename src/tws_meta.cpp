@@ -1391,6 +1391,99 @@ void PacketOrders::dumpXml()
 
 
 
+PacketMktData::PacketMktData()/* :
+		rows(*(new std::vector<RowHist>()))*/
+{
+	reqId = -1;
+	request = NULL;
+}
+
+PacketMktData::~PacketMktData()
+{
+// 	delete &rows;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketMktData * PacketMktData::fromXml( xmlNodePtr root )
+{
+	PacketMktData *pmd = new PacketMktData();
+
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				pmd->request = new MktDataRequest();
+// 				from_xml(pmd->request, p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+// 					if( strcmp((char*)q->name, "row") == 0 ) {
+// 						RowHist *row = new RowHist();
+// 						from_xml( row, q );
+// 						phd->rows.push_back(*row);
+// 						delete row;
+// 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
+// 						RowHist *fin = new RowHist();
+// 						from_xml( fin, q );
+// 						phd->finishRow = *fin;
+// 						phd->mode = CLOSED;
+// 						delete fin;
+// 					}
+				}
+			}
+		}
+	}
+	return pmd;
+}
+
+void PacketMktData::dumpXml()
+{
+}
+
+const MktDataRequest& PacketMktData::getRequest() const
+{
+	return *request;
+}
+
+
+void PacketMktData::clear()
+{
+	mode = CLEAN;
+	error = REQ_ERR_NONE;
+	reqId = -1;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
+// 	rows.clear();
+}
+
+
+void PacketMktData::record( int reqId, const MktDataRequest& mR )
+{
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
+	mode = RECORD;
+	this->reqId = reqId;
+	this->request = new MktDataRequest( mR );
+}
+
+
+// void PacketHistData::append( int reqId,  const RowHist &row )
+// {
+// 	assert( mode == RECORD && error == REQ_ERR_NONE );
+// 	assert( this->reqId == reqId );
+//
+// 	if( strncmp( row.date.c_str(), "finished", 8) == 0) {
+// 		mode = CLOSED;
+// 		finishRow = row;
+// 	} else {
+// 		rows.push_back( row );
+// 	}
+// }
 
 
 

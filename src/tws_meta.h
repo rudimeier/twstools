@@ -584,6 +584,27 @@ class PacketOrders
 
 
 
+class PacketMktData
+	: public  Packet
+{
+	public:
+		PacketMktData();
+		virtual ~PacketMktData();
+
+		static PacketMktData * fromXml( xmlNodePtr );
+
+		const MktDataRequest& getRequest() const;
+		void clear();
+		void record( int reqId, const MktDataRequest& );
+// 		void append( int reqId, const RowHist& );
+
+		void dumpXml();
+
+	private:
+		int reqId;
+		MktDataRequest *request;
+// 		std::vector<RowHist> &rows;
+};
 
 
 
