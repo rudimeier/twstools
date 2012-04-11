@@ -238,6 +238,7 @@ class WorkTodo
 		const PlaceOrderTodo& getPlaceOrderTodo() const;
 		CancelOrderTodo* cancelOrderTodo() const;
 		const CancelOrderTodo& getCancelOrderTodo() const;
+		const MktDataTodo& getMktDataTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 		

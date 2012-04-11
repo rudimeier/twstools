@@ -491,6 +491,10 @@ const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
 	return *_cancel_order_todo;
 }
 
+const MktDataTodo& WorkTodo::getMktDataTodo() const
+{
+	return *_market_data_todo;
+}
 
 void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 {
