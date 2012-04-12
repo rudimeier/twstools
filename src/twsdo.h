@@ -41,6 +41,8 @@
 #include <string>
 #include <stdint.h>
 
+// from global installed ibapi
+#include "twsapi/EWrapper.h"
 
 
 
@@ -178,7 +180,9 @@ class TwsDL
 		void twsOpenOrderEnd();
 		void twsCurrentTime( long time );
 		void nextValidId( long orderId );
-		
+		void twsTickPrice( int reqId, IB::TickType field, double price,
+			int canAutoExecute );
+		void twsTickSize( int reqId, IB::TickType field, int size );
 		
 		State state;
 		int error;

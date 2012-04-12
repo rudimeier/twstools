@@ -151,7 +151,10 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void openOrderEnd();
 		void currentTime( long time );
 		void nextValidId( IB::OrderId orderId );
-		
+		void tickPrice( IB::TickerId reqId, IB::TickType field, double price,
+			int canAutoExecute );
+		void tickSize( IB::TickerId reqId, IB::TickType field, int size );
+
 	private:
 		TwsDL* parentTwsDL;
 };
@@ -290,6 +293,15 @@ void TwsDlWrapper::nextValidId( IB::OrderId orderId )
 	parentTwsDL->nextValidId( orderId );
 }
 
+void TwsDlWrapper::tickPrice( IB::TickerId reqId, IB::TickType field, double price, int canAutoExecute)
+{
+	parentTwsDL->twsTickPrice( reqId, field, price, canAutoExecute );
+}
+
+void TwsDlWrapper::tickSize( IB::TickerId reqId, IB::TickType field, int size )
+{
+	parentTwsDL->twsTickSize( reqId, field, size );
+}
 
 
 
@@ -1087,6 +1099,19 @@ void TwsDL::nextValidId( long orderId )
 	if( state == WAIT_TWS_CON ) {
 		tws_valid_orderId = orderId;
 	}
+}
+
+void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
+	int canAutoExecute )
+{
+	DEBUG_PRINTF( "TICK_PRICE: %d %s %g %d",
+		reqId, ibToString(field).c_str(), price, canAutoExecute);
+}
+
+void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
+{
+	DEBUG_PRINTF( "TICK_SIZE: %d %s %d",
+		reqId, ibToString(field).c_str(), size );
 }
 
 
