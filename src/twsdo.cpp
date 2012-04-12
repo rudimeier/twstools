@@ -484,6 +484,10 @@ void TwsDL::idle()
 
 void TwsDL::waitData()
 {
+	if( packet == NULL ) {
+		return;
+	}
+
 	if( !packet->finished() ) {
 		if( currentRequest.age() <= cfg.tws_reqTimeout ) {
 			static int64_t last = 0;
@@ -1306,6 +1310,9 @@ int TwsDL::reqMktData()
 	for( it = v.begin(); it < v.end(); it++, reqId++ ) {
 		twsClient->reqMktData( reqId, it->ibContract, it->genericTicks,
 			it->snapshot );
+	}
+	if( reqId > 1 ) {
+		changeState( WAIT_DATA );
 	}
 	return reqId;
 }
