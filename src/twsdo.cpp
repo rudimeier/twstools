@@ -1104,14 +1104,26 @@ void TwsDL::nextValidId( long orderId )
 void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 	int canAutoExecute )
 {
-	DEBUG_PRINTF( "TICK_PRICE: %d %s %g %d",
-		reqId, ibToString(field).c_str(), price, canAutoExecute);
+	const std::vector<MktDataRequest> &mdlist
+		= workTodo->getMktDataTodo().mktDataRequests;
+	assert( reqId > 0 && reqId <= mdlist.size() );
+
+	const IB::Contract &c
+		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
+	DEBUG_PRINTF( "TICK_PRICE: %d %s %s %g %d", reqId,
+		c.symbol.c_str(),ibToString(field).c_str(), price, canAutoExecute);
 }
 
 void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 {
-	DEBUG_PRINTF( "TICK_SIZE: %d %s %d",
-		reqId, ibToString(field).c_str(), size );
+	const std::vector<MktDataRequest> &mdlist
+		= workTodo->getMktDataTodo().mktDataRequests;
+	assert( reqId > 0 && reqId <= mdlist.size() );
+
+	const IB::Contract &c
+		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
+	DEBUG_PRINTF( "TICK_SIZE: %d %s %s %d",
+		reqId, c.symbol.c_str(), ibToString(field).c_str(), size );
 }
 
 
