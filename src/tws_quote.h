@@ -38,7 +38,17 @@
 #ifndef TWS_QUOTE_H
 #define TWS_QUOTE_H
 
+#include <stdint.h>
 
+class Quote
+{
+	public:
+		Quote();
+		~Quote();
+
+		double *val;
+		int64_t *stamp;
+};
 
 
 #endif

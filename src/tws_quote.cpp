@@ -34,3 +34,22 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ***/
+
+#include "tws_quote.h"
+#include "twsapi/EWrapper.h"
+#include <string.h>
+
+
+Quote::Quote()
+{
+	val = new double[IB::NOT_SET];
+	memset(val, 0, sizeof(val));
+	stamp = new int64_t[IB::NOT_SET];
+	memset(stamp, 0, sizeof(stamp));
+}
+
+Quote::~Quote()
+{
+	delete val;
+	delete stamp;
+}
