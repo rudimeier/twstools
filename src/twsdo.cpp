@@ -1114,7 +1114,7 @@ void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 
 	const std::vector<MktDataRequest> &mdlist
 		= workTodo->getMktDataTodo().mktDataRequests;
-	assert( reqId > 0 && reqId <= mdlist.size() );
+	assert( reqId > 0 && reqId <= (int)mdlist.size() );
 
 	const IB::Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
@@ -1130,7 +1130,7 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 
 	const std::vector<MktDataRequest> &mdlist
 		= workTodo->getMktDataTodo().mktDataRequests;
-	assert( reqId > 0 && reqId <= mdlist.size() );
+	assert( reqId > 0 && reqId <= (int)mdlist.size() );
 
 	const IB::Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
@@ -1351,7 +1351,6 @@ void TwsDL::cancelOrder()
 
 int TwsDL::reqMktData()
 {
-	const MktDataTodo &mdt = workTodo->getMktDataTodo();
 	const std::vector<MktDataRequest> &v =
 		workTodo->getMktDataTodo().mktDataRequests;
 	std::vector<MktDataRequest>::const_iterator it;
