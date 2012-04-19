@@ -41,6 +41,8 @@
 #include <string>
 #include <stdint.h>
 
+#include "tws_quote.h"
+
 // from global installed ibapi
 #include "twsapi/EWrapper.h"
 
@@ -202,6 +204,7 @@ class TwsDL
 		GenericRequest &currentRequest;
 		
 		WorkTodo *workTodo;
+		Quotes *quotes;
 		
 		Packet *packet;
 		

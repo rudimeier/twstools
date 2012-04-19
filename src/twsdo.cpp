@@ -319,6 +319,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
+	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
 	pacingControl( *(new PacingGod(dataFarms)) )
@@ -343,6 +344,9 @@ TwsDL::~TwsDL()
 	}
 	if( workTodo != NULL ) {
 		delete workTodo;
+	}
+	if( quotes != NULL ) {
+		delete quotes;
 	}
 	if( packet != NULL ) {
 		delete packet;
@@ -1104,6 +1108,10 @@ void TwsDL::nextValidId( long orderId )
 void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 	int canAutoExecute )
 {
+	Quote &q = quotes->at(reqId-1);
+	q.val[field] = price;
+	q.stamp[field] = nowInMsecs();
+
 	const std::vector<MktDataRequest> &mdlist
 		= workTodo->getMktDataTodo().mktDataRequests;
 	assert( reqId > 0 && reqId <= mdlist.size() );
@@ -1116,6 +1124,10 @@ void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 
 void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 {
+	Quote &q = quotes->at(reqId-1);
+	q.val[field] = size;
+	q.stamp[field] = nowInMsecs();
+
 	const std::vector<MktDataRequest> &mdlist
 		= workTodo->getMktDataTodo().mktDataRequests;
 	assert( reqId > 0 && reqId <= mdlist.size() );
@@ -1344,6 +1356,11 @@ int TwsDL::reqMktData()
 		workTodo->getMktDataTodo().mktDataRequests;
 	std::vector<MktDataRequest>::const_iterator it;
 	int reqId = 1;
+
+	/* initialize quote snapshot */
+	assert(quotes->empty());
+	quotes->resize(v.size());
+
 	for( it = v.begin(); it < v.end(); it++, reqId++ ) {
 		twsClient->reqMktData( reqId, it->ibContract, it->genericTicks,
 			it->snapshot );

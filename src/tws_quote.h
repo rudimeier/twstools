@@ -39,6 +39,7 @@
 #define TWS_QUOTE_H
 
 #include <stdint.h>
+#include <vector>
 
 class Quote
 {
@@ -53,5 +54,6 @@ class Quote
 		int64_t * const stamp;
 };
 
+typedef std::vector<Quote> Quotes;
 
 #endif
