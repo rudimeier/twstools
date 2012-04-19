@@ -361,10 +361,8 @@ void TwsDL::eventLoop()
 				waitTwsCon();
 				break;
 			case IDLE:
-				idle();
-				break;
 			case WAIT_DATA:
-				waitData();
+				idle();
 				break;
 			case QUIT:
 				run = false;
@@ -434,7 +432,11 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
-	assert(currentRequest.reqType() == GenericRequest::NONE);
+	if( currentRequest.reqType() != GenericRequest::NONE ) {
+		waitData();
+		return;
+	}
+
 	
 	if( !twsClient->isConnected() ) {
 		connectTws();
