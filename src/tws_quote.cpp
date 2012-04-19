@@ -40,16 +40,31 @@
 #include <string.h>
 
 
-Quote::Quote()
+Quote::Quote() :
+	val(new double[IB::NOT_SET]),
+	stamp(new int64_t[IB::NOT_SET])
 {
-	val = new double[IB::NOT_SET];
-	memset(val, 0, sizeof(val));
-	stamp = new int64_t[IB::NOT_SET];
-	memset(stamp, 0, sizeof(stamp));
+	memset(val, 0, sizeof(val) * IB::NOT_SET);
+	memset(stamp, 0, sizeof(stamp) * IB::NOT_SET);
+}
+
+Quote::Quote( const Quote& other ) :
+	val(new double[IB::NOT_SET]),
+	stamp(new int64_t[IB::NOT_SET])
+{
+	memcpy(val, other.val, sizeof(val) * IB::NOT_SET);
+	memcpy(stamp, other.stamp, sizeof(stamp) * IB::NOT_SET);
+}
+
+Quote& Quote::operator=( const Quote& other )
+{
+	memcpy(val, other.val, sizeof(val) * IB::NOT_SET);
+	memcpy(stamp, other.stamp, sizeof(stamp) * IB::NOT_SET);
+	return *this;
 }
 
 Quote::~Quote()
 {
-	delete val;
-	delete stamp;
+	delete[] val;
+	delete[] stamp;
 }

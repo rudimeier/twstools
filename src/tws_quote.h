@@ -44,10 +44,13 @@ class Quote
 {
 	public:
 		Quote();
+		Quote( const Quote& );
 		~Quote();
 
-		double *val;
-		int64_t *stamp;
+		Quote& operator= (const Quote&);
+
+		double * const val;
+		int64_t * const stamp;
 };
 
 
