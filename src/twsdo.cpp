@@ -294,6 +294,7 @@ void TwsDlWrapper::nextValidId( IB::OrderId orderId )
 
 TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	state(IDLE),
+	quit(false),
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
@@ -343,6 +344,7 @@ int TwsDL::start()
 {
 	assert( state == IDLE );
 	
+	quit = false;
 	curIdleTime = 0;
 	eventLoop();
 	return error;
@@ -351,8 +353,7 @@ int TwsDL::start()
 
 void TwsDL::eventLoop()
 {
-	bool run = true;
-	while( run ) {
+	while( !quit ) {
 		if( curIdleTime > 0 ) {
 			twsClient->selectStuff( curIdleTime );
 		}
@@ -363,9 +364,6 @@ void TwsDL::eventLoop()
 			case IDLE:
 			case WAIT_DATA:
 				idle();
-				break;
-			case QUIT:
-				run = false;
 				break;
 		}
 	}
@@ -433,7 +431,7 @@ void TwsDL::waitTwsCon()
 void TwsDL::idle()
 {
 	waitData();
-	if( currentRequest.reqType() != GenericRequest::NONE ) {
+	if( quit || currentRequest.reqType() != GenericRequest::NONE ) {
 		return;
 	}
 
@@ -471,7 +469,7 @@ void TwsDL::idle()
 	
 	if( reqType == GenericRequest::NONE ) {
 		_lastError = "No more work to do.";
-		changeState( QUIT );
+		quit = true;
 	}
 }
 
@@ -526,7 +524,7 @@ void TwsDL::waitData()
 	} else {
 		error = 1;
 		_lastError = "Fatal error.";
-		changeState( QUIT );
+		quit = true;
 	}
 	delete packet;
 	packet = NULL;

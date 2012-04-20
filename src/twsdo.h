@@ -111,8 +111,7 @@ class TwsDL
 		enum State {
 			WAIT_TWS_CON,
 			IDLE,
-			WAIT_DATA,
-			QUIT
+			WAIT_DATA
 		};
 		
 		TwsDL( const ConfigTwsdo& );
@@ -179,6 +178,7 @@ class TwsDL
 		
 		
 		State state;
+		bool quit;
 		int error;
 		std::string _lastError;
 		int64_t lastConnectionTime;

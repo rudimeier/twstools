@@ -145,7 +145,6 @@ int main(int argc, char *argv[])
 	TwsDL twsDL( cfg );
 	int ret = twsDL.start();
 	
-	assert( twsDL.currentState() == TwsDL::QUIT );
 	if( ret != 0 ) {
 		DEBUG_PRINTF( "error: %s", twsDL.lastError().c_str() );
 	} else {
