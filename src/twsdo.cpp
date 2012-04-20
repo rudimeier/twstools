@@ -432,12 +432,11 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
+	waitData();
 	if( currentRequest.reqType() != GenericRequest::NONE ) {
-		waitData();
 		return;
 	}
 
-	
 	if( !twsClient->isConnected() ) {
 		connectTws();
 		return;
@@ -479,6 +478,10 @@ void TwsDL::idle()
 
 void TwsDL::waitData()
 {
+	if( currentRequest.reqType() == GenericRequest::NONE ) {
+		return;
+	}
+
 	if( !packet->finished() ) {
 		if( currentRequest.age() <= cfg.tws_reqTimeout ) {
 			static int64_t last = 0;
