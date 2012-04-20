@@ -110,8 +110,7 @@ class TwsDL
 	public:
 		enum State {
 			WAIT_TWS_CON,
-			IDLE,
-			WAIT_DATA
+			IDLE
 		};
 		
 		TwsDL( const ConfigTwsdo& );
