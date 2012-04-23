@@ -513,7 +513,20 @@ void TwsDL::idle()
 
 void TwsDL::adjustOrders()
 {
+	static int fuck = 0;
+	if( fuck > 0) {
+		return;
+	}
+	fuck = 1;
+
 	DEBUG_PRINTF( "Adjust orders." );
+	PlaceOrder pO;
+	pO.contract = workTodo->getMktDataTodo().mktDataRequests[1].ibContract;
+	pO.order.orderType = "MKT";
+	pO.order.action = "BUY";
+	pO.order.totalQuantity = 1;
+
+	workTodo->placeOrderTodo()->add(pO);
 }
 
 
