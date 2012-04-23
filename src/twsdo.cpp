@@ -473,6 +473,10 @@ void TwsDL::idle()
 		fuckme = reqMktData();
 	}
 
+	if( cfg.do_mm ) {
+		adjustOrders();
+	}
+
 	GenericRequest::ReqType reqType = workTodo->nextReqType();
 	switch( reqType ) {
 	case GenericRequest::ACC_STATUS_REQUEST:
@@ -504,6 +508,12 @@ void TwsDL::idle()
 		_lastError = "No more work to do.";
 		quit = true;
 	}
+}
+
+
+void TwsDL::adjustOrders()
+{
+	DEBUG_PRINTF( "Adjust orders." );
 }
 
 
