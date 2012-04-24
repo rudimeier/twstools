@@ -35,4 +35,22 @@
  *
  ***/
 
+#include "tws_account.h"
+#include <assert.h>
 
+
+Account::Account()
+{
+}
+
+Account::~Account()
+{
+}
+
+void Account::updatePortfolio( const RowPrtfl& row )
+{
+	long conid = row.contract.conId;
+	assert( conid > 0);
+
+	portfolio[conid] = row;
+}

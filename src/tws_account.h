@@ -38,4 +38,24 @@
 #ifndef TWS_ACCOUNT_H
 #define TWS_ACCOUNT_H
 
+#include "tws_meta.h"
+#include <map>
 
+
+typedef std::map<long, RowPrtfl> Prtfl;
+
+
+class Account
+{
+	public:
+		Account();
+		~Account();
+
+	void updatePortfolio( const RowPrtfl& row );
+
+	private:
+		Prtfl portfolio;
+};
+
+
+#endif
