@@ -1051,6 +1051,8 @@ void TwsDL::twsExecDetailsEnd( int reqId )
 
 void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 {
+	account->update_os(row);
+
 	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
 		((PacketOrders*)packet)->append(row);
 		return;
@@ -1068,6 +1070,8 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 
 void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 {
+	account->update_oo(row);
+
 	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
 		((PacketOrders*)packet)->append(row);
 		return;
