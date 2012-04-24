@@ -104,6 +104,7 @@ class RowOrderStatus;
 class RowOpenOrder;
 class PacingGod;
 class DataFarmStates;
+class Account;
 
 class TwsDlWrapper;
 
@@ -203,6 +204,7 @@ class TwsDL
 		GenericRequest &currentRequest;
 		
 		WorkTodo *workTodo;
+		Account *account;
 		Quotes *quotes;
 		
 		Packet *packet;
