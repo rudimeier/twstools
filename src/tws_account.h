@@ -43,6 +43,8 @@
 
 
 typedef std::map<long, RowPrtfl> Prtfl;
+typedef std::map<long, RowOpenOrder> OpenOrders;
+typedef std::map<long, RowOrderStatus> OrderStatus;
 
 
 class Account
@@ -52,9 +54,13 @@ class Account
 		~Account();
 
 	void updatePortfolio( const RowPrtfl& row );
+	void update_oo( const RowOpenOrder& row );
+	void update_os( const RowOrderStatus& row );
 
 	private:
 		Prtfl portfolio;
+		OpenOrders openOrders;
+		OrderStatus orderStatus;
 };
 
 

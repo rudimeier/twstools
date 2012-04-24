@@ -54,3 +54,20 @@ void Account::updatePortfolio( const RowPrtfl& row )
 
 	portfolio[conid] = row;
 }
+
+void Account::update_oo( const RowOpenOrder& row )
+{
+	long permid = row.order.permId;
+	assert( permid > 0);
+
+	openOrders[permid] = row;
+}
+
+void Account::update_os( const RowOrderStatus& row )
+{
+	long permid = row.permId;
+	assert( permid > 0);
+
+	orderStatus[permid] = row;
+}
+
