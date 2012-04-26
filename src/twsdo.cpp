@@ -883,7 +883,8 @@ void TwsDL::errorHistData( const RowError& err )
 
 void TwsDL::errorPlaceOrder( const RowError& err )
 {
-	PacketPlaceOrder &p_pO = *((PacketPlaceOrder*)packet);
+	assert( p_orders.find(err.id) != p_orders.end() );
+	PacketPlaceOrder &p_pO = *(p_orders[err.id]);
 	p_pO.append( err );
 	switch( err.code ) {
 	default:
@@ -1081,7 +1082,9 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 		return;
 	}
 	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		((PacketPlaceOrder*)packet)->append(row);
+		assert( p_orders.find(row.id) != p_orders.end() );
+		PacketPlaceOrder *p_pO = p_orders[row.id];
+		p_pO->append(row);
 		return;
 	}
 	if( currentRequest.reqType() == GenericRequest::CANCEL_ORDER ) {
@@ -1100,7 +1103,9 @@ void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 		return;
 	}
 	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		((PacketPlaceOrder*)packet)->append(row);
+		assert( p_orders.find(row.orderId) != p_orders.end() );
+		PacketPlaceOrder *p_pO = p_orders[row.orderId];
+		p_pO->append(row);
 		return;
 	}
 	DEBUG_PRINTF( "Warning, unexpected tws callback (openOrder).");
@@ -1326,9 +1331,6 @@ void TwsDL::placeOrder()
 	workTodo->placeOrderTodo()->checkout();
 	const PlaceOrder &pO = workTodo->getPlaceOrderTodo().current();
 
-	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
-	packet = p_placeOrder;
-
 	long orderId;
 	if( pO.orderId == 0 ) {
 		orderId = tws_valid_orderId;
@@ -1336,6 +1338,10 @@ void TwsDL::placeOrder()
 	} else {
 		orderId = pO.orderId;
 	}
+
+	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
+	assert( p_orders.find(orderId) == p_orders.end() ); // TODO order modify
+	p_orders[orderId] = p_placeOrder;
 	currentRequest.nextOrderRequest( GenericRequest::PLACE_ORDER, orderId );
 
 	p_placeOrder->record( orderId, pO );
