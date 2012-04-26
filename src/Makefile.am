@@ -24,6 +24,7 @@ twsdo_SOURCES += tws_query.cpp
 twsdo_SOURCES += tws_util.cpp
 twsdo_SOURCES += tws_wrapper.cpp
 twsdo_SOURCES += tws_quote.cpp
+twsdo_SOURCES += tws_account.cpp
 twsdo_CPPFLAGS = $(AM_CPPFLAGS)
 twsdo_LDFLAGS = $(AM_LDFLAGS)
 twsdo_LDADD =
@@ -52,6 +53,7 @@ noinst_HEADERS += twsdo.h
 noinst_HEADERS += tws_meta.h
 noinst_HEADERS += tws_xml.h
 noinst_HEADERS += tws_quote.h
+noinst_HEADERS += tws_account.h
 
 BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h

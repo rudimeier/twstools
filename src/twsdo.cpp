@@ -41,6 +41,7 @@
 #include "tws_util.h"
 #include "tws_client.h"
 #include "tws_wrapper.h"
+#include "tws_account.h"
 #include "debug.h"
 
 // from global installed twsapi
@@ -320,6 +321,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
+	account( new Account ),
 	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
@@ -345,6 +347,9 @@ TwsDL::~TwsDL()
 	}
 	if( workTodo != NULL ) {
 		delete workTodo;
+	}
+	if( account != NULL ) {
+		delete account;
 	}
 	if( quotes != NULL ) {
 		delete quotes;
@@ -999,6 +1004,8 @@ void TwsDL::twsUpdateAccountValue( const RowAccVal& row )
 
 void TwsDL::twsUpdatePortfolio( const RowPrtfl& row )
 {
+	account->updatePortfolio(row);
+
 	if( currentRequest.reqType() != GenericRequest::ACC_STATUS_REQUEST ) {
 		DEBUG_PRINTF( "Warning, unexpected tws callback (updatePortfolio).");
 		return;
@@ -1044,6 +1051,8 @@ void TwsDL::twsExecDetailsEnd( int reqId )
 
 void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 {
+	account->update_os(row);
+
 	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
 		((PacketOrders*)packet)->append(row);
 		return;
@@ -1061,6 +1070,8 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 
 void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 {
+	account->update_oo(row);
+
 	if( currentRequest.reqType() == GenericRequest::ORDERS_REQUEST ) {
 		((PacketOrders*)packet)->append(row);
 		return;
