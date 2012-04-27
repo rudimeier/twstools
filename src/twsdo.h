@@ -154,6 +154,7 @@ class TwsDL
 		void reqExecutions();
 		void reqOrders();
 		void placeOrder();
+		void placeAllOrders();
 		void cancelOrder();
 		int reqMktData();
 		void adjustOrders();

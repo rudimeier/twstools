@@ -495,7 +495,7 @@ void TwsDL::idle()
 		reqHistoricalData();
 		break;
 	case GenericRequest::PLACE_ORDER:
-		placeOrder();
+		placeAllOrders();
 		break;
 	case GenericRequest::CANCEL_ORDER:
 		cancelOrder();
@@ -1379,7 +1379,6 @@ void TwsDL::placeOrder()
 	} else {
 		orderId = pO.orderId;
 	}
-
 	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
 	assert( p_orders.find(orderId) == p_orders.end() ); // TODO order modify
 	p_orders[orderId] = p_placeOrder;
@@ -1392,6 +1391,14 @@ void TwsDL::placeOrder()
 		/* HACK no response is expected on success, in case of error we hope
 		   that current time comes after that error */
 		twsClient->reqCurrentTime();
+	}
+}
+
+void TwsDL::placeAllOrders()
+{
+	PlaceOrderTodo* todo = workTodo->placeOrderTodo();
+	while( todo->countLeft() > 0 ) {
+		placeOrder();
 	}
 }
 
