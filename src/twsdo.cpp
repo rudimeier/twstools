@@ -898,13 +898,21 @@ void TwsDL::errorHistData( const RowError& err )
 
 void TwsDL::errorPlaceOrder( const RowError& err )
 {
-	assert( p_orders.find(err.id) != p_orders.end() );
-	PacketPlaceOrder &p_pO = *(p_orders[err.id]);
-	p_pO.append( err );
-	switch( err.code ) {
-	default:
-		p_pO.closeError( REQ_ERR_REQUEST );
-		break;
+	if( p_orders.find(err.id) != p_orders.end() ) {
+		assert( p_orders_old.find(err.id) == p_orders_old.end() );
+		PacketPlaceOrder *p_pO = p_orders[err.id];
+		if( p_pO->finished() ) {
+			DEBUG_PRINTF("Warning, got openOrder callback for closed order.");
+		}
+		p_pO->closeError( REQ_ERR_REQUEST );
+		p_pO->append(err);
+		return;
+	} else if( p_orders_old.find(err.id) != p_orders_old.end() ) {
+		assert( p_orders.find(err.id) == p_orders.end() );
+		DEBUG_PRINTF("Warning, got openOrder callback for finished order.");
+		PacketPlaceOrder *p_pO = p_orders_old[err.id];
+		p_pO->append(err);
+		return;
 	}
 }
 
