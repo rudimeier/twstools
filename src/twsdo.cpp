@@ -511,20 +511,32 @@ void TwsDL::idle()
 
 void TwsDL::adjustOrders()
 {
-	static int fuck = 0;
-	if( fuck > 0) {
+	static int fuck = -1;
+	fuck++;
+	if( fuck != 20) {
 		return;
 	}
-	fuck = 1;
 
 	DEBUG_PRINTF( "Adjust orders." );
 	PlaceOrder pO;
-	pO.contract = workTodo->getMktDataTodo().mktDataRequests[1].ibContract;
-	pO.order.orderType = "MKT";
-	pO.order.action = "BUY";
-	pO.order.totalQuantity = 1;
+	int i;
 
+	i = 0;
+	pO.contract = workTodo->getMktDataTodo().mktDataRequests[i].ibContract;
+	pO.order.orderType = "LMT";
+	pO.order.action = "BUY";
+	pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
+	pO.order.totalQuantity = 25000;
 	workTodo->placeOrderTodo()->add(pO);
+
+	i = 1;
+	pO.contract = workTodo->getMktDataTodo().mktDataRequests[i].ibContract;
+	pO.order.orderType = "LMT";
+	pO.order.action = "BUY";
+	pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
+	pO.order.totalQuantity = 25000;
+	workTodo->placeOrderTodo()->add(pO);
+	DEBUG_PRINTF( "Adjust orders. %d", workTodo->placeOrderTodo()->countLeft());
 }
 
 
