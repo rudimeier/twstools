@@ -473,10 +473,6 @@ void TwsDL::idle()
 		fuckme = reqMktData();
 	}
 
-	if( cfg.do_mm ) {
-		adjustOrders();
-	}
-
 	GenericRequest::ReqType reqType = workTodo->nextReqType();
 	switch( reqType ) {
 	case GenericRequest::ACC_STATUS_REQUEST:
@@ -499,6 +495,9 @@ void TwsDL::idle()
 		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
+		if( cfg.do_mm ) {
+			adjustOrders();
+		}
 		placeAllOrders();
 		break;
 	}
