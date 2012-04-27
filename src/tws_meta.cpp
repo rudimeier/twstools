@@ -440,8 +440,6 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 		return GenericRequest::ORDERS_REQUEST;
 	} else if( _cancel_order_todo->countLeft() > 0 ) {
 		return GenericRequest::CANCEL_ORDER;
-	} else if( _place_order_todo->countLeft() > 0 ) {
-		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {

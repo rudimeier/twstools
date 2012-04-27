@@ -494,17 +494,16 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
-	case GenericRequest::PLACE_ORDER:
-		placeAllOrders();
-		break;
 	case GenericRequest::CANCEL_ORDER:
 		cancelOrder();
 		break;
 	case GenericRequest::NONE:
+		/* TODO for now we place all orders when nothing else todo */
+		placeAllOrders();
 		break;
 	}
 	
-	if( reqType == GenericRequest::NONE && fuckme <= 1 ) {
+	if( reqType == GenericRequest::NONE && fuckme <= 1 && p_orders.empty() ) {
 		_lastError = "No more work to do.";
 		quit = true;
 	}
