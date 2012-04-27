@@ -1096,9 +1096,18 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		assert( p_orders.find(row.id) != p_orders.end() );
+	if( p_orders.find(row.id) != p_orders.end() ) {
+		assert( p_orders_old.find(row.id) == p_orders_old.end() );
 		PacketPlaceOrder *p_pO = p_orders[row.id];
+		if( p_pO->finished() ) {
+			DEBUG_PRINTF("Warning, got orderStatus callback for closed order.");
+		}
+		p_pO->append(row);
+		return;
+	} else if( p_orders_old.find(row.id) != p_orders_old.end() ) {
+		assert( p_orders.find(row.id) == p_orders.end() );
+		DEBUG_PRINTF("Warning, got orderStatus callback for finished order.");
+		PacketPlaceOrder *p_pO = p_orders_old[row.id];
 		p_pO->append(row);
 		return;
 	}
@@ -1117,9 +1126,18 @@ void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		assert( p_orders.find(row.orderId) != p_orders.end() );
+	if( p_orders.find(row.orderId) != p_orders.end() ) {
+		assert( p_orders_old.find(row.orderId) == p_orders_old.end() );
 		PacketPlaceOrder *p_pO = p_orders[row.orderId];
+		if( p_pO->finished() ) {
+			DEBUG_PRINTF("Warning, got openOrder callback for closed order.");
+		}
+		p_pO->append(row);
+		return;
+	} else if( p_orders_old.find(row.orderId) != p_orders_old.end() ) {
+		assert( p_orders.find(row.orderId) == p_orders.end() );
+		DEBUG_PRINTF("Warning, got openOrder callback for finished order.");
+		PacketPlaceOrder *p_pO = p_orders_old[row.orderId];
 		p_pO->append(row);
 		return;
 	}
