@@ -212,6 +212,7 @@ class TwsDL
 		
 		Packet *packet;
 		std::map<long, PacketPlaceOrder*> p_orders;
+		std::map<long, PacketPlaceOrder*> p_orders_old;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;

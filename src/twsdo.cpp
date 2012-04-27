@@ -532,6 +532,7 @@ void TwsDL::adjustOrders()
 
 void TwsDL::waitData()
 {
+	finPlaceOrder();
 	if( packet == NULL || currentRequest.reqType() == GenericRequest::NONE ) {
 		return;
 	}
@@ -560,7 +561,7 @@ void TwsDL::waitData()
 		ok = finHist();
 		break;
 	case GenericRequest::PLACE_ORDER:
-		ok = finPlaceOrder();
+		ok = true;
 		break;
 	case GenericRequest::CANCEL_ORDER:
 		ok = finCancelOrder();
@@ -632,18 +633,32 @@ bool TwsDL::finHist()
 
 bool TwsDL::finPlaceOrder()
 {
-	switch( packet->getError() ) {
-	case REQ_ERR_NONE:
-	case REQ_ERR_REQUEST:
-	case REQ_ERR_TIMEOUT:
-		packet->dumpXml();
-	case REQ_ERR_NODATA:
-	case REQ_ERR_NAV:
-		break;
-	case REQ_ERR_TWSCON:
-		return false;
+	bool ok = true;
+	std::map<long, PacketPlaceOrder*>::iterator it;
+	for( it = p_orders.begin(); it != p_orders.end(); it++) {
+		long orderId = it->first;
+		PacketPlaceOrder* p = it->second;
+		assert( orderId == p->getRequest().orderId );
+		if( ! p->finished() ) {
+			continue;
+		}
+
+		switch( p->getError() ) {
+		case REQ_ERR_NONE:
+		case REQ_ERR_REQUEST:
+		case REQ_ERR_TIMEOUT:
+			p->dumpXml();
+			assert( p_orders_old.find(orderId) == p_orders_old.end() );
+			p_orders_old[orderId] = p;
+			p_orders.erase( it );
+		case REQ_ERR_NODATA:
+		case REQ_ERR_NAV:
+			break;
+		case REQ_ERR_TWSCON:
+			ok = false;
+		}
 	}
-	return true;
+	return ok;
 }
 
 
