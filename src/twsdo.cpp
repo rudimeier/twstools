@@ -559,9 +559,6 @@ void TwsDL::waitData()
 	case GenericRequest::HIST_REQUEST:
 		ok = finHist();
 		break;
-	case GenericRequest::PLACE_ORDER:
-		ok = true;
-		break;
 	case GenericRequest::CANCEL_ORDER:
 		ok = finCancelOrder();
 		break;
@@ -721,9 +718,6 @@ void TwsDL::twsError( const RowError& err )
 			case GenericRequest::HIST_REQUEST:
 				errorHistData( err );
 				break;
-			case GenericRequest::PLACE_ORDER:
-				errorPlaceOrder( err );
-				break;
 			case GenericRequest::CANCEL_ORDER:
 				errorCancelOrder( err );
 				break;
@@ -735,6 +729,8 @@ void TwsDL::twsError( const RowError& err )
 				break;
 		}
 		return;
+	} else {
+		errorPlaceOrder( err );
 	}
 	
 	if( err.id != -1 ) {
@@ -943,7 +939,6 @@ void TwsDL::twsConnectionClosed()
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-			case GenericRequest::PLACE_ORDER:
 			case GenericRequest::CANCEL_ORDER:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -959,6 +954,7 @@ void TwsDL::twsConnectionClosed()
 			}
 		}
 	}
+	assert( p_orders.empty() ); // TODO repeat
 	
 	connectivity_IB_TWS = false;
 	dataFarms.setAllBroken();
@@ -1168,9 +1164,8 @@ void TwsDL::twsCurrentTime( long time )
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
 	}
-	if( state == IDLE
-		&& currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		packet->closeError( REQ_ERR_NONE );
+	if( state == IDLE && !p_orders.empty() ) {
+		/* TODO, was: packet->closeError( REQ_ERR_NONE ); */
 	}
 }
 
@@ -1381,7 +1376,6 @@ void TwsDL::placeOrder()
 	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
 	assert( p_orders.find(orderId) == p_orders.end() ); // TODO order modify
 	p_orders[orderId] = p_placeOrder;
-	currentRequest.nextOrderRequest( GenericRequest::PLACE_ORDER, orderId );
 
 	p_placeOrder->record( orderId, pO );
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
