@@ -1863,29 +1863,29 @@ DataFarmStates::~DataFarmStates()
 
 void DataFarmStates::initHardCodedFarms()
 {
-	hLearn["BELFOX"] = "euhmds2";
-	hLearn["BM"] = "euhmds2";
-	hLearn["BVME"] = "euhmds2";
-	hLearn["CBOT"] = "euhmds2";
-	hLearn["DTB"] = "euhmds2";
-	hLearn["EBS"] = "euhmds2";
-	hLearn["EDXNO"] = "euhmds2";
-	hLearn["FTA"] = "euhmds2";
-	hLearn["IBIS"] = "euhmds2";
-	hLearn["IDEM"] = "euhmds2";
-	hLearn["IPE"] = "euhmds2";
-	hLearn["LIFFE_NF"] = "euhmds2";
-	hLearn["LIFFE"] = "euhmds2";
-	hLearn["LSE"] = "euhmds2";
-	hLearn["LSSF"] = "euhmds2";
-	hLearn["MATIF"] = "euhmds2";
-	hLearn["MEFFRV"] = "euhmds2";
-	hLearn["MONEP"] = "euhmds2";
-	hLearn["OMS"] = "euhmds2";
-	hLearn["SFB"] = "euhmds2";
-	hLearn["SOFFEX"] = "euhmds2";
-	hLearn["VIRTX"] = "euhmds2";
-	hLearn["VSE"] = "euhmds2";
+	hLearn["BELFOX"] = "euhmds";
+	hLearn["BM"] = "euhmds";
+	hLearn["BVME"] = "euhmds";
+	hLearn["CBOT"] = "euhmds";
+	hLearn["DTB"] = "euhmds";
+	hLearn["EBS"] = "euhmds";
+	hLearn["EDXNO"] = "euhmds";
+	hLearn["FTA"] = "euhmds";
+	hLearn["IBIS"] = "euhmds";
+	hLearn["IDEM"] = "euhmds";
+	hLearn["IPE"] = "euhmds";
+	hLearn["LIFFE_NF"] = "euhmds";
+	hLearn["LIFFE"] = "euhmds";
+	hLearn["LSE"] = "euhmds";
+	hLearn["LSSF"] = "euhmds";
+	hLearn["MATIF"] = "euhmds";
+	hLearn["MEFFRV"] = "euhmds";
+	hLearn["MONEP"] = "euhmds";
+	hLearn["OMS"] = "euhmds";
+	hLearn["SFB"] = "euhmds";
+	hLearn["SOFFEX"] = "euhmds";
+	hLearn["VIRTX"] = "euhmds";
+	hLearn["VSE"] = "euhmds";
 	
 	hLearn["AMEX"] = "ushmds2a";
 	hLearn["AQS"] = "ushmds2a";
@@ -1910,15 +1910,15 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["RUSSELL"] = "ushmds2a";
 	hLearn["TSE"] = "ushmds2a";
 	
-	hLearn["ASX"] = "hkhmds2";
-	hLearn["HKFE"] = "hkhmds2";
-	hLearn["KSE"] = "hkhmds2";
-	hLearn["NSE"] = "hkhmds2";
-	hLearn["OSE.JPN"] = "hkhmds2";
-	hLearn["SGX"] = "hkhmds2";
-	hLearn["SNFE"] = "hkhmds2";
-	hLearn["TSE.JPN"] = "hkhmds2";
-	hLearn["TSEJ"] = "hkhmds2";
+	hLearn["ASX"] = "hkhmds";
+	hLearn["HKFE"] = "hkhmds";
+	hLearn["KSE"] = "hkhmds";
+	hLearn["NSE"] = "hkhmds";
+	hLearn["OSE.JPN"] = "hkhmds";
+	hLearn["SGX"] = "hkhmds";
+	hLearn["SNFE"] = "hkhmds";
+	hLearn["TSE.JPN"] = "hkhmds";
+	hLearn["TSEJ"] = "hkhmds";
 }
 
 
