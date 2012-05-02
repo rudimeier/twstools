@@ -249,6 +249,7 @@ void TwsDlWrapper::accountDownloadEnd( const IB::IBString& accountName )
 void TwsDlWrapper::execDetails( int reqId, const IB::Contract& contract,
 	const IB::Execution& execution )
 {
+	DebugTwsWrapper::execDetails(reqId, contract, execution);
 	RowExecution row = { contract, execution };
 	parentTwsDL->twsExecDetails(  reqId, row );
 }
@@ -264,6 +265,8 @@ void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
 	int parentId, double lastFillPrice, int clientId,
 	const IB::IBString& whyHeld )
 {
+	DebugTwsWrapper::orderStatus( orderId, status, filled, remaining,
+		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld );
 	RowOrderStatus row = { orderId, status, filled, remaining, avgFillPrice,
 		permId, parentId, lastFillPrice, clientId, whyHeld };
 	parentTwsDL->twsOrderStatus(row);
@@ -272,6 +275,7 @@ void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
 void TwsDlWrapper::openOrder( IB::OrderId orderId, const IB::Contract& c,
 	const IB::Order& o, const IB::OrderState& os)
 {
+	DebugTwsWrapper::openOrder(orderId, c, o, os);
 	RowOpenOrder row = { orderId, c, o, os };
 	parentTwsDL->twsOpenOrder(row);
 }
