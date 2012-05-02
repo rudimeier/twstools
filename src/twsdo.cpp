@@ -294,6 +294,7 @@ void TwsDlWrapper::nextValidId( IB::OrderId orderId )
 
 TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	state(IDLE),
+	quit(false),
 	error(0),
 	lastConnectionTime(0),
 	tws_time(0),
@@ -343,6 +344,7 @@ int TwsDL::start()
 {
 	assert( state == IDLE );
 	
+	quit = false;
 	curIdleTime = 0;
 	eventLoop();
 	return error;
@@ -351,11 +353,13 @@ int TwsDL::start()
 
 void TwsDL::eventLoop()
 {
-	bool run = true;
-	while( run ) {
+	while( !quit ) {
 		if( curIdleTime > 0 ) {
 			twsClient->selectStuff( curIdleTime );
 		}
+		/* We want to set the default select timeout if nobody will change it
+		   later. TODO do better */
+		curIdleTime = -1;
 		switch( state ) {
 			case WAIT_TWS_CON:
 				waitTwsCon();
@@ -363,12 +367,9 @@ void TwsDL::eventLoop()
 			case IDLE:
 				idle();
 				break;
-			case WAIT_DATA:
-				waitData();
-				break;
-			case QUIT:
-				run = false;
-				break;
+		}
+		if( curIdleTime == -1 ) {
+			curIdleTime = 50;
 		}
 	}
 }
@@ -434,8 +435,11 @@ void TwsDL::waitTwsCon()
 
 void TwsDL::idle()
 {
-	assert(currentRequest.reqType() == GenericRequest::NONE);
-	
+	waitData();
+	if( quit || currentRequest.reqType() != GenericRequest::NONE ) {
+		return;
+	}
+
 	if( !twsClient->isConnected() ) {
 		connectTws();
 		return;
@@ -470,13 +474,17 @@ void TwsDL::idle()
 	
 	if( reqType == GenericRequest::NONE ) {
 		_lastError = "No more work to do.";
-		changeState( QUIT );
+		quit = true;
 	}
 }
 
 
 void TwsDL::waitData()
 {
+	if( currentRequest.reqType() == GenericRequest::NONE ) {
+		return;
+	}
+
 	if( !packet->finished() ) {
 		if( currentRequest.age() <= cfg.tws_reqTimeout ) {
 			static int64_t last = 0;
@@ -516,12 +524,10 @@ void TwsDL::waitData()
 		assert(false);
 		break;
 	}
-	if( ok ) {
-		changeState( IDLE );
-	} else {
+	if( !ok ) {
 		error = 1;
 		_lastError = "Fatal error.";
-		changeState( QUIT );
+		quit = true;
 	}
 	delete packet;
 	packet = NULL;
@@ -643,8 +649,7 @@ void TwsDL::twsError( const RowError& err )
 	if( err.id == currentRequest.reqId() ) {
 		DEBUG_PRINTF( "TWS message for request %d: %d '%s'",
 			err.id, err.code, err.msg.c_str() );
-		if( state == WAIT_DATA ) {
-			switch( currentRequest.reqType() ) {
+		switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
 				errorContracts( err );
 				break;
@@ -663,9 +668,6 @@ void TwsDL::twsError( const RowError& err )
 			case GenericRequest::NONE:
 				assert( false );
 				break;
-			}
-		} else {
-			// TODO
 		}
 		return;
 	}
@@ -863,7 +865,7 @@ void TwsDL::twsConnectionClosed()
 {
 	DEBUG_PRINTF( "disconnected in state %d", state );
 	
-	if( state == WAIT_DATA ) {
+	if( currentRequest.reqType() != GenericRequest::NONE ) {
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
@@ -887,7 +889,6 @@ void TwsDL::twsConnectionClosed()
 	connectivity_IB_TWS = false;
 	dataFarms.setAllBroken();
 	pacingControl.clear();
-	curIdleTime = 0;
 }
 
 
@@ -1065,7 +1066,7 @@ void TwsDL::twsCurrentTime( long time )
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
 	}
-	if( state == WAIT_DATA
+	if( state == IDLE
 		&& currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
 		packet->closeError( REQ_ERR_NONE );
 	}
@@ -1133,14 +1134,6 @@ void TwsDL::changeState( State s )
 {
 	assert( state != s );
 	state = s;
-	
-	if( state == WAIT_TWS_CON ) {
-		curIdleTime = 50;
-	} else if( state == WAIT_DATA ) {
-		curIdleTime = 1000;
-	} else {
-		curIdleTime = 0;
-	}
 }
 
 
@@ -1156,7 +1149,6 @@ void TwsDL::reqContractDetails()
 	
 	p_contractDetails->record( currentRequest.reqId(), cdR );
 	twsClient->reqContractDetails( currentRequest.reqId(), cdR.ibContract() );
-	changeState( WAIT_DATA );
 }
 
 void TwsDL::reqHistoricalData()
@@ -1199,7 +1191,6 @@ void TwsDL::reqHistoricalData()
 	                              hR.whatToShow,
 	                              hR.useRTH,
 	                              hR.formatDate );
-	changeState( WAIT_DATA );
 }
 
 void TwsDL::reqAccStatus()
@@ -1214,7 +1205,6 @@ void TwsDL::reqAccStatus()
 	
 	accStatus->record( aR );
 	twsClient->reqAccountUpdates(aR.subscribe, aR.acctCode);
-	changeState( WAIT_DATA );
 }
 
 void TwsDL::reqExecutions()
@@ -1227,7 +1217,6 @@ void TwsDL::reqExecutions()
 	
 	executions->record( currentRequest.reqId(), eR );
 	twsClient->reqExecutions( currentRequest.reqId(), eR.executionFilter);
-	changeState( WAIT_DATA );
 }
 
 void TwsDL::reqOrders()
@@ -1240,7 +1229,6 @@ void TwsDL::reqOrders()
 	
 	orders->record( oR );
 	twsClient->reqAllOpenOrders();
-	changeState( WAIT_DATA );
 }
 
 void TwsDL::placeOrder()
@@ -1268,8 +1256,6 @@ void TwsDL::placeOrder()
 		   that current time comes after that error */
 		twsClient->reqCurrentTime();
 	}
-
-	changeState( WAIT_DATA );
 }
 
 void TwsDL::cancelOrder()
@@ -1285,6 +1271,4 @@ void TwsDL::cancelOrder()
 
 	p_cancelOrder->record( orderId, cO );
 	twsClient->cancelOrder( orderId );
-
-	changeState( WAIT_DATA );
 }
