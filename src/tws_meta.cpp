@@ -2053,7 +2053,11 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 		it++;
 	}
 	if( sl.size() <= 0 ) {
-		assert(false); // assuming at least one farm must be active
+		/* FIXME this is a race, TWS tells us a farm is broken before sending
+		   the last data. If this race happens in the other cases then we would
+		   learn a wrong farm. The final fix would be to handle wrongly learned
+		   farms when we notice it */
+		DEBUG_PRINTF( "Warning, can't learn hmds while no farm is active.");
 	} else if( sl.size() == 1 ) {
 		if( hLearn.find(lazyC) != hLearn.end() ) {
 			assert( hLearn.find( lazyC )->second == sl.front() );
