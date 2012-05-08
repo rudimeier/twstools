@@ -38,7 +38,18 @@
 #ifndef TWS_STRAT_H
 #define TWS_STRAT_H
 
+#include <map>
+
 class TwsDL;
+
+struct buy_sell_oid
+{
+	buy_sell_oid();
+
+	long sell_oid;
+	long buy_oid;
+};
+
 
 class Strat
 {
@@ -50,6 +61,7 @@ class Strat
 
 	private:
 		TwsDL &twsdo;
+		std::map<int, buy_sell_oid> map_data_order;
 };
 
 

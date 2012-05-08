@@ -42,6 +42,14 @@
 #include "debug.h"
 #include <assert.h>
 
+
+buy_sell_oid::buy_sell_oid() :
+	sell_oid(0),
+	buy_oid(0)
+{
+}
+
+
 Strat::Strat( TwsDL& _twsdo) :
 	twsdo(_twsdo)
 {
