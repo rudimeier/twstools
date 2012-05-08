@@ -38,5 +38,17 @@
 #ifndef TWS_STRAT_H
 #define TWS_STRAT_H
 
+class TwsDL;
+
+class Strat
+{
+	public:
+		Strat( TwsDL& );
+		virtual ~Strat();
+
+	private:
+		TwsDL &twsdo;
+};
+
 
 #endif

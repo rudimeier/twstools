@@ -36,5 +36,14 @@
  ***/
 
 #include "tws_strat.h"
+#include "twsdo.h"
 #include <assert.h>
 
+Strat::Strat( TwsDL& _twsdo) :
+	twsdo(_twsdo)
+{
+}
+
+Strat::~Strat()
+{
+}
