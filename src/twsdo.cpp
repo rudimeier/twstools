@@ -1374,11 +1374,17 @@ void TwsDL::placeOrder()
 	} else {
 		orderId = pO.orderId;
 	}
-	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
-	assert( p_orders.find(orderId) == p_orders.end() ); // TODO order modify
-	p_orders[orderId] = p_placeOrder;
+	PacketPlaceOrder *p_placeOrder;
+	if( p_orders.find(orderId) == p_orders.end() ) {
+		p_placeOrder = new PacketPlaceOrder();
+		p_orders[orderId] = p_placeOrder;
+		p_placeOrder->record( orderId, pO );
+	} else {
+		// TODO order modify
+		p_placeOrder = p_orders[orderId];
+		p_placeOrder->modify( pO );
+	}
 
-	p_placeOrder->record( orderId, pO );
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
 
 	if( ! pO.order.transmit ) {

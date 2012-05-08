@@ -400,6 +400,7 @@ class PacketPlaceOrder
 		const PlaceOrder& getRequest() const;
 		virtual void clear();
 		void record( long orderId, const PlaceOrder& );
+		void modify( const PlaceOrder& );
 		void append( const RowError& );
 		void append( const RowOrderStatus& );
 		void append( const RowOpenOrder& );

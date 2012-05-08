@@ -997,6 +997,15 @@ void PacketPlaceOrder::record( long orderId, const PlaceOrder& oP )
 	this->request->orderId = orderId;
 }
 
+void PacketPlaceOrder::modify( const PlaceOrder& oP )
+{
+	assert( mode == RECORD );
+	assert( this->request->orderId == oP.orderId );
+
+	delete this->request;
+	this->request = new PlaceOrder( oP );
+}
+
 void PacketPlaceOrder::append( const RowError& err )
 {
 	TwsRow arow = { t_error, new RowError(err) };
