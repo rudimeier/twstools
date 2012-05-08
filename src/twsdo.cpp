@@ -517,10 +517,10 @@ void TwsDL::adjustOrders()
 {
 	static int fuck = -1;
 	fuck++;
-	if( fuck != 20) {
+	if( fuck <= 20 || p_orders.size() > 0 ) {
 		return;
 	}
-
+	
 	DEBUG_PRINTF( "Adjust orders." );
 	PlaceOrder pO;
 	int i;
