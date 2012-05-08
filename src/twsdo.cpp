@@ -1260,6 +1260,14 @@ void TwsDL::changeState( State s )
 }
 
 
+long TwsDL::fetch_inc_order_id()
+{
+	long orderId = tws_valid_orderId;
+	tws_valid_orderId++;
+	return orderId;
+}
+
+
 void TwsDL::reqContractDetails()
 {
 	workTodo->contractDetailsTodo()->checkout();
