@@ -67,19 +67,38 @@ void Strat::adjustOrders()
 		return;
 	}
 
-	DEBUG_PRINTF( "Adjust orders." );
-	PlaceOrder pO;
-	int i;
+	DEBUG_PRINTF( "strat, adjust orders" );
 
 	const MktDataTodo &mtodo = twsdo.workTodo->getMktDataTodo();
 	for( int i=0; i < mtodo.mktDataRequests.size(); i++ ) {
+		PlaceOrder pO;
 		pO.contract = mtodo.mktDataRequests[i].ibContract;
 		pO.order.orderType = "LMT";
+		pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
+		const char *symbol = pO.contract.symbol.c_str();
+
+		/* here we also initialize zero order ids */
+		buy_sell_oid &oids = map_data_order[i];
+		if( twsdo.p_orders.find(oids.buy_oid) == twsdo.p_orders.end() ) {
+			/* new buy order */
+			DEBUG_PRINTF( "strat, new buy order %s", symbol );
+		} else {
+			/* modify buy order */
+			DEBUG_PRINTF( "strat, modify buy order %s", symbol );
+		}
+		if( twsdo.p_orders.find(oids.sell_oid) == twsdo.p_orders.end() ) {
+			/* new sell order */
+			DEBUG_PRINTF( "strat, new sell order %s", symbol );
+		} else {
+			/* modify sell order */
+			DEBUG_PRINTF( "strat, modify sell order %s", symbol );
+		}
+
 		pO.order.action = "BUY";
 		pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
-		pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
 		twsdo.workTodo->placeOrderTodo()->add(pO);
 	}
-	DEBUG_PRINTF( "Adjust orders. %d",
+	DEBUG_PRINTF( "strat, place/modify %d orders",
 		twsdo.workTodo->placeOrderTodo()->countLeft());
+	assert( mtodo.mktDataRequests.size() == map_data_order.size() );
 }
