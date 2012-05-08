@@ -63,7 +63,7 @@ void Strat::adjustOrders()
 {
 	static int fuck = -1;
 	fuck++;
-	if( fuck <= 30 || twsdo.p_orders.size() > 0 ) {
+	if( fuck <= 30 ) {
 		return;
 	}
 
@@ -82,6 +82,11 @@ void Strat::adjustOrders()
 		if( twsdo.p_orders.find(oids.buy_oid) == twsdo.p_orders.end() ) {
 			/* new buy order */
 			DEBUG_PRINTF( "strat, new buy order %s", symbol );
+			oids.buy_oid = twsdo.fetch_inc_order_id();
+			pO.orderId = oids.buy_oid;
+			pO.order.action = "BUY";
+			pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
+			twsdo.workTodo->placeOrderTodo()->add(pO);
 		} else {
 			/* modify buy order */
 			DEBUG_PRINTF( "strat, modify buy order %s", symbol );
@@ -89,14 +94,15 @@ void Strat::adjustOrders()
 		if( twsdo.p_orders.find(oids.sell_oid) == twsdo.p_orders.end() ) {
 			/* new sell order */
 			DEBUG_PRINTF( "strat, new sell order %s", symbol );
+			oids.sell_oid = twsdo.fetch_inc_order_id();
+			pO.orderId = oids.sell_oid;
+			pO.order.action = "SELL";
+			pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::ASK] + 0.1;
+			twsdo.workTodo->placeOrderTodo()->add(pO);
 		} else {
 			/* modify sell order */
 			DEBUG_PRINTF( "strat, modify sell order %s", symbol );
 		}
-
-		pO.order.action = "BUY";
-		pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
-		twsdo.workTodo->placeOrderTodo()->add(pO);
 	}
 	DEBUG_PRINTF( "strat, place/modify %d orders",
 		twsdo.workTodo->placeOrderTodo()->countLeft());
