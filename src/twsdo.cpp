@@ -525,21 +525,15 @@ void TwsDL::adjustOrders()
 	PlaceOrder pO;
 	int i;
 
-	i = 0;
-	pO.contract = workTodo->getMktDataTodo().mktDataRequests[i].ibContract;
-	pO.order.orderType = "LMT";
-	pO.order.action = "BUY";
-	pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
-	pO.order.totalQuantity = 25000;
-	workTodo->placeOrderTodo()->add(pO);
-
-	i = 1;
-	pO.contract = workTodo->getMktDataTodo().mktDataRequests[i].ibContract;
-	pO.order.orderType = "LMT";
-	pO.order.action = "BUY";
-	pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
-	pO.order.totalQuantity = 25000;
-	workTodo->placeOrderTodo()->add(pO);
+	const MktDataTodo &mtodo = workTodo->getMktDataTodo();
+	for( int i=0; i < mtodo.mktDataRequests.size(); i++ ) {
+		pO.contract = mtodo.mktDataRequests[i].ibContract;
+		pO.order.orderType = "LMT";
+		pO.order.action = "BUY";
+		pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
+		pO.order.totalQuantity = 25000;
+		workTodo->placeOrderTodo()->add(pO);
+	}
 	DEBUG_PRINTF( "Adjust orders. %d", workTodo->placeOrderTodo()->countLeft());
 }
 
