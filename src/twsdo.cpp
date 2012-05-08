@@ -42,6 +42,7 @@
 #include "tws_client.h"
 #include "tws_wrapper.h"
 #include "tws_account.h"
+#include "tws_strat.h"
 #include "debug.h"
 
 // from global installed twsapi
@@ -329,18 +330,26 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
-	pacingControl( *(new PacingGod(dataFarms)) )
+	pacingControl( *(new PacingGod(dataFarms)) ),
+	strat(NULL)
 {
 	pacingControl.setPacingTime( cfg.tws_maxRequests,
 		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
 	pacingControl.setViolationPause( cfg.tws_violationPause );
 	initTwsClient();
 	initWork();
+	if( cfg.do_mm ) {
+		strat = new Strat( *this );
+	}
 }
 
 
 TwsDL::~TwsDL()
 {
+	if( strat != NULL ) {
+		delete strat;
+	}
+
 	delete &currentRequest;
 	
 	if( twsClient != NULL ) {
@@ -499,8 +508,8 @@ void TwsDL::idle()
 		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
-		if( cfg.do_mm ) {
-			adjustOrders();
+		if( strat != NULL ) {
+			strat->adjustOrders();
 		}
 		placeAllOrders();
 		break;
@@ -510,31 +519,6 @@ void TwsDL::idle()
 		_lastError = "No more work to do.";
 		quit = true;
 	}
-}
-
-
-void TwsDL::adjustOrders()
-{
-	static int fuck = -1;
-	fuck++;
-	if( fuck <= 20 || p_orders.size() > 0 ) {
-		return;
-	}
-	
-	DEBUG_PRINTF( "Adjust orders." );
-	PlaceOrder pO;
-	int i;
-
-	const MktDataTodo &mtodo = workTodo->getMktDataTodo();
-	for( int i=0; i < mtodo.mktDataRequests.size(); i++ ) {
-		pO.contract = mtodo.mktDataRequests[i].ibContract;
-		pO.order.orderType = "LMT";
-		pO.order.action = "BUY";
-		pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
-		pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
-		workTodo->placeOrderTodo()->add(pO);
-	}
-	DEBUG_PRINTF( "Adjust orders. %d", workTodo->placeOrderTodo()->countLeft());
 }
 
 
