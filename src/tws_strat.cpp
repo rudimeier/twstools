@@ -93,6 +93,10 @@ void Strat::adjustOrders()
 			const PlaceOrder &po = ppo->getRequest();
 			if( po.order.lmtPrice != twsdo.quotes->at(i).val[IB::BID] - 0.1 ) {
 				DEBUG_PRINTF( "strat, modify buy order %s", symbol );
+				pO.orderId = oids.buy_oid;
+				pO.order.action = "BUY";
+				pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
+				twsdo.workTodo->placeOrderTodo()->add(pO);
 			}
 		}
 		if( twsdo.p_orders.find(oids.sell_oid) == twsdo.p_orders.end() ) {
@@ -109,6 +113,10 @@ void Strat::adjustOrders()
 			const PlaceOrder &po = ppo->getRequest();
 			if( po.order.lmtPrice != twsdo.quotes->at(i).val[IB::ASK] + 0.1 ) {
 				DEBUG_PRINTF( "strat, modify sell order %s", symbol );
+				pO.orderId = oids.sell_oid;
+				pO.order.action = "SELL";
+				pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::ASK] + 0.1;
+				twsdo.workTodo->placeOrderTodo()->add(pO);
 			}
 		}
 	}
