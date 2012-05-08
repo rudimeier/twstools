@@ -68,7 +68,7 @@ GenericRequest::ReqType GenericRequest::reqType() const
 
 int GenericRequest::reqId() const
 {
-	if( _reqType == PLACE_ORDER || _reqType == CANCEL_ORDER ) {
+	if( _reqType == CANCEL_ORDER ) {
 		return _orderId;
 	}
 	return _reqId;
@@ -440,8 +440,6 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 		return GenericRequest::ORDERS_REQUEST;
 	} else if( _cancel_order_todo->countLeft() > 0 ) {
 		return GenericRequest::CANCEL_ORDER;
-	} else if( _place_order_todo->countLeft() > 0 ) {
-		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {
@@ -1010,8 +1008,7 @@ void PacketPlaceOrder::append( const RowOrderStatus& row )
 	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
 	list->push_back( arow );
 
-	/* HACK we expect at least one OpenOrder callback too */
-	if( list->size() >= 2 ) {
+	if( row.remaining == 0 ) {
 		mode = CLOSED;
 	}
 }
@@ -1020,11 +1017,6 @@ void PacketPlaceOrder::append( const RowOpenOrder& row )
 {
 	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
 	list->push_back( arow );
-
-	/* HACK if not whatIf we expect at least one OrderStatus callback too */
-	if( request->order.whatIf || list->size() >= 2 ) {
-		mode = CLOSED;
-	}
 }
 
 

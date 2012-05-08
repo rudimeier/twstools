@@ -40,6 +40,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <map>
 
 #include "tws_quote.h"
 
@@ -95,6 +96,7 @@ class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class Packet;
+class PacketPlaceOrder;
 class RowError;
 class RowHist;
 class RowAccVal;
@@ -152,8 +154,10 @@ class TwsDL
 		void reqExecutions();
 		void reqOrders();
 		void placeOrder();
+		void placeAllOrders();
 		void cancelOrder();
 		int reqMktData();
+		void adjustOrders();
 		
 		void errorContracts( const RowError& );
 		void errorHistData( const RowError& );
@@ -208,6 +212,8 @@ class TwsDL
 		Quotes *quotes;
 		
 		Packet *packet;
+		std::map<long, PacketPlaceOrder*> p_orders;
+		std::map<long, PacketPlaceOrder*> p_orders_old;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;

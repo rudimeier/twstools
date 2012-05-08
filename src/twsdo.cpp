@@ -249,6 +249,7 @@ void TwsDlWrapper::accountDownloadEnd( const IB::IBString& accountName )
 void TwsDlWrapper::execDetails( int reqId, const IB::Contract& contract,
 	const IB::Execution& execution )
 {
+	DebugTwsWrapper::execDetails(reqId, contract, execution);
 	RowExecution row = { contract, execution };
 	parentTwsDL->twsExecDetails(  reqId, row );
 }
@@ -264,6 +265,8 @@ void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
 	int parentId, double lastFillPrice, int clientId,
 	const IB::IBString& whyHeld )
 {
+	DebugTwsWrapper::orderStatus( orderId, status, filled, remaining,
+		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld );
 	RowOrderStatus row = { orderId, status, filled, remaining, avgFillPrice,
 		permId, parentId, lastFillPrice, clientId, whyHeld };
 	parentTwsDL->twsOrderStatus(row);
@@ -272,6 +275,7 @@ void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
 void TwsDlWrapper::openOrder( IB::OrderId orderId, const IB::Contract& c,
 	const IB::Order& o, const IB::OrderState& os)
 {
+	DebugTwsWrapper::openOrder(orderId, c, o, os);
 	RowOpenOrder row = { orderId, c, o, os };
 	parentTwsDL->twsOpenOrder(row);
 }
@@ -490,25 +494,53 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
-	case GenericRequest::PLACE_ORDER:
-		placeOrder();
-		break;
 	case GenericRequest::CANCEL_ORDER:
 		cancelOrder();
 		break;
 	case GenericRequest::NONE:
+		/* TODO for now we place all orders when nothing else todo */
+		if( cfg.do_mm ) {
+			adjustOrders();
+		}
+		placeAllOrders();
 		break;
 	}
 	
-	if( reqType == GenericRequest::NONE && fuckme <= 1 ) {
+	if( reqType == GenericRequest::NONE && fuckme <= 1 && p_orders.empty() ) {
 		_lastError = "No more work to do.";
 		quit = true;
 	}
 }
 
 
+void TwsDL::adjustOrders()
+{
+	static int fuck = -1;
+	fuck++;
+	if( fuck <= 20 || p_orders.size() > 0 ) {
+		return;
+	}
+	
+	DEBUG_PRINTF( "Adjust orders." );
+	PlaceOrder pO;
+	int i;
+
+	const MktDataTodo &mtodo = workTodo->getMktDataTodo();
+	for( int i=0; i < mtodo.mktDataRequests.size(); i++ ) {
+		pO.contract = mtodo.mktDataRequests[i].ibContract;
+		pO.order.orderType = "LMT";
+		pO.order.action = "BUY";
+		pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
+		pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
+		workTodo->placeOrderTodo()->add(pO);
+	}
+	DEBUG_PRINTF( "Adjust orders. %d", workTodo->placeOrderTodo()->countLeft());
+}
+
+
 void TwsDL::waitData()
 {
+	finPlaceOrder();
 	if( packet == NULL || currentRequest.reqType() == GenericRequest::NONE ) {
 		return;
 	}
@@ -535,9 +567,6 @@ void TwsDL::waitData()
 		break;
 	case GenericRequest::HIST_REQUEST:
 		ok = finHist();
-		break;
-	case GenericRequest::PLACE_ORDER:
-		ok = finPlaceOrder();
 		break;
 	case GenericRequest::CANCEL_ORDER:
 		ok = finCancelOrder();
@@ -609,18 +638,32 @@ bool TwsDL::finHist()
 
 bool TwsDL::finPlaceOrder()
 {
-	switch( packet->getError() ) {
-	case REQ_ERR_NONE:
-	case REQ_ERR_REQUEST:
-	case REQ_ERR_TIMEOUT:
-		packet->dumpXml();
-	case REQ_ERR_NODATA:
-	case REQ_ERR_NAV:
-		break;
-	case REQ_ERR_TWSCON:
-		return false;
+	bool ok = true;
+	std::map<long, PacketPlaceOrder*>::iterator it;
+	for( it = p_orders.begin(); it != p_orders.end(); it++) {
+		long orderId = it->first;
+		PacketPlaceOrder* p = it->second;
+		assert( orderId == p->getRequest().orderId );
+		if( ! p->finished() ) {
+			continue;
+		}
+
+		switch( p->getError() ) {
+		case REQ_ERR_NONE:
+		case REQ_ERR_REQUEST:
+		case REQ_ERR_TIMEOUT:
+			p->dumpXml();
+			assert( p_orders_old.find(orderId) == p_orders_old.end() );
+			p_orders_old[orderId] = p;
+			p_orders.erase( it );
+		case REQ_ERR_NODATA:
+		case REQ_ERR_NAV:
+			break;
+		case REQ_ERR_TWSCON:
+			ok = false;
+		}
 	}
-	return true;
+	return ok;
 }
 
 
@@ -684,9 +727,6 @@ void TwsDL::twsError( const RowError& err )
 			case GenericRequest::HIST_REQUEST:
 				errorHistData( err );
 				break;
-			case GenericRequest::PLACE_ORDER:
-				errorPlaceOrder( err );
-				break;
 			case GenericRequest::CANCEL_ORDER:
 				errorCancelOrder( err );
 				break;
@@ -698,6 +738,8 @@ void TwsDL::twsError( const RowError& err )
 				break;
 		}
 		return;
+	} else {
+		errorPlaceOrder( err );
 	}
 	
 	if( err.id != -1 ) {
@@ -860,12 +902,21 @@ void TwsDL::errorHistData( const RowError& err )
 
 void TwsDL::errorPlaceOrder( const RowError& err )
 {
-	PacketPlaceOrder &p_pO = *((PacketPlaceOrder*)packet);
-	p_pO.append( err );
-	switch( err.code ) {
-	default:
-		p_pO.closeError( REQ_ERR_REQUEST );
-		break;
+	if( p_orders.find(err.id) != p_orders.end() ) {
+		assert( p_orders_old.find(err.id) == p_orders_old.end() );
+		PacketPlaceOrder *p_pO = p_orders[err.id];
+		if( p_pO->finished() ) {
+			DEBUG_PRINTF("Warning, got openOrder callback for closed order.");
+		}
+		p_pO->closeError( REQ_ERR_REQUEST );
+		p_pO->append(err);
+		return;
+	} else if( p_orders_old.find(err.id) != p_orders_old.end() ) {
+		assert( p_orders.find(err.id) == p_orders.end() );
+		DEBUG_PRINTF("Warning, got openOrder callback for finished order.");
+		PacketPlaceOrder *p_pO = p_orders_old[err.id];
+		p_pO->append(err);
+		return;
 	}
 }
 
@@ -897,7 +948,6 @@ void TwsDL::twsConnectionClosed()
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-			case GenericRequest::PLACE_ORDER:
 			case GenericRequest::CANCEL_ORDER:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -913,6 +963,7 @@ void TwsDL::twsConnectionClosed()
 			}
 		}
 	}
+	assert( p_orders.empty() ); // TODO repeat
 	
 	connectivity_IB_TWS = false;
 	dataFarms.setAllBroken();
@@ -1057,8 +1108,19 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		((PacketPlaceOrder*)packet)->append(row);
+	if( p_orders.find(row.id) != p_orders.end() ) {
+		assert( p_orders_old.find(row.id) == p_orders_old.end() );
+		PacketPlaceOrder *p_pO = p_orders[row.id];
+		if( p_pO->finished() ) {
+			DEBUG_PRINTF("Warning, got orderStatus callback for closed order.");
+		}
+		p_pO->append(row);
+		return;
+	} else if( p_orders_old.find(row.id) != p_orders_old.end() ) {
+		assert( p_orders.find(row.id) == p_orders.end() );
+		DEBUG_PRINTF("Warning, got orderStatus callback for finished order.");
+		PacketPlaceOrder *p_pO = p_orders_old[row.id];
+		p_pO->append(row);
 		return;
 	}
 	if( currentRequest.reqType() == GenericRequest::CANCEL_ORDER ) {
@@ -1076,8 +1138,19 @@ void TwsDL::twsOpenOrder( const RowOpenOrder& row )
 		((PacketOrders*)packet)->append(row);
 		return;
 	}
-	if( currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		((PacketPlaceOrder*)packet)->append(row);
+	if( p_orders.find(row.orderId) != p_orders.end() ) {
+		assert( p_orders_old.find(row.orderId) == p_orders_old.end() );
+		PacketPlaceOrder *p_pO = p_orders[row.orderId];
+		if( p_pO->finished() ) {
+			DEBUG_PRINTF("Warning, got openOrder callback for closed order.");
+		}
+		p_pO->append(row);
+		return;
+	} else if( p_orders_old.find(row.orderId) != p_orders_old.end() ) {
+		assert( p_orders.find(row.orderId) == p_orders.end() );
+		DEBUG_PRINTF("Warning, got openOrder callback for finished order.");
+		PacketPlaceOrder *p_pO = p_orders_old[row.orderId];
+		p_pO->append(row);
 		return;
 	}
 	DEBUG_PRINTF( "Warning, unexpected tws callback (openOrder).");
@@ -1100,9 +1173,8 @@ void TwsDL::twsCurrentTime( long time )
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
 	}
-	if( state == IDLE
-		&& currentRequest.reqType() == GenericRequest::PLACE_ORDER ) {
-		packet->closeError( REQ_ERR_NONE );
+	if( state == IDLE && !p_orders.empty() ) {
+		/* TODO, was: packet->closeError( REQ_ERR_NONE ); */
 	}
 }
 
@@ -1303,9 +1375,6 @@ void TwsDL::placeOrder()
 	workTodo->placeOrderTodo()->checkout();
 	const PlaceOrder &pO = workTodo->getPlaceOrderTodo().current();
 
-	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
-	packet = p_placeOrder;
-
 	long orderId;
 	if( pO.orderId == 0 ) {
 		orderId = tws_valid_orderId;
@@ -1313,7 +1382,9 @@ void TwsDL::placeOrder()
 	} else {
 		orderId = pO.orderId;
 	}
-	currentRequest.nextOrderRequest( GenericRequest::PLACE_ORDER, orderId );
+	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
+	assert( p_orders.find(orderId) == p_orders.end() ); // TODO order modify
+	p_orders[orderId] = p_placeOrder;
 
 	p_placeOrder->record( orderId, pO );
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
@@ -1322,6 +1393,14 @@ void TwsDL::placeOrder()
 		/* HACK no response is expected on success, in case of error we hope
 		   that current time comes after that error */
 		twsClient->reqCurrentTime();
+	}
+}
+
+void TwsDL::placeAllOrders()
+{
+	PlaceOrderTodo* todo = workTodo->placeOrderTodo();
+	while( todo->countLeft() > 0 ) {
+		placeOrder();
 	}
 }
 
