@@ -42,6 +42,7 @@
 #include "tws_client.h"
 #include "tws_wrapper.h"
 #include "tws_account.h"
+#include "tws_strat.h"
 #include "debug.h"
 
 // from global installed twsapi
@@ -329,18 +330,26 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
-	pacingControl( *(new PacingGod(dataFarms)) )
+	pacingControl( *(new PacingGod(dataFarms)) ),
+	strat(NULL)
 {
 	pacingControl.setPacingTime( cfg.tws_maxRequests,
 		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
 	pacingControl.setViolationPause( cfg.tws_violationPause );
 	initTwsClient();
 	initWork();
+	if( cfg.do_mm ) {
+		strat = new Strat( *this );
+	}
 }
 
 
 TwsDL::~TwsDL()
 {
+	if( strat != NULL ) {
+		delete strat;
+	}
+
 	delete &currentRequest;
 	
 	if( twsClient != NULL ) {
