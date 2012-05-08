@@ -36,7 +36,10 @@
  ***/
 
 #include "tws_strat.h"
+#include "tws_query.h"
+#include "tws_meta.h"
 #include "twsdo.h"
+#include "debug.h"
 #include <assert.h>
 
 Strat::Strat( TwsDL& _twsdo) :
@@ -46,4 +49,29 @@ Strat::Strat( TwsDL& _twsdo) :
 
 Strat::~Strat()
 {
+}
+
+void Strat::adjustOrders()
+{
+	static int fuck = -1;
+	fuck++;
+	if( fuck <= 30 || twsdo.p_orders.size() > 0 ) {
+		return;
+	}
+
+	DEBUG_PRINTF( "Adjust orders." );
+	PlaceOrder pO;
+	int i;
+
+	const MktDataTodo &mtodo = twsdo.workTodo->getMktDataTodo();
+	for( int i=0; i < mtodo.mktDataRequests.size(); i++ ) {
+		pO.contract = mtodo.mktDataRequests[i].ibContract;
+		pO.order.orderType = "LMT";
+		pO.order.action = "BUY";
+		pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
+		pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
+		twsdo.workTodo->placeOrderTodo()->add(pO);
+	}
+	DEBUG_PRINTF( "Adjust orders. %d",
+		twsdo.workTodo->placeOrderTodo()->countLeft());
 }

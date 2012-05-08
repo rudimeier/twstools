@@ -46,6 +46,8 @@ class Strat
 		Strat( TwsDL& );
 		virtual ~Strat();
 
+		void adjustOrders();
+
 	private:
 		TwsDL &twsdo;
 };
