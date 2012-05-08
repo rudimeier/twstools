@@ -531,7 +531,7 @@ void TwsDL::adjustOrders()
 		pO.order.orderType = "LMT";
 		pO.order.action = "BUY";
 		pO.order.lmtPrice = quotes->at(i).val[IB::BID] - 0.1;
-		pO.order.totalQuantity = 25000;
+		pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
 		workTodo->placeOrderTodo()->add(pO);
 	}
 	DEBUG_PRINTF( "Adjust orders. %d", workTodo->placeOrderTodo()->countLeft());
