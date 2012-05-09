@@ -57,7 +57,7 @@ class Account
 	void update_oo( const RowOpenOrder& row );
 	void update_os( const RowOrderStatus& row );
 
-	private:
+// 	private:
 		Prtfl portfolio;
 		OpenOrders openOrders;
 		OrderStatus orderStatus;
