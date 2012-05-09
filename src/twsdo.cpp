@@ -892,8 +892,15 @@ void TwsDL::errorPlaceOrder( const RowError& err )
 		if( p_pO->finished() ) {
 			DEBUG_PRINTF("Warning, got openOrder callback for closed order.");
 		}
-		p_pO->closeError( REQ_ERR_REQUEST );
 		p_pO->append(err);
+
+		switch( err.code ) {
+		// Unable to modify this order as its still being processed.
+		case 2102:
+			break;
+		default:
+			p_pO->closeError( REQ_ERR_REQUEST );
+		}
 		return;
 	} else if( p_orders_old.find(err.id) != p_orders_old.end() ) {
 		assert( p_orders.find(err.id) == p_orders.end() );
@@ -1260,6 +1267,14 @@ void TwsDL::changeState( State s )
 }
 
 
+long TwsDL::fetch_inc_order_id()
+{
+	long orderId = tws_valid_orderId;
+	tws_valid_orderId++;
+	return orderId;
+}
+
+
 void TwsDL::reqContractDetails()
 {
 	workTodo->contractDetailsTodo()->checkout();
@@ -1366,11 +1381,17 @@ void TwsDL::placeOrder()
 	} else {
 		orderId = pO.orderId;
 	}
-	PacketPlaceOrder *p_placeOrder = new PacketPlaceOrder();
-	assert( p_orders.find(orderId) == p_orders.end() ); // TODO order modify
-	p_orders[orderId] = p_placeOrder;
+	PacketPlaceOrder *p_placeOrder;
+	if( p_orders.find(orderId) == p_orders.end() ) {
+		p_placeOrder = new PacketPlaceOrder();
+		p_orders[orderId] = p_placeOrder;
+		p_placeOrder->record( orderId, pO );
+	} else {
+		// TODO order modify
+		p_placeOrder = p_orders[orderId];
+		p_placeOrder->modify( pO );
+	}
 
-	p_placeOrder->record( orderId, pO );
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
 
 	if( ! pO.order.transmit ) {
