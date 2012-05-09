@@ -623,10 +623,11 @@ void TwsDL::waitData()
 
 bool TwsDL::finContracts()
 {
+	PacketContractDetails* p = (PacketContractDetails*)packet;
 	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
 		DEBUG_PRINTF( "Contracts received: %zu",
-		((PacketContractDetails*)packet)->constList().size() );
+		p->constList().size() );
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
@@ -636,6 +637,13 @@ bool TwsDL::finContracts()
 	case REQ_ERR_TIMEOUT:
 		return false;
 	}
+
+	if( strat != NULL ) {
+		assert( p->constList().size() == 1 );
+		const IB::ContractDetails &cd = p->constList().at(0);
+		con_details[cd.summary.conId] =  new IB::ContractDetails(cd);
+	}
+
 	return true;
 }
 
