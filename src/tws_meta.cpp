@@ -489,6 +489,11 @@ const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
 	return *_cancel_order_todo;
 }
 
+MktDataTodo* WorkTodo::mktDataTodo() const
+{
+	return _market_data_todo;
+}
+
 const MktDataTodo& WorkTodo::getMktDataTodo() const
 {
 	return *_market_data_todo;
@@ -540,6 +545,10 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 		PacketMktData *pmd = PacketMktData::fromXml(xn);
 		_market_data_todo->add( pmd->getRequest() );
 		delete pmd;
+		// HACK always get contractDetails too
+		PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
+		_contractDetailsTodo->add(pcd->getRequest());
+		delete pcd;
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
