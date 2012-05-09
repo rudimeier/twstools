@@ -38,6 +38,7 @@
 #include "tws_strat.h"
 #include "tws_query.h"
 #include "tws_meta.h"
+#include "tws_account.h"
 #include "twsdo.h"
 #include "debug.h"
 #include <assert.h>
@@ -69,6 +70,18 @@ double Strat::min_tick(const IB::Contract& c)
 	double min_tick = twsdo.con_details[c.conId]->minTick ;
 	assert(min_tick > 0.0);
 	return min_tick;
+}
+
+/**
+ * Return portfolio position of a given contract.
+ */
+int Strat::prtfl_pos(const IB::Contract& c)
+{
+	Prtfl::const_iterator it = twsdo.account->portfolio.find(c.conId);
+	if( it !=  twsdo.account->portfolio.end() ) {
+		return it->second.position;
+	}
+	return 0;
 }
 
 /**
