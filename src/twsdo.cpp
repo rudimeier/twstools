@@ -892,8 +892,15 @@ void TwsDL::errorPlaceOrder( const RowError& err )
 		if( p_pO->finished() ) {
 			DEBUG_PRINTF("Warning, got openOrder callback for closed order.");
 		}
-		p_pO->closeError( REQ_ERR_REQUEST );
 		p_pO->append(err);
+
+		switch( err.code ) {
+		// Unable to modify this order as its still being processed.
+		case 2102:
+			break;
+		default:
+			p_pO->closeError( REQ_ERR_REQUEST );
+		}
 		return;
 	} else if( p_orders_old.find(err.id) != p_orders_old.end() ) {
 		assert( p_orders.find(err.id) == p_orders.end() );
