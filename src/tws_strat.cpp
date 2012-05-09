@@ -38,6 +38,7 @@
 #include "tws_strat.h"
 #include "tws_query.h"
 #include "tws_meta.h"
+#include "tws_account.h"
 #include "twsdo.h"
 #include "debug.h"
 #include <assert.h>
@@ -72,6 +73,18 @@ double Strat::min_tick(const IB::Contract& c)
 }
 
 /**
+ * Return portfolio position of a given contract.
+ */
+int Strat::prtfl_pos(const IB::Contract& c)
+{
+	Prtfl::const_iterator it = twsdo.account->portfolio.find(c.conId);
+	if( it !=  twsdo.account->portfolio.end() ) {
+		return it->second.position;
+	}
+	return 0;
+}
+
+/**
  * Place or modify buy and sell orders for a single contract. Quote should
  * valid bid and ask.
  */
@@ -85,18 +98,22 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 	const char *symbol = pO.contract.symbol.c_str();
 
 	double quote_dist = 1 * min_tick(c);
+	const int max_pos = 1;
+	int cur_pos = prtfl_pos(c);
 
 	double lmt_buy = quote.val[IB::BID] - quote_dist;
 	double lmt_sell = quote.val[IB::ASK] + quote_dist;
 
 	if( twsdo.p_orders.find(oids.buy_oid) == twsdo.p_orders.end() ) {
 		/* new buy order */
-		DEBUG_PRINTF( "strat, new buy order %s", symbol );
-		oids.buy_oid = twsdo.fetch_inc_order_id();
-		pO.orderId = oids.buy_oid;
-		pO.order.action = "BUY";
-		pO.order.lmtPrice = lmt_buy;
-		twsdo.workTodo->placeOrderTodo()->add(pO);
+		if( cur_pos < max_pos ) {
+			DEBUG_PRINTF( "strat, new buy order %s", symbol );
+			oids.buy_oid = twsdo.fetch_inc_order_id();
+			pO.orderId = oids.buy_oid;
+			pO.order.action = "BUY";
+			pO.order.lmtPrice = lmt_buy;
+			twsdo.workTodo->placeOrderTodo()->add(pO);
+		}
 	} else {
 		/* modify buy order */
 		PacketPlaceOrder *ppo = twsdo.p_orders[oids.buy_oid];
@@ -111,12 +128,14 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 	}
 	if( twsdo.p_orders.find(oids.sell_oid) == twsdo.p_orders.end() ) {
 		/* new sell order */
-		DEBUG_PRINTF( "strat, new sell order %s", symbol );
-		oids.sell_oid = twsdo.fetch_inc_order_id();
-		pO.orderId = oids.sell_oid;
-		pO.order.action = "SELL";
-		pO.order.lmtPrice = lmt_sell;
-		twsdo.workTodo->placeOrderTodo()->add(pO);
+		if( cur_pos > -max_pos ) {
+			DEBUG_PRINTF( "strat, new sell order %s", symbol );
+			oids.sell_oid = twsdo.fetch_inc_order_id();
+			pO.orderId = oids.sell_oid;
+			pO.order.action = "SELL";
+			pO.order.lmtPrice = lmt_sell;
+			twsdo.workTodo->placeOrderTodo()->add(pO);
+		}
 	} else {
 		/* modify sell order */
 		PacketPlaceOrder *ppo = twsdo.p_orders[oids.sell_oid];

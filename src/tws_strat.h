@@ -67,6 +67,7 @@ class Strat
 	private:
 		void adjust_order( const IB::Contract&, const Quote&, buy_sell_oid& );
 		double min_tick( const IB::Contract& );
+		int prtfl_pos(const IB::Contract&);
 
 		TwsDL &twsdo;
 		std::map<int, buy_sell_oid> map_data_order;
