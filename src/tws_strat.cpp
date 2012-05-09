@@ -68,7 +68,9 @@ double Strat::min_tick(const IB::Contract& c)
 	assert( twsdo.con_details.find( c.conId ) != twsdo.con_details.end() );
 	double min_tick = twsdo.con_details[c.conId]->minTick ;
 	assert(min_tick > 0.0);
-	return min_tick;
+	long priceMagnifier = twsdo.con_details[c.conId]->priceMagnifier;
+	assert(priceMagnifier > 0);
+	return min_tick * priceMagnifier;
 }
 
 /**
