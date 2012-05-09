@@ -60,6 +60,18 @@ Strat::~Strat()
 }
 
 /**
+ * Return min tick price for a given contract.
+ */
+double Strat::min_tick(const IB::Contract& c)
+{
+	assert( c.conId != 0 );
+	assert( twsdo.con_details.find( c.conId ) != twsdo.con_details.end() );
+	double min_tick = twsdo.con_details[c.conId]->minTick ;
+	assert(min_tick > 0.0);
+	return min_tick;
+}
+
+/**
  * Place or modify buy and sell orders for a single contract. Quote should
  * valid bid and ask.
  */
@@ -72,8 +84,10 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 	pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
 	const char *symbol = pO.contract.symbol.c_str();
 
-	double lmt_buy = quote.val[IB::BID] - 0.1;
-	double lmt_sell = quote.val[IB::ASK] + 0.1;
+	double quote_dist = 1 * min_tick(c);
+
+	double lmt_buy = quote.val[IB::BID] - quote_dist;
+	double lmt_sell = quote.val[IB::ASK] + quote_dist;
 
 	if( twsdo.p_orders.find(oids.buy_oid) == twsdo.p_orders.end() ) {
 		/* new buy order */
