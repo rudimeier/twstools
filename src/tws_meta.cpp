@@ -489,6 +489,11 @@ const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
 	return *_cancel_order_todo;
 }
 
+MktDataTodo* WorkTodo::mktDataTodo() const
+{
+	return _market_data_todo;
+}
+
 const MktDataTodo& WorkTodo::getMktDataTodo() const
 {
 	return *_market_data_todo;
