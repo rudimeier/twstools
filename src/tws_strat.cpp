@@ -79,23 +79,31 @@ void Strat::adjustOrders()
 
 		/* here we also initialize zero order ids */
 		buy_sell_oid &oids = map_data_order[i];
+
+		double bid = twsdo.quotes->at(i).val[IB::BID];
+		double ask = twsdo.quotes->at(i).val[IB::ASK];
+
+		if( bid > 0.0 && ask > 0.0 ) {
+			double lmt_buy = bid - 0.1;
+			double lmt_sell = ask + 0.1;
+
 		if( twsdo.p_orders.find(oids.buy_oid) == twsdo.p_orders.end() ) {
 			/* new buy order */
 			DEBUG_PRINTF( "strat, new buy order %s", symbol );
 			oids.buy_oid = twsdo.fetch_inc_order_id();
 			pO.orderId = oids.buy_oid;
 			pO.order.action = "BUY";
-			pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
+			pO.order.lmtPrice = lmt_buy;
 			twsdo.workTodo->placeOrderTodo()->add(pO);
 		} else {
 			/* modify buy order */
 			PacketPlaceOrder *ppo = twsdo.p_orders[oids.buy_oid];
 			const PlaceOrder &po = ppo->getRequest();
-			if( po.order.lmtPrice != twsdo.quotes->at(i).val[IB::BID] - 0.1 ) {
+			if( po.order.lmtPrice != lmt_buy ) {
 				DEBUG_PRINTF( "strat, modify buy order %s", symbol );
 				pO.orderId = oids.buy_oid;
 				pO.order.action = "BUY";
-				pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::BID] - 0.1;
+				pO.order.lmtPrice = lmt_buy;
 				twsdo.workTodo->placeOrderTodo()->add(pO);
 			}
 		}
@@ -105,19 +113,22 @@ void Strat::adjustOrders()
 			oids.sell_oid = twsdo.fetch_inc_order_id();
 			pO.orderId = oids.sell_oid;
 			pO.order.action = "SELL";
-			pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::ASK] + 0.1;
+			pO.order.lmtPrice = lmt_sell;
 			twsdo.workTodo->placeOrderTodo()->add(pO);
 		} else {
 			/* modify sell order */
 			PacketPlaceOrder *ppo = twsdo.p_orders[oids.sell_oid];
 			const PlaceOrder &po = ppo->getRequest();
-			if( po.order.lmtPrice != twsdo.quotes->at(i).val[IB::ASK] + 0.1 ) {
+			if( po.order.lmtPrice != lmt_sell ) {
 				DEBUG_PRINTF( "strat, modify sell order %s", symbol );
 				pO.orderId = oids.sell_oid;
 				pO.order.action = "SELL";
-				pO.order.lmtPrice = twsdo.quotes->at(i).val[IB::ASK] + 0.1;
+				pO.order.lmtPrice = lmt_sell;
 				twsdo.workTodo->placeOrderTodo()->add(pO);
 			}
+		}
+		} else {
+			/* invalid quotes, TODO cleanup, cancel, whatever */
 		}
 	}
 	DEBUG_PRINTF( "strat, place/modify %d orders",
