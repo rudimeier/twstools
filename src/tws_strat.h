@@ -41,6 +41,11 @@
 #include <map>
 
 class TwsDL;
+class Quote;
+
+namespace IB {
+	class Contract;
+}
 
 struct buy_sell_oid
 {
@@ -60,6 +65,8 @@ class Strat
 		void adjustOrders();
 
 	private:
+		void adjust_order( const IB::Contract&, const Quote&, buy_sell_oid& );
+
 		TwsDL &twsdo;
 		std::map<int, buy_sell_oid> map_data_order;
 };
