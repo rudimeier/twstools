@@ -119,12 +119,6 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 
 void Strat::adjustOrders()
 {
-	static int fuck = -1;
-	fuck++;
-	if( fuck <= 30 ) {
-		return;
-	}
-
 	DEBUG_PRINTF( "strat, adjust orders" );
 
 	const MktDataTodo &mtodo = twsdo.workTodo->getMktDataTodo();
