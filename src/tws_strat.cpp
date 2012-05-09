@@ -105,14 +105,14 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 	double lmt_sell = quote.val[IB::ASK] + quote_dist;
 
 	if( twsdo.p_orders.find(oids.buy_oid) == twsdo.p_orders.end() ) {
-		if( cur_pos < max_pos ) {
 		/* new buy order */
-		DEBUG_PRINTF( "strat, new buy order %s", symbol );
-		oids.buy_oid = twsdo.fetch_inc_order_id();
-		pO.orderId = oids.buy_oid;
-		pO.order.action = "BUY";
-		pO.order.lmtPrice = lmt_buy;
-		twsdo.workTodo->placeOrderTodo()->add(pO);
+		if( cur_pos < max_pos ) {
+			DEBUG_PRINTF( "strat, new buy order %s", symbol );
+			oids.buy_oid = twsdo.fetch_inc_order_id();
+			pO.orderId = oids.buy_oid;
+			pO.order.action = "BUY";
+			pO.order.lmtPrice = lmt_buy;
+			twsdo.workTodo->placeOrderTodo()->add(pO);
 		}
 	} else {
 		/* modify buy order */
@@ -127,14 +127,14 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 		}
 	}
 	if( twsdo.p_orders.find(oids.sell_oid) == twsdo.p_orders.end() ) {
-		if( cur_pos > -max_pos ) {
 		/* new sell order */
-		DEBUG_PRINTF( "strat, new sell order %s", symbol );
-		oids.sell_oid = twsdo.fetch_inc_order_id();
-		pO.orderId = oids.sell_oid;
-		pO.order.action = "SELL";
-		pO.order.lmtPrice = lmt_sell;
-		twsdo.workTodo->placeOrderTodo()->add(pO);
+		if( cur_pos > -max_pos ) {
+			DEBUG_PRINTF( "strat, new sell order %s", symbol );
+			oids.sell_oid = twsdo.fetch_inc_order_id();
+			pO.orderId = oids.sell_oid;
+			pO.order.action = "SELL";
+			pO.order.lmtPrice = lmt_sell;
+			twsdo.workTodo->placeOrderTodo()->add(pO);
 		}
 	} else {
 		/* modify sell order */
