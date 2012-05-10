@@ -643,6 +643,7 @@ bool TwsDL::finPlaceOrder()
 	for( it = p_orders.begin(); it != p_orders.end(); it++) {
 		long orderId = it->first;
 		PacketPlaceOrder* p = it->second;
+		const IB::Contract &c = p->getRequest().contract;
 		assert( orderId == p->getRequest().orderId );
 		if( ! p->finished() ) {
 			continue;
@@ -653,6 +654,8 @@ bool TwsDL::finPlaceOrder()
 		case REQ_ERR_REQUEST:
 		case REQ_ERR_TIMEOUT:
 			p->dumpXml();
+			DEBUG_PRINTF("fin order, %ld %s, %ld", orderId,
+				c.symbol.c_str(), c.conId);
 			assert( p_orders_old.find(orderId) == p_orders_old.end() );
 			p_orders_old[orderId] = p;
 			p_orders.erase( it );
