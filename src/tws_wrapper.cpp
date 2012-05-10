@@ -245,8 +245,9 @@ void DebugTwsWrapper::contractDetailsEnd( int reqId )
 void DebugTwsWrapper::execDetails ( int orderId, const IB::Contract& contract,
 	const IB::Execution& execution )
 {
-	DEBUG_PRINTF( "EXECUTION_DATA: %d %s %s", orderId,
-		contract.localSymbol.c_str(), ibToString(execution).c_str());
+	DEBUG_PRINTF( "EXECUTION_DATA: %d %s %s %ld %s", orderId,
+		contract.symbol.c_str(), contract.localSymbol.c_str(), contract.conId,
+		ibToString(execution).c_str());
 }
 
 
