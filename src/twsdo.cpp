@@ -1205,8 +1205,8 @@ void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 
 	const IB::Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
-	DEBUG_PRINTF( "TICK_PRICE: %d %s %s %g %d", reqId,
-		c.symbol.c_str(),ibToString(field).c_str(), price, canAutoExecute);
+	DEBUG_PRINTF( "TICK_PRICE: %d %s %ld %s %g", reqId,
+		c.symbol.c_str(), c.conId, ibToString(field).c_str(), price );
 }
 
 void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
@@ -1221,8 +1221,8 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 
 	const IB::Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
-	DEBUG_PRINTF( "TICK_SIZE: %d %s %s %d",
-		reqId, c.symbol.c_str(), ibToString(field).c_str(), size );
+	DEBUG_PRINTF( "TICK_SIZE: %d %s %ld %s %d", reqId,
+		c.symbol.c_str(), c.conId, ibToString(field).c_str(), size );
 }
 
 
