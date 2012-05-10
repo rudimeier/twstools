@@ -639,11 +639,15 @@ bool TwsDL::finHist()
 bool TwsDL::finPlaceOrder()
 {
 	bool ok = true;
-	std::map<long, PacketPlaceOrder*>::iterator it;
-	for( it = p_orders.begin(); it != p_orders.end(); it++) {
-		long orderId = it->first;
-		PacketPlaceOrder* p = it->second;
+	std::map<long, PacketPlaceOrder*>::iterator it = p_orders.begin();
+	while( it != p_orders.end() ) {
+		/* increment it already here and use it_tmp because erase would
+		   invalidate it */
+		std::map<long, PacketPlaceOrder*>::iterator it_tmp = it++;
+		long orderId = it_tmp->first;
+		PacketPlaceOrder* p = it_tmp->second;
 		const IB::Contract &c = p->getRequest().contract;
+
 		assert( orderId == p->getRequest().orderId );
 		if( ! p->finished() ) {
 			continue;
@@ -658,7 +662,7 @@ bool TwsDL::finPlaceOrder()
 				c.symbol.c_str(), c.conId);
 			assert( p_orders_old.find(orderId) == p_orders_old.end() );
 			p_orders_old[orderId] = p;
-			p_orders.erase( it );
+			p_orders.erase( it_tmp );
 		case REQ_ERR_NODATA:
 		case REQ_ERR_NAV:
 			break;
