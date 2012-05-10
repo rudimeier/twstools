@@ -96,7 +96,8 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 	PlaceOrder pO;
 	pO.contract = c;
 	pO.order.orderType = "LMT";
-	pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
+	pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000
+		: (pO.contract.exchange == "NSE" ? 100 : 1 );
 	const char *symbol = pO.contract.symbol.c_str();
 
 	double quote_dist = 1 * min_tick(c);
