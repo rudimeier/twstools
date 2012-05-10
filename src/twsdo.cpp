@@ -643,6 +643,7 @@ bool TwsDL::finPlaceOrder()
 	for( it = p_orders.begin(); it != p_orders.end(); it++) {
 		long orderId = it->first;
 		PacketPlaceOrder* p = it->second;
+		const IB::Contract &c = p->getRequest().contract;
 		assert( orderId == p->getRequest().orderId );
 		if( ! p->finished() ) {
 			continue;
@@ -653,6 +654,8 @@ bool TwsDL::finPlaceOrder()
 		case REQ_ERR_REQUEST:
 		case REQ_ERR_TIMEOUT:
 			p->dumpXml();
+			DEBUG_PRINTF("fin order, %ld %s, %ld", orderId,
+				c.symbol.c_str(), c.conId);
 			assert( p_orders_old.find(orderId) == p_orders_old.end() );
 			p_orders_old[orderId] = p;
 			p_orders.erase( it );
@@ -1205,8 +1208,8 @@ void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 
 	const IB::Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
-	DEBUG_PRINTF( "TICK_PRICE: %d %s %s %g %d", reqId,
-		c.symbol.c_str(),ibToString(field).c_str(), price, canAutoExecute);
+	DEBUG_PRINTF( "TICK_PRICE: %d %s %ld %s %g", reqId,
+		c.symbol.c_str(), c.conId, ibToString(field).c_str(), price );
 }
 
 void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
@@ -1221,8 +1224,8 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 
 	const IB::Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
-	DEBUG_PRINTF( "TICK_SIZE: %d %s %s %d",
-		reqId, c.symbol.c_str(), ibToString(field).c_str(), size );
+	DEBUG_PRINTF( "TICK_SIZE: %d %s %ld %s %d", reqId,
+		c.symbol.c_str(), c.conId, ibToString(field).c_str(), size );
 }
 
 

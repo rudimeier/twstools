@@ -96,7 +96,8 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 	PlaceOrder pO;
 	pO.contract = c;
 	pO.order.orderType = "LMT";
-	pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000 : 1;
+	pO.order.totalQuantity = pO.contract.secType == "CASH" ? 25000
+		: (pO.contract.exchange == "NSE" ? 100 : 1 );
 	const char *symbol = pO.contract.symbol.c_str();
 
 	double quote_dist = 1 * min_tick(c);
@@ -154,8 +155,6 @@ void Strat::adjust_order( const IB::Contract& c, const Quote& quote,
 
 void Strat::adjustOrders()
 {
-	DEBUG_PRINTF( "strat, adjust orders" );
-
 	const MktDataTodo &mtodo = twsdo.workTodo->getMktDataTodo();
 	for( int i=0; i < mtodo.mktDataRequests.size(); i++ ) {
 		const IB::Contract &contract = mtodo.mktDataRequests[i].ibContract;
@@ -170,7 +169,10 @@ void Strat::adjustOrders()
 			/* invalid quotes, TODO cleanup, cancel, whatever */
 		}
 	}
-	DEBUG_PRINTF( "strat, place/modify %d orders",
-		twsdo.workTodo->placeOrderTodo()->countLeft());
+
+	int ocnt = twsdo.workTodo->placeOrderTodo()->countLeft();
+	if( ocnt > 0 ) {
+		DEBUG_PRINTF( "strat, place/modify %d orders", ocnt );
+	}
 	assert( mtodo.mktDataRequests.size() == map_data_order.size() );
 }

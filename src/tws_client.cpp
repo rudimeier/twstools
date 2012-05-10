@@ -210,9 +210,9 @@ void TWSClient::cancelMktData ( int tickerId )
 void TWSClient::placeOrder ( int id, const IB::Contract &contract,
 	const IB::Order &order )
 {
-	DEBUG_PRINTF("PLACE_ORDER %d '%s' %ld '%s' %g '%s'",
+	DEBUG_PRINTF("PLACE_ORDER %d '%s' %ld '%s' %g '%s' %ld",
 		id, order.orderType.c_str(), order.totalQuantity, order.action.c_str(),
-		order.lmtPrice, contract.symbol.c_str() );
+		order.lmtPrice, contract.symbol.c_str(), contract.conId );
 	
 	ePosixClient->placeOrder( id, contract, order );
 }
