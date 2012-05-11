@@ -1,6 +1,6 @@
-/*** tws_query.h -- structs for IB/API requests
+/*** tws_account.cpp -- TWS portfolio and account state
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -35,110 +35,39 @@
  *
  ***/
 
-#ifndef TWS_QUERY_H
-#define TWS_QUERY_H
-
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
+#include "tws_account.h"
+#include <assert.h>
 
 
-class ContractDetailsRequest
+Account::Account()
 {
-	public:
-		const IB::Contract& ibContract() const;
-		bool initialize( const IB::Contract& );
-		
-	private:
-		IB::Contract _ibContract;
-};
+}
 
-
-
-
-class HistRequest
+Account::~Account()
 {
-	public:
-		HistRequest();
-		
-		bool initialize( const IB::Contract&, const std::string &endDateTime,
-			const std::string &durationStr, const std::string &barSizeSetting,
-			const std::string &whatToShow, int useRTH, int formatDate );
-		std::string toString() const;
-		
-		IB::Contract ibContract;
-		std::string endDateTime;
-		std::string durationStr;
-		std::string barSizeSetting;
-		std::string whatToShow;
-		int useRTH;
-		int formatDate;
-};
+}
 
-
-
-
-class AccStatusRequest
+void Account::updatePortfolio( const RowPrtfl& row )
 {
-	public:
-		AccStatusRequest();
-		
-		bool subscribe;
-		std::string acctCode;
-};
+	long conid = row.contract.conId;
+	assert( conid > 0);
 
+	portfolio[conid] = row;
+}
 
-
-
-class ExecutionsRequest
+void Account::update_oo( const RowOpenOrder& row )
 {
-	public:
-		IB::ExecutionFilter executionFilter;
-};
+	long permid = row.order.permId;
+	assert( permid > 0);
 
+	openOrders[permid] = row;
+}
 
-
-
-class OrdersRequest
+void Account::update_os( const RowOrderStatus& row )
 {
-};
+	long permid = row.permId;
+	assert( permid > 0);
 
+	orderStatus[permid] = row;
+}
 
-
-
-class PlaceOrder
-{
-	public:
-		PlaceOrder();
-
-		long orderId;
-		IB::Contract contract;
-		IB::Order order;
-};
-
-
-
-
-class CancelOrder
-{
-	public:
-		CancelOrder();
-
-		long orderId;
-};
-
-
-
-
-class MktDataRequest
-{
-	public:
-		MktDataRequest();
-
-		IB::Contract ibContract;
-		std::string genericTicks;
-		bool snapshot;
-};
-
-
-#endif

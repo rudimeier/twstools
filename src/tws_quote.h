@@ -1,6 +1,6 @@
-/*** tws_query.h -- structs for IB/API requests
+/*** tws_quote.h -- TWS real time quotes
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -35,110 +35,25 @@
  *
  ***/
 
-#ifndef TWS_QUERY_H
-#define TWS_QUERY_H
+#ifndef TWS_QUOTE_H
+#define TWS_QUOTE_H
 
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
+#include <stdint.h>
+#include <vector>
 
-
-class ContractDetailsRequest
+class Quote
 {
 	public:
-		const IB::Contract& ibContract() const;
-		bool initialize( const IB::Contract& );
-		
-	private:
-		IB::Contract _ibContract;
+		Quote();
+		Quote( const Quote& );
+		~Quote();
+
+		Quote& operator= (const Quote&);
+
+		double * const val;
+		int64_t * const stamp;
 };
 
-
-
-
-class HistRequest
-{
-	public:
-		HistRequest();
-		
-		bool initialize( const IB::Contract&, const std::string &endDateTime,
-			const std::string &durationStr, const std::string &barSizeSetting,
-			const std::string &whatToShow, int useRTH, int formatDate );
-		std::string toString() const;
-		
-		IB::Contract ibContract;
-		std::string endDateTime;
-		std::string durationStr;
-		std::string barSizeSetting;
-		std::string whatToShow;
-		int useRTH;
-		int formatDate;
-};
-
-
-
-
-class AccStatusRequest
-{
-	public:
-		AccStatusRequest();
-		
-		bool subscribe;
-		std::string acctCode;
-};
-
-
-
-
-class ExecutionsRequest
-{
-	public:
-		IB::ExecutionFilter executionFilter;
-};
-
-
-
-
-class OrdersRequest
-{
-};
-
-
-
-
-class PlaceOrder
-{
-	public:
-		PlaceOrder();
-
-		long orderId;
-		IB::Contract contract;
-		IB::Order order;
-};
-
-
-
-
-class CancelOrder
-{
-	public:
-		CancelOrder();
-
-		long orderId;
-};
-
-
-
-
-class MktDataRequest
-{
-	public:
-		MktDataRequest();
-
-		IB::Contract ibContract;
-		std::string genericTicks;
-		bool snapshot;
-};
-
+typedef std::vector<Quote> Quotes;
 
 #endif

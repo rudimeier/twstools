@@ -1,6 +1,6 @@
-/*** tws_query.h -- structs for IB/API requests
+/*** tws_account.h -- TWS portfolio and account state
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -35,109 +35,32 @@
  *
  ***/
 
-#ifndef TWS_QUERY_H
-#define TWS_QUERY_H
+#ifndef TWS_ACCOUNT_H
+#define TWS_ACCOUNT_H
 
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
+#include "tws_meta.h"
+#include <map>
 
 
-class ContractDetailsRequest
+typedef std::map<long, RowPrtfl> Prtfl;
+typedef std::map<long, RowOpenOrder> OpenOrders;
+typedef std::map<long, RowOrderStatus> OrderStatus;
+
+
+class Account
 {
 	public:
-		const IB::Contract& ibContract() const;
-		bool initialize( const IB::Contract& );
-		
-	private:
-		IB::Contract _ibContract;
-};
+		Account();
+		~Account();
 
+	void updatePortfolio( const RowPrtfl& row );
+	void update_oo( const RowOpenOrder& row );
+	void update_os( const RowOrderStatus& row );
 
-
-
-class HistRequest
-{
-	public:
-		HistRequest();
-		
-		bool initialize( const IB::Contract&, const std::string &endDateTime,
-			const std::string &durationStr, const std::string &barSizeSetting,
-			const std::string &whatToShow, int useRTH, int formatDate );
-		std::string toString() const;
-		
-		IB::Contract ibContract;
-		std::string endDateTime;
-		std::string durationStr;
-		std::string barSizeSetting;
-		std::string whatToShow;
-		int useRTH;
-		int formatDate;
-};
-
-
-
-
-class AccStatusRequest
-{
-	public:
-		AccStatusRequest();
-		
-		bool subscribe;
-		std::string acctCode;
-};
-
-
-
-
-class ExecutionsRequest
-{
-	public:
-		IB::ExecutionFilter executionFilter;
-};
-
-
-
-
-class OrdersRequest
-{
-};
-
-
-
-
-class PlaceOrder
-{
-	public:
-		PlaceOrder();
-
-		long orderId;
-		IB::Contract contract;
-		IB::Order order;
-};
-
-
-
-
-class CancelOrder
-{
-	public:
-		CancelOrder();
-
-		long orderId;
-};
-
-
-
-
-class MktDataRequest
-{
-	public:
-		MktDataRequest();
-
-		IB::Contract ibContract;
-		std::string genericTicks;
-		bool snapshot;
+// 	private:
+		Prtfl portfolio;
+		OpenOrders openOrders;
+		OrderStatus orderStatus;
 };
 
 

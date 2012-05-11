@@ -1,6 +1,6 @@
-/*** tws_query.h -- structs for IB/API requests
+/*** tws_quotes.cpp -- TWS real time quotes
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -35,110 +35,36 @@
  *
  ***/
 
-#ifndef TWS_QUERY_H
-#define TWS_QUERY_H
-
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
+#include "tws_quote.h"
+#include "twsapi/EWrapper.h"
+#include <string.h>
 
 
-class ContractDetailsRequest
+Quote::Quote() :
+	val(new double[IB::NOT_SET]),
+	stamp(new int64_t[IB::NOT_SET])
 {
-	public:
-		const IB::Contract& ibContract() const;
-		bool initialize( const IB::Contract& );
-		
-	private:
-		IB::Contract _ibContract;
-};
+	memset(val, 0, sizeof(val) * IB::NOT_SET);
+	memset(stamp, 0, sizeof(stamp) * IB::NOT_SET);
+}
 
-
-
-
-class HistRequest
+Quote::Quote( const Quote& other ) :
+	val(new double[IB::NOT_SET]),
+	stamp(new int64_t[IB::NOT_SET])
 {
-	public:
-		HistRequest();
-		
-		bool initialize( const IB::Contract&, const std::string &endDateTime,
-			const std::string &durationStr, const std::string &barSizeSetting,
-			const std::string &whatToShow, int useRTH, int formatDate );
-		std::string toString() const;
-		
-		IB::Contract ibContract;
-		std::string endDateTime;
-		std::string durationStr;
-		std::string barSizeSetting;
-		std::string whatToShow;
-		int useRTH;
-		int formatDate;
-};
+	memcpy(val, other.val, sizeof(val) * IB::NOT_SET);
+	memcpy(stamp, other.stamp, sizeof(stamp) * IB::NOT_SET);
+}
 
-
-
-
-class AccStatusRequest
+Quote& Quote::operator=( const Quote& other )
 {
-	public:
-		AccStatusRequest();
-		
-		bool subscribe;
-		std::string acctCode;
-};
+	memcpy(val, other.val, sizeof(val) * IB::NOT_SET);
+	memcpy(stamp, other.stamp, sizeof(stamp) * IB::NOT_SET);
+	return *this;
+}
 
-
-
-
-class ExecutionsRequest
+Quote::~Quote()
 {
-	public:
-		IB::ExecutionFilter executionFilter;
-};
-
-
-
-
-class OrdersRequest
-{
-};
-
-
-
-
-class PlaceOrder
-{
-	public:
-		PlaceOrder();
-
-		long orderId;
-		IB::Contract contract;
-		IB::Order order;
-};
-
-
-
-
-class CancelOrder
-{
-	public:
-		CancelOrder();
-
-		long orderId;
-};
-
-
-
-
-class MktDataRequest
-{
-	public:
-		MktDataRequest();
-
-		IB::Contract ibContract;
-		std::string genericTicks;
-		bool snapshot;
-};
-
-
-#endif
+	delete[] val;
+	delete[] stamp;
+}

@@ -86,6 +86,7 @@ class ExecutionsRequest;
 class OrdersRequest;
 class PlaceOrder;
 class CancelOrder;
+class MktDataRequest;
 
 void to_xml( xmlNodePtr parent, const ContractDetailsRequest& );
 void to_xml( xmlNodePtr parent, const HistRequest& );
@@ -94,6 +95,7 @@ void to_xml( xmlNodePtr parent, const ExecutionsRequest& );
 void to_xml( xmlNodePtr parent, const OrdersRequest& );
 void to_xml( xmlNodePtr parent, const PlaceOrder& );
 void to_xml( xmlNodePtr parent, const CancelOrder& );
+void to_xml( xmlNodePtr parent, const MktDataRequest& );
 
 void from_xml( ContractDetailsRequest*, const xmlNodePtr node );
 void from_xml( HistRequest*, const xmlNodePtr node );
@@ -102,6 +104,7 @@ void from_xml( ExecutionsRequest*, const xmlNodePtr node );
 void from_xml( OrdersRequest*, const xmlNodePtr node );
 void from_xml( PlaceOrder*, const xmlNodePtr node );
 void from_xml( CancelOrder*, const xmlNodePtr node );
+void from_xml( MktDataRequest*, const xmlNodePtr node );
 
 
 class TwsRow;
