@@ -76,7 +76,6 @@ struct ConfigTwsdo
 	const char* tws_account_name;
 	int get_exec;
 	int get_order;
-	int do_mm;
 	
 	int tws_conTimeout;
 	int tws_reqTimeout;
