@@ -107,7 +107,6 @@ class RowOpenOrder;
 class PacingGod;
 class DataFarmStates;
 class Account;
-class Strat;
 
 class TwsDlWrapper;
 
@@ -222,10 +221,7 @@ class TwsDL
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
 		
-		Strat *strat;
-		
 	friend class TwsDlWrapper;
-	friend class Strat;
 };
 
 
