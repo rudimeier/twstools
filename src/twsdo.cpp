@@ -308,13 +308,43 @@ void TwsDlWrapper::tickSize( IB::TickerId reqId, IB::TickType field, int size )
 }
 
 
+struct TwsHeartBeat
+{
+	TwsHeartBeat();
+	void reset();
+
+	int cnt_sent;
+	int cnt_recv;
+	int64_t time_sent;
+	int64_t time_recv;
+	long tws_time;
+};
+
+TwsHeartBeat::TwsHeartBeat() :
+	cnt_sent(0),
+	cnt_recv(0),
+	time_sent(0),
+	time_recv(0),
+	tws_time(0)
+{
+}
+
+void TwsHeartBeat::reset()
+{
+	cnt_sent = 0;
+	cnt_recv = 0;
+	time_sent = 0;
+	time_recv = 0;
+	tws_time = 0;
+}
+
 
 TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	state(IDLE),
 	quit(false),
 	error(0),
 	lastConnectionTime(0),
-	tws_time(0),
+	tws_hb(new TwsHeartBeat()),
 	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
@@ -341,6 +371,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 TwsDL::~TwsDL()
 {
 	delete &currentRequest;
+	delete tws_hb;
 	
 	if( twsClient != NULL ) {
 		delete twsClient;
@@ -429,7 +460,9 @@ void TwsDL::connectTws()
 		/* this must be set before any possible "Connectivity" callback msg */
 		connectivity_IB_TWS = true;
 		/* waiting for first messages until tws_time is received */
-		tws_time = 0;
+		tws_hb->reset();
+		tws_hb->cnt_sent = 1;
+		tws_hb->time_sent = nowInMsecs();
 		twsClient->reqCurrentTime();
 	}
 }
@@ -440,7 +473,7 @@ void TwsDL::waitTwsCon()
 	int64_t w = cfg.tws_conTimeout - (nowInMsecs() - lastConnectionTime);
 	
 	if( twsClient->isConnected() ) {
-		if( tws_time != 0 ) {
+		if( tws_hb->tws_time != 0 ) {
 			DEBUG_PRINTF( "Connection process finished." );
 			changeState( IDLE );
 		} else if( w > 0 ) {
@@ -1160,9 +1193,9 @@ void TwsDL::twsOpenOrderEnd()
 
 void TwsDL::twsCurrentTime( long time )
 {
-	if( state == WAIT_TWS_CON ) {
-		tws_time = time;
-	}
+	tws_hb->cnt_recv++;
+	tws_hb->time_recv = nowInMsecs();
+	tws_hb->tws_time = time;
 }
 
 void TwsDL::nextValidId( long orderId )
