@@ -970,6 +970,11 @@ void PacketPlaceOrder::append( const RowOpenOrder& row )
 {
 	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
 	list->push_back( arow );
+
+	if( request->order.whatIf ) {
+		/* for whatIf order we expect only one OpenOrder callback */
+		mode = CLOSED;
+	}
 }
 
 
