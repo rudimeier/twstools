@@ -108,6 +108,7 @@ class DataFarmStates;
 class Account;
 
 class TwsDlWrapper;
+class TwsHeartBeat;
 
 
 
@@ -194,7 +195,7 @@ class TwsDL
 		int error;
 		std::string _lastError;
 		int64_t lastConnectionTime;
-		long tws_time;
+		TwsHeartBeat *tws_hb;
 		long tws_valid_orderId;
 		bool connectivity_IB_TWS;
 		int curIdleTime;

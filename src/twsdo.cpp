@@ -308,13 +308,43 @@ void TwsDlWrapper::tickSize( IB::TickerId reqId, IB::TickType field, int size )
 }
 
 
+struct TwsHeartBeat
+{
+	TwsHeartBeat();
+	void reset();
+
+	int cnt_sent;
+	int cnt_recv;
+	int64_t time_sent;
+	int64_t time_recv;
+	long tws_time;
+};
+
+TwsHeartBeat::TwsHeartBeat() :
+	cnt_sent(0),
+	cnt_recv(0),
+	time_sent(0),
+	time_recv(0),
+	tws_time(0)
+{
+}
+
+void TwsHeartBeat::reset()
+{
+	cnt_sent = 0;
+	cnt_recv = 0;
+	time_sent = 0;
+	time_recv = 0;
+	tws_time = 0;
+}
+
 
 TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	state(IDLE),
 	quit(false),
 	error(0),
 	lastConnectionTime(0),
-	tws_time(0),
+	tws_hb(new TwsHeartBeat()),
 	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
@@ -341,6 +371,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 TwsDL::~TwsDL()
 {
 	delete &currentRequest;
+	delete tws_hb;
 	
 	if( twsClient != NULL ) {
 		delete twsClient;
@@ -429,7 +460,9 @@ void TwsDL::connectTws()
 		/* this must be set before any possible "Connectivity" callback msg */
 		connectivity_IB_TWS = true;
 		/* waiting for first messages until tws_time is received */
-		tws_time = 0;
+		tws_hb->reset();
+		tws_hb->cnt_sent = 1;
+		tws_hb->time_sent = nowInMsecs();
 		twsClient->reqCurrentTime();
 	}
 }
@@ -440,7 +473,7 @@ void TwsDL::waitTwsCon()
 	int64_t w = cfg.tws_conTimeout - (nowInMsecs() - lastConnectionTime);
 	
 	if( twsClient->isConnected() ) {
-		if( tws_time != 0 ) {
+		if( tws_hb->tws_time != 0 ) {
 			DEBUG_PRINTF( "Connection process finished." );
 			changeState( IDLE );
 		} else if( w > 0 ) {
@@ -617,11 +650,16 @@ bool TwsDL::finPlaceOrder()
 		std::map<long, PacketPlaceOrder*>::iterator it_tmp = it++;
 		long orderId = it_tmp->first;
 		PacketPlaceOrder* p = it_tmp->second;
-		const IB::Contract &c = p->getRequest().contract;
+		const PlaceOrder &r = p->getRequest();
 
-		assert( orderId == p->getRequest().orderId );
+		assert( orderId == r.orderId );
 		if( ! p->finished() ) {
-			continue;
+			/* close non transmit orders where we haven't received errors */
+			if( !r.order.transmit && (nowInMsecs() - r.time_sent) > 5000 ) {
+				p->closeError( REQ_ERR_NONE );
+			} else {
+				continue;
+			}
 		}
 
 		switch( p->getError() ) {
@@ -630,7 +668,7 @@ bool TwsDL::finPlaceOrder()
 		case REQ_ERR_TIMEOUT:
 			p->dumpXml();
 			DEBUG_PRINTF("fin order, %ld %s, %ld", orderId,
-				c.symbol.c_str(), c.conId);
+				r.contract.symbol.c_str(), r.contract.conId);
 			assert( p_orders_old.find(orderId) == p_orders_old.end() );
 			p_orders_old[orderId] = p;
 			p_orders.erase( it_tmp );
@@ -1155,12 +1193,9 @@ void TwsDL::twsOpenOrderEnd()
 
 void TwsDL::twsCurrentTime( long time )
 {
-	if( state == WAIT_TWS_CON ) {
-		tws_time = time;
-	}
-	if( state == IDLE && !p_orders.empty() ) {
-		/* TODO, was: packet->closeError( REQ_ERR_NONE ); */
-	}
+	tws_hb->cnt_recv++;
+	tws_hb->time_recv = nowInMsecs();
+	tws_hb->tws_time = time;
 }
 
 void TwsDL::nextValidId( long orderId )
@@ -1387,12 +1422,6 @@ void TwsDL::placeOrder()
 	}
 
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
-
-	if( ! pO.order.transmit ) {
-		/* HACK no response is expected on success, in case of error we hope
-		   that current time comes after that error */
-		twsClient->reqCurrentTime();
-	}
 }
 
 void TwsDL::placeAllOrders()

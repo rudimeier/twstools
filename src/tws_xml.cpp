@@ -658,6 +658,7 @@ void to_xml( xmlNodePtr parent, const PlaceOrder& po)
 	conv_ib2xml( ne, "contract", po.contract );
 	conv_ib2xml( ne, "order", po.order );
 	ADD_ATTR_LONG( po, orderId );
+	ADD_ATTR_LONGLONG( po, time_sent );
 }
 
 void to_xml( xmlNodePtr parent, const CancelOrder& co)
@@ -749,6 +750,7 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 	}
 
 	GET_ATTR_LONG( po, orderId );
+	GET_ATTR_LONGLONG( po, time_sent );
 }
 
 void from_xml( CancelOrder* co, const xmlNodePtr node )

@@ -1000,6 +1000,7 @@ void PacketPlaceOrder::record( long orderId, const PlaceOrder& oP )
 	mode = RECORD;
 	this->request = new PlaceOrder( oP );
 	this->request->orderId = orderId;
+	this->request->time_sent = nowInMsecs();
 }
 
 void PacketPlaceOrder::modify( const PlaceOrder& oP )
@@ -1009,6 +1010,7 @@ void PacketPlaceOrder::modify( const PlaceOrder& oP )
 
 	delete this->request;
 	this->request = new PlaceOrder( oP );
+	this->request->time_sent = nowInMsecs();
 }
 
 void PacketPlaceOrder::append( const RowError& err )

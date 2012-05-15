@@ -113,7 +113,8 @@ AccStatusRequest::AccStatusRequest() :
 
 
 PlaceOrder::PlaceOrder() :
-	orderId(0)
+	orderId(0),
+	time_sent(0)
 {
 }
 
