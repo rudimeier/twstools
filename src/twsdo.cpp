@@ -617,11 +617,16 @@ bool TwsDL::finPlaceOrder()
 		std::map<long, PacketPlaceOrder*>::iterator it_tmp = it++;
 		long orderId = it_tmp->first;
 		PacketPlaceOrder* p = it_tmp->second;
-		const IB::Contract &c = p->getRequest().contract;
+		const PlaceOrder &r = p->getRequest();
 
-		assert( orderId == p->getRequest().orderId );
+		assert( orderId == r.orderId );
 		if( ! p->finished() ) {
-			continue;
+			/* close non transmit orders where we haven't received errors */
+			if( !r.order.transmit && (nowInMsecs() - r.time_sent) > 5000 ) {
+				p->closeError( REQ_ERR_NONE );
+			} else {
+				continue;
+			}
 		}
 
 		switch( p->getError() ) {
@@ -630,7 +635,7 @@ bool TwsDL::finPlaceOrder()
 		case REQ_ERR_TIMEOUT:
 			p->dumpXml();
 			DEBUG_PRINTF("fin order, %ld %s, %ld", orderId,
-				c.symbol.c_str(), c.conId);
+				r.contract.symbol.c_str(), r.contract.conId);
 			assert( p_orders_old.find(orderId) == p_orders_old.end() );
 			p_orders_old[orderId] = p;
 			p_orders.erase( it_tmp );
