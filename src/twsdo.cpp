@@ -1158,9 +1158,6 @@ void TwsDL::twsCurrentTime( long time )
 	if( state == WAIT_TWS_CON ) {
 		tws_time = time;
 	}
-	if( state == IDLE && !p_orders.empty() ) {
-		/* TODO, was: packet->closeError( REQ_ERR_NONE ); */
-	}
 }
 
 void TwsDL::nextValidId( long orderId )
@@ -1387,12 +1384,6 @@ void TwsDL::placeOrder()
 	}
 
 	twsClient->placeOrder( orderId, pO.contract, pO.order );
-
-	if( ! pO.order.transmit ) {
-		/* HACK no response is expected on success, in case of error we hope
-		   that current time comes after that error */
-		twsClient->reqCurrentTime();
-	}
 }
 
 void TwsDL::placeAllOrders()
