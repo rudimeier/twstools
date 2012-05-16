@@ -718,7 +718,8 @@ void TwsDL::twsError( const RowError& err )
 			break;
 		case 2110:
 			/* looks like we get that only on fresh connection */
-			assert(ERR_MATCH("Connectivity between TWS and server is broken. It will be restored automatically."));
+			assert(ERR_MATCH("Connectivity between T"));
+			assert(ERR_MATCH(" and server is broken. It will be restored automatically."));
 			connectivity_IB_TWS = false;
 			break;
 	}
