@@ -4,6 +4,17 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
+0.3.5 - 2012-05-24  ------------------------------------------------------------
+
+This is a bug fix release.
+
+  - internal cleanup, reduce eventloop states to prepare parallel requests
+  - fix, IB renamed historical data farms
+  - fix, don't assert when seeing no active hmds farms while getting data
+  - fix, another "Connectivity between IB..." issue
+
+
+
 0.3.4 - 2012-04-17  ------------------------------------------------------------
 
 This is a bug fix release.
