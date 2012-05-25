@@ -112,6 +112,7 @@ class PlaceOrder
 		PlaceOrder();
 
 		long orderId;
+		int64_t time_sent;
 		IB::Contract contract;
 		IB::Order order;
 };
@@ -125,6 +126,19 @@ class CancelOrder
 		CancelOrder();
 
 		long orderId;
+};
+
+
+
+
+class MktDataRequest
+{
+	public:
+		MktDataRequest();
+
+		IB::Contract ibContract;
+		std::string genericTicks;
+		bool snapshot;
 };
 
 

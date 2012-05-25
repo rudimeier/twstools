@@ -81,8 +81,8 @@ class GenericRequest
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST,
-			PLACE_ORDER,
-			CANCEL_ORDER
+			CANCEL_ORDER,
+			MKT_DATA_REQUEST
 		};
 		
 		GenericRequest();
@@ -207,6 +207,21 @@ class CancelOrderTodo
 
 
 
+class MktDataRequest;
+
+class MktDataTodo
+{
+	public:
+		MktDataTodo();
+		virtual ~MktDataTodo();
+
+		void add( const MktDataRequest& );
+
+		std::vector<MktDataRequest> &mktDataRequests;
+};
+
+
+
 class WorkTodo
 {
 	public:
@@ -222,6 +237,8 @@ class WorkTodo
 		const PlaceOrderTodo& getPlaceOrderTodo() const;
 		CancelOrderTodo* cancelOrderTodo() const;
 		const CancelOrderTodo& getCancelOrderTodo() const;
+		MktDataTodo *mktDataTodo() const;
+		const MktDataTodo& getMktDataTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 		
@@ -235,6 +252,7 @@ class WorkTodo
 		HistTodo *_histTodo;
 		PlaceOrderTodo *_place_order_todo;
 		CancelOrderTodo *_cancel_order_todo;
+		MktDataTodo *_market_data_todo;
 };
 
 
@@ -383,6 +401,7 @@ class PacketPlaceOrder
 		const PlaceOrder& getRequest() const;
 		virtual void clear();
 		void record( long orderId, const PlaceOrder& );
+		void modify( const PlaceOrder& );
 		void append( const RowError& );
 		void append( const RowOrderStatus& );
 		void append( const RowOpenOrder& );
@@ -567,6 +586,27 @@ class PacketOrders
 
 
 
+class PacketMktData
+	: public  Packet
+{
+	public:
+		PacketMktData();
+		virtual ~PacketMktData();
+
+		static PacketMktData * fromXml( xmlNodePtr );
+
+		const MktDataRequest& getRequest() const;
+		void clear();
+		void record( int reqId, const MktDataRequest& );
+// 		void append( int reqId, const RowHist& );
+
+		void dumpXml();
+
+	private:
+		int reqId;
+		MktDataRequest *request;
+// 		std::vector<RowHist> &rows;
+};
 
 
 

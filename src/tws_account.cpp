@@ -1,6 +1,6 @@
-/*** tws_query.cpp -- structs for IB/API requests
+/*** tws_account.cpp -- TWS portfolio and account state
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -35,101 +35,39 @@
  *
  ***/
 
-#include "tws_query.h"
-
-#include <stdio.h>
-
-
-const IB::Contract& ContractDetailsRequest::ibContract() const
-{
-	return _ibContract;
-}
-
-bool ContractDetailsRequest::initialize( const IB::Contract& c )
-{
-	_ibContract = c;
-	return true;
-}
+#include "tws_account.h"
+#include <assert.h>
 
 
-
-
-HistRequest::HistRequest()
-{
-	useRTH = 0;
-	formatDate = 0; // set invalid (IB allows 1 or 2)
-}
-
-
-bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
-	const std::string &d, const std::string &b,
-	const std::string &w, int u, int f )
-{
-	ibContract = c;
-	endDateTime = e;
-	durationStr = d;
-	barSizeSetting = b;
-	whatToShow = w;
-	useRTH = u;
-	formatDate = f;
-	return true;
-}
-
-
-std::string HistRequest::toString() const
-{
-	char buf_c[512];
-	char buf_a[1024];
-	snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
-		ibContract.symbol.c_str(),
-		ibContract.secType.c_str(),
-		ibContract.exchange.c_str(),
-		ibContract.currency.c_str(),
-		ibContract.expiry.c_str(),
-		ibContract.strike,
-		ibContract.right.c_str() );
-	
-	snprintf( buf_a, sizeof(buf_a), "%s\t%s\t%s\t%s\t%d\t%d\t%s",
-		endDateTime.c_str(),
-		durationStr.c_str(),
-		barSizeSetting.c_str(),
-		whatToShow.c_str(),
-		useRTH,
-		formatDate,
-		buf_c );
-	
-	return std::string(buf_a);
-}
-
-
-
-
-AccStatusRequest::AccStatusRequest() :
-	subscribe(true)
+Account::Account()
 {
 }
 
-
-
-
-PlaceOrder::PlaceOrder() :
-	orderId(0),
-	time_sent(0)
+Account::~Account()
 {
 }
 
-
-
-
-CancelOrder::CancelOrder() :
-	orderId(0)
+void Account::updatePortfolio( const RowPrtfl& row )
 {
+	long conid = row.contract.conId;
+	assert( conid > 0);
+
+	portfolio[conid] = row;
 }
 
-
-
-
-MktDataRequest::MktDataRequest() :
-	snapshot(false)
+void Account::update_oo( const RowOpenOrder& row )
 {
+	long permid = row.order.permId;
+	assert( permid > 0);
+
+	openOrders[permid] = row;
 }
+
+void Account::update_os( const RowOrderStatus& row )
+{
+	long permid = row.permId;
+	assert( permid > 0);
+
+	orderStatus[permid] = row;
+}
+

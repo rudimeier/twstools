@@ -68,7 +68,7 @@ GenericRequest::ReqType GenericRequest::reqType() const
 
 int GenericRequest::reqId() const
 {
-	if( _reqType == PLACE_ORDER || _reqType == CANCEL_ORDER ) {
+	if( _reqType == CANCEL_ORDER ) {
 		return _orderId;
 	}
 	return _reqId;
@@ -376,6 +376,24 @@ void CancelOrderTodo::add( const CancelOrder& po )
 
 
 
+MktDataTodo::MktDataTodo() :
+	mktDataRequests(*(new std::vector<MktDataRequest>()))
+{
+}
+
+MktDataTodo::~MktDataTodo()
+{
+	delete &mktDataRequests;
+}
+
+void MktDataTodo::add( const MktDataRequest& mkr )
+{
+	mktDataRequests.push_back(mkr);
+}
+
+
+
+
 WorkTodo::WorkTodo() :
 	acc_status_todo(false),
 	executions_todo(false),
@@ -383,13 +401,17 @@ WorkTodo::WorkTodo() :
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
 	_place_order_todo( new PlaceOrderTodo() ),
-	_cancel_order_todo( new CancelOrderTodo() )
+	_cancel_order_todo( new CancelOrderTodo() ),
+	_market_data_todo( new MktDataTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _market_data_todo != NULL ) {
+		delete _market_data_todo;
+	}
 	if( _cancel_order_todo != NULL ) {
 		delete _cancel_order_todo;
 	}
@@ -418,8 +440,6 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 		return GenericRequest::ORDERS_REQUEST;
 	} else if( _cancel_order_todo->countLeft() > 0 ) {
 		return GenericRequest::CANCEL_ORDER;
-	} else if( _place_order_todo->countLeft() > 0 ) {
-		return GenericRequest::PLACE_ORDER;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {
@@ -469,6 +489,15 @@ const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
 	return *_cancel_order_todo;
 }
 
+MktDataTodo* WorkTodo::mktDataTodo() const
+{
+	return _market_data_todo;
+}
+
+const MktDataTodo& WorkTodo::getMktDataTodo() const
+{
+	return *_market_data_todo;
+}
 
 void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
 {
@@ -512,6 +541,10 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 		PacketCancelOrder *pco = PacketCancelOrder::fromXml(xn);
 		_cancel_order_todo->add( pco->getRequest() );
 		delete pco;
+	} else if ( strcmp( tmp, "market_data") == 0 ) {
+		PacketMktData *pmd = PacketMktData::fromXml(xn);
+		_market_data_todo->add( pmd->getRequest() );
+		delete pmd;
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
@@ -967,6 +1000,17 @@ void PacketPlaceOrder::record( long orderId, const PlaceOrder& oP )
 	mode = RECORD;
 	this->request = new PlaceOrder( oP );
 	this->request->orderId = orderId;
+	this->request->time_sent = nowInMsecs();
+}
+
+void PacketPlaceOrder::modify( const PlaceOrder& oP )
+{
+	assert( mode == RECORD );
+	assert( this->request->orderId == oP.orderId );
+
+	delete this->request;
+	this->request = new PlaceOrder( oP );
+	this->request->time_sent = nowInMsecs();
 }
 
 void PacketPlaceOrder::append( const RowError& err )
@@ -980,8 +1024,7 @@ void PacketPlaceOrder::append( const RowOrderStatus& row )
 	TwsRow arow = { t_orderStatus, new RowOrderStatus(row) };
 	list->push_back( arow );
 
-	/* HACK we expect at least one OpenOrder callback too */
-	if( list->size() >= 2 ) {
+	if( row.remaining == 0 ) {
 		mode = CLOSED;
 	}
 }
@@ -990,11 +1033,6 @@ void PacketPlaceOrder::append( const RowOpenOrder& row )
 {
 	TwsRow arow = { t_openOrder, new RowOpenOrder(row) };
 	list->push_back( arow );
-
-	/* HACK if not whatIf we expect at least one OrderStatus callback too */
-	if( request->order.whatIf || list->size() >= 2 ) {
-		mode = CLOSED;
-	}
 }
 
 
@@ -1369,6 +1407,99 @@ void PacketOrders::dumpXml()
 
 
 
+PacketMktData::PacketMktData()/* :
+		rows(*(new std::vector<RowHist>()))*/
+{
+	reqId = -1;
+	request = NULL;
+}
+
+PacketMktData::~PacketMktData()
+{
+// 	delete &rows;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketMktData * PacketMktData::fromXml( xmlNodePtr root )
+{
+	PacketMktData *pmd = new PacketMktData();
+
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				pmd->request = new MktDataRequest();
+				from_xml(pmd->request, p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+// 					if( strcmp((char*)q->name, "row") == 0 ) {
+// 						RowHist *row = new RowHist();
+// 						from_xml( row, q );
+// 						phd->rows.push_back(*row);
+// 						delete row;
+// 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
+// 						RowHist *fin = new RowHist();
+// 						from_xml( fin, q );
+// 						phd->finishRow = *fin;
+// 						phd->mode = CLOSED;
+// 						delete fin;
+// 					}
+				}
+			}
+		}
+	}
+	return pmd;
+}
+
+void PacketMktData::dumpXml()
+{
+}
+
+const MktDataRequest& PacketMktData::getRequest() const
+{
+	return *request;
+}
+
+
+void PacketMktData::clear()
+{
+	mode = CLEAN;
+	error = REQ_ERR_NONE;
+	reqId = -1;
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
+// 	rows.clear();
+}
+
+
+void PacketMktData::record( int reqId, const MktDataRequest& mR )
+{
+	assert( mode == CLEAN && error == REQ_ERR_NONE && request == NULL );
+	mode = RECORD;
+	this->reqId = reqId;
+	this->request = new MktDataRequest( mR );
+}
+
+
+// void PacketHistData::append( int reqId,  const RowHist &row )
+// {
+// 	assert( mode == RECORD && error == REQ_ERR_NONE );
+// 	assert( this->reqId == reqId );
+//
+// 	if( strncmp( row.date.c_str(), "finished", 8) == 0) {
+// 		mode = CLOSED;
+// 		finishRow = row;
+// 	} else {
+// 		rows.push_back( row );
+// 	}
+// }
 
 
 

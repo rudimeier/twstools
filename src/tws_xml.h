@@ -86,6 +86,7 @@ class ExecutionsRequest;
 class OrdersRequest;
 class PlaceOrder;
 class CancelOrder;
+class MktDataRequest;
 
 void to_xml( xmlNodePtr parent, const ContractDetailsRequest& );
 void to_xml( xmlNodePtr parent, const HistRequest& );
@@ -94,6 +95,7 @@ void to_xml( xmlNodePtr parent, const ExecutionsRequest& );
 void to_xml( xmlNodePtr parent, const OrdersRequest& );
 void to_xml( xmlNodePtr parent, const PlaceOrder& );
 void to_xml( xmlNodePtr parent, const CancelOrder& );
+void to_xml( xmlNodePtr parent, const MktDataRequest& );
 
 void from_xml( ContractDetailsRequest*, const xmlNodePtr node );
 void from_xml( HistRequest*, const xmlNodePtr node );
@@ -102,6 +104,7 @@ void from_xml( ExecutionsRequest*, const xmlNodePtr node );
 void from_xml( OrdersRequest*, const xmlNodePtr node );
 void from_xml( PlaceOrder*, const xmlNodePtr node );
 void from_xml( CancelOrder*, const xmlNodePtr node );
+void from_xml( MktDataRequest*, const xmlNodePtr node );
 
 
 class TwsRow;
@@ -165,6 +168,11 @@ class TwsXml
 	_struct_->_attr_ = tmp ? atol( tmp ) : dflt._attr_; \
 	free(tmp)
 
+#define GET_ATTR_LONGLONG( _struct_, _attr_ ) \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
+	_struct_->_attr_ = tmp ? atoll( tmp ) : dflt._attr_; \
+	free(tmp)
+
 #define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
 	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
@@ -190,6 +198,12 @@ class TwsXml
 #define ADD_ATTR_LONG( _struct_, _attr_ ) \
 	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
 		snprintf(tmp, sizeof(tmp), "%ld",_struct_._attr_ ); \
+		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
+	}
+
+#define ADD_ATTR_LONGLONG( _struct_, _attr_ ) \
+	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
+		snprintf(tmp, sizeof(tmp), "%lld",_struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 

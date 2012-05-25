@@ -658,6 +658,7 @@ void to_xml( xmlNodePtr parent, const PlaceOrder& po)
 	conv_ib2xml( ne, "contract", po.contract );
 	conv_ib2xml( ne, "order", po.order );
 	ADD_ATTR_LONG( po, orderId );
+	ADD_ATTR_LONGLONG( po, time_sent );
 }
 
 void to_xml( xmlNodePtr parent, const CancelOrder& co)
@@ -667,6 +668,12 @@ void to_xml( xmlNodePtr parent, const CancelOrder& co)
 
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
 	ADD_ATTR_LONG( co, orderId );
+}
+
+void to_xml( xmlNodePtr parent, const MktDataRequest& co)
+{
+	/* not implemented yet */
+	assert( false );
 }
 
 
@@ -743,6 +750,7 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 	}
 
 	GET_ATTR_LONG( po, orderId );
+	GET_ATTR_LONGLONG( po, time_sent );
 }
 
 void from_xml( CancelOrder* co, const xmlNodePtr node )
@@ -751,6 +759,22 @@ void from_xml( CancelOrder* co, const xmlNodePtr node )
 	static const CancelOrder dflt;
 
 	GET_ATTR_LONG( co, orderId );
+}
+
+void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
+{
+	char* tmp;
+	static const MktDataRequest dflt;
+
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &mdr->ibContract, p);
+		}
+	}
+
+	GET_ATTR_STRING( mdr, genericTicks );
+	GET_ATTR_BOOL( mdr, snapshot );
 }
 
 

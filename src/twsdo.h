@@ -40,7 +40,12 @@
 
 #include <string>
 #include <stdint.h>
+#include <map>
 
+#include "tws_quote.h"
+
+// from global installed ibapi
+#include "twsapi/EWrapper.h"
 
 
 
@@ -90,6 +95,7 @@ class WorkTodo;
 class ContractDetailsTodo;
 class HistTodo;
 class Packet;
+class PacketPlaceOrder;
 class RowError;
 class RowHist;
 class RowAccVal;
@@ -99,8 +105,10 @@ class RowOrderStatus;
 class RowOpenOrder;
 class PacingGod;
 class DataFarmStates;
+class Account;
 
 class TwsDlWrapper;
+class TwsHeartBeat;
 
 
 
@@ -139,14 +147,18 @@ class TwsDL
 		void changeState( State );
 		
 		void initWork();
-		
+
+		long fetch_inc_order_id();
+
 		void reqContractDetails();
 		void reqHistoricalData();
 		void reqAccStatus();
 		void reqExecutions();
 		void reqOrders();
 		void placeOrder();
+		void placeAllOrders();
 		void cancelOrder();
+		int reqMktData();
 		
 		void errorContracts( const RowError& );
 		void errorHistData( const RowError& );
@@ -174,14 +186,16 @@ class TwsDL
 		void twsOpenOrderEnd();
 		void twsCurrentTime( long time );
 		void nextValidId( long orderId );
-		
+		void twsTickPrice( int reqId, IB::TickType field, double price,
+			int canAutoExecute );
+		void twsTickSize( int reqId, IB::TickType field, int size );
 		
 		State state;
 		bool quit;
 		int error;
 		std::string _lastError;
 		int64_t lastConnectionTime;
-		long tws_time;
+		TwsHeartBeat *tws_hb;
 		long tws_valid_orderId;
 		bool connectivity_IB_TWS;
 		int curIdleTime;
@@ -195,8 +209,12 @@ class TwsDL
 		GenericRequest &currentRequest;
 		
 		WorkTodo *workTodo;
+		Account *account;
+		Quotes *quotes;
 		
 		Packet *packet;
+		std::map<long, PacketPlaceOrder*> p_orders;
+		std::map<long, PacketPlaceOrder*> p_orders_old;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;

@@ -1,6 +1,6 @@
-/*** tws_query.cpp -- structs for IB/API requests
+/*** tws_account.h -- TWS portfolio and account state
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2012 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -35,101 +35,33 @@
  *
  ***/
 
-#include "tws_query.h"
+#ifndef TWS_ACCOUNT_H
+#define TWS_ACCOUNT_H
 
-#include <stdio.h>
+#include "tws_meta.h"
+#include <map>
 
 
-const IB::Contract& ContractDetailsRequest::ibContract() const
+typedef std::map<long, RowPrtfl> Prtfl;
+typedef std::map<long, RowOpenOrder> OpenOrders;
+typedef std::map<long, RowOrderStatus> OrderStatus;
+
+
+class Account
 {
-	return _ibContract;
-}
+	public:
+		Account();
+		~Account();
 
-bool ContractDetailsRequest::initialize( const IB::Contract& c )
-{
-	_ibContract = c;
-	return true;
-}
+	void updatePortfolio( const RowPrtfl& row );
+	void update_oo( const RowOpenOrder& row );
+	void update_os( const RowOrderStatus& row );
 
-
-
-
-HistRequest::HistRequest()
-{
-	useRTH = 0;
-	formatDate = 0; // set invalid (IB allows 1 or 2)
-}
+// 	private:
+		Prtfl portfolio;
+		OpenOrders openOrders;
+		OrderStatus orderStatus;
+};
 
 
-bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
-	const std::string &d, const std::string &b,
-	const std::string &w, int u, int f )
-{
-	ibContract = c;
-	endDateTime = e;
-	durationStr = d;
-	barSizeSetting = b;
-	whatToShow = w;
-	useRTH = u;
-	formatDate = f;
-	return true;
-}
-
-
-std::string HistRequest::toString() const
-{
-	char buf_c[512];
-	char buf_a[1024];
-	snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
-		ibContract.symbol.c_str(),
-		ibContract.secType.c_str(),
-		ibContract.exchange.c_str(),
-		ibContract.currency.c_str(),
-		ibContract.expiry.c_str(),
-		ibContract.strike,
-		ibContract.right.c_str() );
-	
-	snprintf( buf_a, sizeof(buf_a), "%s\t%s\t%s\t%s\t%d\t%d\t%s",
-		endDateTime.c_str(),
-		durationStr.c_str(),
-		barSizeSetting.c_str(),
-		whatToShow.c_str(),
-		useRTH,
-		formatDate,
-		buf_c );
-	
-	return std::string(buf_a);
-}
-
-
-
-
-AccStatusRequest::AccStatusRequest() :
-	subscribe(true)
-{
-}
-
-
-
-
-PlaceOrder::PlaceOrder() :
-	orderId(0),
-	time_sent(0)
-{
-}
-
-
-
-
-CancelOrder::CancelOrder() :
-	orderId(0)
-{
-}
-
-
-
-
-MktDataRequest::MktDataRequest() :
-	snapshot(false)
-{
-}
+#endif
