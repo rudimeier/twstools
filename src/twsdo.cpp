@@ -374,7 +374,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 		// for the moment we assume that the lt's load path is
 		// set up correctly or that the user has given an
 		// absolute file, if not just do fuckall
-		if( (strat = open_dso( cfg.strat_file, NULL )) == NULL ) {
+		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
 			// exit? not the best idea seeing as this is a ctor
 			;
 		}
@@ -410,7 +410,7 @@ TwsDL::~TwsDL()
 	}
 
 	if( strat != NULL ) {
-		close_dso( strat, NULL );
+		close_dso( strat, this );
 	}
 
 	delete &pacingControl;
@@ -554,7 +554,7 @@ void TwsDL::idle()
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
 		if( strat != NULL ) {
-			work_dso( strat, NULL );
+			work_dso( strat, this );
 		}
 		placeAllOrders();
 		break;
