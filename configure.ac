@@ -13,7 +13,6 @@ AC_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_CXX
 AC_PROG_CXX_C_O
-AC_PROG_RANLIB
 
 AC_LANG([C++])
 AX_COMPILER_VENDOR
@@ -26,6 +25,20 @@ if test "$ax_cv_cxx_compiler_vendor" != "intel"; then
 fi
 DEFAULT_CXXFLAGS="$warnflags"
 AC_SUBST([DEFAULT_CXXFLAGS])
+
+## libltdl for loadable DSOs
+LT_PREREQ([2.1])
+LT_INIT([dlopen])
+LT_LIB_DLLOAD
+LT_LIB_M
+LT_SYS_DLOPEN_DEPLIBS
+LT_SYS_DLSEARCH_PATH
+LT_SYS_MODULE_EXT
+LT_SYS_MODULE_PATH
+LT_SYS_SYMBOL_USCORE
+LT_FUNC_DLSYM_USCORE
+LT_CONFIG_LTDL_DIR([libltdl], [recursive])
+LTDL_INIT
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
 PKG_CHECK_MODULES([libtwsapi], [libtwsapi >= 0.3.0],

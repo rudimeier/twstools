@@ -83,6 +83,8 @@ struct ConfigTwsdo
 	int tws_pacingInterval;
 	int tws_minPacingTime;
 	int tws_violationPause;
+
+	const char* strat_file;
 };
 
 

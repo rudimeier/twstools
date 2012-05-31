@@ -50,6 +50,7 @@
 #if defined HAVE_CONFIG_H
 # include "config.h"
 #endif  /* HAVE_CONFIG_H */
+#include "dso_magic.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -61,6 +62,8 @@
 #endif
 
 
+/* this should really be a list or something */
+static tws_dso_t strat = NULL;
 
 
 ConfigTwsdo::ConfigTwsdo()
@@ -83,6 +86,8 @@ ConfigTwsdo::ConfigTwsdo()
 	tws_pacingInterval = 605000;
 	tws_minPacingTime = 1000;
 	tws_violationPause = 60000;
+
+	strat_file = NULL;
 }
 
 void ConfigTwsdo::init_ai_family( int ipv4, int ipv6 )
@@ -363,6 +368,18 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	pacingControl.setPacingTime( cfg.tws_maxRequests,
 		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
 	pacingControl.setViolationPause( cfg.tws_violationPause );
+
+	// try loading DSOs before anything else
+	if( cfg.strat_file ) {
+		// for the moment we assume that the lt's load path is
+		// set up correctly or that the user has given an
+		// absolute file, if not just do fuckall
+		if( (strat = open_dso( cfg.strat_file, NULL )) == NULL ) {
+			// exit? not the best idea seeing as this is a ctor
+			;
+		}
+	}
+
 	initTwsClient();
 	initWork();
 }
@@ -391,6 +408,11 @@ TwsDL::~TwsDL()
 	if( packet != NULL ) {
 		delete packet;
 	}
+
+	if( strat != NULL ) {
+		close_dso( strat, NULL );
+	}
+
 	delete &pacingControl;
 	delete &dataFarms;
 }
@@ -531,6 +553,9 @@ void TwsDL::idle()
 		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
+		if( strat != NULL ) {
+			work_dso( strat, NULL );
+		}
 		placeAllOrders();
 		break;
 	}
