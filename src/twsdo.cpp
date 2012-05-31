@@ -553,6 +553,9 @@ void TwsDL::idle()
 		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
+		if( dsos != NULL ) {
+			work_dso( dsos, NULL );
+		}
 		placeAllOrders();
 		break;
 	}
