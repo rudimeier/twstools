@@ -66,6 +66,10 @@ option "ipv6" 6
 "Force twsapi to use IPv6 addresses only."
 optional
 
+option "strat" -
+"Load strategy from FILE."
+optional string typestr="FILE"
+
 # section
 section "Quick shot requests"
 
