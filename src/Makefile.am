@@ -61,6 +61,15 @@ BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
 BUILT_SOURCES += twsgen_ggo.c twsgen_ggo.h
 
+## example DSO
+noinst_LTLIBRARIES =
+noinst_LTLIBRARIES += proof_of_concept.la
+proof_of_concept_la_SOURCES = proof_of_concept.cpp
+proof_of_concept_la_LDFLAGS = -module
+## next one is necessary to force the build of a .so
+proof_of_concept_la_LDFLAGS += -rpath /none
+
+
 # Build all executables at distribution time to generate the man pages.
 dist-hook: $(bin_PROGRAMS)
 
