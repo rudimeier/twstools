@@ -63,7 +63,7 @@
 
 
 /* this should really be a list or something */
-static tws_dso_t dsos = NULL;
+static tws_dso_t strat = NULL;
 
 
 ConfigTwsdo::ConfigTwsdo()
@@ -374,7 +374,7 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 		// for the moment we assume that the lt's load path is
 		// set up correctly or that the user has given an
 		// absolute file, if not just do fuckall
-		if( (dsos = open_dso( cfg.strat_file, NULL )) == NULL ) {
+		if( (strat = open_dso( cfg.strat_file, NULL )) == NULL ) {
 			// exit? not the best idea seeing as this is a ctor
 			;
 		}
@@ -409,8 +409,8 @@ TwsDL::~TwsDL()
 		delete packet;
 	}
 
-	if( dsos != NULL ) {
-		close_dso( dsos, NULL );
+	if( strat != NULL ) {
+		close_dso( strat, NULL );
 	}
 
 	delete &pacingControl;
@@ -553,8 +553,8 @@ void TwsDL::idle()
 		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
-		if( dsos != NULL ) {
-			work_dso( dsos, NULL );
+		if( strat != NULL ) {
+			work_dso( strat, NULL );
 		}
 		placeAllOrders();
 		break;
