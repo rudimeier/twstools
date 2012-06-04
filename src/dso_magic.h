@@ -107,7 +107,7 @@ static tws_dso_t open_dso(const char *name, void *clo)
 	lt_dlinit();
 
 	if( (dso->handle = my_dlopen( name )) == NULL ) {
-		error( "cannot open module `%s'", name );
+		error( "cannot open module `%s': %s", name, lt_dlerror() );
 		return NULL;
 	}
 
