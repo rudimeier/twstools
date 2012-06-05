@@ -121,6 +121,15 @@ static void gengetopt_check_opts()
 	if( args_info.violationPause_given ) {
 		cfg.tws_violationPause = args_info.violationPause_arg;
 	}
+
+	// DSO loading
+	if( args_info.strat_given ) {
+#if defined HAVE_LTDL
+		cfg.strat_file = args_info.strat_arg;
+#else  // !HAVE_LTDL
+		perror("module loading requested but there is no ltdl support");
+#endif	// HAVE_LTDL
+	}
 }
 
 static void gengetopt_free()

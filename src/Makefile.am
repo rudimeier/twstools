@@ -11,6 +11,11 @@ EXTRA_DIST += twsdo.ggo
 EXTRA_DIST += twsgen.ggo
 EXTRA_DIST += $(BUILT_SOURCES)
 
+headerdir = $(includedir)/twstools
+
+noinst_HEADERS =
+header_HEADERS =
+
 bin_PROGRAMS =
 bin_PROGRAMS += twsdo twsgen
 
@@ -26,7 +31,9 @@ twsdo_SOURCES += tws_wrapper.cpp
 twsdo_SOURCES += tws_quote.cpp
 twsdo_SOURCES += tws_account.cpp
 twsdo_CPPFLAGS = $(AM_CPPFLAGS)
+twsdo_CPPFLAGS += $(INCLTDL)
 twsdo_LDFLAGS = $(AM_LDFLAGS)
+twsdo_LDFLAGS += $(LIBLTDL) -export-dynamic
 twsdo_LDADD =
 twsdo_LDADD += $(libxml2_LIBS)
 twsdo_LDADD += $(libtwsapi_LIBS)
@@ -43,21 +50,31 @@ twsgen_LDADD =
 twsgen_LDADD += $(libxml2_LIBS)
 twsgen_LDADD += $(libtwsapi_LIBS)
 
-noinst_HEADERS =
 noinst_HEADERS += tws_client.h
-noinst_HEADERS += tws_query.h
 noinst_HEADERS += tws_util.h
 noinst_HEADERS += tws_wrapper.h
 noinst_HEADERS += debug.h
-noinst_HEADERS += twsdo.h
-noinst_HEADERS += tws_meta.h
 noinst_HEADERS += tws_xml.h
-noinst_HEADERS += tws_quote.h
 noinst_HEADERS += tws_account.h
+noinst_HEADERS += dso_magic.h
+
+header_HEADERS += twsdo.h
+header_HEADERS += tws_meta.h
+header_HEADERS += tws_query.h
+header_HEADERS += tws_quote.h
 
 BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
 BUILT_SOURCES += twsgen_ggo.c twsgen_ggo.h
+
+## example DSO
+noinst_LTLIBRARIES =
+noinst_LTLIBRARIES += proof_of_concept.la
+proof_of_concept_la_SOURCES = proof_of_concept.cpp
+proof_of_concept_la_LDFLAGS = -module
+## next one is necessary to force the build of a .so
+proof_of_concept_la_LDFLAGS += -rpath /none
+
 
 # Build all executables at distribution time to generate the man pages.
 dist-hook: $(bin_PROGRAMS)
