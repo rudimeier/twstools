@@ -7,6 +7,6 @@ datadir=@datarootdir@
 Name: @PACKAGE@
 Description:  Command line tools around Interactive Brokers TWS API
 Version: @VERSION@
-Libs: @LDFLAGS@ -L${libdir}
-Cflags: @CPPFLAGS@ -I${includedir}
+Libs: @LDFLAGS@ @libtwsapi_LIBS@ -L${libdir}
+Cflags: @CPPFLAGS@ @libtwsapi_CFLAGS@ -I${includedir}
 
