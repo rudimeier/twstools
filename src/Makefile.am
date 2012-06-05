@@ -56,6 +56,7 @@ noinst_HEADERS += tws_meta.h
 noinst_HEADERS += tws_xml.h
 noinst_HEADERS += tws_quote.h
 noinst_HEADERS += tws_account.h
+noinst_HEADERS += dso_magic.h
 
 BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
