@@ -11,6 +11,11 @@ EXTRA_DIST += twsdo.ggo
 EXTRA_DIST += twsgen.ggo
 EXTRA_DIST += $(BUILT_SOURCES)
 
+headerdir = $(includedir)/twstools
+
+noinst_HEADERS =
+header_HEADERS =
+
 bin_PROGRAMS =
 bin_PROGRAMS += twsdo twsgen
 
@@ -45,18 +50,18 @@ twsgen_LDADD =
 twsgen_LDADD += $(libxml2_LIBS)
 twsgen_LDADD += $(libtwsapi_LIBS)
 
-noinst_HEADERS =
 noinst_HEADERS += tws_client.h
-noinst_HEADERS += tws_query.h
 noinst_HEADERS += tws_util.h
 noinst_HEADERS += tws_wrapper.h
 noinst_HEADERS += debug.h
-noinst_HEADERS += twsdo.h
-noinst_HEADERS += tws_meta.h
 noinst_HEADERS += tws_xml.h
-noinst_HEADERS += tws_quote.h
 noinst_HEADERS += tws_account.h
 noinst_HEADERS += dso_magic.h
+
+header_HEADERS += twsdo.h
+header_HEADERS += tws_meta.h
+header_HEADERS += tws_query.h
+header_HEADERS += tws_quote.h
 
 BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h

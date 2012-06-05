@@ -66,6 +66,7 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([sample/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([test/Makefile])
+AC_CONFIG_FILES([twstools.pc])
 AC_CONFIG_FILES([twstools.spec])
 AC_OUTPUT
 
