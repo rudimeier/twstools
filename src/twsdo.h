@@ -112,6 +112,7 @@ class Account;
 class TwsDlWrapper;
 class TwsHeartBeat;
 
+typedef struct tws_dso_s *tws_dso_t;
 
 
 
@@ -222,7 +223,9 @@ class TwsDL
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
-		
+
+		tws_dso_t strat;
+
 	friend class TwsDlWrapper;
 };
 

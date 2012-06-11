@@ -62,8 +62,6 @@
 #endif
 
 
-/* this should really be a list or something */
-static tws_dso_t strat = NULL;
 
 
 ConfigTwsdo::ConfigTwsdo()
@@ -363,7 +361,8 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
-	pacingControl( *(new PacingGod(dataFarms)) )
+	pacingControl( *(new PacingGod(dataFarms)) ),
+	strat(NULL)
 {
 	pacingControl.setPacingTime( cfg.tws_maxRequests,
 		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
