@@ -131,7 +131,7 @@ class TwsDL
 		State currentState() const;
 		std::string lastError() const;
 		
-	private:
+// 	private:
 		void initTwsClient();
 		void eventLoop();
 		
