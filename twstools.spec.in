@@ -23,6 +23,15 @@ purpose of having a powerful scriptable toolbox to automate "jobs" like
 downloading historical data, tracking account info or submitting orders
 etc.
 
+%package devel
+Summary:        Development files for %{name}
+Group:          Development/Libraries/Other
+Requires:       %{name} = %{version}
+
+%description devel
+This package contains the header and source files needed for
+compiling programs using the %{name} libraries.
+
 %prep
 %setup -q
 
@@ -48,3 +57,8 @@ rm -rf %{buildroot}
 %doc %{_docdir}/%{name}/
 %doc %{_mandir}/man1/twsdo.1*
 %doc %{_mandir}/man1/twsgen.1*
+
+%files devel
+%defattr(-,root,root,-)
+%{_includedir}/twstools/
+%{_libdir}/pkgconfig/twstools.pc
