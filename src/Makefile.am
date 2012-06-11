@@ -51,17 +51,17 @@ twsgen_LDADD += $(libxml2_LIBS)
 twsgen_LDADD += $(libtwsapi_LIBS)
 
 noinst_HEADERS += tws_client.h
-noinst_HEADERS += tws_util.h
 noinst_HEADERS += tws_wrapper.h
-noinst_HEADERS += debug.h
 noinst_HEADERS += tws_xml.h
-noinst_HEADERS += tws_account.h
 noinst_HEADERS += dso_magic.h
 
+header_HEADERS += debug.h
 header_HEADERS += twsdo.h
+header_HEADERS += tws_account.h
 header_HEADERS += tws_meta.h
 header_HEADERS += tws_query.h
 header_HEADERS += tws_quote.h
+header_HEADERS += tws_util.h
 
 BUILT_SOURCES =
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
