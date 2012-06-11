@@ -623,10 +623,11 @@ void TwsDL::waitData()
 
 bool TwsDL::finContracts()
 {
+	PacketContractDetails* p = (PacketContractDetails*)packet;
 	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
 		DEBUG_PRINTF( "Contracts received: %zu",
-		((PacketContractDetails*)packet)->constList().size() );
+		p->constList().size() );
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
@@ -636,6 +637,21 @@ bool TwsDL::finContracts()
 	case REQ_ERR_TIMEOUT:
 		return false;
 	}
+
+	if( strat != NULL ) {
+		// HACK we want exactly one ContractDetails for each mkt data contract
+		assert( p->constList().size() == 1 );
+		const IB::ContractDetails &cd = p->constList().at(0);
+		con_details[cd.summary.conId] =  new IB::ContractDetails(cd);
+
+		// HACK add conId to mkt data contracts
+		int mi = con_details.size() - 1;
+		const MktDataTodo &mtodo = workTodo->getMktDataTodo();
+		IB::Contract &contract = mtodo.mktDataRequests[mi].ibContract;
+		assert( contract.conId == 0 || contract.conId == cd.summary.conId );
+		contract.conId = cd.summary.conId;
+	}
+
 	return true;
 }
 

@@ -131,7 +131,7 @@ class TwsDL
 		State currentState() const;
 		std::string lastError() const;
 		
-	private:
+// 	private:
 		void initTwsClient();
 		void eventLoop();
 		
@@ -217,6 +217,8 @@ class TwsDL
 		Packet *packet;
 		std::map<long, PacketPlaceOrder*> p_orders;
 		std::map<long, PacketPlaceOrder*> p_orders_old;
+
+		std::map<long, IB::ContractDetails*> con_details;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
