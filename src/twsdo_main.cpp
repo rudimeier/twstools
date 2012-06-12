@@ -152,7 +152,9 @@ int main(int argc, char *argv[])
 	TwsXml::setSkipDefaults( !cfg.skipdef );
 	
 	TwsDL twsDL;
-	twsDL.setup(cfg);
+	if( twsDL.setup(cfg) != 0 ) {
+		return 2;
+	}
 	int ret = twsDL.start();
 	
 	if( ret != 0 ) {

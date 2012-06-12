@@ -413,12 +413,12 @@ int TwsDL::setup( const ConfigTwsdo &c )
 		// set up correctly or that the user has given an
 		// absolute file, if not just do fuckall
 		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
-			// exit? not the best idea seeing as this is a ctor
-			;
+			return -1;
 		}
 	}
 
 	initWork();
+	return 0;
 }
 
 int TwsDL::start()
