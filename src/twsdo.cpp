@@ -66,7 +66,7 @@
 
 ConfigTwsdo::ConfigTwsdo()
 {
-	workfile = "";
+	workfile = NULL;
 	skipdef = 0;
 	tws_host = "localhost";
 	tws_port = 7474;

@@ -1015,7 +1015,7 @@ void TwsXml::resize_buf()
 
 bool TwsXml::openFile( const char *filename )
 {
-	if( filename == NULL || *filename == '\0' ) {
+	if( filename == NULL ) {
 		int tty = isatty(STDIN_FILENO);
 		if( tty ) {
 			fprintf( stderr, "error, No file specified and stdin is a tty.\n" );
