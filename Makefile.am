@@ -15,6 +15,9 @@ dist_doc_DATA += LICENSE
 EXTRA_DIST =
 EXTRA_DIST += $(PACKAGE).spec
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = twstools.pc
+
 # Rule to build RPM distribution package
 rpm: dist-gzip
 	rpmbuild -ta $(distdir).tar.gz

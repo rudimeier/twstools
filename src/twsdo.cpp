@@ -50,6 +50,7 @@
 #if defined HAVE_CONFIG_H
 # include "config.h"
 #endif  /* HAVE_CONFIG_H */
+#include "dso_magic.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -83,6 +84,8 @@ ConfigTwsdo::ConfigTwsdo()
 	tws_pacingInterval = 605000;
 	tws_minPacingTime = 1000;
 	tws_violationPause = 60000;
+
+	strat_file = NULL;
 }
 
 void ConfigTwsdo::init_ai_family( int ipv4, int ipv6 )
@@ -339,7 +342,7 @@ void TwsHeartBeat::reset()
 }
 
 
-TwsDL::TwsDL( const ConfigTwsdo &c ) :
+TwsDL::TwsDL() :
 	state(IDLE),
 	quit(false),
 	error(0),
@@ -348,9 +351,8 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
-	cfg(c),
-	twsWrapper(NULL),
-	twsClient(NULL),
+	twsWrapper( new TwsDlWrapper(this) ),
+	twsClient( new TWSClient(twsWrapper) ),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
@@ -358,13 +360,9 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
-	pacingControl( *(new PacingGod(dataFarms)) )
+	pacingControl( *(new PacingGod(dataFarms)) ),
+	strat(NULL)
 {
-	pacingControl.setPacingTime( cfg.tws_maxRequests,
-		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
-	pacingControl.setViolationPause( cfg.tws_violationPause );
-	initTwsClient();
-	initWork();
 }
 
 
@@ -391,10 +389,39 @@ TwsDL::~TwsDL()
 	if( packet != NULL ) {
 		delete packet;
 	}
+
+	if( strat != NULL ) {
+		close_dso( strat, this );
+	}
+
 	delete &pacingControl;
 	delete &dataFarms;
 }
 
+
+int TwsDL::setup( const ConfigTwsdo &c )
+{
+	cfg = c;
+
+	pacingControl.setPacingTime( cfg.tws_maxRequests,
+		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
+	pacingControl.setViolationPause( cfg.tws_violationPause );
+
+	// try loading DSOs before anything else
+	if( cfg.strat_file ) {
+		// for the moment we assume that the lt's load path is
+		// set up correctly or that the user has given an
+		// absolute file, if not just do fuckall
+		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
+			return -1;
+		}
+	}
+
+	if( initWork() < 0 ) {
+		return -1;
+	}
+	return 0;
+}
 
 int TwsDL::start()
 {
@@ -531,6 +558,9 @@ void TwsDL::idle()
 		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
+		if( strat != NULL ) {
+			work_dso( strat, this );
+		}
 		placeAllOrders();
 		break;
 	}
@@ -598,10 +628,11 @@ void TwsDL::waitData()
 
 bool TwsDL::finContracts()
 {
+	PacketContractDetails* p = (PacketContractDetails*)packet;
 	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
 		DEBUG_PRINTF( "Contracts received: %zu",
-		((PacketContractDetails*)packet)->constList().size() );
+		p->constList().size() );
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
@@ -611,6 +642,21 @@ bool TwsDL::finContracts()
 	case REQ_ERR_TIMEOUT:
 		return false;
 	}
+
+	if( strat != NULL ) {
+		// HACK we want exactly one ContractDetails for each mkt data contract
+		assert( p->constList().size() == 1 );
+		const IB::ContractDetails &cd = p->constList().at(0);
+		con_details[cd.summary.conId] =  new IB::ContractDetails(cd);
+
+		// HACK add conId to mkt data contracts
+		int mi = con_details.size() - 1;
+		const MktDataTodo &mtodo = workTodo->getMktDataTodo();
+		IB::Contract &contract = mtodo.mktDataRequests[mi].ibContract;
+		assert( contract.conId == 0 || contract.conId == cd.summary.conId );
+		contract.conId = cd.summary.conId;
+	}
+
 	return true;
 }
 
@@ -697,15 +743,6 @@ bool TwsDL::finCancelOrder()
 		return false;
 	}
 	return true;
-}
-
-
-void TwsDL::initTwsClient()
-{
-	assert( twsClient == NULL && twsWrapper == NULL );
-	
-	twsWrapper = new TwsDlWrapper(this);
-	twsClient = new TWSClient( twsWrapper );
 }
 
 
@@ -1240,7 +1277,7 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 }
 
 
-void TwsDL::initWork()
+int TwsDL::initWork()
 {
 	if( cfg.get_account ) {
 		workTodo->addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
@@ -1253,6 +1290,9 @@ void TwsDL::initWork()
 	}
 	
 	int cnt = workTodo->read_file(cfg.workfile);
+	if( cnt < 0 ) {
+		goto end;
+	}
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, cfg.workfile );
 	
 	if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
@@ -1266,6 +1306,8 @@ void TwsDL::initWork()
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}
+end:
+	return cnt;
 }
 
 

@@ -54,3 +54,14 @@ build*
 =build*
 .deps
 stamp-h1
+test-driver
+config.guess
+config.sub
+
+## libtool
+libtool
+libltdl/
+m4/argz.m4
+m4/libtool.m4
+m4/lt*.m4
+ltmain.sh

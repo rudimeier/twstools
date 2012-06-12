@@ -83,6 +83,8 @@ struct ConfigTwsdo
 	int tws_pacingInterval;
 	int tws_minPacingTime;
 	int tws_violationPause;
+
+	const char* strat_file;
 };
 
 
@@ -110,6 +112,7 @@ class Account;
 class TwsDlWrapper;
 class TwsHeartBeat;
 
+typedef struct tws_dso_s *tws_dso_t;
 
 
 
@@ -121,16 +124,16 @@ class TwsDL
 			IDLE
 		};
 		
-		TwsDL( const ConfigTwsdo& );
+		TwsDL();
 		~TwsDL();
-		
+
+		int setup( const ConfigTwsdo& );
 		int start();
 		
 		State currentState() const;
 		std::string lastError() const;
 		
-	private:
-		void initTwsClient();
+// 	private:
 		void eventLoop();
 		
 		void dumpWorkTodo() const;
@@ -146,7 +149,7 @@ class TwsDL
 		
 		void changeState( State );
 		
-		void initWork();
+		int initWork();
 
 		long fetch_inc_order_id();
 
@@ -215,10 +218,14 @@ class TwsDL
 		Packet *packet;
 		std::map<long, PacketPlaceOrder*> p_orders;
 		std::map<long, PacketPlaceOrder*> p_orders_old;
+
+		std::map<long, IB::ContractDetails*> con_details;
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
-		
+
+		tws_dso_t strat;
+
 	friend class TwsDlWrapper;
 };
 
