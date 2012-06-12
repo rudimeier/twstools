@@ -8,6 +8,14 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 This is a feature release.
 
+  - new, real time market data requests
+  - new, strategy module support (option --strat)
+  - install twstools.pc and headers to be used to build strategy modules
+  - experimental support for modifying existing orders
+  - place multiple orders in parallel
+  - track portofolio, account info, and open orders to be used by strategie
+    modules
+
 
 
 0.3.5 - 2012-05-24  ------------------------------------------------------------
