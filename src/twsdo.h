@@ -149,7 +149,7 @@ class TwsDL
 		
 		void changeState( State );
 		
-		void initWork();
+		int initWork();
 
 		long fetch_inc_order_id();
 

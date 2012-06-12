@@ -417,7 +417,9 @@ int TwsDL::setup( const ConfigTwsdo &c )
 		}
 	}
 
-	initWork();
+	if( initWork() < 0 ) {
+		return -1;
+	}
 	return 0;
 }
 
@@ -1275,7 +1277,7 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 }
 
 
-void TwsDL::initWork()
+int TwsDL::initWork()
 {
 	if( cfg.get_account ) {
 		workTodo->addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
@@ -1288,6 +1290,9 @@ void TwsDL::initWork()
 	}
 	
 	int cnt = workTodo->read_file(cfg.workfile);
+	if( cnt < 0 ) {
+		goto end;
+	}
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, cfg.workfile );
 	
 	if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
@@ -1301,6 +1306,8 @@ void TwsDL::initWork()
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}
+end:
+	return cnt;
 }
 
 
