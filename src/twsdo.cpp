@@ -342,7 +342,7 @@ void TwsHeartBeat::reset()
 }
 
 
-TwsDL::TwsDL( const ConfigTwsdo &c ) :
+TwsDL::TwsDL() :
 	state(IDLE),
 	quit(false),
 	error(0),
@@ -351,7 +351,6 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
-	cfg(c),
 	twsWrapper( new TwsDlWrapper(this) ),
 	twsClient( new TWSClient(twsWrapper) ),
 	msgCounter(0),
@@ -364,22 +363,6 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	pacingControl( *(new PacingGod(dataFarms)) ),
 	strat(NULL)
 {
-	pacingControl.setPacingTime( cfg.tws_maxRequests,
-		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
-	pacingControl.setViolationPause( cfg.tws_violationPause );
-
-	// try loading DSOs before anything else
-	if( cfg.strat_file ) {
-		// for the moment we assume that the lt's load path is
-		// set up correctly or that the user has given an
-		// absolute file, if not just do fuckall
-		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
-			// exit? not the best idea seeing as this is a ctor
-			;
-		}
-	}
-
-	initWork();
 }
 
 
@@ -415,6 +398,28 @@ TwsDL::~TwsDL()
 	delete &dataFarms;
 }
 
+
+int TwsDL::setup( const ConfigTwsdo &c )
+{
+	cfg = c;
+
+	pacingControl.setPacingTime( cfg.tws_maxRequests,
+		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
+	pacingControl.setViolationPause( cfg.tws_violationPause );
+
+	// try loading DSOs before anything else
+	if( cfg.strat_file ) {
+		// for the moment we assume that the lt's load path is
+		// set up correctly or that the user has given an
+		// absolute file, if not just do fuckall
+		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
+			// exit? not the best idea seeing as this is a ctor
+			;
+		}
+	}
+
+	initWork();
+}
 
 int TwsDL::start()
 {

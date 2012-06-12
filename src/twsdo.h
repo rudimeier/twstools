@@ -124,9 +124,10 @@ class TwsDL
 			IDLE
 		};
 		
-		TwsDL( const ConfigTwsdo& );
+		TwsDL();
 		~TwsDL();
-		
+
+		int setup( const ConfigTwsdo& );
 		int start();
 		
 		State currentState() const;
