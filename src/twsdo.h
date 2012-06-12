@@ -133,7 +133,6 @@ class TwsDL
 		std::string lastError() const;
 		
 // 	private:
-		void initTwsClient();
 		void eventLoop();
 		
 		void dumpWorkTodo() const;

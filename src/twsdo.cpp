@@ -352,8 +352,8 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
 	cfg(c),
-	twsWrapper(NULL),
-	twsClient(NULL),
+	twsWrapper( new TwsDlWrapper(this) ),
+	twsClient( new TWSClient(twsWrapper) ),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
@@ -379,7 +379,6 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 		}
 	}
 
-	initTwsClient();
 	initWork();
 }
 
@@ -737,15 +736,6 @@ bool TwsDL::finCancelOrder()
 		return false;
 	}
 	return true;
-}
-
-
-void TwsDL::initTwsClient()
-{
-	assert( twsClient == NULL && twsWrapper == NULL );
-	
-	twsWrapper = new TwsDlWrapper(this);
-	twsClient = new TWSClient( twsWrapper );
 }
 
 
