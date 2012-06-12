@@ -62,8 +62,6 @@
 #endif
 
 
-/* this should really be a list or something */
-static tws_dso_t strat = NULL;
 
 
 ConfigTwsdo::ConfigTwsdo()
@@ -344,7 +342,7 @@ void TwsHeartBeat::reset()
 }
 
 
-TwsDL::TwsDL( const ConfigTwsdo &c ) :
+TwsDL::TwsDL() :
 	state(IDLE),
 	quit(false),
 	error(0),
@@ -353,9 +351,8 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	tws_valid_orderId(0),
 	connectivity_IB_TWS(false),
 	curIdleTime(0),
-	cfg(c),
-	twsWrapper(NULL),
-	twsClient(NULL),
+	twsWrapper( new TwsDlWrapper(this) ),
+	twsClient( new TWSClient(twsWrapper) ),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
@@ -363,25 +360,9 @@ TwsDL::TwsDL( const ConfigTwsdo &c ) :
 	quotes( new Quotes ),
 	packet( NULL ),
 	dataFarms( *(new DataFarmStates()) ),
-	pacingControl( *(new PacingGod(dataFarms)) )
+	pacingControl( *(new PacingGod(dataFarms)) ),
+	strat(NULL)
 {
-	pacingControl.setPacingTime( cfg.tws_maxRequests,
-		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
-	pacingControl.setViolationPause( cfg.tws_violationPause );
-
-	// try loading DSOs before anything else
-	if( cfg.strat_file ) {
-		// for the moment we assume that the lt's load path is
-		// set up correctly or that the user has given an
-		// absolute file, if not just do fuckall
-		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
-			// exit? not the best idea seeing as this is a ctor
-			;
-		}
-	}
-
-	initTwsClient();
-	initWork();
 }
 
 
@@ -417,6 +398,30 @@ TwsDL::~TwsDL()
 	delete &dataFarms;
 }
 
+
+int TwsDL::setup( const ConfigTwsdo &c )
+{
+	cfg = c;
+
+	pacingControl.setPacingTime( cfg.tws_maxRequests,
+		cfg.tws_pacingInterval, cfg.tws_minPacingTime );
+	pacingControl.setViolationPause( cfg.tws_violationPause );
+
+	// try loading DSOs before anything else
+	if( cfg.strat_file ) {
+		// for the moment we assume that the lt's load path is
+		// set up correctly or that the user has given an
+		// absolute file, if not just do fuckall
+		if( (strat = open_dso( cfg.strat_file, this )) == NULL ) {
+			return -1;
+		}
+	}
+
+	if( initWork() < 0 ) {
+		return -1;
+	}
+	return 0;
+}
 
 int TwsDL::start()
 {
@@ -738,15 +743,6 @@ bool TwsDL::finCancelOrder()
 		return false;
 	}
 	return true;
-}
-
-
-void TwsDL::initTwsClient()
-{
-	assert( twsClient == NULL && twsWrapper == NULL );
-	
-	twsWrapper = new TwsDlWrapper(this);
-	twsClient = new TWSClient( twsWrapper );
 }
 
 
@@ -1281,7 +1277,7 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 }
 
 
-void TwsDL::initWork()
+int TwsDL::initWork()
 {
 	if( cfg.get_account ) {
 		workTodo->addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
@@ -1294,6 +1290,9 @@ void TwsDL::initWork()
 	}
 	
 	int cnt = workTodo->read_file(cfg.workfile);
+	if( cnt < 0 ) {
+		goto end;
+	}
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, cfg.workfile );
 	
 	if( workTodo->getContractDetailsTodo().countLeft() > 0 ) {
@@ -1307,6 +1306,8 @@ void TwsDL::initWork()
 		dumpWorkTodo();
 // 		state = IDLE;;
 	}
+end:
+	return cnt;
 }
 
 

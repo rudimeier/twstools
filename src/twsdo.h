@@ -112,6 +112,7 @@ class Account;
 class TwsDlWrapper;
 class TwsHeartBeat;
 
+typedef struct tws_dso_s *tws_dso_t;
 
 
 
@@ -123,16 +124,16 @@ class TwsDL
 			IDLE
 		};
 		
-		TwsDL( const ConfigTwsdo& );
+		TwsDL();
 		~TwsDL();
-		
+
+		int setup( const ConfigTwsdo& );
 		int start();
 		
 		State currentState() const;
 		std::string lastError() const;
 		
 // 	private:
-		void initTwsClient();
 		void eventLoop();
 		
 		void dumpWorkTodo() const;
@@ -148,7 +149,7 @@ class TwsDL
 		
 		void changeState( State );
 		
-		void initWork();
+		int initWork();
 
 		long fetch_inc_order_id();
 
@@ -222,7 +223,9 @@ class TwsDL
 		
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
-		
+
+		tws_dso_t strat;
+
 	friend class TwsDlWrapper;
 };
 
