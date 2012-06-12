@@ -53,7 +53,7 @@
 
 static gengetopt_args_info args_info;
 
-static const char *filep = "";
+static const char *filep = NULL;
 static int skipdefp = 0;
 static int histjobp = 0;
 static const char *endDateTimep = "";

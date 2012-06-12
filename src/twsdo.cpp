@@ -66,7 +66,7 @@
 
 ConfigTwsdo::ConfigTwsdo()
 {
-	workfile = "";
+	workfile = NULL;
 	skipdef = 0;
 	tws_host = "localhost";
 	tws_port = 7474;
@@ -1291,6 +1291,8 @@ int TwsDL::initWork()
 	
 	int cnt = workTodo->read_file(cfg.workfile);
 	if( cnt < 0 ) {
+		/* it's not an error if no workfile is given and nothing on stdin */
+		cnt = cfg.workfile == NULL ? 0 : -1;
 		goto end;
 	}
 	DEBUG_PRINTF( "got %d jobs from workFile %s", cnt, cfg.workfile );
