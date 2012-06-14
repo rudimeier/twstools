@@ -393,10 +393,6 @@ TwsDL::~TwsDL()
 		delete packet;
 	}
 
-	if( strat != NULL ) {
-		close_dso( strat, this );
-	}
-
 	delete &pacingControl;
 	delete &dataFarms;
 }
@@ -445,6 +441,10 @@ int TwsDL::start()
 
 	curIdleTime = 0;
 	eventLoop();
+
+	if( strat != NULL ) {
+		close_dso( strat, this );
+	}
 	return error;
 }
 
