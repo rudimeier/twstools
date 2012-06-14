@@ -447,6 +447,21 @@ int TwsDL::start()
 		// so nobody will call this thing again
 		strat = NULL;
 	}
+
+	// drain strategy: we give it 10 goes, 50 msec each
+	for( int i = 0; i < 10 && ( !packet || !packet->finished() ); i++ ) {
+		static char dots[] = "draining ..........";
+
+		dots[9 + i] = '\0';
+		DEBUG_PRINTF("%s", dots);
+		dots[9 + i] = '.';
+
+		// this is a very trimmed-down eventLoop as below
+		twsClient->selectStuff( 50 );
+		idle();
+	}
+	// and then disconnect
+	twsClient->disconnectTWS();
 	return error;
 }
 
