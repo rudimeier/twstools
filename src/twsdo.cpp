@@ -54,6 +54,9 @@
 
 #include <stdio.h>
 #include <string.h>
+// not sure if these work on WIN32, as we need posix signals
+#include <signal.h>
+#include <setjmp.h>
 
 #if defined _WIN32
 # include <winsock2.h>
@@ -390,10 +393,6 @@ TwsDL::~TwsDL()
 		delete packet;
 	}
 
-	if( strat != NULL ) {
-		close_dso( strat, this );
-	}
-
 	delete &pacingControl;
 	delete &dataFarms;
 }
@@ -423,37 +422,80 @@ int TwsDL::setup( const ConfigTwsdo &c )
 	return 0;
 }
 
+static jmp_buf jb;
+
+static void
+handle_sigint( int signum )
+{
+	longjmp( jb, signum );
+	return;
+}
+
 int TwsDL::start()
 {
 	assert( state == IDLE );
 	
+	// set up signal handlers
+	signal( SIGINT, handle_sigint );
 	quit = false;
+
 	curIdleTime = 0;
 	eventLoop();
+
+	if( strat != NULL ) {
+		close_dso( strat, this );
+		// so nobody will call this thing again
+		strat = NULL;
+	}
+
+	// drain strategy: we give it 10 goes, 50 msec each
+	for( int i = 0; i < 10 && ( !packet || !packet->finished() ); i++ ) {
+		static char dots[] = "draining ..........";
+
+		dots[9 + i] = '\0';
+		DEBUG_PRINTF("%s", dots);
+		dots[9 + i] = '.';
+
+		// this is a very trimmed-down eventLoop as below
+		twsClient->selectStuff( 50 );
+		idle();
+	}
+	// and then disconnect
+	twsClient->disconnectTWS();
 	return error;
 }
 
 
 void TwsDL::eventLoop()
 {
-	while( !quit ) {
-		if( curIdleTime > 0 ) {
-			twsClient->selectStuff( curIdleTime );
-		}
-		/* We want to set the default select timeout if nobody will change it
-		   later. TODO do better */
-		curIdleTime = -1;
-		switch( state ) {
+	switch (setjmp(jb)) {
+	default:
+		// all caught signals but SIGINT end up here
+		;
+	case 0:
+		while( !quit ) {
+			if( curIdleTime > 0 ) {
+				twsClient->selectStuff( curIdleTime );
+			}
+			/* We want to set the default select timeout if
+			   nobody will change it later. TODO do better */
+			curIdleTime = -1;
+			switch( state ) {
 			case WAIT_TWS_CON:
 				waitTwsCon();
 				break;
 			case IDLE:
 				idle();
 				break;
+			}
+			if( curIdleTime == -1 ) {
+				curIdleTime = 50;
+			}
 		}
-		if( curIdleTime == -1 ) {
-			curIdleTime = 50;
-		}
+	case SIGINT:
+		// C-c, we better have a nice shower here and clean ourselves
+		;
+		break;
 	}
 }
 
@@ -1466,7 +1508,11 @@ void TwsDL::placeOrder()
 		p_placeOrder->modify( pO );
 	}
 
-	twsClient->placeOrder( orderId, pO.contract, pO.order );
+	if( pO.order.totalQuantity != 0 ) {
+		twsClient->placeOrder( orderId, pO.contract, pO.order );
+	} else {
+		twsClient->cancelOrder( orderId );
+	}
 }
 
 void TwsDL::placeAllOrders()
