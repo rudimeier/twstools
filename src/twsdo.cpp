@@ -1421,7 +1421,12 @@ void TwsDL::placeOrder()
 		p_placeOrder->modify( pO );
 	}
 
-	twsClient->placeOrder( orderId, pO.contract, pO.order );
+	if( pO.order.totalQuantity != 0
+	    || strcasecmp(pO.order.action.c_str(), "CANCEL") != 0 ) {
+		twsClient->placeOrder( orderId, pO.contract, pO.order );
+	} else {
+		twsClient->cancelOrder( orderId );
+	}
 }
 
 void TwsDL::placeAllOrders()
