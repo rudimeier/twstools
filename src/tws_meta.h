@@ -81,7 +81,6 @@ class GenericRequest
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST,
-			CANCEL_ORDER,
 			MKT_DATA_REQUEST
 		};
 		
@@ -91,13 +90,11 @@ class GenericRequest
 		int reqId() const;
 		int age() const;
 		void nextRequest( ReqType );
-		void nextOrderRequest( ReqType, int orderId );
 		void close();
 		
 	private:
 		ReqType _reqType;
 		int _reqId;
-		int _orderId;
 		
 		int64_t _ctime;
 };
