@@ -444,6 +444,8 @@ int TwsDL::start()
 
 	if( strat != NULL ) {
 		close_dso( strat, this );
+		// so nobody will call this thing again
+		strat = NULL;
 	}
 	return error;
 }
