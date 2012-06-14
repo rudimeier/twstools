@@ -661,15 +661,6 @@ void to_xml( xmlNodePtr parent, const PlaceOrder& po)
 	ADD_ATTR_LONGLONG( po, time_sent );
 }
 
-void to_xml( xmlNodePtr parent, const CancelOrder& co)
-{
-	char tmp[128];
-	static const CancelOrder dflt;
-
-	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
-	ADD_ATTR_LONG( co, orderId );
-}
-
 void to_xml( xmlNodePtr parent, const MktDataRequest& co)
 {
 	/* not implemented yet */
@@ -751,14 +742,6 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 
 	GET_ATTR_LONG( po, orderId );
 	GET_ATTR_LONGLONG( po, time_sent );
-}
-
-void from_xml( CancelOrder* co, const xmlNodePtr node )
-{
-	char* tmp;
-	static const CancelOrder dflt;
-
-	GET_ATTR_LONG( co, orderId );
 }
 
 void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
