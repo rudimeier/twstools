@@ -80,8 +80,7 @@ class GenericRequest
 			EXECUTIONS_REQUEST,
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
-			HIST_REQUEST,
-			MKT_DATA_REQUEST
+			HIST_REQUEST
 		};
 		
 		GenericRequest();
