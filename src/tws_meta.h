@@ -81,7 +81,6 @@ class GenericRequest
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
 			HIST_REQUEST,
-			CANCEL_ORDER,
 			MKT_DATA_REQUEST
 		};
 		
@@ -91,13 +90,11 @@ class GenericRequest
 		int reqId() const;
 		int age() const;
 		void nextRequest( ReqType );
-		void nextOrderRequest( ReqType, int orderId );
 		void close();
 		
 	private:
 		ReqType _reqType;
 		int _reqId;
-		int _orderId;
 		
 		int64_t _ctime;
 };
@@ -186,27 +183,6 @@ class PlaceOrderTodo
 
 
 
-class CancelOrder;
-
-class CancelOrderTodo
-{
-	public:
-		CancelOrderTodo();
-		virtual ~CancelOrderTodo();
-
-		int countLeft() const;
-		void checkout();
-		const CancelOrder& current() const;
-		void add( const CancelOrder& );
-
-	private:
-		int curIndex;
-		std::vector<CancelOrder> &cancelOrders;
-};
-
-
-
-
 class MktDataRequest;
 
 class MktDataTodo
@@ -235,8 +211,6 @@ class WorkTodo
 		const HistTodo& getHistTodo() const;
 		PlaceOrderTodo* placeOrderTodo() const;
 		const PlaceOrderTodo& getPlaceOrderTodo() const;
-		CancelOrderTodo* cancelOrderTodo() const;
-		const CancelOrderTodo& getCancelOrderTodo() const;
 		MktDataTodo *mktDataTodo() const;
 		const MktDataTodo& getMktDataTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
@@ -251,7 +225,6 @@ class WorkTodo
 		ContractDetailsTodo *_contractDetailsTodo;
 		HistTodo *_histTodo;
 		PlaceOrderTodo *_place_order_todo;
-		CancelOrderTodo *_cancel_order_todo;
 		MktDataTodo *_market_data_todo;
 };
 
@@ -410,33 +383,6 @@ class PacketPlaceOrder
 
 	private:
 		PlaceOrder *request;
-		std::vector<TwsRow> * const list;
-};
-
-
-
-
-class CancelOrder;
-
-class PacketCancelOrder
-	: public  Packet
-{
-	public:
-		PacketCancelOrder();
-		virtual ~PacketCancelOrder();
-
-		static PacketCancelOrder * fromXml( xmlNodePtr );
-
-		const CancelOrder& getRequest() const;
-		virtual void clear();
-		void record( long orderId, const CancelOrder& );
-		void append( const RowError& );
-		void append( const RowOrderStatus& );
-
-		virtual void dumpXml();
-
-	private:
-		CancelOrder *request;
 		std::vector<TwsRow> * const list;
 };
 
