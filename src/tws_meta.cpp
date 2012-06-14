@@ -329,42 +329,6 @@ void PlaceOrderTodo::add( const PlaceOrder& po )
 
 
 
-CancelOrderTodo::CancelOrderTodo() :
-	curIndex(-1),
-	cancelOrders(*(new std::vector<CancelOrder>()))
-{
-}
-
-CancelOrderTodo::~CancelOrderTodo()
-{
-	delete &cancelOrders;
-}
-
-int CancelOrderTodo::countLeft() const
-{
-	return cancelOrders.size() - curIndex - 1;
-}
-
-void CancelOrderTodo::checkout()
-{
-	assert( countLeft() > 0 );
-	curIndex++;
-}
-
-const CancelOrder& CancelOrderTodo::current() const
-{
-	assert( curIndex >= 0 && curIndex < (int)cancelOrders.size() );
-	return cancelOrders.at(curIndex);
-}
-
-void CancelOrderTodo::add( const CancelOrder& po )
-{
-	cancelOrders.push_back(po);
-}
-
-
-
-
 MktDataTodo::MktDataTodo() :
 	mktDataRequests(*(new std::vector<MktDataRequest>()))
 {
@@ -390,7 +354,6 @@ WorkTodo::WorkTodo() :
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
 	_place_order_todo( new PlaceOrderTodo() ),
-	_cancel_order_todo( new CancelOrderTodo() ),
 	_market_data_todo( new MktDataTodo() )
 {
 }
@@ -400,9 +363,6 @@ WorkTodo::~WorkTodo()
 {
 	if( _market_data_todo != NULL ) {
 		delete _market_data_todo;
-	}
-	if( _cancel_order_todo != NULL ) {
-		delete _cancel_order_todo;
 	}
 	if( _place_order_todo != NULL ) {
 		delete _place_order_todo;
@@ -466,16 +426,6 @@ const PlaceOrderTodo& WorkTodo::getPlaceOrderTodo() const
 	return *_place_order_todo;
 }
 
-CancelOrderTodo* WorkTodo::cancelOrderTodo() const
-{
-	return _cancel_order_todo;
-}
-
-const CancelOrderTodo& WorkTodo::getCancelOrderTodo() const
-{
-	return *_cancel_order_todo;
-}
-
 MktDataTodo* WorkTodo::mktDataTodo() const
 {
 	return _market_data_todo;
@@ -524,10 +474,6 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 		PacketPlaceOrder *ppo = PacketPlaceOrder::fromXml(xn);
 		_place_order_todo->add( ppo->getRequest() );
 		delete ppo;
-	} else if ( strcmp( tmp, "cancel_order") == 0 ) {
-		PacketCancelOrder *pco = PacketCancelOrder::fromXml(xn);
-		_cancel_order_todo->add( pco->getRequest() );
-		delete pco;
 	} else if ( strcmp( tmp, "market_data") == 0 ) {
 		PacketMktData *pmd = PacketMktData::fromXml(xn);
 		_market_data_todo->add( pmd->getRequest() );
