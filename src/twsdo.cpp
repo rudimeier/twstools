@@ -54,6 +54,9 @@
 
 #include <stdio.h>
 #include <string.h>
+// not sure if these work on WIN32, as we need posix signals
+#include <signal.h>
+#include <setjmp.h>
 
 #if defined _WIN32
 # include <winsock2.h>
@@ -423,11 +426,23 @@ int TwsDL::setup( const ConfigTwsdo &c )
 	return 0;
 }
 
+static jmp_buf jb;
+
+static void
+handle_sigint( int signum )
+{
+	longjmp( jb, signum );
+	return;
+}
+
 int TwsDL::start()
 {
 	assert( state == IDLE );
 	
+	// set up signal handlers
+	signal( SIGINT, handle_sigint );
 	quit = false;
+
 	curIdleTime = 0;
 	eventLoop();
 	return error;
@@ -436,24 +451,34 @@ int TwsDL::start()
 
 void TwsDL::eventLoop()
 {
-	while( !quit ) {
-		if( curIdleTime > 0 ) {
-			twsClient->selectStuff( curIdleTime );
-		}
-		/* We want to set the default select timeout if nobody will change it
-		   later. TODO do better */
-		curIdleTime = -1;
-		switch( state ) {
+	switch (setjmp(jb)) {
+	default:
+		// all caught signals but SIGINT end up here
+		;
+	case 0:
+		while( !quit ) {
+			if( curIdleTime > 0 ) {
+				twsClient->selectStuff( curIdleTime );
+			}
+			/* We want to set the default select timeout if
+			   nobody will change it later. TODO do better */
+			curIdleTime = -1;
+			switch( state ) {
 			case WAIT_TWS_CON:
 				waitTwsCon();
 				break;
 			case IDLE:
 				idle();
 				break;
+			}
+			if( curIdleTime == -1 ) {
+				curIdleTime = 50;
+			}
 		}
-		if( curIdleTime == -1 ) {
-			curIdleTime = 50;
-		}
+	case SIGINT:
+		// C-c, we better have a nice shower here and clean ourselves
+		;
+		break;
 	}
 }
 
