@@ -827,14 +827,18 @@ void TwsDL::errorContracts( const RowError& err )
 {
 	// TODO
 	switch( err.code ) {
-		// No security definition has been found for the request"
-		case 200:
+	case 200:
+		/* "No security definition has been found for the request" */
 		if( connectivity_IB_TWS ) {
 			packet->closeError( REQ_ERR_REQUEST );
 		} else {
 			/* using ERR_TIMEOUT instead ERR_TWSCON to push_back this request */
 			packet->closeError( REQ_ERR_TIMEOUT );
 		}
+		break;
+	case 321:
+		/* comes directly from TWS whith prefix "Error validating request:-" */
+		packet->closeError( REQ_ERR_REQUEST );
 		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
