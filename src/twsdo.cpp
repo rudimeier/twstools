@@ -827,8 +827,8 @@ void TwsDL::errorContracts( const RowError& err )
 {
 	// TODO
 	switch( err.code ) {
-		// No security definition has been found for the request"
-		case 200:
+	case 200:
+		/* "No security definition has been found for the request" */
 		if( connectivity_IB_TWS ) {
 			packet->closeError( REQ_ERR_REQUEST );
 		} else {
