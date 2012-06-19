@@ -836,6 +836,10 @@ void TwsDL::errorContracts( const RowError& err )
 			packet->closeError( REQ_ERR_TIMEOUT );
 		}
 		break;
+	case 321:
+		/* comes directly from TWS whith prefix "Error validating request:-" */
+		packet->closeError( REQ_ERR_REQUEST );
+		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
 		break;
