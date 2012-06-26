@@ -125,7 +125,11 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_STRING( c, secId );
 	ADD_ATTR_STRING( c, comboLegsDescrip );
 	
+# if TWSAPI_IB_VERSION_NUMBER <= 96600
 	if( c.comboLegs != NULL ) {
+#else
+	if( c.comboLegs.get() != NULL ) {
+#endif
 		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
 		
 		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
@@ -393,8 +397,14 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
+# if TWSAPI_IB_VERSION_NUMBER <= 96600
 			if( c->comboLegs == NULL ) {
 				c->comboLegs = new IB::Contract::ComboLegList();
+#else
+			if( c->comboLegs.get() == NULL ) {
+				c->comboLegs = IB::Contract::ComboLegListSPtr(
+					new IB::Contract::ComboLegList() );
+#endif
 			} else {
 				c->comboLegs->clear();
 			}
@@ -404,7 +414,11 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
 				conv_xml2ib( cl, q );
+# if TWSAPI_IB_VERSION_NUMBER <= 96600
 				c->comboLegs->push_back(cl);
+#else
+				c->comboLegs->push_back(IB::ComboLegSPtr(cl));
+#endif
 			}
 		} else if( p->name && (strcmp((char*) p->name, "underComp") == 0)) {
 			if( c->underComp == NULL ) {
