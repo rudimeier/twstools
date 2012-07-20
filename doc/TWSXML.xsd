@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EXPERIMENTAL -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://www.ga-group.nl/twsxml-0.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	targetNamespace="http://www.ga-group.nl/twsxml-0.1"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+	<!-- level 0 -->
+	<xsd:element name="TWSXML">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="request"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- level 1 -->
+	<xsd:element name="request">
+		<xsd:complexType>
+			<xsd:attribute name="type" type="xsd:string"/>
+			<xsd:element name="query"/>
+			<xsd:element name="response" minOccurs="0" maxOccurs="1"/>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- level 2 -->
+	<xsd:element name="query">
+		<xsd:complexType>
+			<xsd:choice>
+				<xsd:element name="reqContract"/>
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="response">
+		<xsd:complexType>
+			<xsd:choice>
+				<xsd:sequence>
+					<xsd:element name="ContractDetails"/>
+				</xsd:sequence>
+				<xsd:sequence>
+					<xsd:element name="row"/>
+				</xsd:sequence>
+				<xsd:sequence>
+					<xsd:complexType>
+						<xsd:element name="OpenOrder"/>
+						<xsd:element name="OrderStatus"/>
+					</xsd:complexType>
+				</xsd:sequence>
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>
