@@ -1151,6 +1151,8 @@ xmlNodePtr TwsXml::newDocRoot()
 	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
 	xmlNodePtr root = xmlNewDocNode( doc, NULL,
 		(const xmlChar*)"TWSXML", NULL );
+	xmlNsPtr ns = xmlNewNs( root,
+		"http://www.ga-group.nl/twsxml-0.1", NULL );
 	xmlDocSetRootElement( doc, root );
 	
 	//caller has to free root.doc
