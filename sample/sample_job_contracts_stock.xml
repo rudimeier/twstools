@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<TWSXML xmlns="http://www.ga-group.nl/twsxml-0.1">
+	<request type="contract_details">
+		<query>
+			<reqContract symbol="TNA" secType="STK" exchange="ARCA"/>
+		</query>
+	</request>
+	<request type="contract_details">
+		<query>
+			<reqContract symbol="TNA" secType="STK" exchange="SMART"/>
+		</query>
+	</request>
+</TWSXML>
+
