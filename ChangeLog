@@ -8,11 +8,15 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 This is a feature release.
 
+  - incompatible change, drop xml request type="cancel_order", we are now using
+    <request type="place_order">
+      <query orderId="123"> <order action="CANCEL" totalQuantity="0"/> </query>
+    </request>
   - new, real time market data requests
   - new, strategy module support (option --strat)
   - install twstools.pc and headers to be used to build strategy modules
   - experimental support for modifying existing orders
-  - place multiple orders in parallel
+  - place or cancel multiple orders in parallel
   - track portofolio, account info, and open orders to be used by strategie
     modules
 

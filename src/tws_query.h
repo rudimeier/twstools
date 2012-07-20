@@ -120,17 +120,6 @@ class PlaceOrder
 
 
 
-class CancelOrder
-{
-	public:
-		CancelOrder();
-
-		long orderId;
-};
-
-
-
-
 class MktDataRequest
 {
 	public:

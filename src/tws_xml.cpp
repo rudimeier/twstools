@@ -391,6 +391,9 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				c->comboLegs->clear();
 			}
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				if(q->name && (strcmp((char*) q->name, "comboLeg") != 0)) {
+					continue;
+				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
 				conv_xml2ib( cl, q );
 				c->comboLegs->push_back(cl);
@@ -661,15 +664,6 @@ void to_xml( xmlNodePtr parent, const PlaceOrder& po)
 	ADD_ATTR_LONGLONG( po, time_sent );
 }
 
-void to_xml( xmlNodePtr parent, const CancelOrder& co)
-{
-	char tmp[128];
-	static const CancelOrder dflt;
-
-	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
-	ADD_ATTR_LONG( co, orderId );
-}
-
 void to_xml( xmlNodePtr parent, const MktDataRequest& co)
 {
 	/* not implemented yet */
@@ -751,14 +745,6 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 
 	GET_ATTR_LONG( po, orderId );
 	GET_ATTR_LONGLONG( po, time_sent );
-}
-
-void from_xml( CancelOrder* co, const xmlNodePtr node )
-{
-	char* tmp;
-	static const CancelOrder dflt;
-
-	GET_ATTR_LONG( co, orderId );
 }
 
 void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
@@ -1165,6 +1151,8 @@ xmlNodePtr TwsXml::newDocRoot()
 	xmlDocPtr doc = xmlNewDoc( (const xmlChar*) "1.0");
 	xmlNodePtr root = xmlNewDocNode( doc, NULL,
 		(const xmlChar*)"TWSXML", NULL );
+	xmlNsPtr ns = xmlNewNs( root,
+		"http://www.ga-group.nl/twsxml-0.1", NULL );
 	xmlDocSetRootElement( doc, root );
 	
 	//caller has to free root.doc

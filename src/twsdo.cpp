@@ -595,9 +595,6 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
-	case GenericRequest::CANCEL_ORDER:
-		cancelOrder();
-		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
 		if( strat != NULL ) {
@@ -643,9 +640,6 @@ void TwsDL::waitData()
 		break;
 	case GenericRequest::HIST_REQUEST:
 		ok = finHist();
-		break;
-	case GenericRequest::CANCEL_ORDER:
-		ok = finCancelOrder();
 		break;
 	case GenericRequest::ACC_STATUS_REQUEST:
 	case GenericRequest::EXECUTIONS_REQUEST:
@@ -771,23 +765,6 @@ bool TwsDL::finPlaceOrder()
 }
 
 
-bool TwsDL::finCancelOrder()
-{
-	switch( packet->getError() ) {
-	case REQ_ERR_NONE:
-	case REQ_ERR_REQUEST:
-	case REQ_ERR_TIMEOUT:
-		packet->dumpXml();
-	case REQ_ERR_NODATA:
-	case REQ_ERR_NAV:
-		break;
-	case REQ_ERR_TWSCON:
-		return false;
-	}
-	return true;
-}
-
-
 #define ERR_MATCH( _strg_  ) \
 	( err.msg.find(_strg_) != std::string::npos )
 
@@ -821,9 +798,6 @@ void TwsDL::twsError( const RowError& err )
 				break;
 			case GenericRequest::HIST_REQUEST:
 				errorHistData( err );
-				break;
-			case GenericRequest::CANCEL_ORDER:
-				errorCancelOrder( err );
 				break;
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
@@ -895,14 +869,18 @@ void TwsDL::errorContracts( const RowError& err )
 {
 	// TODO
 	switch( err.code ) {
-		// No security definition has been found for the request"
-		case 200:
+	case 200:
+		/* "No security definition has been found for the request" */
 		if( connectivity_IB_TWS ) {
 			packet->closeError( REQ_ERR_REQUEST );
 		} else {
 			/* using ERR_TIMEOUT instead ERR_TWSCON to push_back this request */
 			packet->closeError( REQ_ERR_TIMEOUT );
 		}
+		break;
+	case 321:
+		/* comes directly from TWS whith prefix "Error validating request:-" */
+		packet->closeError( REQ_ERR_REQUEST );
 		break;
 	default:
 		DEBUG_PRINTF( "Warning, unhandled error code." );
@@ -978,6 +956,8 @@ void TwsDL::errorHistData( const RowError& err )
 	// Order cancelled - Reason:
 	case 202:
 		DEBUG_PRINTF( "Warning, unexpected error code." );
+		/* TODO "Order cancelled", this is expected here and we'll wait for some
+		   more orderStatus callbacks */
 		break;
 	// The security <security> is not available or allowed for this account
 	case 203:
@@ -1024,22 +1004,6 @@ void TwsDL::errorPlaceOrder( const RowError& err )
 }
 
 
-void TwsDL::errorCancelOrder( const RowError& err )
-{
-	PacketCancelOrder &p_cO = *((PacketCancelOrder*)packet);
-	p_cO.append( err );
-	switch( err.code ) {
-	case 202:
-		/* "Order cancelled", this is expected here and we'll wait for some
-		   more orderStatus callbacks */
-		break;
-	default:
-		p_cO.closeError( REQ_ERR_REQUEST );
-		break;
-	}
-}
-
-
 #undef ERR_MATCH
 
 
@@ -1051,7 +1015,6 @@ void TwsDL::twsConnectionClosed()
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-			case GenericRequest::CANCEL_ORDER:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
@@ -1224,10 +1187,6 @@ void TwsDL::twsOrderStatus( const RowOrderStatus& row )
 		DEBUG_PRINTF("Warning, got orderStatus callback for finished order.");
 		PacketPlaceOrder *p_pO = p_orders_old[row.id];
 		p_pO->append(row);
-		return;
-	}
-	if( currentRequest.reqType() == GenericRequest::CANCEL_ORDER ) {
-		((PacketCancelOrder*)packet)->append(row);
 		return;
 	}
 	DEBUG_PRINTF( "Warning, unexpected tws callback (orderStatus).");
@@ -1508,7 +1467,8 @@ void TwsDL::placeOrder()
 		p_placeOrder->modify( pO );
 	}
 
-	if( pO.order.totalQuantity != 0 ) {
+	if( pO.order.totalQuantity != 0
+	    || strcasecmp(pO.order.action.c_str(), "CANCEL") != 0 ) {
 		twsClient->placeOrder( orderId, pO.contract, pO.order );
 	} else {
 		twsClient->cancelOrder( orderId );
@@ -1521,21 +1481,6 @@ void TwsDL::placeAllOrders()
 	while( todo->countLeft() > 0 ) {
 		placeOrder();
 	}
-}
-
-void TwsDL::cancelOrder()
-{
-	workTodo->cancelOrderTodo()->checkout();
-	const CancelOrder &cO = workTodo->getCancelOrderTodo().current();
-
-	PacketCancelOrder *p_cancelOrder = new PacketCancelOrder();
-	packet = p_cancelOrder;
-
-	long orderId = cO.orderId;
-	currentRequest.nextOrderRequest( GenericRequest::CANCEL_ORDER, orderId );
-
-	p_cancelOrder->record( orderId, cO );
-	twsClient->cancelOrder( orderId );
 }
 
 int TwsDL::reqMktData()
