@@ -1,0 +1,21 @@
+language: cpp
+
+compiler:
+  - gcc
+
+before_install:
+  - git clone git://github.com/rudimeier/twsapi.git && cd twsapi \
+      && autoreconf -vfi && ./configure && make install
+  - sudo apt-get install -qq gengetopt
+
+script: autoreconf -vfi && ./configure && make && make check
+
+## whitelist
+branches:
+  only:
+    - master
+    - next
+
+notifications:
+  email:
+    - sweet_f_a@gmx.de
