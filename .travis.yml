@@ -4,9 +4,12 @@ compiler:
   - gcc
 
 before_install:
-  - git clone git://github.com/rudimeier/twsapi.git && cd twsapi
-      && autoreconf -vfi && ./configure
-      && make && sudo make install
+  - git clone --quiet git://github.com/rudimeier/twsapi.git ~/builds/twsapi
+  - pushd ~/builds/twsapi
+    && autoreconf -vfi
+    && ./configure
+    && make && sudo make install
+    && popd
   - sudo apt-get install -qq gengetopt
 
 script: autoreconf -vfi && ./configure && make && make check
