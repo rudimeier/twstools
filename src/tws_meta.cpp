@@ -1820,7 +1820,6 @@ DataFarmStates::DataFarmStates() :
 	lastMsgNumber(INT_MIN),
 	edemo_checked(false)
 {
-	initHardCodedFarms();
 }
 
 DataFarmStates::~DataFarmStates()
