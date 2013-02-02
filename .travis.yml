@@ -37,8 +37,7 @@ branches:
   only:
     - master
     - next
-    - bld/travis
 
 notifications:
   email:
-    - s@frndt.de
+    - sweet_f_a@gmx.de
