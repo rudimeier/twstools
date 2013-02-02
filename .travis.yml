@@ -13,6 +13,7 @@ before_install:
 
 install:
   - sudo apt-get install -qq gengetopt
+  - sudo apt-get install -qq help2man
   - if test "${build_git_twsapi}" = "yes"; then
       git clone --quiet --depth=100 git://github.com/rudimeier/twsapi.git ~/builds/twsapi
       && pushd ~/builds/twsapi
