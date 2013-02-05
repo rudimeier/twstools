@@ -3,14 +3,32 @@ language: cpp
 compiler:
   - gcc
 
+env:
+  - build_git_twsapi="no"
+  - build_git_twsapi="yes"
+
 before_install:
-  - git clone --quiet git://github.com/rudimeier/twsapi.git ~/builds/twsapi
-  - pushd ~/builds/twsapi
-    && autoreconf -vfi
-    && ./configure
-    && make && sudo make install
-    && popd
+  - sudo add-apt-repository ppa:hroptatyr/ppa -y
+  - sudo apt-get -qq update
+
+install:
   - sudo apt-get install -qq gengetopt
+  - sudo apt-get install -qq help2man
+  - if test "${build_git_twsapi}" = "yes"; then
+      git clone --quiet --depth=100 git://github.com/rudimeier/twsapi.git ~/builds/twsapi
+      && pushd ~/builds/twsapi
+      && autoreconf -vfi
+      && ./configure
+      && make && sudo make install
+      && popd
+      ;
+    else
+      sudo apt-get install -qq twsapi
+      ;
+    fi
+
+before_script:
+  - autoreconf -vfi
 
 script: autoreconf -vfi && ./configure && make && make check
 
