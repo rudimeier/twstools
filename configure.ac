@@ -41,13 +41,12 @@ LT_CONFIG_LTDL_DIR([libltdl], [recursive])
 LTDL_INIT
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
-PKG_CHECK_MODULES([twsapi], [libtwsapi >= 0.3.0],
+PKG_CHECK_MODULES([twsapi], [twsapi >= 0.4.0],
   [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
-    ["$(pkg-config --modversion libtwsapi || echo "unknown")"],
+    ["$(pkg-config --modversion twsapi || echo "unknown")"],
     [Define twsapi version at compile time.])
-  if pkg-config --atleast-version="0.4.0" libtwsapi; then
     AC_DEFINE([TWSAPI_IPV6], [1], [Define to 1 if twsapi supports IPv6.])
-  fi])
+  ])
 
 
 AC_CHECK_HEADERS([winsock2.h])
