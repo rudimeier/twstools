@@ -41,7 +41,7 @@ LT_CONFIG_LTDL_DIR([libltdl], [recursive])
 LTDL_INIT
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
-PKG_CHECK_MODULES([libtwsapi], [libtwsapi >= 0.3.0],
+PKG_CHECK_MODULES([twsapi], [libtwsapi >= 0.3.0],
   [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
     ["$(pkg-config --modversion libtwsapi || echo "unknown")"],
     [Define twsapi version at compile time.])
