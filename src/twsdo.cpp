@@ -95,10 +95,7 @@ void ConfigTwsdo::init_ai_family( int ipv4, int ipv6 )
 		ai_family = AF_INET;
 		return;
 	}
-#if ! defined TWSAPI_IPV6
-	DEBUG_PRINTF( "Warning, specifying address family is not supported in "
-		"twsapi (" TWSAPI_VERSION "), upgrade it and recompile.");
-#endif
+
 	if( ipv4 && ipv6 ) {
 		/* this will be the default one day */
 		ai_family = AF_UNSPEC;
