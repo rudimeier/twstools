@@ -122,6 +122,7 @@ class DebugTwsWrapper : public IB::EWrapper
 		void deltaNeutralValidation( int reqId,
 			const IB::UnderComp& underComp );
 		void tickSnapshotEnd( int reqId );
+		void marketDataType( IB::TickerId reqId, int marketDataType );
 };
 
 #endif

@@ -367,3 +367,8 @@ void DebugTwsWrapper::tickSnapshotEnd( int reqId )
 {
 	DEBUG_PRINTF( "TICK_SNAPSHOT_END: %d", reqId );
 }
+
+void DebugTwsWrapper::marketDataType( IB::TickerId reqId, int marketDataType )
+{
+	DEBUG_PRINTF( "MARKET_DATA_TYPE: %ld %d", reqId, marketDataType );
+}
