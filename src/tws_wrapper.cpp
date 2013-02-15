@@ -38,12 +38,19 @@
 #include "tws_wrapper.h"
 #include "tws_util.h"
 #include "debug.h"
+#include "config.h"
+
+#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
+# include "twsapi/twsapi_config.h"
+#endif
 
 // from global installed ibapi
 #include "twsapi/Contract.h"
 #include "twsapi/Order.h"
 #include "twsapi/OrderState.h"
-
+#if TWSAPI_IB_VERSION_NUMBER > 96600
+# include "twsapi/CommissionReport.h"
+#endif
 
 
 
@@ -372,3 +379,13 @@ void DebugTwsWrapper::marketDataType( IB::TickerId reqId, int marketDataType )
 {
 	DEBUG_PRINTF( "MARKET_DATA_TYPE: %ld %d", reqId, marketDataType );
 }
+
+/* nobody should reference this callback except a newer twsapi */
+#if TWSAPI_IB_VERSION_NUMBER > 96600
+void DebugTwsWrapper::commissionReport( const IB::CommissionReport &cr )
+{
+	DEBUG_PRINTF( "COMMISSION_REPORT %s %g %s %g %g %d", cr.execId.c_str(),
+		cr.commission, cr.currency.c_str(), cr.realizedPNL, cr.yield,
+		cr.yieldRedemptionDate );
+}
+#endif
