@@ -41,6 +41,10 @@
 // from global installed ibapi
 #include "twsapi/EWrapper.h"
 
+namespace IB {
+	/* forward declaration in case we compile against twsapi < 0.5 */
+	class CommissionReport;
+}
 
 
 
@@ -122,6 +126,8 @@ class DebugTwsWrapper : public IB::EWrapper
 		void deltaNeutralValidation( int reqId,
 			const IB::UnderComp& underComp );
 		void tickSnapshotEnd( int reqId );
+		void marketDataType( IB::TickerId reqId, int marketDataType );
+		void commissionReport( const IB::CommissionReport &commissionReport );
 };
 
 #endif

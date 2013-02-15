@@ -62,6 +62,14 @@
 # include <malloc.h>
 #endif
 
+#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
+# include "twsapi/twsapi_config.h"
+#endif
+#if TWSAPI_IB_VERSION_NUMBER <= 96600
+# define TagValueList Order::TagValueList
+# define TagValueListSPtr Order::TagValueListSPtr
+#endif
+
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
@@ -117,7 +125,11 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_STRING( c, secId );
 	ADD_ATTR_STRING( c, comboLegsDescrip );
 	
+# if TWSAPI_IB_VERSION_NUMBER <= 96600
 	if( c.comboLegs != NULL ) {
+#else
+	if( c.comboLegs.get() != NULL ) {
+#endif
 		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
 		
 		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
@@ -301,11 +313,11 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_STRING( o, clearingIntent );
 	ADD_ATTR_STRING( o, algoStrategy );
 	{
-		const IB::Order::TagValueList* const algoParams = o.algoParams.get();
+		const IB::TagValueList* const algoParams = o.algoParams.get();
 		if( algoParams != NULL ) {
 			xmlNodePtr napl = xmlNewChild( ne, NULL,
 				(const xmlChar*)"algoParams", NULL);
-			for( IB::Order::TagValueList::const_iterator it
+			for( IB::TagValueList::const_iterator it
 				    = algoParams->begin(); it != algoParams->end(); ++it) {
 				conv_ib2xml( napl, "tagValue", **it );
 			}
@@ -385,8 +397,14 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
+# if TWSAPI_IB_VERSION_NUMBER <= 96600
 			if( c->comboLegs == NULL ) {
 				c->comboLegs = new IB::Contract::ComboLegList();
+#else
+			if( c->comboLegs.get() == NULL ) {
+				c->comboLegs = IB::Contract::ComboLegListSPtr(
+					new IB::Contract::ComboLegList() );
+#endif
 			} else {
 				c->comboLegs->clear();
 			}
@@ -396,7 +414,11 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
 				conv_xml2ib( cl, q );
+# if TWSAPI_IB_VERSION_NUMBER <= 96600
 				c->comboLegs->push_back(cl);
+#else
+				c->comboLegs->push_back(IB::ComboLegSPtr(cl));
+#endif
 			}
 		} else if( p->name && (strcmp((char*) p->name, "underComp") == 0)) {
 			if( c->underComp == NULL ) {
@@ -577,8 +599,8 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "algoParams") == 0)) {
 			if( o->algoParams.get() ==  NULL ) {
-				IB::Order::TagValueListSPtr
-					algoParams( new IB::Order::TagValueList);
+				IB::TagValueListSPtr
+					algoParams( new IB::TagValueList);
 				o->algoParams = algoParams;
 			} else {
 				o->algoParams->clear();
