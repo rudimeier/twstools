@@ -45,7 +45,6 @@ PKG_CHECK_MODULES([twsapi], [twsapi >= 0.4.0],
   [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
     ["$(pkg-config --modversion twsapi || echo "unknown")"],
     [Define twsapi version at compile time.])
-    AC_DEFINE([TWSAPI_IPV6], [1], [Define to 1 if twsapi supports IPv6.])
   ])
 
 
