@@ -5,9 +5,9 @@ CMDLINE="-C --no-conv -x"
 PURPOSE="using -x on a file with defaults should not add more stuff"
 
 ## STDIN
-stdin="hist_data_with_defaults.xml"
+TS_STDIN="${srcdir}/hist_data_with_defaults.xml"
 
 ## STDOUT
-stdout="hist_data_with_defaults.xml"
+TS_EXP_STDOUT="${srcdir}/hist_data_with_defaults.xml"
 
 ## defaults.03.twst ends here

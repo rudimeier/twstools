@@ -5,9 +5,9 @@ CMDLINE="-C --no-conv -x"
 PURPOSE="using -x should enrich input with default values"
 
 ## STDIN
-stdin="hist_data_no_defaults.xml"
+TS_STDIN="${srcdir}/hist_data_no_defaults.xml"
 
 ## STDOUT
-stdout="hist_data_with_defaults.xml"
+TS_EXP_STDOUT="${srcdir}/hist_data_with_defaults.xml"
 
 ## defaults.01.twst ends here

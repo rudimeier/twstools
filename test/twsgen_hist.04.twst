@@ -5,9 +5,9 @@ CMDLINE='-H --endDateTime="20111001 00:00:00" --barSizeSetting="1 hour" --whatTo
 PURPOSE="create work file, don't skip any contracts (no expiry)"
 
 ## STDIN
-stdin="con_cash.xml"
+TS_STDIN="${srcdir}/con_cash.xml"
 
 ## STDOUT
-stdout="work_hist_con_01.xml"
+TS_EXP_STDOUT="${srcdir}/work_hist_con_01.xml"
 
 ## twsgen_hist.04.twst ends here

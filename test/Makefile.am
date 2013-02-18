@@ -11,7 +11,7 @@ dist_noinst_DATA =
 
 TEST_EXTENSIONS = .twst
 TWST_LOG_COMPILER = $(srcdir)/tws-test.sh
-AM_TWST_LOG_FLAGS = --builddir $(top_builddir)/src --hash sha1sum
+AM_TWST_LOG_FLAGS = --builddir $(top_builddir)/src
 LOG_COMPILER = echo
 
 TESTS += defaults.01.twst
@@ -30,5 +30,8 @@ dist_noinst_DATA += hist_data_with_defaults.xml
 dist_noinst_DATA += work_hist_fut_01.xml
 dist_noinst_DATA += work_hist_fut_02.xml
 dist_noinst_DATA += work_hist_cash_01.xml
+
+clean-local:
+	-rm -rf *.tmpd
 
 ## Makefile.am ends here
