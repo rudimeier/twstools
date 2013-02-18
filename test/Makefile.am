@@ -11,7 +11,7 @@ dist_noinst_DATA =
 
 TEST_EXTENSIONS = .twst
 TWST_LOG_COMPILER = $(srcdir)/tws-test.sh
-AM_TWST_LOG_FLAGS = --builddir $(top_builddir)/src --hash sha1sum
+AM_TWST_LOG_FLAGS = --builddir $(top_builddir)/src
 LOG_COMPILER = echo
 
 TESTS += defaults.01.twst
