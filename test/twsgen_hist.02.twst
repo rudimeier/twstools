@@ -5,11 +5,9 @@ CMDLINE='-H --endDateTime="20111027 00:00:00" --barSizeSetting="1 min"'
 PURPOSE="concatenated input gives concatenated output"
 
 ## STDIN
-stdin=$(mktemp "/tmp/tmp.XXXXXXXXXX")
-cat ${srcdir}/con_fut.xml ${srcdir}/con_fut.xml >${stdin}
+cat "${srcdir}/con_fut.xml" "${srcdir}/con_fut.xml" >"${TS_STDIN}"
 
 ## STDOUT
-stdout=$(mktemp "/tmp/tmp.XXXXXXXXXX")
-cat ${srcdir}/work_hist_fut_01.xml ${srcdir}/work_hist_fut_01.xml >$stdout
+cat "${srcdir}/work_hist_fut_01.xml" "${srcdir}/work_hist_fut_01.xml" >"${TS_EXP_STDOUT}"
 
 ## twsgen_hist.02.twst ends here
