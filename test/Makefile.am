@@ -31,4 +31,7 @@ dist_noinst_DATA += work_hist_fut_01.xml
 dist_noinst_DATA += work_hist_fut_02.xml
 dist_noinst_DATA += work_hist_cash_01.xml
 
+clean-local:
+	-rm -rf *.tmpd
+
 ## Makefile.am ends here
