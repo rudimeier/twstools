@@ -57,9 +57,8 @@
 		</element>
 	</define>
 
-	<!--
-	  -- we leave out all other elements as they are specific to the
-	  -- tws api version used -->
+	<!-- we leave out all other elements as they are -->
+	<!-- specific to the api version used -->
 
 	<!-- helpers -->
 	<define name="any_attr">
