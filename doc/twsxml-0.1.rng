@@ -14,9 +14,6 @@
 			<attribute name="type">
 				<text/>
 			</attribute>
-			<optional>
-				<ref name="rmeta"/>
-			</optional>
 			<ref name="query"/>
 			<zeroOrMore>
 				<ref name="response"/>
@@ -25,14 +22,6 @@
 	</define>
 
 	<!-- level 2 -->
-	<define name="rmeta">
-		<element name="rmeta" ns="http://www.ga-group.nl/twsxml-0.1">
-			<attribute name="tws">
-				<text/>
-			</attribute>
-		</element>
-	</define>
-
 	<define name="query">
 		<element name="query" ns="http://www.ga-group.nl/twsxml-0.1">
 			<optional>
@@ -44,6 +33,9 @@
 
 	<define name="response">
 		<element name="response" ns="http://www.ga-group.nl/twsxml-0.1">
+			<optional>
+				<ref name="rmeta"/>
+			</optional>
 			<ref name="anything"/>
 		</element>
 	</define>
@@ -52,6 +44,14 @@
 	<define name="qmeta">
 		<element name="qmeta" ns="http://www.ga-group.nl/twsxml-0.1">
 			<attribute name="nick">
+				<text/>
+			</attribute>
+		</element>
+	</define>
+
+	<define name="rmeta">
+		<element name="rmeta" ns="http://www.ga-group.nl/twsxml-0.1">
+			<attribute name="tws">
 				<text/>
 			</attribute>
 		</element>
