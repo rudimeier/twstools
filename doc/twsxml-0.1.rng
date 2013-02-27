@@ -46,6 +46,9 @@
 			<attribute name="nick">
 				<text/>
 			</attribute>
+			<attribute name="tws">
+				<text/>
+			</attribute>
 		</element>
 	</define>
 
