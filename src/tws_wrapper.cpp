@@ -48,7 +48,7 @@
 #include "twsapi/Contract.h"
 #include "twsapi/Order.h"
 #include "twsapi/OrderState.h"
-#if TWSAPI_IB_VERSION_NUMBER > 96600
+#if TWSAPI_IB_VERSION_NUMBER > 966
 # include "twsapi/CommissionReport.h"
 #endif
 
@@ -381,7 +381,7 @@ void DebugTwsWrapper::marketDataType( IB::TickerId reqId, int marketDataType )
 }
 
 /* nobody should reference this callback except a newer twsapi */
-#if TWSAPI_IB_VERSION_NUMBER > 96600
+#if TWSAPI_IB_CLIENT_VERSION > 966
 void DebugTwsWrapper::commissionReport( const IB::CommissionReport &cr )
 {
 	DEBUG_PRINTF( "COMMISSION_REPORT %s %g %s %g %g %d", cr.execId.c_str(),

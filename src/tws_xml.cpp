@@ -65,7 +65,7 @@
 #ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
 # include "twsapi/twsapi_config.h"
 #endif
-#if TWSAPI_IB_VERSION_NUMBER <= 96600
+#if TWSAPI_IB_VERSION_NUMBER <= 966
 # define TagValueList Order::TagValueList
 # define TagValueListSPtr Order::TagValueListSPtr
 #endif
@@ -125,7 +125,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_STRING( c, secId );
 	ADD_ATTR_STRING( c, comboLegsDescrip );
 	
-# if TWSAPI_IB_VERSION_NUMBER <= 96600
+# if TWSAPI_IB_VERSION_NUMBER <= 966
 	if( c.comboLegs != NULL ) {
 #else
 	if( c.comboLegs.get() != NULL ) {
@@ -397,7 +397,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
-# if TWSAPI_IB_VERSION_NUMBER <= 96600
+# if TWSAPI_IB_VERSION_NUMBER <= 966
 			if( c->comboLegs == NULL ) {
 				c->comboLegs = new IB::Contract::ComboLegList();
 #else
@@ -414,7 +414,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
 				conv_xml2ib( cl, q );
-# if TWSAPI_IB_VERSION_NUMBER <= 96600
+# if TWSAPI_IB_VERSION_NUMBER <= 966
 				c->comboLegs->push_back(cl);
 #else
 				c->comboLegs->push_back(IB::ComboLegSPtr(cl));
