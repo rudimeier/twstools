@@ -4,7 +4,7 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
-0.4.0 - not yet released  ------------------------------------------------------
+0.4.0 - 2013-03-28  ------------------------------------------------------------
 
 This is a feature release.
 
@@ -19,6 +19,13 @@ This is a feature release.
   - place or cancel multiple orders in parallel
   - track portofolio, account info, and open orders to be used by strategie
     modules
+  - fix, parsing comboLegs from xml
+  - fix, handle contract_details error 321
+  - fix, disable harcoded data farms
+  - bldchn, require twsapi >= 0.4.0
+  - bldchn, check for twsapi_config.h
+  - bldchn, compatibility with twsapi >= 0.5.0
+  - test suite refactored
 
 
 
