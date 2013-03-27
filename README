@@ -6,7 +6,12 @@ This is a simple set of command line tools around IB's TWS API with the purpose
 of having a powerful scriptable toolbox to automate "jobs" like downloading
 historical data, tracking account info or submitting orders etc.
 
-Check out the latest version at https://github.com/rudimeier/twstools
+The project homepage (bugtracker, latest git repo) is hosted on github
+ https://github.com/rudimeier/twstools
+Released source tarballs download here
+ https://bitbucket.org/rudimeier/twstools/downloads
+Binary rpms for various Linux distros here
+ http://software.opensuse.org/download.html?project=home:rudi_m&package=twstools
 
 
 
