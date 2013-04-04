@@ -39,6 +39,7 @@ LT_SYS_SYMBOL_USCORE
 LT_FUNC_DLSYM_USCORE
 LT_CONFIG_LTDL_DIR([libltdl], [recursive])
 LTDL_INIT
+AM_CONDITIONAL([DESCEND_LIBLTDL], [test "${with_included_ltdl}" = "yes"])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
 PKG_CHECK_MODULES([twsapi], [twsapi >= 0.4.0],
