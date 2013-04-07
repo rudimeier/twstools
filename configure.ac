@@ -39,6 +39,8 @@ LT_SYS_SYMBOL_USCORE
 LT_FUNC_DLSYM_USCORE
 LT_CONFIG_LTDL_DIR([libltdl])
 LTDL_INIT([recursive])
+# workaround libtool LT_CONFIG_H bug #12262
+AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
 AM_CONDITIONAL([DESCEND_LIBLTDL], [test "${with_included_ltdl}" = "yes"])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
