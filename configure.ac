@@ -37,8 +37,8 @@ LT_SYS_MODULE_EXT
 LT_SYS_MODULE_PATH
 LT_SYS_SYMBOL_USCORE
 LT_FUNC_DLSYM_USCORE
-LT_CONFIG_LTDL_DIR([libltdl], [recursive])
-LTDL_INIT
+LT_CONFIG_LTDL_DIR([libltdl])
+LTDL_INIT([subproject])
 AM_CONDITIONAL([DESCEND_LIBLTDL], [test "${with_included_ltdl}" = "yes"])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
