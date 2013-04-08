@@ -40,9 +40,7 @@
 #if defined HAVE_CONFIG_H
 # include "config.h"
 #endif	/* HAVE_CONFIG_H */
-#if defined HAVE_LTDL
 # include <ltdl.h>
-#endif	/* HAVE_LTDL */
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
@@ -54,7 +52,6 @@
 typedef void(*lt_f)(void*);
 typedef struct tws_dso_s *tws_dso_t;
 
-#if defined HAVE_LTDL
 struct tws_dso_s {
 	lt_dlhandle handle;
 	lt_f initf;
@@ -154,22 +151,4 @@ static void work_dso(tws_dso_t mod, void *clo)
 	return;
 }
 
-#else  /* !HAVE_LTDL */
-/* just stubs here */
-static tws_dso_t open_dso(const char *UNUSED(fn), void *UNUSED(clo))
-{
-	return NULL;
-}
-
-static void close_dso(tws_dso_t UNUSED(mod), void *UNUSED(clo))
-{
-	return;
-}
-
-static void work_dso(tws_dso_t UNUSED(mod), void *UNUSED(clo))
-{
-	return;
-}
-
-#endif	/* HAVE_LTDL */
 #endif	/* INCLUDED_dso_magic_h_ */
