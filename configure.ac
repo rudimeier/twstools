@@ -2,7 +2,7 @@ AC_PREREQ([2.61])
 AC_INIT([twstools], [0.4.0], [http://www.ga-group.nl/])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADER([src/config.h])
+AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_SRCDIR([src/])
 
 AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
@@ -29,16 +29,10 @@ AC_SUBST([DEFAULT_CXXFLAGS])
 ## libltdl for loadable DSOs
 LT_PREREQ([2.1])
 LT_INIT([dlopen])
-LT_LIB_DLLOAD
-LT_LIB_M
-LT_SYS_DLOPEN_DEPLIBS
-LT_SYS_DLSEARCH_PATH
-LT_SYS_MODULE_EXT
-LT_SYS_MODULE_PATH
-LT_SYS_SYMBOL_USCORE
-LT_FUNC_DLSYM_USCORE
-LT_CONFIG_LTDL_DIR([libltdl], [recursive])
-LTDL_INIT
+LT_CONFIG_LTDL_DIR([libltdl])
+LTDL_INIT([recursive])
+# workaround libtool LT_CONFIG_H bug #12262
+AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
 AM_CONDITIONAL([DESCEND_LIBLTDL], [test "${with_included_ltdl}" = "yes"])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
@@ -66,6 +60,7 @@ AM_MISSING_PROG([HELP2MAN], [help2man], ["${missing_dir}"])
 
 ## output
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([libltdl/Makefile])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([sample/Makefile])
 AC_CONFIG_FILES([doc/Makefile])

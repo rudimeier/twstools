@@ -31,12 +31,15 @@ twsdo_SOURCES += tws_wrapper.cpp
 twsdo_SOURCES += tws_quote.cpp
 twsdo_SOURCES += tws_account.cpp
 twsdo_CPPFLAGS = $(AM_CPPFLAGS)
-twsdo_CPPFLAGS += $(INCLTDL)
+twsdo_CPPFLAGS += $(LTDLINCL)
 twsdo_LDFLAGS = $(AM_LDFLAGS)
-twsdo_LDFLAGS += $(LIBLTDL) -export-dynamic
+twsdo_LDFLAGS += -export-dynamic
 twsdo_LDADD =
+twsdo_LDADD += $(LIBLTDL)
 twsdo_LDADD += $(libxml2_LIBS)
 twsdo_LDADD += $(twsapi_LIBS)
+twsdo_DEPENDENCIES =
+twsdo_DEPENDENCIES += $(LTDLDEPS)
 
 twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp
