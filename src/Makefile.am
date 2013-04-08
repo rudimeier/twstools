@@ -38,6 +38,8 @@ twsdo_LDADD =
 twsdo_LDADD += $(LIBLTDL)
 twsdo_LDADD += $(libxml2_LIBS)
 twsdo_LDADD += $(twsapi_LIBS)
+twsdo_DEPENDENCIES =
+twsdo_DEPENDENCIES += $(LTDLDEPS)
 
 twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp
