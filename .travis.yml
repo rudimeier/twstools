@@ -2,6 +2,7 @@ language: cpp
 
 compiler:
   - gcc
+  - clang
 
 env:
   - build_git_twsapi="no"
@@ -37,7 +38,4 @@ branches:
   only:
     - master
     - next
-
-notifications:
-  email:
-    - sweet_f_a@gmx.de
+    - tmp
