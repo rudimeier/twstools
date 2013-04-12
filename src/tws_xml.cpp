@@ -428,7 +428,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				c->comboLegs->clear();
 			}
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				if(q->name && (strcmp((char*) q->name, "comboLeg") != 0)) {
+				if( !q->name || (strcmp((char*) q->name, "comboLeg") != 0)) {
 					continue;
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
