@@ -4,6 +4,15 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
+0.4.1 - not yet released  ------------------------------------------------------
+
+This is a maintenance release.
+
+  - bldchn, sort out libtdl dependencies
+  - complete Order and Execution structs to IB API 9.66
+
+
+
 0.4.0 - 2013-03-28  ------------------------------------------------------------
 
 This is a feature release.
