@@ -634,6 +634,9 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 			}
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
+				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
+					continue;
+				}
 				conv_xml2ib( tV.get(), q );
 				o->algoParams->push_back(tV);
 			}
@@ -648,6 +651,9 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 			}
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
+				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
+					continue;
+				}
 				conv_xml2ib( tV.get(), q );
 				o->smartComboRoutingParams->push_back(tV);
 			}
