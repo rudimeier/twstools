@@ -210,6 +210,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
 	ADD_ATTR_INT( e, liquidation );
 	ADD_ATTR_INT( e, cumQty );
 	ADD_ATTR_DOUBLE( e, avgPrice );
+	ADD_ATTR_STRING( e, orderRef );
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name,
@@ -290,6 +291,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_BOOL( o, eTradeOnly );
 	ADD_ATTR_BOOL( o, firmQuoteOnly );
 	ADD_ATTR_DOUBLE( o, nbboPriceCap );
+	ADD_ATTR_BOOL( o, optOutSmartRouting );
 	ADD_ATTR_INT( o, auctionStrategy );
 	ADD_ATTR_DOUBLE( o, startingPrice );
 	ADD_ATTR_DOUBLE( o, stockRefPrice );
@@ -300,6 +302,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_INT( o, volatilityType );
 	ADD_ATTR_STRING( o,  deltaNeutralOrderType );
 	ADD_ATTR_DOUBLE( o, deltaNeutralAuxPrice );
+	ADD_ATTR_LONG( o, deltaNeutralConId );
+	ADD_ATTR_STRING( o, deltaNeutralSettlingFirm );
+	ADD_ATTR_STRING( o, deltaNeutralClearingAccount );
+	ADD_ATTR_STRING( o, deltaNeutralClearingIntent );
 	ADD_ATTR_BOOL( o, continuousUpdate );
 	ADD_ATTR_INT( o, referencePriceType );
 	ADD_ATTR_DOUBLE( o, basisPoints );
@@ -307,6 +313,8 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_INT( o, scaleInitLevelSize );
 	ADD_ATTR_INT( o, scaleSubsLevelSize );
 	ADD_ATTR_DOUBLE( o, scalePriceIncrement );
+	ADD_ATTR_STRING( o, hedgeType );
+	ADD_ATTR_STRING( o, hedgeParam );
 	ADD_ATTR_STRING( o, account );
 	ADD_ATTR_STRING( o, settlingFirm );
 	ADD_ATTR_STRING( o, clearingAccount );
@@ -319,6 +327,17 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 				(const xmlChar*)"algoParams", NULL);
 			for( IB::TagValueList::const_iterator it
 				    = algoParams->begin(); it != algoParams->end(); ++it) {
+				conv_ib2xml( napl, "tagValue", **it );
+			}
+		}
+	}
+	{
+		const IB::TagValueList* const scrp = o.smartComboRoutingParams.get();
+		if( scrp != NULL ) {
+			xmlNodePtr napl = xmlNewChild( ne, NULL,
+				(const xmlChar*)"smartComboRoutingParams", NULL);
+			for( IB::TagValueList::const_iterator it
+				    = scrp->begin(); it != scrp->end(); ++it) {
 				conv_ib2xml( napl, "tagValue", **it );
 			}
 		}
@@ -409,7 +428,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				c->comboLegs->clear();
 			}
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				if(q->name && (strcmp((char*) q->name, "comboLeg") != 0)) {
+				if( !q->name || (strcmp((char*) q->name, "comboLeg") != 0)) {
 					continue;
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
@@ -493,6 +512,7 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 	GET_ATTR_INT( e, liquidation );
 	GET_ATTR_INT( e, cumQty );
 	GET_ATTR_DOUBLE( e, avgPrice );
+	GET_ATTR_STRING( e, orderRef );
 }
 
 
@@ -571,6 +591,7 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_BOOL( o, eTradeOnly );
 	GET_ATTR_BOOL( o, firmQuoteOnly );
 	GET_ATTR_DOUBLE( o, nbboPriceCap );
+	GET_ATTR_BOOL( o, optOutSmartRouting );
 	GET_ATTR_INT( o, auctionStrategy );
 	GET_ATTR_DOUBLE( o, startingPrice );
 	GET_ATTR_DOUBLE( o, stockRefPrice );
@@ -581,6 +602,10 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_INT( o, volatilityType );
 	GET_ATTR_STRING( o,  deltaNeutralOrderType );
 	GET_ATTR_DOUBLE( o, deltaNeutralAuxPrice );
+	GET_ATTR_LONG( o, deltaNeutralConId );
+	GET_ATTR_STRING( o, deltaNeutralSettlingFirm );
+	GET_ATTR_STRING( o, deltaNeutralClearingAccount );
+	GET_ATTR_STRING( o, deltaNeutralClearingIntent );
 	GET_ATTR_BOOL( o, continuousUpdate );
 	GET_ATTR_INT( o, referencePriceType );
 	GET_ATTR_DOUBLE( o, basisPoints );
@@ -588,6 +613,8 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_INT( o, scaleInitLevelSize );
 	GET_ATTR_INT( o, scaleSubsLevelSize );
 	GET_ATTR_DOUBLE( o, scalePriceIncrement );
+	GET_ATTR_STRING( o, hedgeType );
+	GET_ATTR_STRING( o, hedgeParam );
 	GET_ATTR_STRING( o, account );
 	GET_ATTR_STRING( o, settlingFirm );
 	GET_ATTR_STRING( o, clearingAccount );
@@ -607,8 +634,28 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 			}
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
+				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
+					continue;
+				}
 				conv_xml2ib( tV.get(), q );
 				o->algoParams->push_back(tV);
+			}
+		}
+		if(p->name && (strcmp((char*) p->name, "smartComboRoutingParams") == 0)) {
+			if( o->smartComboRoutingParams.get() ==  NULL ) {
+				IB::TagValueListSPtr
+					smartComboRoutingParams( new IB::TagValueList);
+				o->smartComboRoutingParams = smartComboRoutingParams;
+			} else {
+				o->smartComboRoutingParams->clear();
+			}
+			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				IB::TagValueSPtr tV( new IB::TagValue());
+				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
+					continue;
+				}
+				conv_xml2ib( tV.get(), q );
+				o->smartComboRoutingParams->push_back(tV);
 			}
 		}
 	}
