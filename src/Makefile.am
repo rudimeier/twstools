@@ -82,6 +82,12 @@ proof_of_concept_la_LDFLAGS += -rpath /none
 # Build all executables at distribution time to generate the man pages.
 dist-hook: $(bin_PROGRAMS)
 
+## hack to build libtdl (at least initially) if dist-hook binaries need it
+if DESCEND_LIBLTDL
+$(LTDLDEPS):
+	cd ../libltdl && $(MAKE)
+endif
+
 CLEANFILES =
 CLEANFILES += *.s
 CLEANFILES += *.i
