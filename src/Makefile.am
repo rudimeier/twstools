@@ -38,8 +38,8 @@ twsdo_LDADD =
 twsdo_LDADD += $(LIBLTDL)
 twsdo_LDADD += $(libxml2_LIBS)
 twsdo_LDADD += $(twsapi_LIBS)
-twsdo_DEPENDENCIES =
-twsdo_DEPENDENCIES += $(LTDLDEPS)
+EXTRA_twsdo_DEPENDENCIES =
+EXTRA_twsdo_DEPENDENCIES += $(LTDLDEPS)
 
 twsgen_SOURCES =
 twsgen_SOURCES += twsgen.cpp
@@ -81,6 +81,12 @@ proof_of_concept_la_LDFLAGS += -rpath /none
 
 # Build all executables at distribution time to generate the man pages.
 dist-hook: $(bin_PROGRAMS)
+
+## hack to build libtdl (at least initially) if dist-hook binaries need it
+if DESCEND_LIBLTDL
+$(LTDLDEPS):
+	cd ../libltdl && $(MAKE)
+endif
 
 CLEANFILES =
 CLEANFILES += *.s
