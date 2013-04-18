@@ -5,6 +5,8 @@ LC_ALL = C
 
 ACLOCAL_AMFLAGS = -I m4
 
+EXTRA_DIST =
+CLEANFILES =
 DISTCLEANFILES =
 
 SUBDIRS =
@@ -28,14 +30,17 @@ doc_DATA += ChangeLog
 dist_doc_DATA =
 dist_doc_DATA += LICENSE
 
-EXTRA_DIST =
 EXTRA_DIST += git-version-gen
-EXTRA_DIST += $(PACKAGE).spec
+EXTRA_DIST += twstools.spec twstools.spec.in
 
+CLEANFILES += twstools.spec
 DISTCLEANFILES += version.mk
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = twstools.pc
+
+twstools.spec: twstools.spec.in version.mk
+	$(do_subst) <$< >$@
 
 # Rule to build RPM distribution package
 rpm: dist-gzip
