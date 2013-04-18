@@ -31,13 +31,18 @@ dist_doc_DATA =
 dist_doc_DATA += LICENSE
 
 EXTRA_DIST += git-version-gen
+EXTRA_DIST += twstools.pc.in
 EXTRA_DIST += twstools.spec twstools.spec.in
 
+CLEANFILES += twstools.pc
 CLEANFILES += twstools.spec
 DISTCLEANFILES += version.mk
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = twstools.pc
+
+twstools.pc: twstools.pc.in version.mk
+	$(do_subst) <$< >$@
 
 twstools.spec: twstools.spec.in version.mk
 	$(do_subst) <$< >$@
