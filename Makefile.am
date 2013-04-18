@@ -17,6 +17,7 @@ dist_doc_DATA =
 dist_doc_DATA += LICENSE
 
 EXTRA_DIST =
+EXTRA_DIST += git-version-gen
 EXTRA_DIST += $(PACKAGE).spec
 
 pkgconfigdir = $(libdir)/pkgconfig
