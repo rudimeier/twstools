@@ -1,5 +1,7 @@
 AC_PREREQ([2.61])
-AC_INIT([twstools], [0.4.1], [https://github.com/rudimeier/twstools])
+
+## t.i.n.a.v = this is not a version, never use it!
+AC_INIT([twstools], [t.i.n.a.v], [https://github.com/rudimeier/twstools])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/config.h])
