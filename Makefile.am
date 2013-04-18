@@ -32,3 +32,7 @@ pkgconfig_DATA = twstools.pc
 # Rule to build RPM distribution package
 rpm: dist-gzip
 	rpmbuild -ta $(distdir).tar.gz
+
+dist-hook:
+	echo $(VERSION) > $(distdir)/version \
+	&& touch -r $(top_builddir)/version.mk $(distdir)/version
