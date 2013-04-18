@@ -13,6 +13,14 @@ SUBDIRS += libltdl
 endif  DESCEND_LIBLTDL
 SUBDIRS += src sample doc test
 
+# do_subst, inspired by the automake project
+do_subst = ( sed \
+  -e 's,[@]VERSION[@],$(VERSION),g' \
+  -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+  -e 's,[@]PACKAGE_STRING[@],$(PACKAGE_STRING),g' \
+| $(SHELL) ./config.status --file=- \
+  )
+
 doc_DATA =
 doc_DATA += README
 doc_DATA += ChangeLog
