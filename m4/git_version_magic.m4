@@ -9,4 +9,11 @@ if  "${srcdir}/git-version-gen" "${srcdir}" version.mk 2>/dev/null \
 else
   AC_MSG_FAILURE([failed])
 fi
+
+dnl remove version info from config header
+AH_BOTTOM([
+#/**/undef/**/ VERSION
+#/**/undef/**/ PACKAGE_VERSION
+#/**/undef/**/ PACKAGE_STRING
+])
 ])
