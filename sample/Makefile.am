@@ -1,3 +1,4 @@
+include $(top_builddir)/version.mk
 
 dist_noinst_SCRIPTS =
 dist_noinst_SCRIPTS += get_account_info.sh

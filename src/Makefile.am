@@ -1,3 +1,5 @@
+include $(top_builddir)/version.mk
+
 AM_CPPFLAGS =
 AM_CPPFLAGS += -DDEBUG -D_GNU_SOURCE
 AM_CPPFLAGS += $(libxml2_CFLAGS)

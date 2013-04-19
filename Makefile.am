@@ -1,3 +1,5 @@
+include $(top_builddir)/version.mk
+
 LANG = C
 LC_ALL = C
 
