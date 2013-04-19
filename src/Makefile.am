@@ -36,6 +36,7 @@ twsdo_SOURCES += tws_wrapper.cpp
 twsdo_SOURCES += tws_quote.cpp
 twsdo_SOURCES += tws_account.cpp
 twsdo_SOURCES += twsdo_ggo.c
+twsdo_SOURCES += version.c
 twsdo_LDFLAGS = $(AM_LDFLAGS)
 twsdo_LDFLAGS += -export-dynamic
 twsdo_LDADD =
@@ -52,6 +53,7 @@ twsgen_SOURCES += tws_meta.cpp
 twsgen_SOURCES += tws_query.cpp
 twsgen_SOURCES += tws_util.cpp
 twsgen_SOURCES += twsgen_ggo.c
+twsgen_SOURCES += version.c
 twsgen_LDFLAGS = $(AM_LDFLAGS)
 twsgen_LDADD =
 twsgen_LDADD += $(libxml2_LIBS)
@@ -61,6 +63,7 @@ noinst_HEADERS += tws_client.h
 noinst_HEADERS += tws_wrapper.h
 noinst_HEADERS += tws_xml.h
 noinst_HEADERS += dso_magic.h
+noinst_HEADERS += version.h
 
 header_HEADERS += debug.h
 header_HEADERS += twsdo.h
@@ -71,6 +74,7 @@ header_HEADERS += tws_quote.h
 header_HEADERS += tws_util.h
 
 BUILT_SOURCES =
+BUILT_SOURCES += version_defs.h
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
 BUILT_SOURCES += twsgen_ggo.c twsgen_ggo.h
 
@@ -95,7 +99,10 @@ endif
 CLEANFILES =
 CLEANFILES += *.s
 CLEANFILES += *.i
+CLEANFILES += version_defs.h
 
+version_defs.h: $(top_builddir)/version.mk Makefile
+	echo '#define VERSION "$(VERSION)"' > $@
 
 %_ggo.c %_ggo.h: %.ggo
 	gengetopt --no-help --no-version -i $< -F $*_ggo
