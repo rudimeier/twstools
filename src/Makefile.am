@@ -104,8 +104,15 @@ CLEANFILES += version_defs.h
 version_defs.h: $(top_builddir)/version.mk Makefile
 	echo '#define VERSION "$(VERSION)"' > $@
 
-%_ggo.c %_ggo.h: %.ggo
-	gengetopt --no-help --no-version -i $< -F $*_ggo
+## gengetopt rule with sed hack to avoid using VERSION and config.h
+## depend on Makefile.am to survive a git pull
+%_ggo.c %_ggo.h: %.ggo Makefile.am
+	gengetopt --no-help --no-version -i $< -F $*_ggo \
+	&& sed \
+	  -e 's,config.h,version.h,g' \
+	  -e 's,CMDLINE_PARSER_VERSION VERSION,CMDLINE_PARSER_VERSION git_version_string,g' \
+	  $*_ggo.h >$*_ggo.h-t \
+	&& mv $*_ggo.h-t $*_ggo.h
 
 # 
 # Help the developers get nice post-processed source files
