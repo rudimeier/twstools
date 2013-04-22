@@ -35,7 +35,6 @@
  *
  ***/
 
-#include "twsgen_ggo.h"
 #include "tws_xml.h"
 #include "tws_meta.h"
 #include "tws_query.h"
@@ -48,7 +47,7 @@
 #include <time.h>
 #include <libxml/tree.h>
 
-#include "twsgen_ggo.c"
+#include "twsgen_ggo.h"
 
 
 static gengetopt_args_info args_info;
