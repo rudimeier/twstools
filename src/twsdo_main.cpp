@@ -41,7 +41,6 @@
 #include "tws_xml.h"
 
 #include "twsdo_ggo.h"
-#include "twsdo_ggo.c"
 
 
 static gengetopt_args_info args_info;
