@@ -16,8 +16,11 @@ AC_PROG_CXX_C_O
 
 AC_LANG([C++])
 AX_COMPILER_VENDOR
+AC_LANG_PUSH([C])
+AX_COMPILER_VENDOR
+AC_LANG_POP([C])
 
-# enable some warnings
+## enable some warnings for CXX
 AX_CHECK_COMPILE_FLAG([-Wall],[warnflags="-Wall"])
 # intel's -Wextra is too verbose
 if test "$ax_cv_cxx_compiler_vendor" != "intel"; then
@@ -25,6 +28,14 @@ if test "$ax_cv_cxx_compiler_vendor" != "intel"; then
 fi
 DEFAULT_CXXFLAGS="$warnflags"
 AC_SUBST([DEFAULT_CXXFLAGS])
+
+## enable some warnings for CC
+AC_LANG_PUSH([C])
+AX_CHECK_COMPILE_FLAG([-Wall],[warnflags="-Wall"])
+AX_CHECK_COMPILE_FLAG([-Wextra],[warnflags="$warnflags -Wextra"])
+DEFAULT_CFLAGS="$warnflags"
+AC_SUBST([DEFAULT_CFLAGS])
+AC_LANG_POP([C])
 
 ## libltdl for loadable DSOs
 LT_PREREQ([2.1])
