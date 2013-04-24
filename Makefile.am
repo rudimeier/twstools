@@ -41,11 +41,12 @@ DISTCLEANFILES += version.mk
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = twstools.pc
 
-twstools.pc: twstools.pc.in version.mk
-	$(do_subst) <$< >$@
-
-twstools.spec: twstools.spec.in version.mk
-	$(do_subst) <$< >$@
+twstools.pc: twstools.pc.in
+twstools.spec: twstools.spec.in
+twstools.spec twstools.pc: version.mk
+	rm -f $@ $@-t
+	$(do_subst) <$(srcdir)/$@.in >$@-t
+	mv -f $@-t $@
 
 # Rule to build RPM distribution package
 rpm: dist-gzip
