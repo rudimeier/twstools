@@ -7,6 +7,10 @@ ifneq ($(_gl-Makefile),)
 
 include Makefile
 
+# update the included makefile snippet which sets VERSION variables
+version.mk: FORCE
+	$(top_srcdir)/git-version-gen $(top_srcdir) $@
+
 else
 
 .DEFAULT_GOAL := abort-due-to-no-makefile
@@ -18,3 +22,5 @@ abort-due-to-no-makefile:
 	@exit 1
 
 endif
+
+.PHONY: FORCE
