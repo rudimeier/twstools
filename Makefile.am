@@ -3,6 +3,8 @@ LC_ALL = C
 
 ACLOCAL_AMFLAGS = -I m4
 
+DISTCLEANFILES =
+
 SUBDIRS =
 if DESCEND_LIBLTDL
 SUBDIRS += libltdl
@@ -19,6 +21,8 @@ dist_doc_DATA += LICENSE
 EXTRA_DIST =
 EXTRA_DIST += git-version-gen
 EXTRA_DIST += $(PACKAGE).spec
+
+DISTCLEANFILES += version.mk
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = twstools.pc

@@ -9,6 +9,8 @@ AC_CONFIG_SRCDIR([src/])
 
 AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
 
+GIT_VERSION_MAGIC
+
 ## compiler check
 AC_PROG_CC
 AC_PROG_CC_C_O
