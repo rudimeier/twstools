@@ -26,6 +26,6 @@ twsgen.1: $(top_srcdir)/src/twsgen.cpp
 ## help2man helpers
 %.1: $(top_srcdir)/src/%.ggo $(top_srcdir)/doc/%.h2m $(top_srcdir)/configure
 	$(HELP2MAN) -S "$(PACKAGE_STRING)" -N \
-		-I "$(srcdir)/$*.h2m" -I "$(builddir)/$*.h2m" \
+		-I "$(srcdir)/$*.h2m" \
 		-I "$(srcdir)/author.h2m" \
 		-o $@ $(top_builddir)/src/$*
