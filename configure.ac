@@ -10,6 +10,7 @@ AC_CONFIG_SRCDIR([src/])
 AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
 
 GIT_VERSION_MAGIC
+AC_CONFIG_LINKS([GNUmakefile:GNUmakefile])
 
 ## compiler check
 AC_PROG_CC
