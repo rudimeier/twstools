@@ -11,6 +11,8 @@ man1_MANS =
 man1_MANS += $(built_mans)
 
 EXTRA_DIST += author.h2m
+EXTRA_DIST += twsdo.h2m
+EXTRA_DIST += twsgen.h2m
 BUILT_SOURCES += $(built_mans)
 
 built_mans =
