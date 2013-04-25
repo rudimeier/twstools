@@ -26,7 +26,7 @@ twsdo.1: $(top_srcdir)/src/twsdo_main.cpp
 twsgen.1: $(top_srcdir)/src/twsgen.cpp
 
 ## help2man helpers
-%.1: $(top_srcdir)/src/%.ggo $(top_srcdir)/doc/%.h2m $(top_srcdir)/configure
+%.1: $(top_srcdir)/src/%.ggo $(top_srcdir)/doc/%.h2m $(top_srcdir)/configure $(top_builddir)/version.mk
 	$(HELP2MAN) -S "$(PACKAGE_STRING)" -N \
 		-I "$(srcdir)/$*.h2m" \
 		-I "$(srcdir)/author.h2m" \
