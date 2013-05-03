@@ -39,6 +39,7 @@
 #include "tws_meta.h"
 #include "tws_query.h"
 #include "debug.h"
+#include "version.h"
 #include "config.h"
 
 #include <stdlib.h>
@@ -83,7 +84,7 @@ static int formatDate()
 
 
 #define VERSION_MSG \
-CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") " PACKAGE_VERSION " [\
+CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") %s [\
 built with twsapi " TWSAPI_VERSION "]\n\
 Copyright (C) 2010-2012 Ruediger Meier\n\
 License BSD 3-Clause\n\
@@ -100,7 +101,7 @@ static void check_display_args()
 	} else if( args_info.usage_given ) {
 		printf( "%s\n", gengetopt_args_info_usage );
 	} else if( args_info.version_given ) {
-		printf( VERSION_MSG );
+		printf( VERSION_MSG, git_version_string );
  	} else {
 		return;
 	}

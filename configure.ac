@@ -1,11 +1,16 @@
 AC_PREREQ([2.61])
-AC_INIT([twstools], [0.4.1], [https://github.com/rudimeier/twstools])
+
+## t.i.n.a.v = this is not a version, never use it!
+AC_INIT([twstools], [t.i.n.a.v], [https://github.com/rudimeier/twstools])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_SRCDIR([src/])
 
 AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
+
+GIT_VERSION_MAGIC
+AC_CONFIG_LINKS([GNUmakefile:GNUmakefile])
 
 ## compiler check
 AC_PROG_CC
@@ -76,7 +81,5 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([sample/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([test/Makefile])
-AC_CONFIG_FILES([twstools.pc])
-AC_CONFIG_FILES([twstools.spec])
 AC_OUTPUT
 
