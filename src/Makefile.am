@@ -14,6 +14,7 @@ AM_LDFLAGS =
 EXTRA_DIST =
 EXTRA_DIST += twsdo.ggo
 EXTRA_DIST += twsgen.ggo
+EXTRA_DIST += version.c.in
 EXTRA_DIST += $(BUILT_SOURCES)
 
 headerdir = $(includedir)/twstools
@@ -36,7 +37,7 @@ twsdo_SOURCES += tws_wrapper.cpp
 twsdo_SOURCES += tws_quote.cpp
 twsdo_SOURCES += tws_account.cpp
 twsdo_SOURCES += twsdo_ggo.c
-twsdo_SOURCES += version.c
+nodist_twsdo_SOURCES = version.c
 twsdo_LDFLAGS = $(AM_LDFLAGS)
 twsdo_LDFLAGS += -export-dynamic
 twsdo_LDADD =
@@ -53,7 +54,7 @@ twsgen_SOURCES += tws_meta.cpp
 twsgen_SOURCES += tws_query.cpp
 twsgen_SOURCES += tws_util.cpp
 twsgen_SOURCES += twsgen_ggo.c
-twsgen_SOURCES += version.c
+nodist_twsgen_SOURCES = version.c
 twsgen_LDFLAGS = $(AM_LDFLAGS)
 twsgen_LDADD =
 twsgen_LDADD += $(libxml2_LIBS)
@@ -74,7 +75,6 @@ header_HEADERS += tws_quote.h
 header_HEADERS += tws_util.h
 
 BUILT_SOURCES =
-BUILT_SOURCES += version_defs.h
 BUILT_SOURCES += twsdo_ggo.c twsdo_ggo.h
 BUILT_SOURCES += twsgen_ggo.c twsgen_ggo.h
 
@@ -99,10 +99,10 @@ endif
 CLEANFILES =
 CLEANFILES += *.s
 CLEANFILES += *.i
-CLEANFILES += version_defs.h
+CLEANFILES += version.c
 
-version_defs.h: $(top_builddir)/version.mk Makefile
-	echo '#define VERSION "$(VERSION)"' > $@
+version.c: version.c.in $(top_builddir)/version.mk
+	sed -e 's,[@]VERSION[@],$(VERSION),g' <$(srcdir)/$@.in >$@
 
 ## gengetopt rule with sed hack to avoid using VERSION and config.h
 ## depend on Makefile.am to survive a git pull

@@ -1,4 +1,5 @@
 #include "version.h"
-#include "version_defs.h"
+
+#define VERSION "@VERSION@"
 
 const char git_version_string[] = VERSION;
