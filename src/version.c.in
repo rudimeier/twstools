@@ -2,4 +2,4 @@
 
 #define VERSION "@VERSION@"
 
-const char git_version_string[] = VERSION;
+const char twstools_version_string[] = VERSION;

@@ -110,7 +110,7 @@ version.c: version.c.in $(top_builddir)/version.mk
 	gengetopt --no-help --no-version -i $< -F $*_ggo \
 	&& sed \
 	  -e 's,config.h,version.h,g' \
-	  -e 's,CMDLINE_PARSER_VERSION VERSION,CMDLINE_PARSER_VERSION git_version_string,g' \
+	  -e 's,\(.*\)_PARSER_VERSION VERSION,\1_PARSER_VERSION $(PACKAGE)_version_string,g' \
 	  $*_ggo.h >$*_ggo.h-t \
 	&& mv $*_ggo.h-t $*_ggo.h
 

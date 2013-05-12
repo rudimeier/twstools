@@ -101,7 +101,7 @@ static void check_display_args()
 	} else if( args_info.usage_given ) {
 		printf( "%s\n", gengetopt_args_info_usage );
 	} else if( args_info.version_given ) {
-		printf( VERSION_MSG, git_version_string );
+		printf( VERSION_MSG, twstools_version_string );
  	} else {
 		return;
 	}
