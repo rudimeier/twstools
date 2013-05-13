@@ -20,7 +20,7 @@ do_subst = ( sed \
   -e 's,[@]VERSION[@],$(VERSION),g' \
   -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
   -e 's,[@]PACKAGE_STRING[@],$(PACKAGE_STRING),g' \
-| $(SHELL) ./config.status --file=- \
+  | $(SHELL) ./config.status --file=- \
   )
 
 doc_DATA =

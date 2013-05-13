@@ -1,0 +1,5 @@
+#include "version.h"
+
+#define VERSION "@VERSION@"
+
+const char twstools_version_string[] = VERSION;
