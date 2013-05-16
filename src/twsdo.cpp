@@ -757,8 +757,11 @@ void TwsDL::twsError( const RowError& err )
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
-			case GenericRequest::NONE:
 				assert( false );
+				break;
+			case GenericRequest::NONE:
+				DEBUG_PRINTF( "Warning, got message for closed request %d.",
+					err.id );
 				break;
 		}
 		return;
