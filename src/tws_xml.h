@@ -38,6 +38,10 @@
 #ifndef TWS_XML_H
 #define TWS_XML_H
 
+/* it's a pain to get macro PRIdMAX on C++ */
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 
 namespace IB {
 	class ComboLeg;
@@ -200,7 +204,7 @@ class TwsXml
 
 #define ADD_ATTR_LONGLONG( _struct_, _attr_ ) \
 	if( !TwsXml::skip_defaults || _struct_._attr_ != dflt._attr_ ) { \
-		snprintf(tmp, sizeof(tmp), "%lld",_struct_._attr_ ); \
+		snprintf(tmp, sizeof(tmp), "%" PRIdMAX, (intmax_t)_struct_._attr_ ); \
 		xmlNewProp ( ne, (xmlChar*) #_attr_, (xmlChar*) tmp ); \
 	}
 
