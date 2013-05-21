@@ -622,8 +622,8 @@ bool TwsDL::finContracts()
 	PacketContractDetails* p = (PacketContractDetails*)packet;
 	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
-		DEBUG_PRINTF( "Contracts received: %zu",
-		p->constList().size() );
+		DEBUG_PRINTF( "Contracts received: %lu",
+			(unsigned long) p->constList().size() );
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
