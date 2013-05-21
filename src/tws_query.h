@@ -41,6 +41,7 @@
 #include "twsapi/Contract.h"
 #include "twsapi/Execution.h"
 #include "twsapi/Order.h"
+#include <stdint.h>
 
 
 class ContractDetailsRequest
