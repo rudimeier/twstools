@@ -187,7 +187,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, timeZoneId );
 	ADD_ATTR_STRING( cd, tradingHours );
 	ADD_ATTR_STRING( cd, liquidHours );
-
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	ADD_ATTR_STRING( cd, evRule );
+	ADD_ATTR_DOUBLE( cd, evMultiplier );
+#endif
 	// BOND values
 	ADD_ATTR_STRING( cd, cusip );
 	ADD_ATTR_STRING( cd, ratings );
@@ -204,6 +207,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, nextOptionType );
 	ADD_ATTR_BOOL( cd, nextOptionPartial );
 	ADD_ATTR_STRING( cd, notes );
+
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	ADD_CHILD_TAGVALUELIST( cd, secIdList );
+#endif
 }
 
 
@@ -229,6 +236,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
 	ADD_ATTR_INT( e, cumQty );
 	ADD_ATTR_DOUBLE( e, avgPrice );
 	ADD_ATTR_STRING( e, orderRef );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	ADD_ATTR_STRING( e, evRule );
+	ADD_ATTR_DOUBLE( e, evMultiplier );
+#endif
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name,
@@ -296,6 +307,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_DOUBLE( o, percentOffset );
 	ADD_ATTR_BOOL( o, overridePercentageConstraints );
 	ADD_ATTR_DOUBLE( o, trailStopPrice );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	ADD_ATTR_DOUBLE( o, trailingPercent );
+#endif
 	ADD_ATTR_STRING( o, faGroup );
 	ADD_ATTR_STRING( o, faProfile );
 	ADD_ATTR_STRING( o, faMethod );
@@ -331,6 +345,15 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_INT( o, scaleInitLevelSize );
 	ADD_ATTR_INT( o, scaleSubsLevelSize );
 	ADD_ATTR_DOUBLE( o, scalePriceIncrement );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	ADD_ATTR_DOUBLE( o, scalePriceAdjustValue );
+	ADD_ATTR_INT( o, scalePriceAdjustInterval );
+	ADD_ATTR_DOUBLE( o, scaleProfitOffset );
+	ADD_ATTR_BOOL( o, scaleAutoReset );
+	ADD_ATTR_INT( o, scaleInitPosition );
+	ADD_ATTR_INT( o, scaleInitFillQty );
+	ADD_ATTR_BOOL( o, scaleRandomPercent );
+#endif
 	ADD_ATTR_STRING( o, hedgeType );
 	ADD_ATTR_STRING( o, hedgeParam );
 	ADD_ATTR_STRING( o, account );
@@ -473,7 +496,10 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, timeZoneId );
 	GET_ATTR_STRING( cd, tradingHours );
 	GET_ATTR_STRING( cd, liquidHours );
-
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	GET_ATTR_STRING( cd, evRule );
+	GET_ATTR_DOUBLE( cd, evMultiplier );
+#endif
 	// BOND values
 	GET_ATTR_STRING( cd, cusip );
 	GET_ATTR_STRING( cd, ratings );
@@ -498,6 +524,11 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 		if( strcmp((char*) p->name, "summary") == 0 ) {
 			conv_xml2ib( &cd->summary, p );
 		}
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+		else if(p->name && (strcmp((char*) p->name, "secIdList") == 0)) {
+			GET_CHILD_TAGVALUELIST( cd->secIdList );
+		}
+#endif
 	}
 }
 
@@ -520,6 +551,10 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 	GET_ATTR_INT( e, cumQty );
 	GET_ATTR_DOUBLE( e, avgPrice );
 	GET_ATTR_STRING( e, orderRef );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	GET_ATTR_STRING( e, evRule );
+	GET_ATTR_DOUBLE( e, evMultiplier );
+#endif
 }
 
 
@@ -576,6 +611,9 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_DOUBLE( o, percentOffset );
 	GET_ATTR_BOOL( o, overridePercentageConstraints );
 	GET_ATTR_DOUBLE( o, trailStopPrice );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	GET_ATTR_DOUBLE( o, trailingPercent );
+#endif
 	GET_ATTR_STRING( o, faGroup );
 	GET_ATTR_STRING( o, faProfile );
 	GET_ATTR_STRING( o, faMethod );
@@ -617,6 +655,15 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_INT( o, scaleInitLevelSize );
 	GET_ATTR_INT( o, scaleSubsLevelSize );
 	GET_ATTR_DOUBLE( o, scalePriceIncrement );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	GET_ATTR_DOUBLE( o, scalePriceAdjustValue );
+	GET_ATTR_INT( o, scalePriceAdjustInterval );
+	GET_ATTR_DOUBLE( o, scaleProfitOffset );
+	GET_ATTR_BOOL( o, scaleAutoReset );
+	GET_ATTR_INT( o, scaleInitPosition );
+	GET_ATTR_INT( o, scaleInitFillQty );
+	GET_ATTR_BOOL( o, scaleRandomPercent );
+#endif
 	GET_ATTR_STRING( o, hedgeType );
 	GET_ATTR_STRING( o, hedgeParam );
 	GET_ATTR_STRING( o, account );
