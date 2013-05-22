@@ -352,6 +352,12 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_STRING( o, deltaNeutralSettlingFirm );
 	ADD_ATTR_STRING( o, deltaNeutralClearingAccount );
 	ADD_ATTR_STRING( o, deltaNeutralClearingIntent );
+#if TWSAPI_IB_VERSION_NUMBER >= 968
+	ADD_ATTR_STRING( o, deltaNeutralOpenClose );
+	ADD_ATTR_BOOL( o, deltaNeutralShortSale );
+	ADD_ATTR_INT( o, deltaNeutralShortSaleSlot );
+	ADD_ATTR_STRING( o, deltaNeutralDesignatedLocation );
+#endif
 	ADD_ATTR_BOOL( o, continuousUpdate );
 	ADD_ATTR_INT( o, referencePriceType );
 	ADD_ATTR_DOUBLE( o, basisPoints );
@@ -680,6 +686,12 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, deltaNeutralSettlingFirm );
 	GET_ATTR_STRING( o, deltaNeutralClearingAccount );
 	GET_ATTR_STRING( o, deltaNeutralClearingIntent );
+#if TWSAPI_IB_VERSION_NUMBER >= 968
+	GET_ATTR_STRING( o, deltaNeutralOpenClose );
+	GET_ATTR_BOOL( o, deltaNeutralShortSale );
+	GET_ATTR_INT( o, deltaNeutralShortSaleSlot );
+	GET_ATTR_STRING( o, deltaNeutralDesignatedLocation );
+#endif
 	GET_ATTR_BOOL( o, continuousUpdate );
 	GET_ATTR_INT( o, referencePriceType );
 	GET_ATTR_DOUBLE( o, basisPoints );
