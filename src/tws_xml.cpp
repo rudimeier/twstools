@@ -271,6 +271,20 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& tV )
 	ADD_ATTR_STRING( tV, value );
 }
 
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+void conv_ib2xml( xmlNodePtr parent, const char* name,
+	const IB::OrderComboLeg& oCL )
+{
+	char tmp[128];
+	static const IB::OrderComboLeg dflt;
+
+	xmlNodePtr ne = xmlNewChild( parent, NULL,
+		(const xmlChar*)name, NULL);
+
+	ADD_ATTR_DOUBLE( oCL, price );
+}
+#endif
+
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 {
 	char tmp[128];
@@ -578,6 +592,15 @@ void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 	GET_ATTR_STRING( tV, tag );
 	GET_ATTR_STRING( tV, value );
 }
+
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+void conv_xml2ib( IB::OrderComboLeg* oCL, const xmlNodePtr node )
+{
+	char* tmp;
+
+	GET_ATTR_DOUBLE( oCL, price );
+}
+#endif
 
 void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 {
