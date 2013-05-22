@@ -455,10 +455,6 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	char* tmp;
 	static const IB::ContractDetails dflt;
 	
-	xmlNodePtr xc = xmlFirstElementChild( node );
-	conv_xml2ib( &cd->summary, xc );
-	assert( strcmp((char*)xc->name,"summary") == 0 ); //TODO
-	
 	GET_ATTR_STRING( cd, marketName );
 	GET_ATTR_STRING( cd, tradingClass );
 	GET_ATTR_DOUBLE( cd, minTick );
@@ -491,6 +487,12 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, nextOptionType );
 	GET_ATTR_BOOL( cd, nextOptionPartial );
 	GET_ATTR_STRING( cd, notes );
+	
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if(p->name && (strcmp((char*) p->name, "summary") == 0)) {
+			conv_xml2ib( &cd->summary, p );
+		}
+	}
 }
 
 
