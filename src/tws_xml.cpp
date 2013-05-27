@@ -381,6 +381,15 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 
 	ADD_ATTR_BOOL( o, whatIf );
 	ADD_ATTR_BOOL( o, notHeld );
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+	if( o.orderComboLegs.get() != NULL ) {
+		xmlNodePtr np = xmlNewChild( ne, NULL, (xmlChar*)"orderComboLegs", NULL);
+		for( IB::Order::OrderComboLegList::const_iterator it
+			 = o.orderComboLegs->begin(); it != o.orderComboLegs->end(); ++it) {
+			conv_ib2xml( np, "orderComboLeg", **it );
+		}
+	}
+#endif
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
@@ -706,6 +715,21 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 		} else if( strcmp((char*) p->name, "smartComboRoutingParams") == 0 ) {
 			GET_CHILD_TAGVALUELIST( o->smartComboRoutingParams );
 		}
+#if TWSAPI_IB_VERSION_NUMBER >= 967
+		else if( strcmp((char*) p->name, "orderComboLegs") == 0 ) {
+			o->orderComboLegs = IB::Order::OrderComboLegListSPtr(
+				new IB::Order::OrderComboLegList() );
+			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+				IB::OrderComboLegSPtr oCL( new IB::OrderComboLeg());
+				if( q->type != XML_ELEMENT_NODE
+				    || (strcmp((char*) q->name, "orderComboLeg") != 0)) {
+					continue;
+				}
+				conv_xml2ib( oCL.get(), q );
+				o->orderComboLegs->push_back(oCL);
+			}
+		}
+#endif
 	}
 }
 
