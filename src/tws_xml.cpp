@@ -581,8 +581,8 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, openClose );
 	
 	int orderOriginInt;
-	tmp = (char*) xmlGetProp( node, (xmlChar*) "origin" ); \
-	orderOriginInt = tmp ? atoi( tmp ) : dflt.origin; \
+	tmp = (char*) xmlGetProp( node, (xmlChar*) "origin" );
+	orderOriginInt = tmp ? atoi( tmp ) : dflt.origin;
 	free(tmp);
 	o->origin = (IB::Origin) orderOriginInt;
 	
