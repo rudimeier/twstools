@@ -411,16 +411,15 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
 #if TWSAPI_IB_VERSION_NUMBER <= 966
-			if( c->comboLegs == NULL ) {
-				c->comboLegs = new IB::Contract::ComboLegList();
-#else
-			if( c->comboLegs.get() == NULL ) {
-				c->comboLegs = IB::Contract::ComboLegListSPtr(
-					new IB::Contract::ComboLegList() );
-#endif
-			} else {
-				c->comboLegs->clear();
+			if( c->comboLegs != NULL ) {
+				/* see comment for underComp below */
+				delete c->comboLegs;
 			}
+			c->comboLegs = new IB::Contract::ComboLegList();
+#else
+			c->comboLegs = IB::Contract::ComboLegListSPtr(
+				new IB::Contract::ComboLegList() );
+#endif
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				if( !q->name || (strcmp((char*) q->name, "comboLeg") != 0)) {
 					continue;
@@ -434,9 +433,14 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 #endif
 			}
 		} else if( p->name && (strcmp((char*) p->name, "underComp") == 0)) {
-			if( c->underComp == NULL ) {
-				c->underComp = new IB::UnderComp();
+			if( c->underComp != NULL ) {
+				/* This can only happen if the caller gave us an uninitialized
+				   contract (programming error) or if the xml wrongly contains
+				   more than one underComp tag. For the second case we have to
+				   avoid a memleak here */
+				delete c->underComp;
 			}
+			c->underComp = new IB::UnderComp();
 			conv_xml2ib( c->underComp, p );
 		}
 	}
@@ -615,13 +619,7 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "algoParams") == 0)) {
-			if( o->algoParams.get() ==  NULL ) {
-				IB::TagValueListSPtr
-					algoParams( new IB::TagValueList);
-				o->algoParams = algoParams;
-			} else {
-				o->algoParams->clear();
-			}
+			o->algoParams = IB::TagValueListSPtr( new IB::TagValueList);
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
 				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
@@ -632,13 +630,8 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 			}
 		}
 		if(p->name && (strcmp((char*) p->name, "smartComboRoutingParams") == 0)) {
-			if( o->smartComboRoutingParams.get() ==  NULL ) {
-				IB::TagValueListSPtr
-					smartComboRoutingParams( new IB::TagValueList);
-				o->smartComboRoutingParams = smartComboRoutingParams;
-			} else {
-				o->smartComboRoutingParams->clear();
-			}
+			o->smartComboRoutingParams
+				= IB::TagValueListSPtr( new IB::TagValueList);
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
 				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
