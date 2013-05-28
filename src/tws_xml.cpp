@@ -128,9 +128,8 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	if( c.comboLegs.get() != NULL ) {
 #endif
 		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
-
-		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
-		for ( it = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
+		for( IB::Contract::ComboLegList::const_iterator it
+			    = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
 			conv_ib2xml( ncl, "comboLeg", **it );
 		}
 	}
