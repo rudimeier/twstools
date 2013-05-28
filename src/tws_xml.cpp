@@ -628,8 +628,8 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 				conv_xml2ib( tV.get(), q );
 				o->algoParams->push_back(tV);
 			}
-		}
-		if(p->name && (strcmp((char*) p->name, "smartComboRoutingParams") == 0)) {
+		} else if( p->name &&
+		           (strcmp((char*) p->name, "smartComboRoutingParams") == 0)) {
 			o->smartComboRoutingParams
 				= IB::TagValueListSPtr( new IB::TagValueList);
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
