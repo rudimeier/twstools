@@ -368,7 +368,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
 void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 {
 	char* tmp;
-	*cl = IB::ComboLeg();
 
 	GET_ATTR_LONG( cl, conId );
 	GET_ATTR_LONG( cl, ratio );
@@ -383,7 +382,6 @@ void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 void conv_xml2ib( IB::UnderComp* uc, const xmlNodePtr node )
 {
 	char* tmp;
-	*uc = IB::UnderComp();
 
 	GET_ATTR_LONG( uc, conId );
 	GET_ATTR_DOUBLE( uc, delta );
@@ -393,7 +391,6 @@ void conv_xml2ib( IB::UnderComp* uc, const xmlNodePtr node )
 void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 {
 	char* tmp;
-	*c = IB::Contract();
 
 	GET_ATTR_LONG( c, conId );
 	GET_ATTR_STRING( c, symbol );
@@ -449,7 +446,6 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 {
 	char* tmp;
-	*cd = IB::ContractDetails();
 
 	GET_ATTR_STRING( cd, marketName );
 	GET_ATTR_STRING( cd, tradingClass );
@@ -495,7 +491,6 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 {
 	char* tmp;
-	*e = IB::Execution();
 
 	GET_ATTR_STRING( e, execId );
 	GET_ATTR_STRING( e, time );
@@ -517,7 +512,6 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
 {
 	char* tmp;
-	* eF = IB::ExecutionFilter();
 
 	GET_ATTR_LONG( eF, m_clientId );
 	GET_ATTR_STRING( eF, m_acctCode );
@@ -531,7 +525,6 @@ void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
 void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 {
 	char* tmp;
-	*tV = IB::TagValue();
 
 	GET_ATTR_STRING( tV, tag );
 	GET_ATTR_STRING( tV, value );
@@ -540,7 +533,6 @@ void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 {
 	char* tmp;
-	*o = IB::Order();
 
 	GET_ATTR_LONG( o, orderId );
 	GET_ATTR_LONG( o, clientId );
@@ -662,7 +654,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 {
 	char* tmp;
-	*os = IB::OrderState();
 
 	GET_ATTR_STRING( os, status );
 	GET_ATTR_STRING( os, initMargin );
@@ -753,7 +744,6 @@ void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
 void from_xml( HistRequest *hR, const xmlNodePtr node )
 {
 	char* tmp;
-	*hR = HistRequest();
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE
@@ -773,7 +763,6 @@ void from_xml( HistRequest *hR, const xmlNodePtr node )
 void from_xml( AccStatusRequest *aR, const xmlNodePtr node )
 {
 	char* tmp;
-	*aR = AccStatusRequest();
 
 	GET_ATTR_BOOL( aR, subscribe );
 	GET_ATTR_STRING( aR, acctCode );
@@ -796,7 +785,6 @@ void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 void from_xml( PlaceOrder* po, const xmlNodePtr node )
 {
 	char* tmp;
-	*po = PlaceOrder();
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
@@ -815,7 +803,6 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
 {
 	char* tmp;
-	*mdr = MktDataRequest();
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE
