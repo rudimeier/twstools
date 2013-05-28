@@ -409,7 +409,10 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( c, comboLegsDescrip );
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
+		if( p->type != XML_ELEMENT_NODE ) {
+			continue;
+		}
+		if( strcmp((char*) p->name, "comboLegs") == 0 ) {
 #if TWSAPI_IB_VERSION_NUMBER <= 966
 			if( c->comboLegs != NULL ) {
 				/* see comment for underComp below */
@@ -421,7 +424,8 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				new IB::Contract::ComboLegList() );
 #endif
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				if( !q->name || (strcmp((char*) q->name, "comboLeg") != 0)) {
+				if( q->type != XML_ELEMENT_NODE
+					|| (strcmp((char*) q->name, "comboLeg") != 0)) {
 					continue;
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
@@ -432,7 +436,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				c->comboLegs->push_back(IB::ComboLegSPtr(cl));
 #endif
 			}
-		} else if( p->name && (strcmp((char*) p->name, "underComp") == 0)) {
+		} else if( strcmp((char*) p->name, "underComp") == 0 ) {
 			if( c->underComp != NULL ) {
 				/* This can only happen if the caller gave us an uninitialized
 				   contract (programming error) or if the xml wrongly contains
@@ -485,7 +489,10 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, notes );
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if(p->name && (strcmp((char*) p->name, "summary") == 0)) {
+		if( p->type != XML_ELEMENT_NODE ) {
+			continue;
+		}
+		if( strcmp((char*) p->name, "summary") == 0 ) {
 			conv_xml2ib( &cd->summary, p );
 		}
 	}
@@ -618,23 +625,27 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_BOOL( o, notHeld );
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if(p->name && (strcmp((char*) p->name, "algoParams") == 0)) {
+		if( p->type != XML_ELEMENT_NODE ) {
+			continue;
+		}
+		if( strcmp((char*) p->name, "algoParams") == 0 ) {
 			o->algoParams = IB::TagValueListSPtr( new IB::TagValueList);
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
-				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
+				if( q->type != XML_ELEMENT_NODE
+					|| (strcmp((char*) q->name, "tagValue") != 0)) {
 					continue;
 				}
 				conv_xml2ib( tV.get(), q );
 				o->algoParams->push_back(tV);
 			}
-		} else if( p->name &&
-		           (strcmp((char*) p->name, "smartComboRoutingParams") == 0)) {
+		} else if( strcmp((char*) p->name, "smartComboRoutingParams") == 0 ) {
 			o->smartComboRoutingParams
 				= IB::TagValueListSPtr( new IB::TagValueList);
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				IB::TagValueSPtr tV( new IB::TagValue());
-				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
+				if( q->type != XML_ELEMENT_NODE
+					|| (strcmp((char*) q->name, "tagValue") != 0)) {
 					continue;
 				}
 				conv_xml2ib( tV.get(), q );
