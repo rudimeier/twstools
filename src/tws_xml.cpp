@@ -68,6 +68,28 @@
 #endif
 
 
+#define ADD_CHILD_TAGVALUELIST( _struct_, _attr_ ) \
+	if( _struct_._attr_.get() != NULL ) { \
+		xmlNodePtr np = xmlNewChild(ne, NULL, (const xmlChar*) #_attr_, NULL); \
+		for( IB::TagValueList::const_iterator it = _struct_._attr_->begin(); \
+			    it != _struct_._attr_->end(); ++it) { \
+			conv_ib2xml( np, "tagValue", **it ); \
+		} \
+	}
+
+#define GET_CHILD_TAGVALUELIST( _tvl_ ) \
+	_tvl_ = IB::TagValueListSPtr( new IB::TagValueList); \
+	for( xmlNodePtr q = p->children; q!= NULL; q=q->next) { \
+		IB::TagValueSPtr tV( new IB::TagValue()); \
+		if( q->type != XML_ELEMENT_NODE \
+			|| (strcmp((char*) q->name, "tagValue") != 0)) { \
+			continue; \
+		} \
+		conv_xml2ib( tV.get(), q ); \
+		_tvl_->push_back(tV); \
+	}
+
+
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
 	char tmp[128];
@@ -316,28 +338,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_STRING( o, clearingAccount );
 	ADD_ATTR_STRING( o, clearingIntent );
 	ADD_ATTR_STRING( o, algoStrategy );
-	{
-		const IB::TagValueList* const algoParams = o.algoParams.get();
-		if( algoParams != NULL ) {
-			xmlNodePtr napl = xmlNewChild( ne, NULL,
-				(const xmlChar*)"algoParams", NULL);
-			for( IB::TagValueList::const_iterator it
-				    = algoParams->begin(); it != algoParams->end(); ++it) {
-				conv_ib2xml( napl, "tagValue", **it );
-			}
-		}
-	}
-	{
-		const IB::TagValueList* const scrp = o.smartComboRoutingParams.get();
-		if( scrp != NULL ) {
-			xmlNodePtr napl = xmlNewChild( ne, NULL,
-				(const xmlChar*)"smartComboRoutingParams", NULL);
-			for( IB::TagValueList::const_iterator it
-				    = scrp->begin(); it != scrp->end(); ++it) {
-				conv_ib2xml( napl, "tagValue", **it );
-			}
-		}
-	}
+
+	ADD_CHILD_TAGVALUELIST( o, algoParams );
+	ADD_CHILD_TAGVALUELIST( o, smartComboRoutingParams );
+
 	ADD_ATTR_BOOL( o, whatIf );
 	ADD_ATTR_BOOL( o, notHeld );
 }
@@ -628,28 +632,9 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 			continue;
 		}
 		if( strcmp((char*) p->name, "algoParams") == 0 ) {
-			o->algoParams = IB::TagValueListSPtr( new IB::TagValueList);
-			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				IB::TagValueSPtr tV( new IB::TagValue());
-				if( q->type != XML_ELEMENT_NODE
-					|| (strcmp((char*) q->name, "tagValue") != 0)) {
-					continue;
-				}
-				conv_xml2ib( tV.get(), q );
-				o->algoParams->push_back(tV);
-			}
+			GET_CHILD_TAGVALUELIST( o->algoParams );
 		} else if( strcmp((char*) p->name, "smartComboRoutingParams") == 0 ) {
-			o->smartComboRoutingParams
-				= IB::TagValueListSPtr( new IB::TagValueList);
-			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				IB::TagValueSPtr tV( new IB::TagValue());
-				if( q->type != XML_ELEMENT_NODE
-					|| (strcmp((char*) q->name, "tagValue") != 0)) {
-					continue;
-				}
-				conv_xml2ib( tV.get(), q );
-				o->smartComboRoutingParams->push_back(tV);
-			}
+			GET_CHILD_TAGVALUELIST( o->smartComboRoutingParams );
 		}
 	}
 }
