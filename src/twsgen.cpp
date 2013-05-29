@@ -366,7 +366,6 @@ bool gen_hist_job()
 				continue;
 			}
 
-
 			for( char **wts = wts_list; *wts != NULL; wts++ ) {
 				HistRequest hR;
 				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,

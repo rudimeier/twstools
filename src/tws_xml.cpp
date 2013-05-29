@@ -445,7 +445,6 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 			}
 			conv_xml2ib( c->underComp, p );
 		}
-
 	}
 }
 
@@ -661,8 +660,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 			}
 		}
 	}
-
-
 }
 
 void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )

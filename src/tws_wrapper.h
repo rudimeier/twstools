@@ -54,7 +54,6 @@ class DebugTwsWrapper : public IB::EWrapper
 		virtual ~DebugTwsWrapper();
 
 	public:
-
 		void tickPrice( IB::TickerId tickerId, IB::TickType field, double price,
 			int canAutoExecute );
 		void tickSize( IB::TickerId tickerId, IB::TickType field, int size );

@@ -1756,7 +1756,6 @@ void PacingGod::checkAdd( const IB::Contract& c,
 				DEBUG_PRINTF( "move pacing control lazy to farm %s, %s",
 					lazyC.c_str(), farm.c_str() );
 
-
 				std::map<const std::string, PacingControl*>::iterator it
 					= controlLazy.find(lazyC);
 				pC = it->second;
@@ -1801,7 +1800,6 @@ void PacingGod::checkAdd( const IB::Contract& c,
 
 bool PacingGod::laziesAreCleared() const
 {
-
 	bool retVal = true;
 	std::map<const std::string, PacingControl*>::iterator it;
 	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {

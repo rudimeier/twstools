@@ -1341,7 +1341,6 @@ void TwsDL::reqHistoricalData()
 	packet = p_histData;
 	currentRequest.nextRequest( GenericRequest::HIST_REQUEST );
 
-
 	const HistRequest &hR = workTodo->getHistTodo().current();
 	pacingControl.addRequest( hR.ibContract );
 
