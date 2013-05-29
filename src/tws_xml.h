@@ -131,23 +131,23 @@ class TwsXml
 	public:
 		TwsXml();
 		virtual ~TwsXml();
-		
+
 		static void setSkipDefaults( bool );
 		static xmlNodePtr newDocRoot();
 		static void dumpAndFree( xmlNodePtr root );
-		
+
 		bool openFile( const char *filename );
 		xmlDocPtr nextXmlDoc();
 		xmlNodePtr nextXmlRoot();
 		xmlNodePtr nextXmlNode();
-		
+
 		static const bool &skip_defaults;
-		
+
 	private:
 		void resize_buf();
-		
+
 		static bool _skip_defaults;
-		
+
 		void *file; // FILE*
 		long buf_size;
 		long buf_len;

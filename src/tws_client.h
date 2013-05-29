@@ -58,19 +58,19 @@ class TWSClient
 	public:
 		TWSClient( IB::EWrapper *ew );
 		~TWSClient();
-		
+
 		bool isConnected() const;
-		
+
 		void selectStuff( int msec );
-		
+
 		/////////////////////////////////////////////////////
 		bool connectTWS( const std::string &host, int port, int clientId,
 			int ai_family );
 		void disconnectTWS();
-		
+
 		int serverVersion();
 		std::string TwsConnectionTime();
-		
+
 		void reqMktData( int tickerId, const IB::Contract &contract, const std::string &genericTickList, bool snapshot );
 		void cancelMktData( int tickerId );
 		void placeOrder( int id, const IB::Contract &contract, const IB::Order &order );
@@ -88,7 +88,7 @@ class TWSClient
 			const std::string &barSizeSetting, const std::string &whatToShow,
 			int useRTH, int formatDate );
 		void reqCurrentTime();
-		
+
 	private:
 		IB::EWrapper* myEWrapper;
 		IB::EPosixClientSocket* ePosixClient;

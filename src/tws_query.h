@@ -49,7 +49,7 @@ class ContractDetailsRequest
 	public:
 		const IB::Contract& ibContract() const;
 		bool initialize( const IB::Contract& );
-		
+
 	private:
 		IB::Contract _ibContract;
 };
@@ -61,12 +61,12 @@ class HistRequest
 {
 	public:
 		HistRequest();
-		
+
 		bool initialize( const IB::Contract&, const std::string &endDateTime,
 			const std::string &durationStr, const std::string &barSizeSetting,
 			const std::string &whatToShow, int useRTH, int formatDate );
 		std::string toString() const;
-		
+
 		IB::Contract ibContract;
 		std::string endDateTime;
 		std::string durationStr;
@@ -83,7 +83,7 @@ class AccStatusRequest
 {
 	public:
 		AccStatusRequest();
-		
+
 		bool subscribe;
 		std::string acctCode;
 };

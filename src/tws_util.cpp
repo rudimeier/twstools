@@ -70,7 +70,7 @@ int64_t nowInMsecs()
 	timeval tv;
 	int err = gettimeofday( &tv, NULL );
 	assert( err == 0 );
-	
+
 	const int64_t now_ms = (int64_t)(tv.tv_sec*1000ULL) + (int64_t)(tv.tv_usec/1000ULL);
 	return now_ms;
 }
@@ -89,12 +89,12 @@ std::string msecs_to_string( int64_t msecs )
 #endif
 	assert(tmp_tm != NULL );
 	size_t tmp_sz;
-	
+
 	tmp_sz = strftime(buf, 19+1 , "%F %T", tmp_tm);
 	assert( tmp_sz == 19);
 	tmp_sz = snprintf( buf+19, 4+1, ".%03u", ms );
 	assert( tmp_sz == 4);
-	
+
 	return std::string(buf);
 }
 
@@ -106,13 +106,13 @@ std::string msecs_to_string( int64_t msecs )
 int ib_strptime( struct tm *tm, const std::string &ib_datetime )
 {
 	char *tmp;
-	
+
 	memset(tm, 0, sizeof(struct tm));
 	tmp = strptime( ib_datetime.c_str(), "%Y%m%d", tm);
 	if( tmp != NULL && *tmp == '\0' ) {
 		return 0;
 	}
-	
+
 	memset(tm, 0, sizeof(struct tm));
 	tmp = strptime( ib_datetime.c_str(), "%Y%m%d%t%H:%M:%S", tm);
 	if(  tmp != NULL && *tmp == '\0' ) {
@@ -132,21 +132,21 @@ std::string ib_date2iso( const std::string &ibDate )
 	struct tm tm;
 	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
 	char *tmp;
-	
+
 	memset(&tm, 0, sizeof(struct tm));
 	tmp = strptime( ibDate.c_str(), "%Y%m%d", &tm);
 	if( tmp != NULL && *tmp == '\0' ) {
 		strftime(buf, sizeof(buf), "%F", &tm);
 		return buf;
 	}
-	
+
 	memset(&tm, 0, sizeof(struct tm));
 	tmp = strptime( ibDate.c_str(), "%Y%m%d%t%H:%M:%S", &tm);
 	if(  tmp != NULL && *tmp == '\0' ) {
 		strftime(buf, sizeof(buf), "%F %T", &tm);
 		return buf;
 	}
-	
+
 	return "";
 }
 
@@ -156,9 +156,9 @@ std::string ib_date2iso( const std::string &ibDate )
  */
 std::string time_t_local( time_t t )
 {
-	struct tm *tmp; 
+	struct tm *tmp;
 	char buf[sizeof("yyyy-mm-dd HH:MM:SS")];
-	
+
 #ifdef HAVE_LOCALTIME_R
 	struct tm tm;
 	tmp = localtime_r( &t, &tm );
@@ -166,7 +166,7 @@ std::string time_t_local( time_t t )
 	tmp = localtime( &t );
 #endif
 	assert( tmp != NULL );
-	
+
 	if( strftime(buf, sizeof(buf), "%F %T", tmp) == 0) {
 		assert( false );
 	}
@@ -186,7 +186,7 @@ int ib_duration2secs( const std::string &dur )
 	if( *space != ' ' ) {
 		return -1;
 	}
-	
+
 	int unit;
 	switch( _dur[len-1] ) {
 	case 'S':
@@ -207,7 +207,7 @@ int ib_duration2secs( const std::string &dur )
 	default:
 		return -1;
 	}
-	
+
 	char *tmp;
 	long val = strtol(_dur, &tmp, 10);
 	if( tmp != space ) {
@@ -216,7 +216,7 @@ int ib_duration2secs( const std::string &dur )
 	if( val < 0 || val > INT_MAX/unit ) {
 		return -1;
 	}
-	
+
 	return val * unit;
 }
 
@@ -295,7 +295,7 @@ std::string ibToString( const IB::Contract &c, bool showFields )
 {
 	char buf[1024];
 	const char *fmt;
-	
+
 	if( showFields ) {
 		fmt = "conId:%ld, symbol:%s, secType:%s, expiry:%s, strike:%g, "
 		"right:%s, multiplier:%s, exchange:%s, currency:%s, localSymbol:%s";
@@ -307,7 +307,7 @@ std::string ibToString( const IB::Contract &c, bool showFields )
 		c.expiry.c_str(), c.strike, c.right.c_str(),
 		c.multiplier.c_str(), c.exchange.c_str(), c.currency.c_str(),
 		c.localSymbol.c_str() );
-	
+
 	return std::string(buf);
 }
 

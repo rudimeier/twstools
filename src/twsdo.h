@@ -71,12 +71,12 @@ struct ConfigTwsdo
 	int tws_port;
 	int tws_client_id;
 	int ai_family;
-	
+
 	int get_account;
 	const char* tws_account_name;
 	int get_exec;
 	int get_order;
-	
+
 	int tws_conTimeout;
 	int tws_reqTimeout;
 	int tws_maxRequests;
@@ -123,21 +123,21 @@ class TwsDL
 			WAIT_TWS_CON,
 			IDLE
 		};
-		
+
 		TwsDL();
 		~TwsDL();
 
 		int setup( const ConfigTwsdo& );
 		int start();
-		
+
 		State currentState() const;
 		std::string lastError() const;
-		
+
 // 	private:
 		void eventLoop();
-		
+
 		void dumpWorkTodo() const;
-		
+
 		void connectTws();
 		void waitTwsCon();
 		void idle();
@@ -145,9 +145,9 @@ class TwsDL
 		bool finHist();
 		bool finPlaceOrder();
 		void waitData();
-		
+
 		void changeState( State );
-		
+
 		int initWork();
 
 		long fetch_inc_order_id();
@@ -160,14 +160,14 @@ class TwsDL
 		void placeOrder();
 		void placeAllOrders();
 		int reqMktData();
-		
+
 		void errorContracts( const RowError& );
 		void errorHistData( const RowError& );
 		void errorPlaceOrder( const RowError& );
-		
+
 		// callbacks from our twsWrapper
 		void twsError( const RowError& );
-		
+
 		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
 			const IB::ContractDetails &ibContractDetails );
@@ -189,7 +189,7 @@ class TwsDL
 		void twsTickPrice( int reqId, IB::TickType field, double price,
 			int canAutoExecute );
 		void twsTickSize( int reqId, IB::TickType field, int size );
-		
+
 		State state;
 		bool quit;
 		int error;
@@ -199,25 +199,25 @@ class TwsDL
 		long tws_valid_orderId;
 		bool connectivity_IB_TWS;
 		int curIdleTime;
-		
+
 		ConfigTwsdo cfg;
-		
+
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
-		
+
 		int msgCounter;
 		GenericRequest &currentRequest;
-		
+
 		WorkTodo *workTodo;
 		Account *account;
 		Quotes *quotes;
-		
+
 		Packet *packet;
 		std::map<long, PacketPlaceOrder*> p_orders;
 		std::map<long, PacketPlaceOrder*> p_orders_old;
 
 		std::map<long, IB::ContractDetails*> con_details;
-		
+
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;
 

@@ -75,9 +75,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
 	char tmp[128];
 	static const IB::ComboLeg dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_LONG( cl, conId );
 	ADD_ATTR_LONG( cl, ratio );
 	ADD_ATTR_STRING( cl, action );
@@ -93,9 +93,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& uc )
 {
 	char tmp[128];
 	static const IB::UnderComp dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_LONG( uc, conId );
 	ADD_ATTR_DOUBLE( uc, delta );
 	ADD_ATTR_DOUBLE( uc, price );
@@ -106,9 +106,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 {
 	char tmp[128];
 	static const IB::Contract dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_LONG( c, conId );
 	ADD_ATTR_STRING( c, symbol );
 	ADD_ATTR_STRING( c, secType );
@@ -124,14 +124,14 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_STRING( c, secIdType );
 	ADD_ATTR_STRING( c, secId );
 	ADD_ATTR_STRING( c, comboLegsDescrip );
-	
+
 #if TWSAPI_IB_VERSION_NUMBER <= 966
 	if( c.comboLegs != NULL ) {
 #else
 	if( c.comboLegs.get() != NULL ) {
 #endif
 		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
-		
+
 		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
 		for ( it = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
 			conv_ib2xml( ncl, "comboLeg", **it );
@@ -148,12 +148,12 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 {
 	char tmp[128];
 	static const IB::ContractDetails dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
-	
+
 	conv_ib2xml( ne, "summary", cd.summary );
-	
+
 	ADD_ATTR_STRING( cd, marketName );
 	ADD_ATTR_STRING( cd, tradingClass );
 	ADD_ATTR_DOUBLE( cd, minTick );
@@ -169,7 +169,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, timeZoneId );
 	ADD_ATTR_STRING( cd, tradingHours );
 	ADD_ATTR_STRING( cd, liquidHours );
-	
+
 	// BOND values
 	ADD_ATTR_STRING( cd, cusip );
 	ADD_ATTR_STRING( cd, ratings );
@@ -193,10 +193,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
 {
 	char tmp[128];
 	static const IB::Execution dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_STRING( e, execId );
 	ADD_ATTR_STRING( e, time );
 	ADD_ATTR_STRING( e, acctNumber );
@@ -218,10 +218,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 {
 	char tmp[128];
 	static const IB::ExecutionFilter dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_LONG( eF, m_clientId );
 	ADD_ATTR_STRING( eF, m_acctCode );
 	ADD_ATTR_STRING( eF, m_time );
@@ -234,10 +234,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& tV )
 {
 	static const IB::TagValue dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_STRING( tV, tag );
 	ADD_ATTR_STRING( tV, value );
 }
@@ -246,10 +246,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 {
 	char tmp[128];
 	static const IB::Order dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_LONG( o, orderId );
 	ADD_ATTR_LONG( o, clientId );
 	ADD_ATTR_LONG( o, permId );
@@ -350,10 +350,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
 {
 	char tmp[128];
 	static const IB::OrderState dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL,
 		(const xmlChar*)name, NULL);
-	
+
 	ADD_ATTR_STRING( os, status );
 	ADD_ATTR_STRING( os, initMargin );
 	ADD_ATTR_STRING( os, maintMargin );
@@ -387,7 +387,7 @@ void conv_xml2ib( IB::UnderComp* uc, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::UnderComp dflt;
-	
+
 	GET_ATTR_LONG( uc, conId );
 	GET_ATTR_DOUBLE( uc, delta );
 	GET_ATTR_DOUBLE( uc, price );
@@ -397,7 +397,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::Contract dflt;
-	
+
 	GET_ATTR_LONG( c, conId );
 	GET_ATTR_STRING( c, symbol );
 	GET_ATTR_STRING( c, secType );
@@ -413,7 +413,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( c, secIdType );
 	GET_ATTR_STRING( c, secId );
 	GET_ATTR_STRING( c, comboLegsDescrip );
-	
+
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
 #if TWSAPI_IB_VERSION_NUMBER <= 966
@@ -445,7 +445,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 			}
 			conv_xml2ib( c->underComp, p );
 		}
-		
+
 	}
 }
 
@@ -454,7 +454,7 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::ContractDetails dflt;
-	
+
 	GET_ATTR_STRING( cd, marketName );
 	GET_ATTR_STRING( cd, tradingClass );
 	GET_ATTR_DOUBLE( cd, minTick );
@@ -470,7 +470,7 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, timeZoneId );
 	GET_ATTR_STRING( cd, tradingHours );
 	GET_ATTR_STRING( cd, liquidHours );
-	
+
 	// BOND values
 	GET_ATTR_STRING( cd, cusip );
 	GET_ATTR_STRING( cd, ratings );
@@ -487,7 +487,7 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, nextOptionType );
 	GET_ATTR_BOOL( cd, nextOptionPartial );
 	GET_ATTR_STRING( cd, notes );
-	
+
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if(p->name && (strcmp((char*) p->name, "summary") == 0)) {
 			conv_xml2ib( &cd->summary, p );
@@ -500,7 +500,7 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::Execution dflt;
-	
+
 	GET_ATTR_STRING( e, execId );
 	GET_ATTR_STRING( e, time );
 	GET_ATTR_STRING( e, acctNumber );
@@ -522,7 +522,7 @@ void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::ExecutionFilter dflt;
-	
+
 	GET_ATTR_LONG( eF, m_clientId );
 	GET_ATTR_STRING( eF, m_acctCode );
 	GET_ATTR_STRING( eF, m_time );
@@ -536,7 +536,7 @@ void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::TagValue dflt;
-	
+
 	GET_ATTR_STRING( tV, tag );
 	GET_ATTR_STRING( tV, value );
 }
@@ -545,7 +545,7 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::Order dflt;
-	
+
 	GET_ATTR_LONG( o, orderId );
 	GET_ATTR_LONG( o, clientId );
 	GET_ATTR_LONG( o, permId );
@@ -579,13 +579,13 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, faMethod );
 	GET_ATTR_STRING( o, faPercentage );
 	GET_ATTR_STRING( o, openClose );
-	
+
 	int orderOriginInt;
 	tmp = (char*) xmlGetProp( node, (xmlChar*) "origin" );
 	orderOriginInt = tmp ? atoi( tmp ) : dflt.origin;
 	free(tmp);
 	o->origin = (IB::Origin) orderOriginInt;
-	
+
 	GET_ATTR_INT( o, shortSaleSlot );
 	GET_ATTR_STRING( o, designatedLocation );
 	GET_ATTR_INT( o, exemptCode );
@@ -669,7 +669,7 @@ void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 {
 	char* tmp;
 	static const IB::OrderState dflt;
-	
+
 	GET_ATTR_STRING( os, status );
 	GET_ATTR_STRING( os, initMargin );
 	GET_ATTR_STRING( os, maintMargin );
@@ -692,7 +692,7 @@ void to_xml( xmlNodePtr parent, const HistRequest& hr)
 {
 	char tmp[128];
 	static const HistRequest dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
 	conv_ib2xml( ne, "reqContract", hr.ibContract );
 	ADD_ATTR_STRING( hr, endDateTime );
@@ -706,7 +706,7 @@ void to_xml( xmlNodePtr parent, const HistRequest& hr)
 void to_xml( xmlNodePtr parent, const AccStatusRequest &aR )
 {
 	static const AccStatusRequest dflt;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)"query", NULL);
 	ADD_ATTR_BOOL( aR, subscribe );
 	ADD_ATTR_STRING( aR, acctCode );
@@ -760,14 +760,14 @@ void from_xml( HistRequest *hR, const xmlNodePtr node )
 {
 	char* tmp;
 	static const HistRequest dflt;
-	
+
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE
 			&& strcmp((char*)p->name, "reqContract") == 0 )  {
 			conv_xml2ib( &hR->ibContract, p);
 		}
 	}
-	
+
 	GET_ATTR_STRING( hR, endDateTime );
 	GET_ATTR_STRING( hR, durationStr );
 	GET_ATTR_STRING( hR, barSizeSetting );
@@ -780,7 +780,7 @@ void from_xml( AccStatusRequest *aR, const xmlNodePtr node )
 {
 	char* tmp;
 	static const AccStatusRequest dflt;
-	
+
 	GET_ATTR_BOOL( aR, subscribe );
 	GET_ATTR_STRING( aR, acctCode );
 }
@@ -852,7 +852,7 @@ void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
 {
 	char tmp[128];
 	static const RowHist &dflt = dflt_RowHist;
-	
+
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (xmlChar*)name, NULL);
 	ADD_ATTR_STRING( r, date );
 	ADD_ATTR_DOUBLE( r, open );
@@ -982,7 +982,7 @@ void from_xml( RowHist *row, const xmlNodePtr node )
 {
 	char* tmp;
 	static const RowHist &dflt = dflt_RowHist;
-	
+
 	GET_ATTR_STRING( row, date );
 	GET_ATTR_DOUBLE( row, open );
 	GET_ATTR_DOUBLE( row, high );
@@ -1090,7 +1090,7 @@ bool TwsXml::openFile( const char *filename )
 			return false;
 		}
 	}
-	
+
 	assert( file != NULL );
 	return true;
 }
@@ -1101,7 +1101,7 @@ xmlDocPtr TwsXml::nextXmlDoc()
 	if( file == NULL ) {
 		return doc;
 	}
-	
+
 	/* This is ugly code. If we will rewrite it to use xml push parser then we
 	   could avoid resize_buf(), memmove() and even find_form_feed(). */
 	int jump_ff = 0;
@@ -1115,7 +1115,7 @@ xmlDocPtr TwsXml::nextXmlDoc()
 			break;
 		}
 		cp += tmp_len;
-		
+
 		if( (buf_len + CHUNK_SIZE) >= buf_size ) {
 			resize_buf();
 			cp = buf + buf_len;
@@ -1127,12 +1127,12 @@ xmlDocPtr TwsXml::nextXmlDoc()
 		}
 		buf_len += tmp_len;
 	}
-	
+
 	doc = xmlReadMemory( buf, cp-buf, "URL", NULL, 0 );
-	
+
 	buf_len -= cp - buf + jump_ff;
 	memmove( buf, cp + jump_ff, buf_len );
-	
+
 	return doc;
 }
 
@@ -1141,7 +1141,7 @@ xmlNodePtr TwsXml::nextXmlRoot()
 	if( curDoc != NULL ) {
 		xmlFreeDoc(curDoc);
 	}
-	
+
 	while( (curDoc = nextXmlDoc()) != NULL ) {
 		xmlNodePtr root = xmlDocGetRootElement(curDoc);
 		if( root != NULL ) {
@@ -1174,9 +1174,9 @@ xmlNodePtr TwsXml::nextXmlNode()
 		} else {
 // 			fprintf(stderr, "Warning, ignore element '%s'.\n", curNode->name);
 		}
-	}	
+	}
 	assert( curNode == NULL );
-	
+
 	xmlNodePtr root;
 	while( (root = nextXmlRoot()) != NULL ) {
 		for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
@@ -1193,7 +1193,7 @@ xmlNodePtr TwsXml::nextXmlNode()
 			fprintf(stderr, "Warning, no usable element found.\n");
 		}
 	}
-	
+
 	if( curNode != NULL ) {
 // 		fprintf(stderr, "Notice, return element '%s'.\n", curNode->name);
 	} else {
@@ -1202,7 +1202,7 @@ xmlNodePtr TwsXml::nextXmlNode()
 		malloc_trim(0);
 #endif
 	}
-	
+
 	return curNode;
 }
 
@@ -1223,7 +1223,7 @@ xmlNodePtr TwsXml::newDocRoot()
 	xmlNodePtr root = xmlNewDocNode( doc, NULL,
 		(const xmlChar*)"TWSXML", NULL );
 	xmlDocSetRootElement( doc, root );
-	
+
 	//caller has to free root.doc
 	return root;
 }
@@ -1233,7 +1233,7 @@ void TwsXml::dumpAndFree( xmlNodePtr root )
 	xmlDocFormatDump(stdout, root->doc, 1);
 	//HACK print form feed as xml file separator
 	printf("\f");
-	
+
 	xmlFreeDoc(root->doc);
 }
 

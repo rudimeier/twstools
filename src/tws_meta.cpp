@@ -163,7 +163,7 @@ void HistTodo::checkout()
 int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 {
 	assert( checkedOutRequest == NULL );
-	
+
 	std::map<std::string, HistRequest*> hashByFarm;
 	std::map<std::string, int> countByFarm;
 	for( std::list<HistRequest*>::const_iterator it = leftRequests.begin();
@@ -176,7 +176,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 			countByFarm[farm]++;
 		}
 	}
-	
+
 	HistRequest *todo_hR = leftRequests.front();
 	int countTodo = 0;
 	for( std::map<std::string, HistRequest*>::const_iterator
@@ -196,7 +196,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 			}
 		}
 	}
-	
+
 	std::list<HistRequest*>::iterator it = leftRequests.begin();
 	while( it != leftRequests.end() ) {
 		if( *it == todo_hR ) {
@@ -210,7 +210,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		leftRequests.erase( it );
 		checkedOutRequest = todo_hR;
 	}
-	
+
 	return wait;
 }
 
@@ -458,7 +458,7 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 {
 	int ret = 1;
 	char* tmp = (char*) xmlGetProp( xn, (const xmlChar*) "type" );
-	
+
 	if( tmp == NULL ) {
 		fprintf(stderr, "Warning, no request type specified.\n");
 		ret = 0;
@@ -492,7 +492,7 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 		fprintf(stderr, "Warning, unknown request type '%s' ignored.\n", tmp );
 		ret = 0;
 	}
-	
+
 	free(tmp);
 	return ret;
 }
@@ -500,7 +500,7 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 int WorkTodo::read_file( const char *fileName )
 {
 	int retVal = -1;
-	
+
 	TwsXml file;
 	if( ! file.openFile(fileName) ) {
 		return retVal;
@@ -516,7 +516,7 @@ int WorkTodo::read_file( const char *fileName )
 				xn->name );
 		}
 	}
-	
+
 	return retVal;
 }
 
@@ -604,7 +604,7 @@ PacketContractDetails::~PacketContractDetails()
 PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 {
 	PacketContractDetails *pcd = new PacketContractDetails();
-	
+
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
@@ -667,7 +667,7 @@ void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
 	}
 	assert( this->reqId == reqId );
 	assert( mode == RECORD );
-	
+
 	cdList->push_back(c);
 }
 
@@ -679,14 +679,14 @@ void PacketContractDetails::dumpXml()
 		(const xmlChar*)"request", NULL );
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"contract_details" );
-	
+
 	to_xml(npcd, *request );
-	
+
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	for( size_t i=0; i<cdList->size(); i++ ) {
 		conv_ib2xml( nrsp, "ContractDetails", (*cdList)[i] );
 	}
-	
+
 	TwsXml::dumpAndFree( root );
 }
 
@@ -715,7 +715,7 @@ PacketHistData::~PacketHistData()
 PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 {
 	PacketHistData *phd = new PacketHistData();
-	
+
 	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
 			if( strcmp((char*)p->name, "query") == 0 ) {
@@ -743,7 +743,7 @@ PacketHistData * PacketHistData::fromXml( xmlNodePtr root )
 			}
 		}
 	}
-	
+
 	return phd;
 }
 
@@ -754,9 +754,9 @@ void PacketHistData::dumpXml()
 		(const xmlChar*)"request", NULL );
 	xmlNewProp( nphd, (const xmlChar*)"type",
 		(const xmlChar*)"historical_data" );
-	
+
 	to_xml(nphd, *request);
-	
+
 	if( mode == CLOSED ) {
 		xmlNodePtr nrsp = xmlNewChild( nphd, NULL, (xmlChar*)"response", NULL);
 		for( size_t i=0; i<rows.size(); i++ ) {
@@ -800,7 +800,7 @@ void PacketHistData::append( int reqId,  const RowHist &row )
 {
 	assert( mode == RECORD && error == REQ_ERR_NONE );
 	assert( this->reqId == reqId );
-	
+
 	if( strncmp( row.date.c_str(), "finished", 8) == 0) {
 		mode = CLOSED;
 		finishRow = row;
@@ -815,7 +815,7 @@ void PacketHistData::dump( bool printFormatDates )
 	const IB::Contract &c = request->ibContract;
 	const char *wts = short_wts( request->whatToShow.c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting.c_str());
-	
+
 	for( std::vector<RowHist>::const_iterator it = rows.begin();
 		it != rows.end(); it++ ) {
 		std::string expiry = c.expiry;
@@ -829,7 +829,7 @@ void PacketHistData::dump( bool printFormatDates )
 			dateTime = ib_date2iso(it->date);
 			assert( !expiry.empty() && !dateTime.empty() ); //TODO
 		}
-		
+
 		char buf_c[512];
 		snprintf( buf_c, sizeof(buf_c), "%s\t%s\t%s\t%s\t%s\t%g\t%s",
 			c.symbol.c_str(),
@@ -839,7 +839,7 @@ void PacketHistData::dump( bool printFormatDates )
 			expiry.c_str(),
 			c.strike,
 			c.right.c_str() );
-		
+
 		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
 		       wts,
 		       bss,
@@ -1068,7 +1068,7 @@ void PacketAccStatus::appendAccountDownloadEnd( const std::string& accountName )
 	arow->type =RowAcc::t_end;
 	arow->data = new std::string(accountName);
 	list->push_back( arow );
-	
+
 	mode = CLOSED;
 }
 
@@ -1079,15 +1079,15 @@ void PacketAccStatus::dumpXml()
 		(const xmlChar*)"request", NULL );
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"account" );
-	
+
 	to_xml(npcd, *request);
-	
+
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowAcc*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
 		to_xml( nrsp, **it );
 	}
-	
+
 	TwsXml::dumpAndFree( root );
 }
 
@@ -1160,15 +1160,15 @@ void PacketExecutions::dumpXml()
 		(const xmlChar*)"request", NULL );
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"executions" );
-	
+
 	to_xml(npcd, *request);
-	
+
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<RowExecution*>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
 		to_xml( nrsp, **it );
 	}
-	
+
 	TwsXml::dumpAndFree( root );
 }
 
@@ -1236,15 +1236,15 @@ void PacketOrders::dumpXml()
 		(const xmlChar*)"request", NULL );
 	xmlNewProp( npcd, (const xmlChar*)"type",
 		(const xmlChar*)"open_orders" );
-	
+
 	to_xml(npcd, *request);
-	
+
 	xmlNodePtr nrsp = xmlNewChild( npcd, NULL, (xmlChar*)"response", NULL);
 	std::vector<TwsRow>::const_iterator it;
 	for( it = list->begin(); it < list->end(); it++ ) {
 		to_xml( nrsp, *it );
 	}
-	
+
 	TwsXml::dumpAndFree( root );
 }
 
@@ -1435,23 +1435,23 @@ int PacingControl::goodTime(const char** ddd) const
 	const int64_t now = nowInMsecs();
 	const char* dbg = "don't wait";
 	int retVal = INT_MIN;
-	
+
 	if( dateTimes.empty() ) {
 		*ddd = dbg;
 		return retVal;
 	}
-	
-	
+
+
 	int waitMin = dateTimes.back() + minPacingTime - now;
 	SWAP_MAX( waitMin, "wait min" );
-	
+
 // 	int waitAvg =  dateTimes.last() + avgPacingTime - now;
 // 	SWAP_MAX( waitAvg, "wait avg" );
-	
+
 	int waitViol = violations.back() ?
 		(dateTimes.back() + violationPause - now) : INT_MIN;
 	SWAP_MAX( waitViol, "wait violation" );
-	
+
 	int waitBurst = INT_MIN;
 	int p_index = dateTimes.size() - maxRequests;
 	if( p_index >= 0 ) {
@@ -1459,7 +1459,7 @@ int PacingControl::goodTime(const char** ddd) const
 		waitBurst = p_time + checkInterval - now;
 	}
 	SWAP_MAX( waitBurst, "wait burst" );
-	
+
 	*ddd = dbg;
 	return retVal;
 }
@@ -1470,14 +1470,14 @@ int PacingControl::goodTime(const char** ddd) const
 int PacingControl::countLeft() const
 {
 	const int64_t now = nowInMsecs();
-	
+
 	if( (dateTimes.size() > 0) && violations.back() ) {
 		int waitViol = dateTimes.back() + violationPause - now;
 		if( waitViol > 0 ) {
 			return 0;
 		}
 	}
-	
+
 	int retVal = maxRequests;
 	std::vector<int64_t>::const_iterator it = dateTimes.end();
 	while( it != dateTimes.begin() ) {
@@ -1501,7 +1501,7 @@ void PacingControl::merge( const PacingControl& other )
 	std::vector<bool>::iterator t_v = violations.begin();
 	std::vector<int64_t>::const_iterator o_d = other.dateTimes.begin();
 	std::vector<bool>::const_iterator o_v = other.violations.begin();
-	
+
 	while( t_d != dateTimes.end() && o_d != other.dateTimes.end() ) {
 		if( *o_d < *t_d ) {
 			t_d = dateTimes.insert( t_d, *o_d );
@@ -1554,7 +1554,7 @@ PacingGod::PacingGod( const DataFarmStates &dfs ) :
 PacingGod::~PacingGod()
 {
 	delete &controlGlobal;
-	
+
 	std::map<const std::string, PacingControl*>::iterator it;
 	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
 		delete it->second;
@@ -1574,7 +1574,7 @@ void PacingGod::setPacingTime( int r, int i, int m )
 	minPacingTime = m;
 	controlGlobal.setPacingTime( r, i, m );
 	std::map<const std::string, PacingControl*>::iterator it;
-	
+
 	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
 		it->second->setPacingTime( r, i, m );
 	}
@@ -1589,7 +1589,7 @@ void PacingGod::setViolationPause( int vP )
 	violationPause = vP;
 	controlGlobal.setViolationPause( vP );
 	std::map<const std::string, PacingControl*>::iterator it;
-	
+
 	for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
 		it->second->setViolationPause( vP );
 	}
@@ -1606,7 +1606,7 @@ void PacingGod::clear()
 		DEBUG_PRINTF( "clear all pacing controls" );
 		controlGlobal.clear();
 		std::map<const std::string, PacingControl*>::iterator it;
-		
+
 		for( it = controlHmds.begin(); it != controlHmds.end(); it++ ) {
 			it->second->clear();
 		}
@@ -1633,9 +1633,9 @@ void PacingGod::addRequest( const IB::Contract& c )
 	std::string farm;
 	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
-	
+
 	controlGlobal.addRequest();
-	
+
 	if( farm.empty() ) {
 		DEBUG_PRINTF( "add request lazy" );
 		assert( controlLazy.find(lazyC) != controlLazy.end()
@@ -1655,9 +1655,9 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 	std::string farm;
 	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
-	
+
 	controlGlobal.notifyViolation();
-	
+
 	if( farm.empty() ) {
 		DEBUG_PRINTF( "set violation lazy" );
 		assert( controlLazy.find(lazyC) != controlLazy.end()
@@ -1679,7 +1679,7 @@ int PacingGod::goodTime( const IB::Contract& c )
 	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
 	bool laziesCleared = laziesAreCleared();
-	
+
 	if( farm.empty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
 		assert( (controlLazy.find(lazyC) != controlLazy.end()
@@ -1704,7 +1704,7 @@ int PacingGod::countLeft( const IB::Contract& c )
 	std::string lazyC;
 	checkAdd( c, &lazyC, &farm );
 	bool laziesCleared = laziesAreCleared();
-	
+
 	if( farm.empty() || !laziesCleared ) {
 		// we have to use controlGlobal if any contract's farm is ambiguous
 		assert( (controlLazy.find(lazyC) != controlLazy.end()
@@ -1729,7 +1729,7 @@ void PacingGod::checkAdd( const IB::Contract& c,
 {
 	*lazyC_ = LAZY_CONTRACT_STR(c);
 	*farm_ = dataFarms.getHmdsFarm(c);
-	
+
 	std::vector<std::string> lazies;
 	bool append_lazyC = true;
 	std::map<const std::string, PacingControl*>::const_iterator it =
@@ -1744,7 +1744,7 @@ void PacingGod::checkAdd( const IB::Contract& c,
 	if( append_lazyC ) {
 		lazies.push_back(*lazyC_);
 	}
-	
+
 	for( std::vector<std::string>::const_iterator it = lazies.begin();
 		    it != lazies.end(); it++ ) {
 	const std::string &lazyC = *it;
@@ -1755,8 +1755,8 @@ void PacingGod::checkAdd( const IB::Contract& c,
 			if( controlLazy.find(lazyC) != controlLazy.end() ) {
 				DEBUG_PRINTF( "move pacing control lazy to farm %s, %s",
 					lazyC.c_str(), farm.c_str() );
-				
-				
+
+
 				std::map<const std::string, PacingControl*>::iterator it
 					= controlLazy.find(lazyC);
 				pC = it->second;
@@ -1774,7 +1774,7 @@ void PacingGod::checkAdd( const IB::Contract& c,
 			} else {
 				DEBUG_PRINTF( "merge pacing control lazy into farm %s %s",
 					lazyC.c_str(), farm.c_str() );
-				
+
 				std::map<const std::string, PacingControl*>::iterator it
 					= controlLazy.find(lazyC);
 				PacingControl *pC = it->second;
@@ -1785,13 +1785,13 @@ void PacingGod::checkAdd( const IB::Contract& c,
 		}
 		assert( controlHmds.find(farm) != controlHmds.end() );
 		assert( controlLazy.find(lazyC) == controlLazy.end() );
-		
+
 	} else if( controlLazy.find(lazyC) == controlLazy.end() ) {
 			DEBUG_PRINTF( "create pacing control for lazy %s", lazyC.c_str() );
 			PacingControl *pC = new PacingControl(
 				maxRequests, checkInterval, minPacingTime, violationPause);
 			controlLazy[lazyC] = pC;
-			
+
 			assert( controlHmds.find(farm) == controlHmds.end() );
 			assert( controlLazy.find(lazyC) != controlLazy.end() );
 	}
@@ -1801,7 +1801,7 @@ void PacingGod::checkAdd( const IB::Contract& c,
 
 bool PacingGod::laziesAreCleared() const
 {
-	
+
 	bool retVal = true;
 	std::map<const std::string, PacingControl*>::iterator it;
 	for( it = controlLazy.begin(); it != controlLazy.end(); it++ ) {
@@ -1859,7 +1859,7 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["SOFFEX"] = "euhmds";
 	hLearn["VIRTX"] = "euhmds";
 	hLearn["VSE"] = "euhmds";
-	
+
 	hLearn["AMEX"] = "ushmds";
 	hLearn["AQS"] = "ushmds";
 	hLearn["ARCA"] = "ushmds";
@@ -1886,7 +1886,7 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["PSE"] = "ushmds";
 	hLearn["RUSSELL"] = "ushmds";
 	hLearn["TSE"] = "ushmds";
-	
+
 	hLearn["ASX"] = "hkhmds";
 	hLearn["HKFE"] = "hkhmds";
 	hLearn["HKMEX"] = "hkhmds";
@@ -1905,7 +1905,7 @@ void DataFarmStates::check_edemo_hack( const std::string &farm )
 	if( edemo_checked ) {
 		return;
 	}
-	
+
 	/* This is a dirty HACK. We would still crash if we are changing to edemo
 	   after reconnect. To fix it we would need to handle the general case that
 	   we've learned a wrong farm somehow which should be handled anyway. */
@@ -1920,19 +1920,19 @@ void DataFarmStates::check_edemo_hack( const std::string &farm )
 void DataFarmStates::setAllBroken()
 {
 	std::map<const std::string, State>::iterator it;
-	
+
 	it = mStates.begin();
 	while( it != mStates.end() ) {
 		it->second = BROKEN;
 		it++;
 	}
-	
+
 	it = hStates.begin();
 	while( it != hStates.end() ) {
 		it->second = BROKEN;
 		it++;
 	}
-	
+
 	last_learned_lazy_contract.clear();
 }
 
@@ -1944,7 +1944,7 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 	std::string farm;
 	State state;
 	std::map<const std::string, State> *pHash = NULL;
-	
+
 	// prefixes used for getFarm() are taken from past logs
 	switch( errorCode ) {
 	case 2103:
@@ -1987,9 +1987,9 @@ void DataFarmStates::notify(int msgNumber, int errorCode,
 		assert(false);
 		return;
 	}
-	
+
 	check_edemo_hack(farm);
-	
+
 	lastChanged = farm;
 	(*pHash)[farm] = state;
 	last_learned_lazy_contract.clear();
@@ -2002,7 +2002,7 @@ std::string DataFarmStates::getFarm( const std::string &prefix,
 	const std::string& msg )
 {
 	assert( prefix == msg.substr(0, prefix.size()) );
-	
+
 	return msg.substr( prefix.size() );
 }
 
@@ -2016,12 +2016,12 @@ void DataFarmStates::learnMarket( const IB::Contract& )
 void DataFarmStates::learnHmds( const IB::Contract& c )
 {
 	std::string lazyC = LAZY_CONTRACT_STR(c);
-	
+
 	if( last_learned_lazy_contract == lazyC ) {
 		return;
 	}
 	last_learned_lazy_contract = lazyC;
-	
+
 	std::vector<std::string> sl;
 	std::map<const std::string, State>::const_iterator it = hStates.begin();
 	while( it != hStates.end() ) {
@@ -2064,7 +2064,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 				    it != sl.end(); it++ ) {
 				dbg_active_farms.append(",").append(*it);
 			}
-			
+
 			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
 				lazyC.c_str(),
 				(dbg_active_farms.c_str()+1) );
@@ -2079,10 +2079,10 @@ void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
 		return;
 	}
 	/* Last tws message notified about a farm state change ...*/
-	
+
 	std::map<const std::string, State>::const_iterator it =
 		hStates.find(lastChanged);
-	
+
 	if( it != hStates.end() && it->second == OK ) {
 		/* ... and it was a hist farm which became OK. So this contract should
 		   belong to that farm.*/
