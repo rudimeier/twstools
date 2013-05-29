@@ -114,7 +114,7 @@ version.c: version.c.in $(top_builddir)/version.mk
 	  $*_ggo.h >$*_ggo.h-t \
 	&& mv $*_ggo.h-t $*_ggo.h
 
-# 
+#
 # Help the developers get nice post-processed source files
 
 ## Create preprocessor output (debugging purposes only)
