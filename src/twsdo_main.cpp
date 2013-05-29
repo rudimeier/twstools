@@ -72,7 +72,7 @@ static void check_display_args()
  	} else {
 		return;
 	}
-	
+
 	exit(0);
 }
 
@@ -84,7 +84,7 @@ static void gengetopt_check_opts()
 		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
-	
+
 	cfg.skipdef = args_info.verbose_xml_given;
 	if( args_info.host_given ) {
 		cfg.tws_host = args_info.host_arg;
@@ -102,7 +102,7 @@ static void gengetopt_check_opts()
 	}
 	cfg.get_exec = args_info.get_exec_given;
 	cfg.get_order = args_info.get_order_given;
-	
+
 	if( args_info.conTimeout_given ) {
 		cfg.tws_conTimeout = args_info.conTimeout_arg;
 	}
@@ -137,22 +137,22 @@ static void gengetopt_free()
 int main(int argc, char *argv[])
 {
 	atexit( gengetopt_free );
-	
+
 	if( cmdline_parser(argc, argv, &args_info) != 0 ) {
 		return 2; // exit
 	}
-	
+
 	check_display_args();
 	gengetopt_check_opts();
-	
+
 	TwsXml::setSkipDefaults( !cfg.skipdef );
-	
+
 	TwsDL twsDL;
 	if( twsDL.setup(cfg) != 0 ) {
 		return 2;
 	}
 	int ret = twsDL.start();
-	
+
 	if( ret != 0 ) {
 		DEBUG_PRINTF( "error: %s", twsDL.lastError().c_str() );
 	} else {

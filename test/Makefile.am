@@ -36,4 +36,3 @@ dist_noinst_DATA += work_hist_cash_01.xml
 clean-local:
 	-rm -rf *.tmpd
 
-## Makefile.am ends here

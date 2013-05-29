@@ -37,14 +37,14 @@ and/or
     5000 option contracts and goto 2.).
 
 
-The input/output file format is very simple xml which can be easily 
-generated/converted from and to csv using the tools itself or any other 
-tools. Per design the actual job processing tool is completely stupid - 
+The input/output file format is very simple xml which can be easily
+generated/converted from and to csv using the tools itself or any other
+tools. Per design the actual job processing tool is completely stupid -
 just doing the given job but doing it very well.
 
-BTW the used xml format is intended to be independent from the tools 
-itself to be used to carry all IB/TWS specific structs/messages for 
-saving without loss of information and easy conversion to other 
+BTW the used xml format is intended to be independent from the tools
+itself to be used to carry all IB/TWS specific structs/messages for
+saving without loss of information and easy conversion to other
 existing TWS/API applications, see "Notes on the twsxml format"
 
 

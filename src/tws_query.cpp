@@ -88,7 +88,7 @@ std::string HistRequest::toString() const
 		ibContract.expiry.c_str(),
 		ibContract.strike,
 		ibContract.right.c_str() );
-	
+
 	snprintf( buf_a, sizeof(buf_a), "%s\t%s\t%s\t%s\t%d\t%d\t%s",
 		endDateTime.c_str(),
 		durationStr.c_str(),
@@ -97,7 +97,7 @@ std::string HistRequest::toString() const
 		useRTH,
 		formatDate,
 		buf_c );
-	
+
 	return std::string(buf_a);
 }
 

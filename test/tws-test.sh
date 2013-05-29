@@ -2,7 +2,7 @@
 
 usage()
 {
-	cat <<EOF 
+	cat <<EOF
 `basename ${0}` [OPTION] TEST_FILE
 
 --builddir DIR  specify where tools can be found

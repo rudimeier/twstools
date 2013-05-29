@@ -105,7 +105,7 @@ static void check_display_args()
  	} else {
 		return;
 	}
-	
+
 	exit(0);
 }
 
@@ -117,7 +117,7 @@ static void gengetopt_check_opts()
 		fprintf( stderr, "error: bad usage\n" );
 		exit(2);
 	}
-	
+
 	skipdefp = args_info.verbose_xml_given;
 	histjobp = args_info.histjob_given;
 	if( args_info.endDateTime_given ) {
@@ -236,7 +236,7 @@ void split_whatToShow()
 	wts_list = (char**) malloc( (len/2 + 1) * sizeof(char*) );
 	wts_split = (char*) malloc( len * sizeof(char) );
 	strcpy( wts_split, whatToShowp );
-	
+
 	char **wts = wts_list;
 	char *token = strtok( wts_split, ", \t" );
 	*wts = token;
@@ -258,20 +258,20 @@ time_t min_begin_date( const std::string &end, const std::string dur )
 {
 	struct tm tm_tmp;
 	time_t t_begin;
-	
+
 	memset(&tm_tmp, 0, sizeof(struct tm));
 	if( ib_strptime( &tm_tmp, end ) == -1 ) {
 		// TODO use current date time
 		return 0;
 	}
 	tm_tmp.tm_isdst = -1; // set "auto dst", strptime() does not set it
-	
+
 	int minus_busy_days = ib_duration2secs( dur );
 	if( minus_busy_days == -1  ) {
 		return 0;
 	}
-	minus_busy_days /= 86400; 
-	
+	minus_busy_days /= 86400;
+
 	/* saturday or sunday jumps to friday for free */
 	if( tm_tmp.tm_wday == 0 ) {
 		tm_tmp.tm_mday -= 2;
@@ -282,11 +282,11 @@ time_t min_begin_date( const std::string &end, const std::string dur )
 		tm_tmp.tm_wday = 5;
 		minus_busy_days--;
 	}
-	
+
 	/* jump over full weeks */
 	tm_tmp.tm_mday -= 7 * (minus_busy_days / 5);
 	minus_busy_days = minus_busy_days % 5;
-	
+
 	while( minus_busy_days > 0 ) {
 		if( tm_tmp.tm_wday == 1 ) {
 			/* monday jumps to friday */
@@ -298,10 +298,10 @@ time_t min_begin_date( const std::string &end, const std::string dur )
 		}
 		minus_busy_days--;
 	}
-	
+
 	t_begin = mktime( &tm_tmp );
 	assert( t_begin != -1 );
-	
+
 	return t_begin;
 }
 
@@ -310,11 +310,11 @@ bool skip_expiry( const std::string &expiry, time_t t_before )
 {
 	struct tm tm_tmp;
 	time_t t_expiry;
-	
+
 	if( expiry.empty() ) {
 		return false;
 	}
-	
+
 	// expiry
 	memset(&tm_tmp, 0, sizeof(struct tm));
 	if( ib_strptime( &tm_tmp, expiry.c_str() ) == -1 ) {
@@ -323,7 +323,7 @@ bool skip_expiry( const std::string &expiry, time_t t_before )
 	tm_tmp.tm_isdst = -1; // set "auto dst", strptime() does not set it
 	t_expiry = mktime( &tm_tmp );
 	assert( t_expiry != -1 );
-	
+
 	return ( t_expiry < t_before);
 }
 
@@ -334,11 +334,11 @@ bool gen_hist_job()
 	if( ! file.openFile(filep) ) {
 		return false;
 	}
-	
+
 	time_t t_begin = min_begin_date( endDateTimep, durationStrp );
 	DEBUG_PRINTF("skipping expiries before: '%s'",
 		time_t_local(t_begin).c_str() );
-	
+
 	xmlNodePtr xn;
 	int count_docs = 0;
 	/* NOTE We are dumping single HistRequests but we should build and dump
@@ -346,32 +346,31 @@ bool gen_hist_job()
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
 		PacketContractDetails *pcd = PacketContractDetails::fromXml( xn );
-		
+
 		int myProp_reqMaxContractsPerSpec = -1;
 		for( size_t i = 0; i < pcd->constList().size(); i++ ) {
-			
+
 			const IB::ContractDetails &cd = pcd->constList()[i];
 			IB::Contract c = cd.summary;
 // 			DEBUG_PRINTF("contract, %s %s", c.symbol.c_str(), c.expiry.c_str());
-			
+
 			if( exp_mode != EXP_KEEP ) {
 				c.includeExpired = get_inc_exp(c.secType.c_str());
 			}
 			if( myProp_reqMaxContractsPerSpec > 0 && (size_t)myProp_reqMaxContractsPerSpec <= i ) {
 				break;
 			}
-			
+
 			if( skip_expiry(c.expiry, t_begin) ) {
 // 				DEBUG_PRINTF("skipping expiry: '%s'", c.expiry.c_str());
 				continue;
 			}
-			
-			
+
 			for( char **wts = wts_list; *wts != NULL; wts++ ) {
 				HistRequest hR;
 				hR.initialize( c, endDateTimep, durationStrp, barSizeSettingp,
 				               *wts, useRTHp, formatDate() );
-				
+
 				PacketHistData phd;
 				phd.record( 0, hR );
 				phd.dumpXml();
@@ -381,7 +380,7 @@ bool gen_hist_job()
 	}
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
-	
+
 	return true;
 }
 
@@ -392,7 +391,7 @@ bool gen_csv()
 	if( ! file.openFile(filep) ) {
 		return false;
 	}
-	
+
 	if( max_expiryp != NULL ) {
 		struct tm tm_tmp;
 		memset(&tm_tmp, 0, sizeof(struct tm));
@@ -403,20 +402,20 @@ bool gen_csv()
 		}
 		DEBUG_PRINTF("skipping expiries newer than: '%s'", max_expiryp );
 	}
-	
+
 	xmlNodePtr xn;
 	int count_docs = 0;
 	while( (xn = file.nextXmlNode()) != NULL ) {
 		count_docs++;
 		PacketHistData *phd = PacketHistData::fromXml( xn );
-		
+
 		if( max_expiryp != NULL ) {
 			const std::string &expiry = phd->getRequest().ibContract.expiry;
 			if( !expiry.empty() && strcmp(max_expiryp, expiry.c_str() ) < 0 ) {
 				goto cont;
 			}
 		}
-		
+
 		if( !no_convp ) {
 			phd->dump( true /* printFormatDates */);
 		} else {
@@ -427,7 +426,7 @@ cont:
 	}
 	fprintf( stderr, "notice, %d xml docs parsed from file '%s'\n",
 		count_docs, filep );
-	
+
 	return true;
 }
 
@@ -435,21 +434,21 @@ cont:
 int main(int argc, char *argv[])
 {
 	atexit( gengetopt_free );
-	
+
 	if( cmdline_parser(argc, argv, &args_info) != 0 ) {
 		return 2; // exit
 	}
-	
+
 	check_display_args();
 	gengetopt_check_opts();
-	
+
 	TwsXml::setSkipDefaults( !skipdefp );
 	if( !durationStrp ) {
 		durationStrp = max_durationStr( barSizeSettingp );
 	}
 	split_whatToShow();
 	set_includeExpired();
-	
+
 	if( histjobp ) {
 		if( !gen_hist_job() ) {
 			return 1;
@@ -462,6 +461,6 @@ int main(int argc, char *argv[])
 		fprintf( stderr, "error, nothing to do, use -H or -C.\n" );
 		return 2;
 	}
-	
+
 	return 0;
 }
