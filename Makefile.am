@@ -15,7 +15,7 @@ SUBDIRS += libltdl
 endif  DESCEND_LIBLTDL
 SUBDIRS += src sample doc test
 
-# do_subst, inspired by the automake project
+## do_subst, inspired by the automake project
 do_subst = ( sed \
   -e 's,[@]VERSION[@],$(VERSION),g' \
   -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
@@ -48,7 +48,7 @@ twstools.spec twstools.pc: version.mk
 	$(do_subst) <$(srcdir)/$@.in >$@-t
 	mv -f $@-t $@
 
-# Rule to build RPM distribution package
+## Rule to build RPM distribution package
 rpm: dist-gzip
 	rpmbuild -ta $(distdir).tar.gz
 

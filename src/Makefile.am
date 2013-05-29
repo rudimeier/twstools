@@ -87,7 +87,7 @@ proof_of_concept_la_LDFLAGS = -module
 proof_of_concept_la_LDFLAGS += -rpath /none
 
 
-# Build all executables at distribution time to generate the man pages.
+## Build all executables at distribution time to generate the man pages.
 dist-hook: $(bin_PROGRAMS)
 
 ## hack to build libtdl (at least initially) if dist-hook binaries need it
@@ -113,9 +113,6 @@ version.c: version.c.in $(top_builddir)/version.mk
 	  -e 's,\(.*\)_PARSER_VERSION VERSION,\1_PARSER_VERSION $(PACKAGE)_version_string,g' \
 	  $*_ggo.h >$*_ggo.h-t \
 	&& mv $*_ggo.h-t $*_ggo.h
-
-#
-# Help the developers get nice post-processed source files
 
 ## Create preprocessor output (debugging purposes only)
 .c.i:
