@@ -52,16 +52,17 @@ AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
 AM_CONDITIONAL([DESCEND_LIBLTDL], [test "${with_included_ltdl}" = "yes"])
 
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
-PKG_CHECK_MODULES([twsapi], [twsapi >= 0.4.0],
-  [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
-    ["$(pkg-config --modversion twsapi || echo "unknown")"],
-    [Define twsapi version at compile time.])
-  ])
+PKG_CHECK_MODULES([twsapi], [twsapi >= 0.4.0])
 
-
+## define TWSAPI_VERSION if twsapi_config.h is not available
 safe_CPPFLAGS="${CPPFLAGS}"
 CPPFLAGS="${pkg_cv_twsapi_CFLAGS}"
-AC_CHECK_HEADERS([twsapi/twsapi_config.h])
+AC_CHECK_HEADERS([twsapi/twsapi_config.h],
+  [],
+  [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
+    ["$(pkg-config --modversion twsapi || echo "unknown")"],
+    [Define twsapi version if twsapi_config.h is not available.])
+  ])
 CPPFLAGS="${safe_CPPFLAGS}"
 
 AC_CHECK_HEADERS([winsock2.h])
