@@ -1,4 +1,4 @@
-/*** tws_quotes.cpp -- TWS real time quotes
+/*** tws_quote.cpp -- TWS real time quotes
  *
  * Copyright (C) 2012 Ruediger Meier
  *

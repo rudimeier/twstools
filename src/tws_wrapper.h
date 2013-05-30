@@ -1,4 +1,4 @@
-/*** twsWrapper.h -- simple "IB/API wrapper" just for debugging
+/*** tws_wrapper.h -- simple "IB/API wrapper" just for debugging
  *
  * Copyright (C) 2010-2012 Ruediger Meier
  *

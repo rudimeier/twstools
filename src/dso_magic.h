@@ -1,4 +1,4 @@
-/*** twsdo.cpp -- TWS job processing tool
+/*** dso_magic.h -- interface for libltdl modules
  *
  * Copyright (C) 2012 Sebastian Freundt
  *
