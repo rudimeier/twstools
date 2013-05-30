@@ -41,11 +41,19 @@
 #include "tws_meta.h"
 #include "tws_query.h"
 #include "tws_util.h"
+#include "config.h"
 
+#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
+# include <twsapi/twsapi_config.h>
+#endif
 #include <twsapi/Contract.h>
 #include <twsapi/Execution.h>
 #include <twsapi/Order.h>
 #include <twsapi/OrderState.h>
+#if TWSAPI_IB_VERSION_NUMBER <= 966
+# define TagValueList Order::TagValueList
+# define TagValueListSPtr Order::TagValueListSPtr
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -55,20 +63,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
 #if defined HAVE_MALLOC_TRIM
 # include <malloc.h>
-#endif
-
-#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
-# include <twsapi/twsapi_config.h>
-#endif
-#if TWSAPI_IB_VERSION_NUMBER <= 966
-# define TagValueList Order::TagValueList
-# define TagValueListSPtr Order::TagValueListSPtr
 #endif
 
 

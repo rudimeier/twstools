@@ -43,6 +43,10 @@
 
 #include "twsdo_ggo.h"
 
+#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
+# include <twsapi/twsapi_config.h>
+#endif
+
 
 static gengetopt_args_info args_info;
 static ConfigTwsdo cfg;
