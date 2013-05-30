@@ -41,15 +41,13 @@
 #include "config.h"
 
 #ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
-# include "twsapi/twsapi_config.h"
+# include <twsapi/twsapi_config.h>
 #endif
-
-// from global installed ibapi
-#include "twsapi/Contract.h"
-#include "twsapi/Order.h"
-#include "twsapi/OrderState.h"
+#include <twsapi/Contract.h>
+#include <twsapi/Order.h>
+#include <twsapi/OrderState.h>
 #if TWSAPI_IB_VERSION_NUMBER > 966
-# include "twsapi/CommissionReport.h"
+# include <twsapi/CommissionReport.h>
 #endif
 
 

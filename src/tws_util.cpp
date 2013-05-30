@@ -38,10 +38,9 @@
 #include "tws_util.h"
 #include "debug.h"
 
-// from global installed twsapi
-#include "twsapi/EWrapper.h" //IB::TickType
-#include "twsapi/Execution.h"
-#include "twsapi/Contract.h"
+#include <twsapi/EWrapper.h> //IB::TickType
+#include <twsapi/Execution.h>
+#include <twsapi/Contract.h>
 
 #if defined HAVE_CONFIG_H
 # include "config.h"

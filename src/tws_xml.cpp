@@ -41,10 +41,11 @@
 #include "tws_meta.h"
 #include "tws_query.h"
 #include "tws_util.h"
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
-#include "twsapi/OrderState.h"
+
+#include <twsapi/Contract.h>
+#include <twsapi/Execution.h>
+#include <twsapi/Order.h>
+#include <twsapi/OrderState.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -63,7 +64,7 @@
 #endif
 
 #ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
-# include "twsapi/twsapi_config.h"
+# include <twsapi/twsapi_config.h>
 #endif
 #if TWSAPI_IB_VERSION_NUMBER <= 966
 # define TagValueList Order::TagValueList

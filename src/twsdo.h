@@ -44,8 +44,7 @@
 
 #include "tws_quote.h"
 
-// from global installed ibapi
-#include "twsapi/EWrapper.h"
+#include <twsapi/EWrapper.h>
 
 
 

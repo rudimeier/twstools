@@ -36,7 +36,7 @@
  ***/
 
 #include "tws_quote.h"
-#include "twsapi/EWrapper.h"
+#include <twsapi/EWrapper.h>
 #include <string.h>
 
 

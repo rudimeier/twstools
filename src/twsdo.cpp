@@ -44,8 +44,7 @@
 #include "tws_account.h"
 #include "debug.h"
 
-// from global installed twsapi
-#include "twsapi/Contract.h"
+#include <twsapi/Contract.h>
 
 #if defined HAVE_CONFIG_H
 # include "config.h"

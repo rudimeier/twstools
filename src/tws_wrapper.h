@@ -38,8 +38,7 @@
 #ifndef TWSWrapper_H
 #define TWSWrapper_H
 
-// from global installed ibapi
-#include "twsapi/EWrapper.h"
+#include <twsapi/EWrapper.h>
 
 namespace IB {
 	/* forward declaration in case we compile against twsapi < 0.5 */

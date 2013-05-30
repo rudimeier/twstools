@@ -38,9 +38,9 @@
 #ifndef TWS_QUERY_H
 #define TWS_QUERY_H
 
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
+#include <twsapi/Contract.h>
+#include <twsapi/Execution.h>
+#include <twsapi/Order.h>
 #include <stdint.h>
 
 
