@@ -57,12 +57,13 @@ PKG_CHECK_MODULES([twsapi], [twsapi >= 0.4.0])
 ## define TWSAPI_VERSION if twsapi_config.h is not available
 safe_CPPFLAGS="${CPPFLAGS}"
 CPPFLAGS="${pkg_cv_twsapi_CFLAGS}"
+AX_CHECK_COMPILE_FLAG([-nostdinc],[CPPFLAGS="$CPPFLAGS -nostdinc"])
 AC_CHECK_HEADERS([twsapi/twsapi_config.h],
   [],
   [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
     ["$(pkg-config --modversion twsapi || echo "unknown")"],
-    [Define twsapi version if twsapi_config.h is not available.])
-  ])
+    [Define twsapi version if twsapi_config.h is not available.])],
+  [/* no default includes */])
 CPPFLAGS="${safe_CPPFLAGS}"
 
 AC_CHECK_HEADERS([winsock2.h])
