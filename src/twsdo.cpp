@@ -1,6 +1,6 @@
 /*** twsdo.cpp -- TWS job processing tool
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2010-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -44,8 +44,7 @@
 #include "tws_account.h"
 #include "debug.h"
 
-// from global installed twsapi
-#include "twsapi/Contract.h"
+#include <twsapi/Contract.h>
 
 #if defined HAVE_CONFIG_H
 # include "config.h"

@@ -1,6 +1,6 @@
-/*** tws_quotes.cpp -- TWS real time quotes
+/*** tws_quote.cpp -- TWS real time quotes
  *
- * Copyright (C) 2012 Ruediger Meier
+ * Copyright (C) 2012-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -36,7 +36,7 @@
  ***/
 
 #include "tws_quote.h"
-#include "twsapi/EWrapper.h"
+#include <twsapi/EWrapper.h>
 #include <string.h>
 
 

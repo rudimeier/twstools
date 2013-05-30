@@ -1,6 +1,6 @@
-/*** twsWrapper.h -- simple "IB/API wrapper" just for debugging
+/*** tws_wrapper.h -- simple "IB/API wrapper" just for debugging
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2010-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -38,8 +38,7 @@
 #ifndef TWSWrapper_H
 #define TWSWrapper_H
 
-// from global installed ibapi
-#include "twsapi/EWrapper.h"
+#include <twsapi/EWrapper.h>
 
 namespace IB {
 	/* forward declaration in case we compile against twsapi < 0.5 */

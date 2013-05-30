@@ -1,6 +1,6 @@
 /*** tws_client.cpp -- IB/API TWSClient class
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2010-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -39,14 +39,13 @@
 #include "tws_util.h"
 #include "debug.h"
 
-// from global installed twsapi
-#include "twsapi/Contract.h"
-#include "twsapi/Order.h"
-#include "twsapi/OrderState.h"
-#include "twsapi/Execution.h"
-#include "twsapi/TwsSocketClientErrors.h"
-#include "twsapi/EWrapper.h"
-#include "twsapi/EPosixClientSocket.h"
+#include <twsapi/Contract.h>
+#include <twsapi/Order.h>
+#include <twsapi/OrderState.h>
+#include <twsapi/Execution.h>
+#include <twsapi/TwsSocketClientErrors.h>
+#include <twsapi/EWrapper.h>
+#include <twsapi/EPosixClientSocket.h>
 
 #if defined HAVE_CONFIG_H
 # include "config.h"

@@ -1,6 +1,6 @@
 /*** tws_account.h -- TWS portfolio and account state
  *
- * Copyright (C) 2012 Ruediger Meier
+ * Copyright (C) 2012-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *

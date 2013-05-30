@@ -1,6 +1,6 @@
 /*** tws_meta.h -- helper structs for IB/API messages
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2010-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -38,11 +38,11 @@
 #ifndef TWS_META_H
 #define TWS_META_H
 
-#include "twsapi/Contract.h"
-#include "twsapi/Execution.h"
-#include "twsapi/Order.h"
-#include "twsapi/OrderState.h"
-#include "twsapi/CommonDefs.h"
+#include <twsapi/Contract.h>
+#include <twsapi/Execution.h>
+#include <twsapi/Order.h>
+#include <twsapi/OrderState.h>
+#include <twsapi/CommonDefs.h>
 
 #include <stdint.h>
 #include <list>

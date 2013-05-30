@@ -1,6 +1,6 @@
 /*** tws_util.cpp -- common utils
  *
- * Copyright (C) 2010-2012 Ruediger Meier
+ * Copyright (C) 2010-2013 Ruediger Meier
  *
  * Author:  Ruediger Meier <sweet_f_a@gmx.de>
  *
@@ -38,10 +38,9 @@
 #include "tws_util.h"
 #include "debug.h"
 
-// from global installed twsapi
-#include "twsapi/EWrapper.h" //IB::TickType
-#include "twsapi/Execution.h"
-#include "twsapi/Contract.h"
+#include <twsapi/EWrapper.h> //IB::TickType
+#include <twsapi/Execution.h>
+#include <twsapi/Contract.h>
 
 #if defined HAVE_CONFIG_H
 # include "config.h"
