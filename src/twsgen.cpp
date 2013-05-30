@@ -86,7 +86,7 @@ static int formatDate()
 #define VERSION_MSG \
 CMDLINE_PARSER_PACKAGE_NAME " (" PACKAGE_NAME ") %s [\
 built with twsapi " TWSAPI_VERSION "]\n\
-Copyright (C) 2010-2012 Ruediger Meier\n\
+Copyright (C) 2010-2013 Ruediger Meier\n\
 License BSD 3-Clause\n\
 \n\
 Written by Ruediger Meier <sweet_f_a@gmx.de>\n"
