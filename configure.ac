@@ -63,7 +63,7 @@ esac
 AC_CHECK_HEADERS([twsapi/twsapi_config.h],
   [],
   [AC_DEFINE_UNQUOTED([TWSAPI_VERSION],
-    ["$(pkg-config --modversion twsapi || echo "unknown")"],
+    ["`pkg-config --modversion twsapi || echo "unknown"`"],
     [Define twsapi version if twsapi_config.h is not available.])],
   [/* no default includes */])
 CPPFLAGS="${safe_CPPFLAGS}"
