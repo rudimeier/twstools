@@ -68,6 +68,28 @@
 #endif
 
 
+#define ADD_CHILD_TAGVALUELIST( _struct_, _attr_ ) \
+	if( _struct_._attr_.get() != NULL ) { \
+		xmlNodePtr np = xmlNewChild(ne, NULL, (const xmlChar*) #_attr_, NULL); \
+		for( IB::TagValueList::const_iterator it = _struct_._attr_->begin(); \
+			    it != _struct_._attr_->end(); ++it) { \
+			conv_ib2xml( np, "tagValue", **it ); \
+		} \
+	}
+
+#define GET_CHILD_TAGVALUELIST( _tvl_ ) \
+	_tvl_ = IB::TagValueListSPtr( new IB::TagValueList); \
+	for( xmlNodePtr q = p->children; q!= NULL; q=q->next) { \
+		IB::TagValueSPtr tV( new IB::TagValue()); \
+		if( q->type != XML_ELEMENT_NODE \
+			|| (strcmp((char*) q->name, "tagValue") != 0)) { \
+			continue; \
+		} \
+		conv_xml2ib( tV.get(), q ); \
+		_tvl_->push_back(tV); \
+	}
+
+
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& cl )
 {
 	char tmp[128];
@@ -128,9 +150,8 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	if( c.comboLegs.get() != NULL ) {
 #endif
 		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
-
-		IB::Contract::ComboLegList::const_iterator it = c.comboLegs->begin();
-		for ( it = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
+		for( IB::Contract::ComboLegList::const_iterator it
+			    = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
 			conv_ib2xml( ncl, "comboLeg", **it );
 		}
 	}
@@ -317,28 +338,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_STRING( o, clearingAccount );
 	ADD_ATTR_STRING( o, clearingIntent );
 	ADD_ATTR_STRING( o, algoStrategy );
-	{
-		const IB::TagValueList* const algoParams = o.algoParams.get();
-		if( algoParams != NULL ) {
-			xmlNodePtr napl = xmlNewChild( ne, NULL,
-				(const xmlChar*)"algoParams", NULL);
-			for( IB::TagValueList::const_iterator it
-				    = algoParams->begin(); it != algoParams->end(); ++it) {
-				conv_ib2xml( napl, "tagValue", **it );
-			}
-		}
-	}
-	{
-		const IB::TagValueList* const scrp = o.smartComboRoutingParams.get();
-		if( scrp != NULL ) {
-			xmlNodePtr napl = xmlNewChild( ne, NULL,
-				(const xmlChar*)"smartComboRoutingParams", NULL);
-			for( IB::TagValueList::const_iterator it
-				    = scrp->begin(); it != scrp->end(); ++it) {
-				conv_ib2xml( napl, "tagValue", **it );
-			}
-		}
-	}
+
+	ADD_CHILD_TAGVALUELIST( o, algoParams );
+	ADD_CHILD_TAGVALUELIST( o, smartComboRoutingParams );
+
 	ADD_ATTR_BOOL( o, whatIf );
 	ADD_ATTR_BOOL( o, notHeld );
 }
@@ -368,7 +371,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
 void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::ComboLeg dflt;
 
 	GET_ATTR_LONG( cl, conId );
 	GET_ATTR_LONG( cl, ratio );
@@ -383,7 +385,6 @@ void conv_xml2ib( IB::ComboLeg* cl, const xmlNodePtr node )
 void conv_xml2ib( IB::UnderComp* uc, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::UnderComp dflt;
 
 	GET_ATTR_LONG( uc, conId );
 	GET_ATTR_DOUBLE( uc, delta );
@@ -393,7 +394,6 @@ void conv_xml2ib( IB::UnderComp* uc, const xmlNodePtr node )
 void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::Contract dflt;
 
 	GET_ATTR_LONG( c, conId );
 	GET_ATTR_STRING( c, symbol );
@@ -412,20 +412,23 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( c, comboLegsDescrip );
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if(p->name && (strcmp((char*) p->name, "comboLegs") == 0)) {
+		if( p->type != XML_ELEMENT_NODE ) {
+			continue;
+		}
+		if( strcmp((char*) p->name, "comboLegs") == 0 ) {
 #if TWSAPI_IB_VERSION_NUMBER <= 966
-			if( c->comboLegs == NULL ) {
-				c->comboLegs = new IB::Contract::ComboLegList();
-#else
-			if( c->comboLegs.get() == NULL ) {
-				c->comboLegs = IB::Contract::ComboLegListSPtr(
-					new IB::Contract::ComboLegList() );
-#endif
-			} else {
-				c->comboLegs->clear();
+			if( c->comboLegs != NULL ) {
+				/* see comment for underComp below */
+				delete c->comboLegs;
 			}
+			c->comboLegs = new IB::Contract::ComboLegList();
+#else
+			c->comboLegs = IB::Contract::ComboLegListSPtr(
+				new IB::Contract::ComboLegList() );
+#endif
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				if( !q->name || (strcmp((char*) q->name, "comboLeg") != 0)) {
+				if( q->type != XML_ELEMENT_NODE
+					|| (strcmp((char*) q->name, "comboLeg") != 0)) {
 					continue;
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
@@ -436,10 +439,15 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				c->comboLegs->push_back(IB::ComboLegSPtr(cl));
 #endif
 			}
-		} else if( p->name && (strcmp((char*) p->name, "underComp") == 0)) {
-			if( c->underComp == NULL ) {
-				c->underComp = new IB::UnderComp();
+		} else if( strcmp((char*) p->name, "underComp") == 0 ) {
+			if( c->underComp != NULL ) {
+				/* This can only happen if the caller gave us an uninitialized
+				   contract (programming error) or if the xml wrongly contains
+				   more than one underComp tag. For the second case we have to
+				   avoid a memleak here */
+				delete c->underComp;
 			}
+			c->underComp = new IB::UnderComp();
 			conv_xml2ib( c->underComp, p );
 		}
 	}
@@ -449,7 +457,6 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::ContractDetails dflt;
 
 	GET_ATTR_STRING( cd, marketName );
 	GET_ATTR_STRING( cd, tradingClass );
@@ -485,7 +492,10 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, notes );
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if(p->name && (strcmp((char*) p->name, "summary") == 0)) {
+		if( p->type != XML_ELEMENT_NODE ) {
+			continue;
+		}
+		if( strcmp((char*) p->name, "summary") == 0 ) {
 			conv_xml2ib( &cd->summary, p );
 		}
 	}
@@ -495,7 +505,6 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::Execution dflt;
 
 	GET_ATTR_STRING( e, execId );
 	GET_ATTR_STRING( e, time );
@@ -517,7 +526,6 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::ExecutionFilter dflt;
 
 	GET_ATTR_LONG( eF, m_clientId );
 	GET_ATTR_STRING( eF, m_acctCode );
@@ -531,7 +539,6 @@ void conv_xml2ib( IB::ExecutionFilter* eF, const xmlNodePtr node )
 void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::TagValue dflt;
 
 	GET_ATTR_STRING( tV, tag );
 	GET_ATTR_STRING( tV, value );
@@ -540,7 +547,6 @@ void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::Order dflt;
 
 	GET_ATTR_LONG( o, orderId );
 	GET_ATTR_LONG( o, clientId );
@@ -576,12 +582,12 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, faPercentage );
 	GET_ATTR_STRING( o, openClose );
 
-	int orderOriginInt;
 	tmp = (char*) xmlGetProp( node, (xmlChar*) "origin" );
-	orderOriginInt = tmp ? atoi( tmp ) : dflt.origin;
-	free(tmp);
-	o->origin = (IB::Origin) orderOriginInt;
-
+	if(tmp) {
+		int orderOriginInt = atoi( tmp );
+		free(tmp);
+		o->origin = (IB::Origin) orderOriginInt;
+	}
 	GET_ATTR_INT( o, shortSaleSlot );
 	GET_ATTR_STRING( o, designatedLocation );
 	GET_ATTR_INT( o, exemptCode );
@@ -622,39 +628,13 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_BOOL( o, notHeld );
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
-		if(p->name && (strcmp((char*) p->name, "algoParams") == 0)) {
-			if( o->algoParams.get() ==  NULL ) {
-				IB::TagValueListSPtr
-					algoParams( new IB::TagValueList);
-				o->algoParams = algoParams;
-			} else {
-				o->algoParams->clear();
-			}
-			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				IB::TagValueSPtr tV( new IB::TagValue());
-				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
-					continue;
-				}
-				conv_xml2ib( tV.get(), q );
-				o->algoParams->push_back(tV);
-			}
+		if( p->type != XML_ELEMENT_NODE ) {
+			continue;
 		}
-		if(p->name && (strcmp((char*) p->name, "smartComboRoutingParams") == 0)) {
-			if( o->smartComboRoutingParams.get() ==  NULL ) {
-				IB::TagValueListSPtr
-					smartComboRoutingParams( new IB::TagValueList);
-				o->smartComboRoutingParams = smartComboRoutingParams;
-			} else {
-				o->smartComboRoutingParams->clear();
-			}
-			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
-				IB::TagValueSPtr tV( new IB::TagValue());
-				if( !q->name || (strcmp((char*) q->name, "tagValue") != 0)) {
-					continue;
-				}
-				conv_xml2ib( tV.get(), q );
-				o->smartComboRoutingParams->push_back(tV);
-			}
+		if( strcmp((char*) p->name, "algoParams") == 0 ) {
+			GET_CHILD_TAGVALUELIST( o->algoParams );
+		} else if( strcmp((char*) p->name, "smartComboRoutingParams") == 0 ) {
+			GET_CHILD_TAGVALUELIST( o->smartComboRoutingParams );
 		}
 	}
 }
@@ -662,7 +642,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 void conv_xml2ib( IB::OrderState* os, const xmlNodePtr node )
 {
 	char* tmp;
-	static const IB::OrderState dflt;
 
 	GET_ATTR_STRING( os, status );
 	GET_ATTR_STRING( os, initMargin );
@@ -753,7 +732,6 @@ void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
 void from_xml( HistRequest *hR, const xmlNodePtr node )
 {
 	char* tmp;
-	static const HistRequest dflt;
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE
@@ -773,7 +751,6 @@ void from_xml( HistRequest *hR, const xmlNodePtr node )
 void from_xml( AccStatusRequest *aR, const xmlNodePtr node )
 {
 	char* tmp;
-	static const AccStatusRequest dflt;
 
 	GET_ATTR_BOOL( aR, subscribe );
 	GET_ATTR_STRING( aR, acctCode );
@@ -796,7 +773,6 @@ void from_xml( OrdersRequest* /*oR*/, const xmlNodePtr /*node*/ )
 void from_xml( PlaceOrder* po, const xmlNodePtr node )
 {
 	char* tmp;
-	static const PlaceOrder dflt;
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE ) {
@@ -815,7 +791,6 @@ void from_xml( PlaceOrder* po, const xmlNodePtr node )
 void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
 {
 	char* tmp;
-	static const MktDataRequest dflt;
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type == XML_ELEMENT_NODE
@@ -975,7 +950,7 @@ static void from_xml( RowError*, const xmlNodePtr /*node*/ )
 void from_xml( RowHist *row, const xmlNodePtr node )
 {
 	char* tmp;
-	static const RowHist &dflt = dflt_RowHist;
+	*row = dflt_RowHist;
 
 	GET_ATTR_STRING( row, date );
 	GET_ATTR_DOUBLE( row, open );
