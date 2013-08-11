@@ -4,6 +4,16 @@ ChangeLog, twstools - command line tools around Interactive Brokers TWS API
 
 
 
+0.4.2 - not yet released  ------------------------------------------------------
+
+This is a maintenance release.
+
+  - bldchn, fix possible use of the wrong twsapi_config.h
+  - minor fixes and cleanups for parsing xml TagValueLists
+  - complete Order and ContractDetails structs to IB API 9.68
+
+
+
 0.4.1 - 2013-05-24  ------------------------------------------------------------
 
 This is a maintenance release.
