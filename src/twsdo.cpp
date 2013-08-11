@@ -991,6 +991,8 @@ void TwsDL::twsConnectionClosed()
 	connectivity_IB_TWS = false;
 	dataFarms.setAllBroken();
 	pacingControl.clear();
+	/* avoid re-connect right now */
+	lastConnectionTime = nowInMsecs();
 }
 
 
