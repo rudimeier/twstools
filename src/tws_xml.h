@@ -51,6 +51,7 @@ namespace IB {
 	class Execution;
 	class ExecutionFilter;
 	class TagValue;
+	class OrderComboLeg;
 	class Order;
 	class OrderState;
 }
@@ -69,6 +70,8 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
 	const IB::ExecutionFilter& );
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& );
+void conv_ib2xml( xmlNodePtr parent, const char* name,
+	const IB::OrderComboLeg& );
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& );
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& );
 
@@ -79,6 +82,7 @@ void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
 void conv_xml2ib( IB::Execution*, const xmlNodePtr node );
 void conv_xml2ib( IB::ExecutionFilter*, const xmlNodePtr node );
 void conv_xml2ib( IB::TagValue*, const xmlNodePtr node );
+void conv_xml2ib( IB::OrderComboLeg*, const xmlNodePtr node );
 void conv_xml2ib( IB::Order*, const xmlNodePtr node );
 void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
 
@@ -161,33 +165,45 @@ class TwsXml
 
 #define GET_ATTR_INT( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
+	if( tmp ) { \
+		_struct_->_attr_ = atoi( tmp ); \
+		free(tmp); \
+	}
 
 #define GET_ATTR_LONG( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atol( tmp ) : dflt._attr_; \
-	free(tmp)
+	if( tmp ) { \
+		_struct_->_attr_ = atol( tmp ); \
+		free(tmp); \
+	}
 
 #define GET_ATTR_LONGLONG( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoll( tmp ) : dflt._attr_; \
-	free(tmp)
+	if( tmp ) { \
+		_struct_->_attr_ = atoll( tmp ); \
+		free(tmp); \
+	}
 
 #define GET_ATTR_DOUBLE( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atof( tmp ) : dflt._attr_; \
-	free(tmp)
+	if( tmp ) { \
+		_struct_->_attr_ = atof( tmp ); \
+		free(tmp); \
+	}
 
 #define GET_ATTR_BOOL( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? atoi( tmp ) : dflt._attr_; \
-	free(tmp)
+	if( tmp ) { \
+		_struct_->_attr_ = atoi( tmp ); \
+		free(tmp); \
+	}
 
 #define GET_ATTR_STRING( _struct_, _attr_ ) \
 	tmp = (char*) xmlGetProp( node, (xmlChar*) #_attr_ ); \
-	_struct_->_attr_ = tmp ? std::string(tmp) : dflt._attr_; \
-	free(tmp)
+	if( tmp ) { \
+		_struct_->_attr_ = std::string(tmp); \
+		free(tmp); \
+	}
 
 
 #define ADD_ATTR_INT( _struct_, _attr_ ) \
