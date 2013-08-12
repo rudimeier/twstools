@@ -1858,32 +1858,20 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["VIRTX"] = "euhmds";
 	hLearn["VSE"] = "euhmds";
 
-	hLearn["AMEX"] = "ushmds";
-	hLearn["AQS"] = "ushmds";
-	hLearn["ARCA"] = "ushmds";
-	hLearn["CBOE"] = "ushmds";
+	hLearn["ECBOT"] = "ilhmds";
+	hLearn["GLOBEX"] = "ilhmds";
+	hLearn["NYMEX"] = "ilhmds";
+
 	hLearn["CBOT"] = "ushmds.us";
 	hLearn["CDE"] = "ushmds.us";
 	hLearn["CFE"] = "ushmds.us";
 	hLearn["CME"] = "ushmds.us";
-	hLearn["ECBOT"] = "ushmds";
 	hLearn["ELX"] = "ushmds.us";
-	hLearn["GLOBEX"] = "ushmds";
-	hLearn["IDEALPRO"] = "ushmds";
 	hLearn["IPE"] = "ushmds.us";
-	hLearn["ISE"] = "ushmds";
 	hLearn["MEXDER"] = "ushmds.us";
-	hLearn["NASDAQ"] = "ushmds";
-	hLearn["NFX"] = "ushmds.us";
 	hLearn["NYBOT"] = "ushmds.us";
-	hLearn["NYMEX"] = "ushmds";
 	hLearn["NYSELIFFE"] = "ushmds.us";
-	hLearn["NYSE"] = "ushmds";
 	hLearn["ONE"] = "ushmds.us";
-	hLearn["PHLX"] = "ushmds";
-	hLearn["PSE"] = "ushmds";
-	hLearn["RUSSELL"] = "ushmds";
-	hLearn["TSE"] = "ushmds";
 
 	hLearn["ASX"] = "hkhmds";
 	hLearn["HKFE"] = "hkhmds";
@@ -1893,7 +1881,6 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["OSE.JPN"] = "hkhmds";
 	hLearn["SGX"] = "hkhmds";
 	hLearn["SNFE"] = "hkhmds";
-	hLearn["TSE.JPN"] = "hkhmds";
 	hLearn["TSEJ"] = "hkhmds";
 }
 
