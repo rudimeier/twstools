@@ -11,6 +11,7 @@ This is a maintenance release.
   - bldchn, fix possible use of the wrong twsapi_config.h
   - minor fixes and cleanups for parsing xml TagValueLists
   - complete Order and ContractDetails structs to IB API 9.68
+  - don't reconnect right after disconnect
 
 
 
