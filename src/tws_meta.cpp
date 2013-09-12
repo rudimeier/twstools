@@ -1838,10 +1838,13 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["BELFOX"] = "euhmds";
 	hLearn["BM"] = "euhmds";
 	hLearn["BVME"] = "euhmds";
+	hLearn["CHIXDE"] = "euhmds";
+	hLearn["CHIXUK"] = "euhmds";
 	hLearn["DTB"] = "euhmds";
 	hLearn["EBS"] = "euhmds";
 	hLearn["EDXNO"] = "euhmds";
 	hLearn["FTA"] = "euhmds";
+	hLearn["FWB"] = "euhmds";
 	hLearn["IBIS"] = "euhmds";
 	hLearn["IDEM"] = "euhmds";
 	hLearn["IPE"] = "euhmds";
@@ -1874,6 +1877,7 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["ONE"] = "ushmds.us";
 
 	hLearn["ASX"] = "hkhmds";
+	hLearn["CHIXJ"] = "hkhmds";
 	hLearn["HKFE"] = "hkhmds";
 	hLearn["HKMEX"] = "hkhmds";
 	hLearn["KSE"] = "hkhmds";
