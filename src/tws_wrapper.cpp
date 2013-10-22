@@ -400,21 +400,27 @@ void DebugTwsWrapper::commissionReport( const IB::CommissionReport &cr )
 
 #if TWSAPI_IB_VERSION_NUMBER >= 969
 void DebugTwsWrapper::position( const IB::IBString& account,
-	const IB::Contract& contract, int position, double avgCost )
+	const IB::Contract& c, int pos, double avgCost )
 {
+	DEBUG_PRINTF( "POSITION: %s %s %s %d %g", account.c_str(),
+		c.symbol.c_str(), c.localSymbol.c_str(), pos, avgCost );
 }
 
 void DebugTwsWrapper::positionEnd()
 {
+	DEBUG_PRINTF( "POSITION_END" );
 }
 
 void DebugTwsWrapper::accountSummary( int reqId, const IB::IBString& account,
 	const IB::IBString& tag, const IB::IBString& value,
 	const IB::IBString& currency )
 {
+	DEBUG_PRINTF( "ACCOUNT_SUMMARY: %d %s %s %s %s", reqId, account.c_str(),
+		tag.c_str(), value.c_str(), currency.c_str() );
 }
 
 void DebugTwsWrapper::accountSummaryEnd( int reqId )
 {
+	DEBUG_PRINTF( "ACCOUNT_SUMMARY_END: %d", reqId );
 }
 #endif
