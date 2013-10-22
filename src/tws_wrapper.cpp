@@ -387,3 +387,24 @@ void DebugTwsWrapper::commissionReport( const IB::CommissionReport &cr )
 		cr.yieldRedemptionDate );
 }
 #endif
+
+#if TWSAPI_IB_VERSION_NUMBER >= 969
+void DebugTwsWrapper::position( const IB::IBString& account,
+	const IB::Contract& contract, int position, double avgCost )
+{
+}
+
+void DebugTwsWrapper::positionEnd()
+{
+}
+
+void DebugTwsWrapper::accountSummary( int reqId, const IB::IBString& account,
+	const IB::IBString& tag, const IB::IBString& value,
+	const IB::IBString& currency )
+{
+}
+
+void DebugTwsWrapper::accountSummaryEnd( int reqId )
+{
+}
+#endif
