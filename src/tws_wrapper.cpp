@@ -218,7 +218,12 @@ void DebugTwsWrapper::contractDetails( int reqId,
 		contractDetails.summary.currency.c_str(),
 		contractDetails.summary.localSymbol.c_str(),
 		contractDetails.marketName.c_str(),
-		contractDetails.tradingClass.c_str() );
+#if TWSAPI_IB_VERSION_NUMBER >= 969
+		contractDetails.summary.tradingClass.c_str()
+#else
+		contractDetails.tradingClass.c_str()
+#endif
+		);
 }
 
 
@@ -237,7 +242,12 @@ void DebugTwsWrapper::bondContractDetails( int reqId,
 		contractDetails.summary.currency.c_str(),
 		contractDetails.summary.localSymbol.c_str(),
 		contractDetails.marketName.c_str(),
-		contractDetails.tradingClass.c_str() );
+#if TWSAPI_IB_VERSION_NUMBER >= 969
+		contractDetails.summary.tradingClass.c_str()
+#else
+		contractDetails.tradingClass.c_str()
+#endif
+		);
 }
 
 
