@@ -1410,6 +1410,12 @@ void PacingControl::addRequest()
 	violations.push_back( false );
 }
 
+void PacingControl::remove_last_request()
+{
+	assert(dateTimes.size() > 0 && violations.size() > 0 );
+	dateTimes.pop_back();
+	violations.pop_back();
+}
 
 void PacingControl::notifyViolation()
 {
@@ -1649,6 +1655,26 @@ void PacingGod::addRequest( const IB::Contract& c )
 	}
 }
 
+void PacingGod::remove_last_request( const IB::Contract& c )
+{
+	std::string farm;
+	std::string lazyC;
+	checkAdd( c, &lazyC, &farm );
+
+	controlGlobal.remove_last_request();
+
+	if( farm.empty() ) {
+		DEBUG_PRINTF( "remove request lazy" );
+		assert( controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() );
+		controlLazy[lazyC]->remove_last_request();
+	} else {
+		DEBUG_PRINTF( "remove request farm %s", farm.c_str() );
+		assert( controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.find(lazyC) == controlLazy.end() );
+		controlHmds[farm]->remove_last_request();
+	}
+}
 
 void PacingGod::notifyViolation( const IB::Contract& c )
 {
