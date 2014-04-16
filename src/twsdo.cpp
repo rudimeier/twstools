@@ -877,6 +877,7 @@ void TwsDL::errorHistData( const RowError& err )
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_REQUEST );
+			pacingControl.remove_last_request( curContract );
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
