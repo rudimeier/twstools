@@ -250,9 +250,35 @@ void HistTodo::add( const HistRequest& hR )
 	leftRequests.push_back(p);
 }
 
+int HistTodo::skip_by_con(const IB::Contract& con)
+{
+	int cnt_skipped = 0;
+	std::list<HistRequest*>::iterator it = leftRequests.begin();
 
+	if (con.symbol.empty() || con.secType.empty() || con.exchange.empty() ) {
+		goto return_skip_by_con;
+	}
 
+	while( it != leftRequests.end() ) {
+		HistRequest *hr = *it;
+		IB::Contract &ci = hr->ibContract;
+		if (strcasecmp( ci.symbol.c_str(), con.symbol.c_str()) == 0 &&
+				strcasecmp( ci.secType.c_str(), con.secType.c_str()) == 0 &&
+				strcasecmp( ci.exchange.c_str(), con.exchange.c_str()) == 0) {
+			cnt_skipped++;
+			errorRequests.push_back(hr);
+			it = leftRequests.erase(it);
+		} else {
+			++it;
+		}
+	}
 
+return_skip_by_con:
+	DEBUG_PRINTF("skipped %d requests for contracts like %s,%s,%s",
+		cnt_skipped,
+		con.symbol.c_str(), con.secType.c_str(), con.exchange.c_str());
+	return cnt_skipped;
+}
 
 
 
