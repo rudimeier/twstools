@@ -868,7 +868,8 @@ void TwsDL::errorHistData( const RowError& err )
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
-			ERR_MATCH("No data of type DayChart is available") ) {
+			ERR_MATCH("No data of type DayChart is available") ||
+			ERR_MATCH("BEST queries are not supported for this contract")) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
 				"%p %d", cur_hR, err.id );
