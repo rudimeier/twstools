@@ -126,7 +126,8 @@ class HistTodo
 		void tellDone();
 		void cancelForRepeat( int priority );
 		void add( const HistRequest& );
-		int skip_by_con(const IB::Contract&);
+		int skip_by_perm(const IB::Contract&);
+		int skip_by_nodata(const HistRequest&);
 
 	private:
 		std::list<HistRequest*> &doneRequests;

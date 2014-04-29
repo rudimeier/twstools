@@ -250,7 +250,7 @@ void HistTodo::add( const HistRequest& hR )
 	leftRequests.push_back(p);
 }
 
-int HistTodo::skip_by_con(const IB::Contract& con)
+int HistTodo::skip_by_perm(const IB::Contract& con)
 {
 	int cnt_skipped = 0;
 	std::list<HistRequest*>::iterator it = leftRequests.begin();
@@ -261,7 +261,7 @@ int HistTodo::skip_by_con(const IB::Contract& con)
 
 	while( it != leftRequests.end() ) {
 		HistRequest *hr = *it;
-		IB::Contract &ci = hr->ibContract;
+		const IB::Contract &ci = hr->ibContract;
 		if (strcasecmp( ci.symbol.c_str(), con.symbol.c_str()) == 0 &&
 				strcasecmp( ci.secType.c_str(), con.secType.c_str()) == 0 &&
 				strcasecmp( ci.exchange.c_str(), con.exchange.c_str()) == 0) {
@@ -280,6 +280,48 @@ return_skip_by_con:
 	return cnt_skipped;
 }
 
+static inline bool is_quote_req(const HistRequest &hr)
+{
+	return strcasecmp(hr.whatToShow.c_str(), "BID") == 0
+	       || strcasecmp(hr.whatToShow.c_str(), "ASK") == 0;
+}
+
+int HistTodo::skip_by_nodata(const HistRequest& hr)
+{
+	const IB::Contract &con = hr.ibContract;
+	int cnt_skipped = 0;
+	std::list<HistRequest*>::iterator it = leftRequests.begin();
+
+	if (con.symbol.empty() || con.secType.empty() || con.exchange.empty() ) {
+		goto return_skip_by_con;
+	}
+
+	while( it != leftRequests.end() ) {
+		HistRequest *hi = *it;
+		const IB::Contract &ci = hi->ibContract;
+		if (strcasecmp( ci.symbol.c_str(), con.symbol.c_str()) == 0 &&
+			  strcasecmp( ci.secType.c_str(), con.secType.c_str()) == 0 &&
+			  strcasecmp( ci.exchange.c_str(), con.exchange.c_str()) == 0 &&
+			  strcasecmp( ci.currency.c_str(), con.currency.c_str()) == 0 &&
+			  strcasecmp( ci.multiplier.c_str(), con.multiplier.c_str()) == 0 &&
+			  strcasecmp( ci.localSymbol.c_str(), con.localSymbol.c_str()) == 0 &&
+			  ((is_quote_req(hr) && is_quote_req(*hi)) ||
+			   strcasecmp( hr.whatToShow.c_str(), hi->whatToShow.c_str()) == 0)
+			) {
+			cnt_skipped++;
+			errorRequests.push_back(hi);
+			it = leftRequests.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+return_skip_by_con:
+	DEBUG_PRINTF("skipped %d requests for contracts like %s,%s,%s",
+		cnt_skipped,
+		con.symbol.c_str(), con.secType.c_str(), con.exchange.c_str());
+	return cnt_skipped;
+}
 
 
 
