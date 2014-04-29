@@ -250,9 +250,35 @@ void HistTodo::add( const HistRequest& hR )
 	leftRequests.push_back(p);
 }
 
+int HistTodo::skip_by_con(const IB::Contract& con)
+{
+	int cnt_skipped = 0;
+	std::list<HistRequest*>::iterator it = leftRequests.begin();
 
+	if (con.symbol.empty() || con.secType.empty() || con.exchange.empty() ) {
+		goto return_skip_by_con;
+	}
 
+	while( it != leftRequests.end() ) {
+		HistRequest *hr = *it;
+		IB::Contract &ci = hr->ibContract;
+		if (strcasecmp( ci.symbol.c_str(), con.symbol.c_str()) == 0 &&
+				strcasecmp( ci.secType.c_str(), con.secType.c_str()) == 0 &&
+				strcasecmp( ci.exchange.c_str(), con.exchange.c_str()) == 0) {
+			cnt_skipped++;
+			errorRequests.push_back(hr);
+			it = leftRequests.erase(it);
+		} else {
+			++it;
+		}
+	}
 
+return_skip_by_con:
+	DEBUG_PRINTF("skipped %d requests for contracts like %s,%s,%s",
+		cnt_skipped,
+		con.symbol.c_str(), con.secType.c_str(), con.exchange.c_str());
+	return cnt_skipped;
+}
 
 
 
@@ -1410,6 +1436,15 @@ void PacingControl::addRequest()
 	violations.push_back( false );
 }
 
+void PacingControl::remove_last_request()
+{
+	//assert(dateTimes.size() > 0 && violations.size() > 0 );
+	if(dateTimes.size() <= 0 || violations.size() <= 0 ) {
+		DEBUG_PRINTF( "Warning, assert remove_last_request");
+	}
+	dateTimes.pop_back();
+	violations.pop_back();
+}
 
 void PacingControl::notifyViolation()
 {
@@ -1649,6 +1684,26 @@ void PacingGod::addRequest( const IB::Contract& c )
 	}
 }
 
+void PacingGod::remove_last_request( const IB::Contract& c )
+{
+	std::string farm;
+	std::string lazyC;
+	checkAdd( c, &lazyC, &farm );
+
+	controlGlobal.remove_last_request();
+
+	if( farm.empty() ) {
+		DEBUG_PRINTF( "remove request lazy" );
+		assert( controlLazy.find(lazyC) != controlLazy.end()
+			&& controlHmds.find(farm) == controlHmds.end() );
+		controlLazy[lazyC]->remove_last_request();
+	} else {
+		DEBUG_PRINTF( "remove request farm %s", farm.c_str() );
+		assert( controlHmds.find(farm) != controlHmds.end()
+			&& controlLazy.find(lazyC) == controlLazy.end() );
+		controlHmds[farm]->remove_last_request();
+	}
+}
 
 void PacingGod::notifyViolation( const IB::Contract& c )
 {
@@ -1823,6 +1878,7 @@ DataFarmStates::DataFarmStates() :
 	lastMsgNumber(INT_MIN),
 	edemo_checked(false)
 {
+	initHardCodedFarms();
 }
 
 DataFarmStates::~DataFarmStates()

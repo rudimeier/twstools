@@ -126,6 +126,7 @@ class HistTodo
 		void tellDone();
 		void cancelForRepeat( int priority );
 		void add( const HistRequest& );
+		int skip_by_con(const IB::Contract&);
 
 	private:
 		std::list<HistRequest*> &doneRequests;
@@ -568,6 +569,7 @@ class PacingControl
 		bool isEmpty() const;
 		void clear();
 		void addRequest();
+		void remove_last_request();
 		void notifyViolation();
 		int goodTime( const char** dbg ) const;
 		int countLeft() const;
@@ -598,6 +600,7 @@ class PacingGod
 
 		void clear();
 		void addRequest( const IB::Contract& );
+		void remove_last_request( const IB::Contract& );
 		void notifyViolation( const IB::Contract& );
 		int goodTime( const IB::Contract& );
 		int countLeft( const IB::Contract& c );

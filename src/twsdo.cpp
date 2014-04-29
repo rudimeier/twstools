@@ -868,15 +868,20 @@ void TwsDL::errorHistData( const RowError& err )
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_NAV );
 		} else if( ERR_MATCH("No data of type EODChart is available") ||
-			ERR_MATCH("No data of type DayChart is available") ) {
+			ERR_MATCH("No data of type DayChart is available") ||
+			ERR_MATCH("BEST queries are not supported for this contract")) {
 			// NOTE we should skip all similar work intelligently
 			DEBUG_PRINTF( "WARNING - DATA IS NOT AVAILABLE (no HMDS route). "
 				"%p %d", cur_hR, err.id );
 			p_histData.closeError( REQ_ERR_NAV );
+			workTodo->histTodo()->skip_by_con(curContract);
+			pacingControl.remove_last_request( curContract );
 		} else if( ERR_MATCH("No market data permissions for") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
 			p_histData.closeError( REQ_ERR_REQUEST );
+			workTodo->histTodo()->skip_by_con(curContract);
+			pacingControl.remove_last_request( curContract );
 		} else if( ERR_MATCH("Unknown contract") ) {
 			// NOTE we should skip all similar work intelligently
 			dataFarms.learnHmds( curContract );
