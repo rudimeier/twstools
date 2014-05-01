@@ -2,7 +2,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="20111027 00:00:00" durationStr="6 D" barSizeSetting="1 min" whatToShow="TRADES" formatDate="1">
-      <reqContract conId="86887275" symbol="A" secType="FUT" expiry="20111216" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CZ1" includeExpired="1"/>
+      <reqContract conId="86887275" symbol="A" secType="FUT" expiry="20111216" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CZ1" tradingClass="A1C" includeExpired="1"/>
     </query>
   </request>
 </TWSXML>
@@ -10,7 +10,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="20111027 00:00:00" durationStr="6 D" barSizeSetting="1 min" whatToShow="TRADES" formatDate="1">
-      <reqContract conId="86887278" symbol="A" secType="FUT" expiry="20111216" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DZ1" includeExpired="1"/>
+      <reqContract conId="86887278" symbol="A" secType="FUT" expiry="20111216" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DZ1" tradingClass="A1D" includeExpired="1"/>
     </query>
   </request>
 </TWSXML>
@@ -18,7 +18,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="20111027 00:00:00" durationStr="6 D" barSizeSetting="1 min" whatToShow="TRADES" formatDate="1">
-      <reqContract conId="93176902" symbol="A" secType="FUT" expiry="20111021" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CV1" includeExpired="1"/>
+      <reqContract conId="93176902" symbol="A" secType="FUT" expiry="20111021" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CV1" tradingClass="A1C" includeExpired="1"/>
     </query>
   </request>
 </TWSXML>
@@ -26,7 +26,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="20111027 00:00:00" durationStr="6 D" barSizeSetting="1 min" whatToShow="TRADES" formatDate="1">
-      <reqContract conId="93176905" symbol="A" secType="FUT" expiry="20111021" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DV1" includeExpired="1"/>
+      <reqContract conId="93176905" symbol="A" secType="FUT" expiry="20111021" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DV1" tradingClass="A1D" includeExpired="1"/>
     </query>
   </request>
 </TWSXML>
@@ -34,7 +34,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="20111027 00:00:00" durationStr="6 D" barSizeSetting="1 min" whatToShow="TRADES" formatDate="1">
-      <reqContract conId="94542173" symbol="A" secType="FUT" expiry="20111118" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CX1" includeExpired="1"/>
+      <reqContract conId="94542173" symbol="A" secType="FUT" expiry="20111118" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1CX1" tradingClass="A1C" includeExpired="1"/>
     </query>
   </request>
 </TWSXML>
@@ -42,7 +42,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="20111027 00:00:00" durationStr="6 D" barSizeSetting="1 min" whatToShow="TRADES" formatDate="1">
-      <reqContract conId="94542177" symbol="A" secType="FUT" expiry="20111118" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DX1" includeExpired="1"/>
+      <reqContract conId="94542177" symbol="A" secType="FUT" expiry="20111118" multiplier="100" exchange="ONE" currency="USD" localSymbol="A1DX1" tradingClass="A1D" includeExpired="1"/>
     </query>
   </request>
 </TWSXML>

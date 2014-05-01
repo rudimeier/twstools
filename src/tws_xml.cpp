@@ -521,6 +521,9 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, marketName );
 #if TWSAPI_IB_VERSION_NUMBER < 969
 	GET_ATTR_STRING( cd, tradingClass );
+#else
+	/* for compatibility we move tradingClass attribute to the contract */
+	GET_ATTR_STRING( (&cd->summary), tradingClass );
 #endif
 	GET_ATTR_DOUBLE( cd, minTick );
 	GET_ATTR_STRING( cd, orderTypes );
