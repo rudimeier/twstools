@@ -126,6 +126,13 @@ class DebugTwsWrapper : public IB::EWrapper
 		void tickSnapshotEnd( int reqId );
 		void marketDataType( IB::TickerId reqId, int marketDataType );
 		void commissionReport( const IB::CommissionReport &commissionReport );
+		void position( const IB::IBString& account,
+			const IB::Contract& contract, int position, double avgCost );
+		void positionEnd();
+		void accountSummary( int reqId, const IB::IBString& account,
+			const IB::IBString& tag, const IB::IBString& value,
+			const IB::IBString& currency );
+		void accountSummaryEnd( int reqId );
 };
 
 #endif

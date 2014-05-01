@@ -139,6 +139,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_STRING( c, primaryExchange );
 	ADD_ATTR_STRING( c, currency );
 	ADD_ATTR_STRING( c, localSymbol );
+#if TWSAPI_IB_VERSION_NUMBER >= 969
+	ADD_ATTR_STRING( c, tradingClass );
+#endif
 	ADD_ATTR_BOOL( c, includeExpired );
 	ADD_ATTR_STRING( c, secIdType );
 	ADD_ATTR_STRING( c, secId );
@@ -173,7 +176,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	conv_ib2xml( ne, "summary", cd.summary );
 
 	ADD_ATTR_STRING( cd, marketName );
+#if TWSAPI_IB_VERSION_NUMBER < 969
 	ADD_ATTR_STRING( cd, tradingClass );
+#endif
 	ADD_ATTR_DOUBLE( cd, minTick );
 	ADD_ATTR_STRING( cd, orderTypes );
 	ADD_ATTR_STRING( cd, validExchanges );
@@ -458,6 +463,9 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( c, primaryExchange );
 	GET_ATTR_STRING( c, currency );
 	GET_ATTR_STRING( c, localSymbol );
+#if TWSAPI_IB_VERSION_NUMBER >= 969
+	GET_ATTR_STRING( c, tradingClass );
+#endif
 	GET_ATTR_BOOL( c, includeExpired );
 	GET_ATTR_STRING( c, secIdType );
 	GET_ATTR_STRING( c, secId );
@@ -511,7 +519,12 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	char* tmp;
 
 	GET_ATTR_STRING( cd, marketName );
+#if TWSAPI_IB_VERSION_NUMBER < 969
 	GET_ATTR_STRING( cd, tradingClass );
+#else
+	/* for compatibility we move tradingClass attribute to the contract */
+	GET_ATTR_STRING( (&cd->summary), tradingClass );
+#endif
 	GET_ATTR_DOUBLE( cd, minTick );
 	GET_ATTR_STRING( cd, orderTypes );
 	GET_ATTR_STRING( cd, validExchanges );
