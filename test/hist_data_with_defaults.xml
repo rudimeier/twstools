@@ -2,7 +2,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="" durationStr="20 D" barSizeSetting="15 mins" whatToShow="BID_ASK" useRTH="0" formatDate="1">
-      <reqContract conId="12087820" symbol="USD" secType="CASH" expiry="" strike="0" right="" multiplier="" exchange="IDEALPRO" primaryExchange="" currency="CHF" localSymbol="USD.CHF" includeExpired="0" secIdType="" secId="" comboLegsDescrip=""/>
+      <reqContract conId="12087820" symbol="USD" secType="CASH" expiry="" strike="0" right="" multiplier="" exchange="IDEALPRO" primaryExchange="" currency="CHF" localSymbol="USD.CHF" tradingClass="" includeExpired="0" secIdType="" secId="" comboLegsDescrip=""/>
     </query>
     <response>
       <row date="20111006  00:00:00" open="0.92385" high="0.9245" low="0.92315" close="0.92405" volume="-1" count="-1" WAP="-1" hasGaps="0"/>
@@ -23,7 +23,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="" durationStr="20 D" barSizeSetting="15 mins" whatToShow="BID_ASK" useRTH="0" formatDate="1">
-      <reqContract conId="0" symbol="" secType="" expiry="" strike="0" right="" multiplier="" exchange="" primaryExchange="" currency="" localSymbol="" includeExpired="0" secIdType="" secId="" comboLegsDescrip=""/>
+      <reqContract conId="0" symbol="" secType="" expiry="" strike="0" right="" multiplier="" exchange="" primaryExchange="" currency="" localSymbol="" tradingClass="" includeExpired="0" secIdType="" secId="" comboLegsDescrip=""/>
     </query>
     <response>
       <row date="" open="-1" high="-1" low="-1" close="-1" volume="-1" count="-1" WAP="-1" hasGaps="0"/>
@@ -44,7 +44,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="" durationStr="" barSizeSetting="" whatToShow="" useRTH="0" formatDate="0">
-      <reqContract conId="86892675" symbol="MSFT" secType="FUT" expiry="20111216" strike="1234" right="P" multiplier="100" exchange="ONE" primaryExchange="GAGA" currency="USD" localSymbol="MSFT1CZ1" includeExpired="1" secIdType="BLA" secId="BLA" comboLegsDescrip="BLA"/>
+      <reqContract conId="86892675" symbol="MSFT" secType="FUT" expiry="20111216" strike="1234" right="P" multiplier="100" exchange="ONE" primaryExchange="GAGA" currency="USD" localSymbol="MSFT1CZ1" tradingClass="" includeExpired="1" secIdType="BLA" secId="BLA" comboLegsDescrip="BLA"/>
     </query>
   </request>
 </TWSXML>
@@ -52,7 +52,7 @@
 <TWSXML>
   <request type="historical_data">
     <query endDateTime="" durationStr="" barSizeSetting="" whatToShow="" useRTH="0" formatDate="0">
-      <reqContract conId="0" symbol="" secType="" expiry="" strike="0" right="" multiplier="" exchange="" primaryExchange="" currency="" localSymbol="" includeExpired="0" secIdType="" secId="" comboLegsDescrip=""/>
+      <reqContract conId="0" symbol="" secType="" expiry="" strike="0" right="" multiplier="" exchange="" primaryExchange="" currency="" localSymbol="" tradingClass="" includeExpired="0" secIdType="" secId="" comboLegsDescrip=""/>
     </query>
   </request>
 </TWSXML>
