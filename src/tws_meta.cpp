@@ -1933,17 +1933,27 @@ DataFarmStates::~DataFarmStates()
 
 void DataFarmStates::initHardCodedFarms()
 {
+	hLearn["AEB"] = "euhmds";
+	hLearn["BATECH"] = "euhmds";
+	hLearn["BATEDE"] = "euhmds";
+	hLearn["BATEEN"] = "euhmds";
+	hLearn["BATEUK"] = "euhmds";
 	hLearn["BELFOX"] = "euhmds";
 	hLearn["BM"] = "euhmds";
+	hLearn["BVL"] = "euhmds";
 	hLearn["BVME"] = "euhmds";
+	hLearn["CHIXCH"] = "euhmds";
 	hLearn["CHIXDE"] = "euhmds";
+	hLearn["CHIXEN"] = "euhmds";
 	hLearn["CHIXUK"] = "euhmds";
 	hLearn["DTB"] = "euhmds";
 	hLearn["EBS"] = "euhmds";
 	hLearn["EDXNO"] = "euhmds";
 	hLearn["FTA"] = "euhmds";
 	hLearn["FWB"] = "euhmds";
+	hLearn["FWB2"] = "euhmds";
 	hLearn["IBIS"] = "euhmds";
+	hLearn["IBIS2"] = "euhmds";
 	hLearn["IDEM"] = "euhmds";
 	hLearn["IPE"] = "euhmds";
 	hLearn["LIFFE_NF"] = "euhmds";
@@ -1954,8 +1964,17 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["MEFFRV"] = "euhmds";
 	hLearn["MONEP"] = "euhmds";
 	hLearn["OMS"] = "euhmds";
+	hLearn["SBF"] = "euhmds";
+	hLearn["SBVM"] = "euhmds";
 	hLearn["SFB"] = "euhmds";
+	hLearn["SWB"] = "euhmds";
+	hLearn["SWB2"] = "euhmds";
 	hLearn["SOFFEX"] = "euhmds";
+	hLearn["TGATE"] = "euhmds";
+	hLearn["TRQXCH"] = "euhmds";
+	hLearn["TRQXDE"] = "euhmds";
+	hLearn["TRQXEN"] = "euhmds";
+	hLearn["TRQXUK"] = "euhmds";
 	hLearn["VIRTX"] = "euhmds";
 	hLearn["VSE"] = "euhmds";
 
@@ -1963,12 +1982,17 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["GLOBEX"] = "ilhmds";
 	hLearn["NYMEX"] = "ilhmds";
 
+	hLearn["BATS"] = "ushmds.us";
+	hLearn["BYX"] = "ushmds.us";
 	hLearn["CBOT"] = "ushmds.us";
 	hLearn["CDE"] = "ushmds.us";
 	hLearn["CFE"] = "ushmds.us";
 	hLearn["CME"] = "ushmds.us";
+	hLearn["DRCTEDGE"] = "ushmds.us";
+	hLearn["EDGEA"] = "ushmds.us";
 	hLearn["ELX"] = "ushmds.us";
 	hLearn["IPE"] = "ushmds.us";
+	hLearn["LAVA"] = "ushmds.us";
 	hLearn["MEXDER"] = "ushmds.us";
 	hLearn["NYBOT"] = "ushmds.us";
 	hLearn["NYSELIFFE"] = "ushmds.us";
