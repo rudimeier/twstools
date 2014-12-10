@@ -2133,53 +2133,48 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 	}
 	last_learned_lazy_contract = lazyC;
 
+	const std::string &known_farm = getHmdsFarm(lazyC);
+
 	std::vector<std::string> sl;
+	std::string farms_ok_str;
+	bool known_farm_is_ok = false;
 	std::map<const std::string, State>::const_iterator it = hStates.begin();
 	while( it != hStates.end() ) {
 		if( it->second == OK ) {
 			sl.push_back( it->first );
+			if( farms_ok_str.size() > 0 ) {
+				farms_ok_str.append(",");
+			}
+			farms_ok_str.append(it->first);
+			if( it->first ==  known_farm ) {
+				known_farm_is_ok = true;
+			}
 		}
 		it++;
 	}
-	if( sl.size() <= 0 ) {
-		/* FIXME this is a race, TWS tells us a farm is broken before sending
-		   the last data. If this race happens in the other cases then we would
-		   learn a wrong farm. The final fix would be to handle wrongly learned
-		   farms when we notice it */
-		DEBUG_PRINTF( "Warning, can't learn hmds while no farm is active.");
-	} else if( sl.size() == 1 ) {
-		if( hLearn.find(lazyC) != hLearn.end() ) {
-			assert( hLearn.find( lazyC )->second == sl.front() );
-		} else {
-			hLearn[lazyC] = sl.front();
-			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
-				lazyC.c_str(), sl.front().c_str() );
-		}
-	} else {
-		if( hLearn.find(lazyC) != hLearn.end() ) {
-			// here we just validate that the known farm is active
-			const std::string &known_farm =  hLearn.find(lazyC)->second;
-			bool sl_contains_lazyC = false;
-			for( std::vector<std::string>::const_iterator it = sl.begin();
-				    it != sl.end(); it++ ) {
-				if( *it == known_farm ) {
-					sl_contains_lazyC = true;
-					break;
-				}
-			}
-			assert( sl_contains_lazyC );
-		} else {
-			//but doing nothing
-			std::string dbg_active_farms;
-			for( std::vector<std::string>::const_iterator it = sl.begin();
-				    it != sl.end(); it++ ) {
-				dbg_active_farms.append(",").append(*it);
-			}
 
-			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
-				lazyC.c_str(),
-				(dbg_active_farms.c_str()+1) );
-		}
+	if( known_farm_is_ok ) {
+		return;
+	}
+	if( ! known_farm.empty() ) {
+		/* Either this is a race (TWS told us a farm is broken before sending
+		   last data) or our known farm is wrong. Just ignore this for now. */
+		DEBUG_PRINTF( "Warning, known HMDS farm (%s->%s) is not active (%s).",
+			lazyC.c_str(), known_farm.c_str(), farms_ok_str.c_str() );
+		return;
+	}
+
+	if( sl.size() <= 0 ) {
+		DEBUG_PRINTF( "Warning, can't learn HMDS while no farm is active.");
+	} else if( sl.size() == 1 ) {
+		hLearn[lazyC] = sl.front();
+		DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
+			lazyC.c_str(), sl.front().c_str() );
+	} else {
+		//but doing nothing
+		DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
+			lazyC.c_str(),
+			farms_ok_str.c_str() );
 	}
 }
 
