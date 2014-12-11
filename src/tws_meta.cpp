@@ -1480,9 +1480,9 @@ void PacingControl::addRequest()
 
 void PacingControl::remove_last_request()
 {
-	//assert(dateTimes.size() > 0 && violations.size() > 0 );
-	if(dateTimes.size() <= 0 || violations.size() <= 0 ) {
+	if( dateTimes.size() <= 0 ) {
 		DEBUG_PRINTF( "Warning, assert remove_last_request");
+		return;
 	}
 	dateTimes.pop_back();
 	violations.pop_back();
