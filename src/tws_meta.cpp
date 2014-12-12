@@ -1933,54 +1933,103 @@ DataFarmStates::~DataFarmStates()
 
 void DataFarmStates::initHardCodedFarms()
 {
-	hLearn["BELFOX"] = "euhmds";
-	hLearn["BM"] = "euhmds";
-	hLearn["BVME"] = "euhmds";
-	hLearn["CHIXDE"] = "euhmds";
-	hLearn["CHIXUK"] = "euhmds";
-	hLearn["DTB"] = "euhmds";
-	hLearn["EBS"] = "euhmds";
-	hLearn["EDXNO"] = "euhmds";
-	hLearn["FTA"] = "euhmds";
-	hLearn["FWB"] = "euhmds";
-	hLearn["IBIS"] = "euhmds";
-	hLearn["IDEM"] = "euhmds";
-	hLearn["IPE"] = "euhmds";
-	hLearn["LIFFE_NF"] = "euhmds";
-	hLearn["LIFFE"] = "euhmds";
-	hLearn["LSE"] = "euhmds";
-	hLearn["LSSF"] = "euhmds";
-	hLearn["MATIF"] = "euhmds";
-	hLearn["MEFFRV"] = "euhmds";
-	hLearn["MONEP"] = "euhmds";
-	hLearn["OMS"] = "euhmds";
-	hLearn["SFB"] = "euhmds";
-	hLearn["SOFFEX"] = "euhmds";
-	hLearn["VIRTX"] = "euhmds";
-	hLearn["VSE"] = "euhmds";
+	hLearn["AEB"] = "ethmds";
+	hLearn["BATECH"] = "ethmds";
+	hLearn["BATEDE"] = "ethmds";
+	hLearn["BATEEN"] = "ethmds";
+	hLearn["BATEUK"] = "ethmds";
+	hLearn["BELFOX"] = "ethmds";
+	hLearn["BM"] = "ethmds";
+	hLearn["BVL"] = "ethmds";
+	hLearn["BVME"] = "ethmds";
+	hLearn["BVME.ETF"] = "ethmds";
+	hLearn["CHIXCH"] = "ethmds";
+	hLearn["CHIXDE"] = "ethmds";
+	hLearn["CHIXEN"] = "ethmds";
+	hLearn["CHIXUK"] = "ethmds";
+	hLearn["CPH"] = "ethmds";
+	hLearn["DTB"] = "ethmds";
+	hLearn["EBS"] = "ethmds";
+	hLearn["EDXNO"] = "ethmds";
+	hLearn["FTA"] = "ethmds";
+	hLearn["FWB"] = "ethmds";
+	hLearn["FWB2"] = "ethmds";
+	hLearn["HEX"] = "ethmds";
+	hLearn["IBIS"] = "ethmds";
+	hLearn["IBIS2"] = "ethmds";
+	hLearn["ICEEU"] = "ethmds";
+	hLearn["IDEM"] = "ethmds";
+	hLearn["LSE"] = "ethmds";
+	hLearn["MATIF"] = "ethmds";
+	hLearn["MEFFRV"] = "ethmds";
+	hLearn["MONEP"] = "ethmds";
+	hLearn["OMC"] = "ethmds";
+	hLearn["OMH"] = "ethmds";
+	hLearn["OMS"] = "ethmds";
+	hLearn["OMXNO"] = "ethmds";
+	hLearn["OSE"] = "ethmds";
+	hLearn["SBF"] = "ethmds";
+	hLearn["SBVM"] = "ethmds";
+	hLearn["SFB"] = "ethmds";
+	hLearn["SOFFEX"] = "ethmds";
+	hLearn["SWB"] = "ethmds";
+	hLearn["SWB2"] = "ethmds";
+	hLearn["TGATE"] = "ethmds";
+	hLearn["TOM"] = "ethmds";
+	hLearn["TRQXCH"] = "ethmds";
+	hLearn["TRQXDE"] = "ethmds";
+	hLearn["TRQXEN"] = "ethmds";
+	hLearn["TRQXUK"] = "ethmds";
+	hLearn["VIRTX"] = "ethmds";
+	hLearn["VSE"] = "ethmds";
 
 	hLearn["ECBOT"] = "ilhmds";
 	hLearn["GLOBEX"] = "ilhmds";
+	hLearn["ICEEUSOFT"] = "ilhmds";
 	hLearn["NYMEX"] = "ilhmds";
 
+	hLearn["AMEX"] = "ushmds.us";
+	hLearn["ARCA"] = "ushmds.us";
+	hLearn["ARCAEDGE"] = "ushmds.us";
+	hLearn["BATS"] = "ushmds.us";
+	hLearn["BEX"] = "ushmds.us";
+	hLearn["BYX"] = "ushmds.us";
+	hLearn["CBOE"] = "ushmds.us";
+	hLearn["CBOE2"] = "ushmds.us";
 	hLearn["CBOT"] = "ushmds.us";
 	hLearn["CDE"] = "ushmds.us";
 	hLearn["CFE"] = "ushmds.us";
+	hLearn["CHX"] = "ushmds.us";
 	hLearn["CME"] = "ushmds.us";
+	hLearn["DRCTEDGE"] = "ushmds.us";
+	hLearn["EDGEA"] = "ushmds.us";
 	hLearn["ELX"] = "ushmds.us";
 	hLearn["IPE"] = "ushmds.us";
+	hLearn["ISE"] = "ushmds.us";
+	hLearn["ISLAND"] = "ushmds.us";
+	hLearn["LAVA"] = "ushmds.us";
 	hLearn["MEXDER"] = "ushmds.us";
+	hLearn["MEXI"] = "ushmds.us";
+	hLearn["NASDAQ"] = "ushmds.us";
 	hLearn["NYBOT"] = "ushmds.us";
+	hLearn["NYSE"] = "ushmds.us";
 	hLearn["NYSELIFFE"] = "ushmds.us";
 	hLearn["ONE"] = "ushmds.us";
+	hLearn["PHLX"] = "ushmds.us";
+	hLearn["PSE"] = "ushmds.us";
+	hLearn["PSX"] = "ushmds.us";
+	hLearn["RUSSELL"] = "ushmds.us";
+	hLearn["TSE"] = "ushmds.us";
+	hLearn["VENTURE"] = "ushmds.us";
 
 	hLearn["ASX"] = "hkhmds";
 	hLearn["CHIXJ"] = "hkhmds";
 	hLearn["HKFE"] = "hkhmds";
-	hLearn["HKMEX"] = "hkhmds";
 	hLearn["KSE"] = "hkhmds";
 	hLearn["NSE"] = "hkhmds";
 	hLearn["OSE.JPN"] = "hkhmds";
+	hLearn["SEHK"] = "hkhmds";
+	hLearn["SEHKNTL"] = "hkhmds";
 	hLearn["SGX"] = "hkhmds";
 	hLearn["SNFE"] = "hkhmds";
 	hLearn["TSEJ"] = "hkhmds";
@@ -2109,53 +2158,48 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 	}
 	last_learned_lazy_contract = lazyC;
 
+	const std::string &known_farm = getHmdsFarm(lazyC);
+
 	std::vector<std::string> sl;
+	std::string farms_ok_str;
+	bool known_farm_is_ok = false;
 	std::map<const std::string, State>::const_iterator it = hStates.begin();
 	while( it != hStates.end() ) {
 		if( it->second == OK ) {
 			sl.push_back( it->first );
+			if( farms_ok_str.size() > 0 ) {
+				farms_ok_str.append(",");
+			}
+			farms_ok_str.append(it->first);
+			if( it->first ==  known_farm ) {
+				known_farm_is_ok = true;
+			}
 		}
 		it++;
 	}
-	if( sl.size() <= 0 ) {
-		/* FIXME this is a race, TWS tells us a farm is broken before sending
-		   the last data. If this race happens in the other cases then we would
-		   learn a wrong farm. The final fix would be to handle wrongly learned
-		   farms when we notice it */
-		DEBUG_PRINTF( "Warning, can't learn hmds while no farm is active.");
-	} else if( sl.size() == 1 ) {
-		if( hLearn.find(lazyC) != hLearn.end() ) {
-			assert( hLearn.find( lazyC )->second == sl.front() );
-		} else {
-			hLearn[lazyC] = sl.front();
-			DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
-				lazyC.c_str(), sl.front().c_str() );
-		}
-	} else {
-		if( hLearn.find(lazyC) != hLearn.end() ) {
-			// here we just validate that the known farm is active
-			const std::string &known_farm =  hLearn.find(lazyC)->second;
-			bool sl_contains_lazyC = false;
-			for( std::vector<std::string>::const_iterator it = sl.begin();
-				    it != sl.end(); it++ ) {
-				if( *it == known_farm ) {
-					sl_contains_lazyC = true;
-					break;
-				}
-			}
-			assert( sl_contains_lazyC );
-		} else {
-			//but doing nothing
-			std::string dbg_active_farms;
-			for( std::vector<std::string>::const_iterator it = sl.begin();
-				    it != sl.end(); it++ ) {
-				dbg_active_farms.append(",").append(*it);
-			}
 
-			DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
-				lazyC.c_str(),
-				(dbg_active_farms.c_str()+1) );
-		}
+	if( known_farm_is_ok ) {
+		return;
+	}
+	if( ! known_farm.empty() ) {
+		/* Either this is a race (TWS told us a farm is broken before sending
+		   last data) or our known farm is wrong. Just ignore this for now. */
+		DEBUG_PRINTF( "Warning, known HMDS farm (%s->%s) is not active (%s).",
+			lazyC.c_str(), known_farm.c_str(), farms_ok_str.c_str() );
+		return;
+	}
+
+	if( sl.size() <= 0 ) {
+		DEBUG_PRINTF( "Warning, can't learn HMDS while no farm is active.");
+	} else if( sl.size() == 1 ) {
+		hLearn[lazyC] = sl.front();
+		DEBUG_PRINTF( "learn HMDS farm (unique): %s %s",
+			lazyC.c_str(), sl.front().c_str() );
+	} else {
+		//but doing nothing
+		DEBUG_PRINTF( "learn HMDS farm (ambiguous): %s (%s)",
+			lazyC.c_str(),
+			farms_ok_str.c_str() );
 	}
 }
 
