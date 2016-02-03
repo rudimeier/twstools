@@ -86,7 +86,7 @@ Note there is still a lot debug output on stderr. Just redirect it into files:
 Usage
 -----
 
-Currently we have just two commands. The job processer "twsdo" and job generator
+Currently we have just two commands. The job processor "twsdo" and job generator
 "twsgen".
 
 twsdo reads jobs from file and writes TWS response to stdout.
@@ -130,7 +130,7 @@ file conatins one xml document only.
 Known issues / TODO (feedback is welcome)
 -----------------------------------------
 
-Allthough particular use cases are working nice and stable twstools development
+Although particular use cases are working nice and stable twstools development
 is still in alpha state! The user interface and xml format is not stabilized
 yet. But don't worry all future changes will be made as compatible as possible.
 

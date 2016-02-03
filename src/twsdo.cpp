@@ -836,7 +836,7 @@ void TwsDL::errorContracts( const RowError& err )
 		}
 		break;
 	case 321:
-		/* comes directly from TWS whith prefix "Error validating request:-" */
+		/* comes directly from TWS with prefix "Error validating request:-" */
 		packet->closeError( REQ_ERR_REQUEST );
 		break;
 	default:
@@ -927,7 +927,7 @@ void TwsDL::errorHistData( const RowError& err )
 		break;
 	// Server error when validating an API client request
 	case 321:
-		// comes directly from TWS whith prefix "Error validating request:-"
+		// comes directly from TWS with prefix "Error validating request:-"
 		// NOTE we could find out more to throw away similar worktodo
 		p_histData.closeError( REQ_ERR_REQUEST );
 		break;

@@ -1493,7 +1493,7 @@ void PacingControl::notifyViolation()
 	if( violations.empty() ) {
 		/* Either we have cleared violations for no good reason or TWS itself
 		   made requests where we don't know about */
-		DEBUG_PRINTF( "Warning, pacing violation occured while HMDS farm "
+		DEBUG_PRINTF( "Warning, pacing violation occurred while HMDS farm "
 			"looks clear.");
 		addRequest();
 	}
