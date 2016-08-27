@@ -2022,17 +2022,17 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["TSE"] = "ushmds.us";
 	hLearn["VENTURE"] = "ushmds.us";
 
-	hLearn["ASX"] = "hkhmds";
-	hLearn["CHIXJ"] = "hkhmds";
-	hLearn["HKFE"] = "hkhmds";
-	hLearn["KSE"] = "hkhmds";
-	hLearn["NSE"] = "hkhmds";
-	hLearn["OSE.JPN"] = "hkhmds";
-	hLearn["SEHK"] = "hkhmds";
-	hLearn["SEHKNTL"] = "hkhmds";
-	hLearn["SGX"] = "hkhmds";
-	hLearn["SNFE"] = "hkhmds";
-	hLearn["TSEJ"] = "hkhmds";
+	hLearn["ASX"] = "hthmds";
+	hLearn["CHIXJ"] = "hthmds";
+	hLearn["HKFE"] = "hthmds";
+	hLearn["KSE"] = "hthmds";
+	hLearn["NSE"] = "hthmds";
+	hLearn["OSE.JPN"] = "hthmds";
+	hLearn["SEHK"] = "hthmds";
+	hLearn["SEHKNTL"] = "hthmds";
+	hLearn["SGX"] = "hthmds";
+	hLearn["SNFE"] = "hthmds";
+	hLearn["TSEJ"] = "hthmds";
 }
 
 
