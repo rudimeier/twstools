@@ -2033,6 +2033,8 @@ void DataFarmStates::initHardCodedFarms()
 	hLearn["SGX"] = "hkhmds";
 	hLearn["SNFE"] = "hkhmds";
 	hLearn["TSEJ"] = "hkhmds";
+
+	hLearn["IDEALPRO"] = "cashhmds";
 }
 
 
