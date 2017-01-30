@@ -424,3 +424,27 @@ void DebugTwsWrapper::accountSummaryEnd( int reqId )
 	DEBUG_PRINTF( "ACCOUNT_SUMMARY_END: %d", reqId );
 }
 #endif
+
+
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+void DebugTwsWrapper::verifyMessageAPI( const IB::IBString& apiData)
+{
+	DEBUG_PRINTF( "VERIFY_MESSAGE_API: %s", apiData.c_str() );
+}
+
+void DebugTwsWrapper::verifyCompleted( bool isSuccessful, const IB::IBString& errorText)
+{
+	DEBUG_PRINTF( "VERIFY_COMPLETED: %s %s", isSuccessful ? "true" : "false",
+		errorText.c_str() );
+}
+
+void DebugTwsWrapper::displayGroupList( int reqId, const IB::IBString& groups)
+{
+	DEBUG_PRINTF( "DISPLAY_GROUP_LIST: %d %s", reqId, groups.c_str() );
+}
+
+void DebugTwsWrapper::displayGroupUpdated( int reqId, const IB::IBString& contractInfo)
+{
+	DEBUG_PRINTF( "DISPLAY_GROUP_UPDATED: %d %s", reqId, contractInfo.c_str() );
+}
+#endif

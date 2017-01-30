@@ -133,6 +133,10 @@ class DebugTwsWrapper : public IB::EWrapper
 			const IB::IBString& tag, const IB::IBString& value,
 			const IB::IBString& currency );
 		void accountSummaryEnd( int reqId );
+		void verifyMessageAPI( const IB::IBString& apiData);
+		void verifyCompleted( bool isSuccessful, const IB::IBString& errorText);
+		void displayGroupList( int reqId, const IB::IBString& groups);
+		void displayGroupUpdated( int reqId, const IB::IBString& contractInfo);
 };
 
 #endif
