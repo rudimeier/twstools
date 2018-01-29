@@ -33,8 +33,9 @@ static char *strptime(const char * __restrict,
 }
 #endif
 
-
-
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 int64_t nowInMsecs()
 {
@@ -318,7 +319,7 @@ std::string ibToString( const IB::Contract &c, bool showFields )
 	}
 	snprintf( buf, sizeof(buf), fmt,
 		c.conId, c.symbol.c_str(), c.secType.c_str(),
-		c.expiry.c_str(), c.strike, c.right.c_str(),
+		c.lastTradeDateOrContractMonth.c_str(), c.strike, c.right.c_str(),
 		c.multiplier.c_str(), c.exchange.c_str(), c.currency.c_str(),
 		c.localSymbol.c_str() );
 

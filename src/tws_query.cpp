@@ -8,8 +8,13 @@
 
 #include "tws_query.h"
 
+#include <twsapi/twsapi_config.h>
+
 #include <stdio.h>
 
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 const IB::Contract& ContractDetailsRequest::ibContract() const
 {
@@ -56,7 +61,7 @@ std::string HistRequest::toString() const
 		ibContract.secType.c_str(),
 		ibContract.exchange.c_str(),
 		ibContract.currency.c_str(),
-		ibContract.expiry.c_str(),
+		ibContract.lastTradeDateOrContractMonth.c_str(),
 		ibContract.strike,
 		ibContract.right.c_str() );
 

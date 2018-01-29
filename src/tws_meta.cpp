@@ -12,6 +12,8 @@
 #include "tws_util.h"
 #include "debug.h"
 
+#include <twsapi/twsapi_config.h>
+
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -19,8 +21,9 @@
 #include <limits.h>
 #include <string.h>
 
-
-
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 GenericRequest::GenericRequest() :
 	_reqType(NONE),
@@ -857,13 +860,13 @@ void PacketHistData::dump( bool printFormatDates )
 
 	for( std::vector<RowHist>::const_iterator it = rows.begin();
 		it != rows.end(); it++ ) {
-		std::string expiry = c.expiry;
+		std::string expiry = c.lastTradeDateOrContractMonth;
 		std::string dateTime = it->date;
 		if( printFormatDates ) {
 			if( expiry.empty() ) {
 				expiry = "0000-00-00";
 			} else {
-				expiry = ib_date2iso( c.expiry );
+				expiry = ib_date2iso( c.lastTradeDateOrContractMonth );
 			}
 			dateTime = ib_date2iso(it->date);
 			assert( !expiry.empty() && !dateTime.empty() ); //TODO

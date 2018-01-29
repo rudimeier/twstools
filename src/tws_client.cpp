@@ -10,6 +10,7 @@
 #include "tws_util.h"
 #include "debug.h"
 
+#include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
 #include <twsapi/Order.h>
 #include <twsapi/OrderState.h>
@@ -40,8 +41,9 @@
 		DEBUG_PRINTF("tws debug: " _fmt, ## _msg); \
 	}
 
-
-
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 TWSClient::TWSClient( IB::EWrapper *ew ) :
 	myEWrapper(ew),
@@ -157,7 +159,7 @@ void TWSClient::reqMktData(int tickerId, const IB::Contract &contract,
 	DEBUG_PRINTF( "REQ_MKT_DATA %d "
 		"'%s' '%s' '%s' '%s' '%s' '%g' '%s' '%s' '%s' %d",
 		tickerId, contract.symbol.c_str(), contract.exchange.c_str(),
-		contract.secType.c_str(), contract.expiry.c_str(),
+		contract.secType.c_str(), contract.lastTradeDateOrContractMonth.c_str(),
 		contract.right.c_str(), contract.strike, contract.currency.c_str(),
 		contract.localSymbol.c_str(), genericTickList.c_str(), snapshot );
 

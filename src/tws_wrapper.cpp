@@ -17,7 +17,9 @@
 #include <twsapi/OrderState.h>
 #include <twsapi/CommissionReport.h>
 
-
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 DebugTwsWrapper::~DebugTwsWrapper()
 {
@@ -178,7 +180,7 @@ void DebugTwsWrapper::contractDetails( int reqId,
 		reqId,
 		contractDetails.summary.symbol.c_str(),
 		contractDetails.summary.secType.c_str(),
-		contractDetails.summary.expiry.c_str(),
+		contractDetails.summary.lastTradeDateOrContractMonth.c_str(),
 		contractDetails.summary.strike,
 		contractDetails.summary.right.c_str(),
 		contractDetails.summary.exchange.c_str(),
@@ -198,7 +200,7 @@ void DebugTwsWrapper::bondContractDetails( int reqId,
 		reqId,
 		contractDetails.summary.symbol.c_str(),
 		contractDetails.summary.secType.c_str(),
-		contractDetails.summary.expiry.c_str(),
+		contractDetails.summary.lastTradeDateOrContractMonth.c_str(),
 		contractDetails.summary.strike,
 		contractDetails.summary.right.c_str(),
 		contractDetails.summary.exchange.c_str(),

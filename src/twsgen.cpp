@@ -23,6 +23,9 @@
 
 #include "twsgen_ggo.h"
 
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 static gengetopt_args_info args_info;
 
@@ -334,7 +337,7 @@ bool gen_hist_job()
 				break;
 			}
 
-			if( skip_expiry(c.expiry, t_begin) ) {
+			if( skip_expiry(c.lastTradeDateOrContractMonth, t_begin) ) {
 // 				DEBUG_PRINTF("skipping expiry: '%s'", c.expiry.c_str());
 				continue;
 			}
@@ -383,7 +386,7 @@ bool gen_csv()
 		PacketHistData *phd = PacketHistData::fromXml( xn );
 
 		if( max_expiryp != NULL ) {
-			const std::string &expiry = phd->getRequest().ibContract.expiry;
+			const std::string &expiry = phd->getRequest().ibContract.lastTradeDateOrContractMonth;
 			if( !expiry.empty() && strcmp(max_expiryp, expiry.c_str() ) < 0 ) {
 				goto cont;
 			}

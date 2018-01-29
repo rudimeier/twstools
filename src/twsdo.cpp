@@ -15,6 +15,7 @@
 #include "tws_account.h"
 #include "debug.h"
 
+#include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
 
 #if defined HAVE_CONFIG_H
@@ -31,8 +32,9 @@
 # include <sys/socket.h>
 #endif
 
-
-
+#if TWSAPI_IB_VERSION_NUMBER < 97200
+# define lastTradeDateOrContractMonth expiry
+#endif
 
 ConfigTwsdo::ConfigTwsdo()
 {
@@ -1325,7 +1327,7 @@ void TwsDL::reqHistoricalData()
 	DEBUG_PRINTF( "REQ_HISTORICAL_DATA %p %d: %ld,%s,%s,%s,%s %s,%s,%s,%s",
 		&workTodo->getHistTodo().current(),
 		currentRequest.reqId(), c.conId,
-		c.symbol.c_str(), c.secType.c_str(),c.exchange.c_str(),c.expiry.c_str(),
+		c.symbol.c_str(), c.secType.c_str(),c.exchange.c_str(),c.lastTradeDateOrContractMonth.c_str(),
 		hR.whatToShow.c_str(), hR.endDateTime.c_str(),
 		hR.durationStr.c_str(), hR.barSizeSetting.c_str() );
 
