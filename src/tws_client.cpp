@@ -45,9 +45,9 @@
 # define lastTradeDateOrContractMonth expiry
 #endif
 
-TWSClient::TWSClient( IB::EWrapper *ew ) :
+TWSClient::TWSClient( EWrapper *ew ) :
 	myEWrapper(ew),
-	ePosixClient( new IB::EPosixClientSocket(ew) )
+	ePosixClient( new EPosixClientSocket(ew) )
 {
 }
 
@@ -153,7 +153,7 @@ std::string TWSClient::TwsConnectionTime()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void TWSClient::reqMktData(int tickerId, const IB::Contract &contract,
+void TWSClient::reqMktData(int tickerId, const Contract &contract,
 	const  std::string &genericTickList, bool snapshot)
 {
 	DEBUG_PRINTF( "REQ_MKT_DATA %d "
@@ -175,8 +175,8 @@ void TWSClient::cancelMktData ( int tickerId )
 }
 
 
-void TWSClient::placeOrder ( int id, const IB::Contract &contract,
-	const IB::Order &order )
+void TWSClient::placeOrder ( int id, const Contract &contract,
+	const Order &order )
 {
 	DEBUG_PRINTF("PLACE_ORDER %d '%s' %g '%s' %g '%s' %ld",
 		id, order.orderType.c_str(), (double)order.totalQuantity, order.action.c_str(),
@@ -224,7 +224,7 @@ void TWSClient::reqAccountUpdates( bool subscribe, const std::string &acctCode )
 }
 
 
-void TWSClient::reqExecutions(int reqId, const IB::ExecutionFilter& filter)
+void TWSClient::reqExecutions(int reqId, const ExecutionFilter& filter)
 {
 	DEBUG_PRINTF("REQ_EXECUTIONS %d", reqId);
 
@@ -240,7 +240,7 @@ void TWSClient::reqIds( int numIds)
 }
 
 
-void TWSClient::reqContractDetails( int reqId, const IB::Contract &contract )
+void TWSClient::reqContractDetails( int reqId, const Contract &contract )
 {
 	DEBUG_PRINTF("REQ_CONTRACT_DATA %d '%s' '%s' '%s'",
 		reqId, contract.symbol.c_str(), contract.secType.c_str(),
@@ -258,7 +258,7 @@ void TWSClient::setServerLogLevel( int logLevel )
 }
 
 
-void TWSClient::reqHistoricalData ( int tickerId, const IB::Contract &contract,
+void TWSClient::reqHistoricalData ( int tickerId, const Contract &contract,
 	const std::string &endDateTime, const std::string &durationStr,
 	const std::string &barSizeSetting, const std::string &whatToShow,
 	int useRTH, int formatDate )

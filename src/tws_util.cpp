@@ -195,105 +195,105 @@ int ib_duration2secs( const std::string &dur )
 
 std::string ibToString( int tickType) {
 	 /* cast to get compiler warnings when enums are missing in switch */
-	IB::TickType xtickType = (IB::TickType)(tickType);
+	TickType xtickType = (TickType)(tickType);
 	switch ( xtickType) {
-		case IB::BID_SIZE:                    return "bidSize";
-		case IB::BID:                         return "bidPrice";
-		case IB::ASK:                         return "askPrice";
-		case IB::ASK_SIZE:                    return "askSize";
-		case IB::LAST:                        return "lastPrice";
-		case IB::LAST_SIZE:                   return "lastSize";
-		case IB::HIGH:                        return "high";
-		case IB::LOW:                         return "low";
-		case IB::VOLUME:                      return "volume";
-		case IB::CLOSE:                       return "close";
-		case IB::BID_OPTION_COMPUTATION:      return "bidOptComp";
-		case IB::ASK_OPTION_COMPUTATION:      return "askOptComp";
-		case IB::LAST_OPTION_COMPUTATION:     return "lastOptComp";
-		case IB::MODEL_OPTION:                return "modelOptComp";
-		case IB::OPEN:                        return "open";
-		case IB::LOW_13_WEEK:                 return "13WeekLow";
-		case IB::HIGH_13_WEEK:                return "13WeekHigh";
-		case IB::LOW_26_WEEK:                 return "26WeekLow";
-		case IB::HIGH_26_WEEK:                return "26WeekHigh";
-		case IB::LOW_52_WEEK:                 return "52WeekLow";
-		case IB::HIGH_52_WEEK:                return "52WeekHigh";
-		case IB::AVG_VOLUME:                  return "AvgVolume";
-		case IB::OPEN_INTEREST:               return "OpenInterest";
-		case IB::OPTION_HISTORICAL_VOL:       return "OptionHistoricalVolatility";
-		case IB::OPTION_IMPLIED_VOL:          return "OptionImpliedVolatility";
-		case IB::OPTION_BID_EXCH:             return "OptionBidExchStr";
-		case IB::OPTION_ASK_EXCH:             return "OptionAskExchStr";
-		case IB::OPTION_CALL_OPEN_INTEREST:   return "OptionCallOpenInterest";
-		case IB::OPTION_PUT_OPEN_INTEREST:    return "OptionPutOpenInterest";
-		case IB::OPTION_CALL_VOLUME:          return "OptionCallVolume";
-		case IB::OPTION_PUT_VOLUME:           return "OptionPutVolume";
-		case IB::INDEX_FUTURE_PREMIUM:        return "IndexFuturePremium";
-		case IB::BID_EXCH:                    return "bidExch";
-		case IB::ASK_EXCH:                    return "askExch";
-		case IB::AUCTION_VOLUME:              return "auctionVolume";
-		case IB::AUCTION_PRICE:               return "auctionPrice";
-		case IB::AUCTION_IMBALANCE:           return "auctionImbalance";
-		case IB::MARK_PRICE:                  return "markPrice";
-		case IB::BID_EFP_COMPUTATION:         return "bidEFP";
-		case IB::ASK_EFP_COMPUTATION:         return "askEFP";
-		case IB::LAST_EFP_COMPUTATION:        return "lastEFP";
-		case IB::OPEN_EFP_COMPUTATION:        return "openEFP";
-		case IB::HIGH_EFP_COMPUTATION:        return "highEFP";
-		case IB::LOW_EFP_COMPUTATION:         return "lowEFP";
-		case IB::CLOSE_EFP_COMPUTATION:       return "closeEFP";
-		case IB::LAST_TIMESTAMP:              return "lastTimestamp";
-		case IB::SHORTABLE:                   return "shortable";
-		case IB::FUNDAMENTAL_RATIOS:          return "fundamentals";
-		case IB::RT_VOLUME:                   return "RTVolume";
-		case IB::HALTED:                      return "halted";
-		case IB::BID_YIELD:                   return "bidYield";
-		case IB::ASK_YIELD:                   return "askYield";
-		case IB::LAST_YIELD:                  return "lastYield";
-		case IB::CUST_OPTION_COMPUTATION:     return "custOptComp";
-		case IB::TRADE_COUNT:                 return "trades";
-		case IB::TRADE_RATE:                  return "trades/min";
-		case IB::VOLUME_RATE:                 return "volume/min";
-		case IB::LAST_RTH_TRADE:              return "lastRTHTrade";
+		case BID_SIZE:                    return "bidSize";
+		case BID:                         return "bidPrice";
+		case ASK:                         return "askPrice";
+		case ASK_SIZE:                    return "askSize";
+		case LAST:                        return "lastPrice";
+		case LAST_SIZE:                   return "lastSize";
+		case HIGH:                        return "high";
+		case LOW:                         return "low";
+		case VOLUME:                      return "volume";
+		case CLOSE:                       return "close";
+		case BID_OPTION_COMPUTATION:      return "bidOptComp";
+		case ASK_OPTION_COMPUTATION:      return "askOptComp";
+		case LAST_OPTION_COMPUTATION:     return "lastOptComp";
+		case MODEL_OPTION:                return "modelOptComp";
+		case OPEN:                        return "open";
+		case LOW_13_WEEK:                 return "13WeekLow";
+		case HIGH_13_WEEK:                return "13WeekHigh";
+		case LOW_26_WEEK:                 return "26WeekLow";
+		case HIGH_26_WEEK:                return "26WeekHigh";
+		case LOW_52_WEEK:                 return "52WeekLow";
+		case HIGH_52_WEEK:                return "52WeekHigh";
+		case AVG_VOLUME:                  return "AvgVolume";
+		case OPEN_INTEREST:               return "OpenInterest";
+		case OPTION_HISTORICAL_VOL:       return "OptionHistoricalVolatility";
+		case OPTION_IMPLIED_VOL:          return "OptionImpliedVolatility";
+		case OPTION_BID_EXCH:             return "OptionBidExchStr";
+		case OPTION_ASK_EXCH:             return "OptionAskExchStr";
+		case OPTION_CALL_OPEN_INTEREST:   return "OptionCallOpenInterest";
+		case OPTION_PUT_OPEN_INTEREST:    return "OptionPutOpenInterest";
+		case OPTION_CALL_VOLUME:          return "OptionCallVolume";
+		case OPTION_PUT_VOLUME:           return "OptionPutVolume";
+		case INDEX_FUTURE_PREMIUM:        return "IndexFuturePremium";
+		case BID_EXCH:                    return "bidExch";
+		case ASK_EXCH:                    return "askExch";
+		case AUCTION_VOLUME:              return "auctionVolume";
+		case AUCTION_PRICE:               return "auctionPrice";
+		case AUCTION_IMBALANCE:           return "auctionImbalance";
+		case MARK_PRICE:                  return "markPrice";
+		case BID_EFP_COMPUTATION:         return "bidEFP";
+		case ASK_EFP_COMPUTATION:         return "askEFP";
+		case LAST_EFP_COMPUTATION:        return "lastEFP";
+		case OPEN_EFP_COMPUTATION:        return "openEFP";
+		case HIGH_EFP_COMPUTATION:        return "highEFP";
+		case LOW_EFP_COMPUTATION:         return "lowEFP";
+		case CLOSE_EFP_COMPUTATION:       return "closeEFP";
+		case LAST_TIMESTAMP:              return "lastTimestamp";
+		case SHORTABLE:                   return "shortable";
+		case FUNDAMENTAL_RATIOS:          return "fundamentals";
+		case RT_VOLUME:                   return "RTVolume";
+		case HALTED:                      return "halted";
+		case BID_YIELD:                   return "bidYield";
+		case ASK_YIELD:                   return "askYield";
+		case LAST_YIELD:                  return "lastYield";
+		case CUST_OPTION_COMPUTATION:     return "custOptComp";
+		case TRADE_COUNT:                 return "trades";
+		case TRADE_RATE:                  return "trades/min";
+		case VOLUME_RATE:                 return "volume/min";
+		case LAST_RTH_TRADE:              return "lastRTHTrade";
 #if TWSAPI_IB_VERSION_NUMBER >= 97200
-		case IB::RT_HISTORICAL_VOL:           return "RTHistoricalVol";
-		case IB::IB_DIVIDENDS:                return "IBDividends";
-		case IB::BOND_FACTOR_MULTIPLIER:      return "bondFactorMultiplier";
-		case IB::REGULATORY_IMBALANCE:        return "regulatoryImbalance";
-		case IB::NEWS_TICK:                   return "newsTick";
-		case IB::SHORT_TERM_VOLUME_3_MIN:     return "shortTermVolume3Min";
-		case IB::SHORT_TERM_VOLUME_5_MIN:     return "shortTermVolume5Min";
-		case IB::SHORT_TERM_VOLUME_10_MIN:    return "shortTermVolume10Min";
-		case IB::DELAYED_BID:                 return "delayedBid";
-		case IB::DELAYED_ASK:                 return "delayedAsk";
-		case IB::DELAYED_LAST:                return "delayedLast";
-		case IB::DELAYED_BID_SIZE:            return "delayedBidSize";
-		case IB::DELAYED_ASK_SIZE:            return "delayedAskSize";
-		case IB::DELAYED_LAST_SIZE:           return "delayedLastSize";
-		case IB::DELAYED_HIGH:                return "delayedHigh";
-		case IB::DELAYED_LOW:                 return "delayedLow";
-		case IB::DELAYED_VOLUME:              return "delayedVolume";
-		case IB::DELAYED_CLOSE:               return "delayedClose";
-		case IB::DELAYED_OPEN:                return "delayedOpen";
-		case IB::RT_TRD_VOLUME:               return "rtTrdVolume";
-		case IB::CREDITMAN_MARK_PRICE:        return "creditmanMarkPrice";
-		case IB::CREDITMAN_SLOW_MARK_PRICE:   return "creditmanSlowMarkPrice";
+		case RT_HISTORICAL_VOL:           return "RTHistoricalVol";
+		case IB_DIVIDENDS:                return "IBDividends";
+		case BOND_FACTOR_MULTIPLIER:      return "bondFactorMultiplier";
+		case REGULATORY_IMBALANCE:        return "regulatoryImbalance";
+		case NEWS_TICK:                   return "newsTick";
+		case SHORT_TERM_VOLUME_3_MIN:     return "shortTermVolume3Min";
+		case SHORT_TERM_VOLUME_5_MIN:     return "shortTermVolume5Min";
+		case SHORT_TERM_VOLUME_10_MIN:    return "shortTermVolume10Min";
+		case DELAYED_BID:                 return "delayedBid";
+		case DELAYED_ASK:                 return "delayedAsk";
+		case DELAYED_LAST:                return "delayedLast";
+		case DELAYED_BID_SIZE:            return "delayedBidSize";
+		case DELAYED_ASK_SIZE:            return "delayedAskSize";
+		case DELAYED_LAST_SIZE:           return "delayedLastSize";
+		case DELAYED_HIGH:                return "delayedHigh";
+		case DELAYED_LOW:                 return "delayedLow";
+		case DELAYED_VOLUME:              return "delayedVolume";
+		case DELAYED_CLOSE:               return "delayedClose";
+		case DELAYED_OPEN:                return "delayedOpen";
+		case RT_TRD_VOLUME:               return "rtTrdVolume";
+		case CREDITMAN_MARK_PRICE:        return "creditmanMarkPrice";
+		case CREDITMAN_SLOW_MARK_PRICE:   return "creditmanSlowMarkPrice";
 #endif
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
-		case IB::DELAYED_BID_OPTION_COMPUTATION:      return "delayedBidOptComp";
-		case IB::DELAYED_ASK_OPTION_COMPUTATION:      return "delayedAskOptComp";
-		case IB::DELAYED_LAST_OPTION_COMPUTATION:     return "delayedLastOptComp";
-		case IB::DELAYED_MODEL_OPTION_COMPUTATION:    return "delayedModelOptComp";
-		case IB::LAST_EXCH:                           return "lastExchange";
-		case IB::LAST_REG_TIME:                       return "lastRegTime";
-		case IB::FUTURES_OPEN_INTEREST:               return "futuresOpenInterest";
+		case DELAYED_BID_OPTION_COMPUTATION:      return "delayedBidOptComp";
+		case DELAYED_ASK_OPTION_COMPUTATION:      return "delayedAskOptComp";
+		case DELAYED_LAST_OPTION_COMPUTATION:     return "delayedLastOptComp";
+		case DELAYED_MODEL_OPTION_COMPUTATION:    return "delayedModelOptComp";
+		case LAST_EXCH:                           return "lastExchange";
+		case LAST_REG_TIME:                       return "lastRegTime";
+		case FUTURES_OPEN_INTEREST:               return "futuresOpenInterest";
 #endif
 		default: return "unknown";
 	}
 }
 
 
-std::string ibToString( const IB::Execution& ex )
+std::string ibToString( const Execution& ex )
 {
 	char buf[1024];
 	snprintf( buf, sizeof(buf), "orderId:%ld: clientId:%ld, execId:%s, "
@@ -307,7 +307,7 @@ std::string ibToString( const IB::Execution& ex )
 }
 
 
-std::string ibToString( const IB::Contract &c, bool showFields )
+std::string ibToString( const Contract &c, bool showFields )
 {
 	char buf[1024];
 	const char *fmt;

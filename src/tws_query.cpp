@@ -16,12 +16,12 @@
 # define lastTradeDateOrContractMonth expiry
 #endif
 
-const IB::Contract& ContractDetailsRequest::ibContract() const
+const Contract& ContractDetailsRequest::ibContract() const
 {
 	return _ibContract;
 }
 
-bool ContractDetailsRequest::initialize( const IB::Contract& c )
+bool ContractDetailsRequest::initialize( const Contract& c )
 {
 	_ibContract = c;
 	return true;
@@ -37,7 +37,7 @@ HistRequest::HistRequest()
 }
 
 
-bool HistRequest::initialize( const IB::Contract& c, const std::string &e,
+bool HistRequest::initialize( const Contract& c, const std::string &e,
 	const std::string &d, const std::string &b,
 	const std::string &w, int u, int f )
 {

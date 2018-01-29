@@ -9,6 +9,7 @@
 #ifndef TWS_META_H
 #define TWS_META_H
 
+#include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
 #include <twsapi/Execution.h>
 #include <twsapi/Order.h>
@@ -23,7 +24,11 @@
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
-
+#ifndef TWSAPI_NO_NAMESPACE
+namespace IB {
+}
+using namespace IB;
+#endif
 
 enum req_err
 {
@@ -97,7 +102,7 @@ class HistTodo
 		void tellDone();
 		void cancelForRepeat( int priority );
 		void add( const HistRequest& );
-		int skip_by_perm(const IB::Contract&);
+		int skip_by_perm(const Contract&);
 		int skip_by_nodata(const HistRequest&);
 
 	private:
@@ -219,7 +224,7 @@ struct RowError
 {
 	int id;
 	int code;
-	IB::IBString msg;
+	IBString msg;
 };
 struct RowOrderStatus;
 struct RowOpenOrder;
@@ -262,22 +267,22 @@ class PacketContractDetails
 		static PacketContractDetails * fromXml( xmlNodePtr );
 
 		const ContractDetailsRequest& getRequest() const;
-		const std::vector<IB::ContractDetails>& constList() const;
+		const std::vector<ContractDetails>& constList() const;
 		void record( int reqId, const ContractDetailsRequest& );
 		void setFinished();
 		void clear();
-		void append( int reqId, const IB::ContractDetails& );
+		void append( int reqId, const ContractDetails& );
 
 		void dumpXml();
 
 	private:
 		int reqId;
 		ContractDetailsRequest *request;
-		std::vector<IB::ContractDetails> * const cdList;
+		std::vector<ContractDetails> * const cdList;
 };
 
 
-inline const std::vector<IB::ContractDetails>&
+inline const std::vector<ContractDetails>&
 PacketContractDetails::constList() const
 {
 	return *cdList;
@@ -380,7 +385,7 @@ struct RowAccVal
 
 struct RowPrtfl
 {
-	IB::Contract contract;
+	Contract contract;
 	int position;
 	double marketPrice;
 	double marketValue;
@@ -424,8 +429,8 @@ class ExecutionsRequest;
 
 struct RowExecution
 {
-	IB::Contract contract;
-	IB::Execution execution;
+	Contract contract;
+	Execution execution;
 };
 
 class PacketExecutions
@@ -461,7 +466,7 @@ class OrdersRequest;
 
 struct RowOrderStatus
 {
-	IB::OrderId id;
+	OrderId id;
 	std::string status;
 	int filled;
 	int remaining;
@@ -475,10 +480,10 @@ struct RowOrderStatus
 
 struct RowOpenOrder
 {
-	IB::OrderId orderId;
-	IB::Contract contract;
-	IB::Order order;
-	IB::OrderState orderState;
+	OrderId orderId;
+	Contract contract;
+	Order order;
+	OrderState orderState;
 };
 
 class PacketOrders
@@ -571,14 +576,14 @@ class PacingGod
 		void setViolationPause( int pause );
 
 		void clear();
-		void addRequest( const IB::Contract& );
-		void remove_last_request( const IB::Contract& );
-		void notifyViolation( const IB::Contract& );
-		int goodTime( const IB::Contract& );
-		int countLeft( const IB::Contract& c );
+		void addRequest( const Contract& );
+		void remove_last_request( const Contract& );
+		void notifyViolation( const Contract& );
+		int goodTime( const Contract& );
+		int countLeft( const Contract& c );
 
 	private:
-		void checkAdd( const IB::Contract&,
+		void checkAdd( const Contract&,
 			std::string *lazyContract, std::string *farm );
 		bool laziesAreCleared() const;
 
@@ -610,16 +615,16 @@ class DataFarmStates
 
 		std::vector<std::string> getInactives() const;
 		std::vector<std::string>  getActives() const;
-		std::string getMarketFarm( const IB::Contract& ) const;
+		std::string getMarketFarm( const Contract& ) const;
 		std::string getHmdsFarm( const std::string& lazyC ) const;
-		std::string getHmdsFarm( const IB::Contract& ) const;
+		std::string getHmdsFarm( const Contract& ) const;
 
 		void initHardCodedFarms();
 		void setAllBroken();
 		void notify(int msgNumber, int errorCode, const std::string &msg);
-		void learnMarket( const IB::Contract& );
-		void learnHmds( const IB::Contract& );
-		void learnHmdsLastOk(int msgNumber, const IB::Contract& );
+		void learnMarket( const Contract& );
+		void learnHmds( const Contract& );
+		void learnHmdsLastOk(int msgNumber, const Contract& );
 
 	private:
 		static std::string getFarm( const std::string &prefix,

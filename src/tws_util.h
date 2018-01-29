@@ -12,11 +12,18 @@
 #include <string>
 #include <stdint.h>
 
+#include <twsapi/twsapi_config.h>
 
+#ifndef TWSAPI_NO_NAMESPACE
 namespace IB {
+#endif
 	class Execution;
 	class Contract;
+#ifndef TWSAPI_NO_NAMESPACE
 }
+using namespace IB;
+#endif
+
 
 int64_t nowInMsecs();
 std::string msecs_to_string( int64_t msecs );
@@ -28,8 +35,8 @@ std::string time_t_local( time_t t );
 int ib_duration2secs( const std::string &dur );
 
 std::string ibToString( int ibTickType);
-std::string ibToString( const IB::Execution& );
-std::string ibToString( const IB::Contract&, bool showFields = false );
+std::string ibToString( const Execution& );
+std::string ibToString( const Contract&, bool showFields = false );
 
 const char* short_wts( const char* wts );
 const char* short_bar_size( const char* bar_size );

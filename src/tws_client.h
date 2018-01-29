@@ -11,8 +11,11 @@
 
 #include <string>
 
+#include <twsapi/twsapi_config.h>
 
+#ifndef TWSAPI_NO_NAMESPACE
 namespace IB {
+#endif
 	class Contract;
 	class ContractDetails;
 	class Order;
@@ -21,13 +24,15 @@ namespace IB {
 	class ExecutionFilter;
 	class EPosixClientSocket;
 	class EWrapper;
-};
-
+#ifndef TWSAPI_NO_NAMESPACE
+}
+using namespace IB;
+#endif
 
 class TWSClient
 {
 	public:
-		TWSClient( IB::EWrapper *ew );
+		TWSClient( EWrapper *ew );
 		~TWSClient();
 
 		bool isConnected() const;
@@ -42,27 +47,27 @@ class TWSClient
 		int serverVersion();
 		std::string TwsConnectionTime();
 
-		void reqMktData( int tickerId, const IB::Contract &contract, const std::string &genericTickList, bool snapshot );
+		void reqMktData( int tickerId, const Contract &contract, const std::string &genericTickList, bool snapshot );
 		void cancelMktData( int tickerId );
-		void placeOrder( int id, const IB::Contract &contract, const IB::Order &order );
+		void placeOrder( int id, const Contract &contract, const Order &order );
 		void cancelOrder( int id );
 		void reqOpenOrders();
 		void reqAllOpenOrders();
 		void reqAutoOpenOrders( bool bAutoBind );
-		void reqExecutions(int reqId, const IB::ExecutionFilter& filter);
+		void reqExecutions(int reqId, const ExecutionFilter& filter);
 		void reqAccountUpdates( bool subscribe, const std::string &acctCode );
 		void reqIds( int numIds );
-		void reqContractDetails( int reqId, const IB::Contract &contract );
+		void reqContractDetails( int reqId, const Contract &contract );
 		void setServerLogLevel( int logLevel );
-		void reqHistoricalData ( int tickerId, const IB::Contract &contract,
+		void reqHistoricalData ( int tickerId, const Contract &contract,
 			const std::string &endDateTime, const std::string &durationStr,
 			const std::string &barSizeSetting, const std::string &whatToShow,
 			int useRTH, int formatDate );
 		void reqCurrentTime();
 
 	private:
-		IB::EWrapper* myEWrapper;
-		IB::EPosixClientSocket* ePosixClient;
+		EWrapper* myEWrapper;
+		EPosixClientSocket* ePosixClient;
 };
 
 

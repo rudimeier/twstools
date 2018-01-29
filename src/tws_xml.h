@@ -13,8 +13,11 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
+#include <twsapi/twsapi_config.h>
 
+#ifndef TWSAPI_NO_NAMESPACE
 namespace IB {
+#endif
 	class ComboLeg;
 	class UnderComp;
 	class Contract;
@@ -25,37 +28,39 @@ namespace IB {
 	class OrderComboLeg;
 	class Order;
 	class OrderState;
+#ifndef TWSAPI_NO_NAMESPACE
 }
-
+using namespace IB;
+#endif
 
 typedef struct _xmlNode * xmlNodePtr;
 typedef struct _xmlDoc * xmlDocPtr;
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::ComboLeg& c );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::UnderComp& c );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const ComboLeg& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const UnderComp& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const Contract& c );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
-	const IB::ContractDetails& c );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& );
+	const ContractDetails& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const Execution& );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
-	const IB::ExecutionFilter& );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& );
+	const ExecutionFilter& );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const TagValue& );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
-	const IB::OrderComboLeg& );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& );
+	const OrderComboLeg& );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const Order& );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const OrderState& );
 
-void conv_xml2ib( IB::ComboLeg* c, const xmlNodePtr node );
-void conv_xml2ib( IB::UnderComp* c, const xmlNodePtr node );
-void conv_xml2ib( IB::Contract* c, const xmlNodePtr node );
-void conv_xml2ib( IB::ContractDetails* c, const xmlNodePtr node );
-void conv_xml2ib( IB::Execution*, const xmlNodePtr node );
-void conv_xml2ib( IB::ExecutionFilter*, const xmlNodePtr node );
-void conv_xml2ib( IB::TagValue*, const xmlNodePtr node );
-void conv_xml2ib( IB::OrderComboLeg*, const xmlNodePtr node );
-void conv_xml2ib( IB::Order*, const xmlNodePtr node );
-void conv_xml2ib( IB::OrderState*, const xmlNodePtr node );
+void conv_xml2ib( ComboLeg* c, const xmlNodePtr node );
+void conv_xml2ib( UnderComp* c, const xmlNodePtr node );
+void conv_xml2ib( Contract* c, const xmlNodePtr node );
+void conv_xml2ib( ContractDetails* c, const xmlNodePtr node );
+void conv_xml2ib( Execution*, const xmlNodePtr node );
+void conv_xml2ib( ExecutionFilter*, const xmlNodePtr node );
+void conv_xml2ib( TagValue*, const xmlNodePtr node );
+void conv_xml2ib( OrderComboLeg*, const xmlNodePtr node );
+void conv_xml2ib( Order*, const xmlNodePtr node );
+void conv_xml2ib( OrderState*, const xmlNodePtr node );
 
 
 class ContractDetailsRequest;

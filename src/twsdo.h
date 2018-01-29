@@ -15,19 +15,23 @@
 
 #include "tws_quote.h"
 
+#include <twsapi/twsapi_config.h>
 #include <twsapi/EWrapper.h>
 
 
 
 class TWSClient;
 
+#ifndef TWSAPI_NO_NAMESPACE
 namespace IB {
+#endif
 	class ContractDetails;
 	class Contract;
 	class Execution;
+#ifndef TWSAPI_NO_NAMESPACE
 }
-
-
+using namespace IB;
+#endif
 
 struct ConfigTwsdo
 {
@@ -140,9 +144,9 @@ class TwsDL
 
 		void twsConnectionClosed();
 		void twsContractDetails( int reqId,
-			const IB::ContractDetails &ibContractDetails );
+			const ContractDetails &ibContractDetails );
 		void twsBondContractDetails( int reqId,
-			const IB::ContractDetails &ibContractDetails );
+			const ContractDetails &ibContractDetails );
 		void twsContractDetailsEnd( int reqId );
 		void twsHistoricalData( int reqId, const RowHist& );
 		void twsUpdateAccountValue( const RowAccVal& );
@@ -156,9 +160,9 @@ class TwsDL
 		void twsOpenOrderEnd();
 		void twsCurrentTime( long time );
 		void nextValidId( long orderId );
-		void twsTickPrice( int reqId, IB::TickType field, double price,
+		void twsTickPrice( int reqId, TickType field, double price,
 			int canAutoExecute );
-		void twsTickSize( int reqId, IB::TickType field, int size );
+		void twsTickSize( int reqId, TickType field, int size );
 
 		State state;
 		bool quit;
@@ -186,7 +190,7 @@ class TwsDL
 		std::map<long, PacketPlaceOrder*> p_orders;
 		std::map<long, PacketPlaceOrder*> p_orders_old;
 
-		std::map<long, IB::ContractDetails*> con_details;
+		std::map<long, ContractDetails*> con_details;
 
 		DataFarmStates &dataFarms;
 		PacingGod &pacingControl;

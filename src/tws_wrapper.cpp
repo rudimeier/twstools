@@ -29,7 +29,7 @@ DebugTwsWrapper::~DebugTwsWrapper()
 
 
 
-void DebugTwsWrapper::tickPrice( IB::TickerId tickerId, IB::TickType field,
+void DebugTwsWrapper::tickPrice( TickerId tickerId, TickType field,
 	double price, int canAutoExecute )
 {
 	DEBUG_PRINTF( "TICK_PRICE: %ld %s %g %d",
@@ -37,7 +37,7 @@ void DebugTwsWrapper::tickPrice( IB::TickerId tickerId, IB::TickType field,
 }
 
 
-void DebugTwsWrapper::tickSize( IB::TickerId tickerId, IB::TickType field,
+void DebugTwsWrapper::tickSize( TickerId tickerId, TickType field,
 	int size )
 {
 	DEBUG_PRINTF( "TICK_SIZE: %ld %s %d",
@@ -45,8 +45,8 @@ void DebugTwsWrapper::tickSize( IB::TickerId tickerId, IB::TickType field,
 }
 
 
-void DebugTwsWrapper::tickOptionComputation ( IB::TickerId tickerId,
-	IB::TickType tickType, double impliedVol, double delta, double optPrice,
+void DebugTwsWrapper::tickOptionComputation ( TickerId tickerId,
+	TickType tickType, double impliedVol, double delta, double optPrice,
 	double pvDividend, double gamma, double vega, double theta,
 	double undPrice )
 {
@@ -56,7 +56,7 @@ void DebugTwsWrapper::tickOptionComputation ( IB::TickerId tickerId,
 }
 
 
-void DebugTwsWrapper::tickGeneric( IB::TickerId tickerId, IB::TickType tickType,
+void DebugTwsWrapper::tickGeneric( TickerId tickerId, TickType tickType,
 	double value )
 {
 	DEBUG_PRINTF( "TICK_GENERIC: %ld %s %g",
@@ -64,10 +64,10 @@ void DebugTwsWrapper::tickGeneric( IB::TickerId tickerId, IB::TickType tickType,
 }
 
 
-void DebugTwsWrapper::tickString( IB::TickerId tickerId, IB::TickType tickType,
-	const IB::IBString& value )
+void DebugTwsWrapper::tickString( TickerId tickerId, TickType tickType,
+	const IBString& value )
 {
-	if( tickType == IB::LAST_TIMESTAMP ) {
+	if( tickType == LAST_TIMESTAMP ) {
 		// here we format unix timestamp value
 	}
 	DEBUG_PRINTF( "TICK_STRING: %ld %s %s",
@@ -75,9 +75,9 @@ void DebugTwsWrapper::tickString( IB::TickerId tickerId, IB::TickType tickType,
 }
 
 
-void DebugTwsWrapper::tickEFP( IB::TickerId tickerId, IB::TickType tickType,
-	double basisPoints, const IB::IBString& formattedBasisPoints,
-	double totalDividends, int holdDays, const IB::IBString& futureExpiry,
+void DebugTwsWrapper::tickEFP( TickerId tickerId, TickType tickType,
+	double basisPoints, const IBString& formattedBasisPoints,
+	double totalDividends, int holdDays, const IBString& futureExpiry,
 	double dividendImpact, double dividendsToExpiry )
 {
 	// TODO
@@ -85,10 +85,10 @@ void DebugTwsWrapper::tickEFP( IB::TickerId tickerId, IB::TickType tickType,
 }
 
 
-void DebugTwsWrapper::orderStatus ( IB::OrderId orderId,
-	const IB::IBString &status, int filled, int remaining, double avgFillPrice,
+void DebugTwsWrapper::orderStatus ( OrderId orderId,
+	const IBString &status, int filled, int remaining, double avgFillPrice,
 	int permId, int parentId, double lastFillPrice, int clientId,
-	const IB::IBString& whyHeld )
+	const IBString& whyHeld )
 {
 	DEBUG_PRINTF( "ORDER_STATUS: "
 		"orderId:%ld, status:%s, filled:%d, remaining:%d, %d %d %g %g %d, %s",
@@ -97,9 +97,9 @@ void DebugTwsWrapper::orderStatus ( IB::OrderId orderId,
 }
 
 
-void DebugTwsWrapper::openOrder( IB::OrderId orderId,
-	const IB::Contract &contract, const IB::Order &order,
-	const IB::OrderState &orderState )
+void DebugTwsWrapper::openOrder( OrderId orderId,
+	const Contract &contract, const Order &order,
+	const OrderState &orderState )
 {
 	DEBUG_PRINTF( "OPEN_ORDER: %ld %s %s "
 		"warnTxt:%s, status:%s, com:%g, comCur:%s, minCom:%g, maxCom:%g, "
@@ -123,7 +123,7 @@ void DebugTwsWrapper::openOrderEnd()
 }
 
 
-void DebugTwsWrapper::winError( const IB::IBString &str, int lastError )
+void DebugTwsWrapper::winError( const IBString &str, int lastError )
 {
 	DEBUG_PRINTF( "WIN_ERROR: %s %d", str.c_str(), lastError );
 }
@@ -135,18 +135,18 @@ void DebugTwsWrapper::connectionClosed()
 }
 
 
-void DebugTwsWrapper::updateAccountValue( const IB::IBString& key,
-	const IB::IBString& val, const IB::IBString& currency,
-	const IB::IBString& accountName )
+void DebugTwsWrapper::updateAccountValue( const IBString& key,
+	const IBString& val, const IBString& currency,
+	const IBString& accountName )
 {
 	DEBUG_PRINTF( "ACCT_VALUE: %s %s %s %s",
 		key.c_str(), val.c_str(), currency.c_str(), accountName.c_str() );
 }
 
 
-void DebugTwsWrapper::updatePortfolio( const IB::Contract& contract,
+void DebugTwsWrapper::updatePortfolio( const Contract& contract,
 	int position, double marketPrice, double marketValue, double averageCost,
-	double unrealizedPNL, double realizedPNL, const IB::IBString& accountName)
+	double unrealizedPNL, double realizedPNL, const IBString& accountName)
 {
 	DEBUG_PRINTF( "PORTFOLIO_VALUE: %s %s %d %g %g %g %g %g %s",
 		contract.symbol.c_str(), contract.localSymbol.c_str(), position,
@@ -155,26 +155,26 @@ void DebugTwsWrapper::updatePortfolio( const IB::Contract& contract,
 }
 
 
-void DebugTwsWrapper::updateAccountTime( const IB::IBString& timeStamp )
+void DebugTwsWrapper::updateAccountTime( const IBString& timeStamp )
 {
 	DEBUG_PRINTF( "ACCT_UPDATE_TIME: %s", timeStamp.c_str() );
 }
 
 
-void DebugTwsWrapper::accountDownloadEnd( const IB::IBString& accountName )
+void DebugTwsWrapper::accountDownloadEnd( const IBString& accountName )
 {
 	DEBUG_PRINTF( "ACCT_DOWNLOAD_END: %s", accountName.c_str() );
 }
 
 
-void DebugTwsWrapper::nextValidId( IB::OrderId orderId )
+void DebugTwsWrapper::nextValidId( OrderId orderId )
 {
 	DEBUG_PRINTF( "NEXT_VALID_ID: %ld", orderId );
 }
 
 
 void DebugTwsWrapper::contractDetails( int reqId,
-	const IB::ContractDetails& contractDetails )
+	const ContractDetails& contractDetails )
 {
 	DEBUG_PRINTF( "CONTRACT_DATA: %d %s %s %s %g %s %s %s %s %s %s",
 		reqId,
@@ -193,7 +193,7 @@ void DebugTwsWrapper::contractDetails( int reqId,
 
 
 void DebugTwsWrapper::bondContractDetails( int reqId,
-	const IB::ContractDetails& contractDetails )
+	const ContractDetails& contractDetails )
 {
 	//TODO
 	DEBUG_PRINTF( "BOND_CONTRACT_DATA: %d %s %s %s %g %s %s %s %s %s %s",
@@ -218,8 +218,8 @@ void DebugTwsWrapper::contractDetailsEnd( int reqId )
 }
 
 
-void DebugTwsWrapper::execDetails ( int orderId, const IB::Contract& contract,
-	const IB::Execution& execution )
+void DebugTwsWrapper::execDetails ( int orderId, const Contract& contract,
+	const Execution& execution )
 {
 	DEBUG_PRINTF( "EXECUTION_DATA: %d %s %s %ld %s", orderId,
 		contract.symbol.c_str(), contract.localSymbol.c_str(), contract.conId,
@@ -234,13 +234,13 @@ void DebugTwsWrapper::execDetailsEnd( int reqId )
 
 
 void DebugTwsWrapper::error( int id, int errorCode,
-	const IB::IBString errorMsg )
+	const IBString errorMsg )
 {
 	DEBUG_PRINTF( "ERR_MSG: %d %d %s", id, errorCode, errorMsg.c_str() );
 }
 
 
-void DebugTwsWrapper::updateMktDepth( IB::TickerId id, int position,
+void DebugTwsWrapper::updateMktDepth( TickerId id, int position,
 	int operation, int side, double price, int size )
 {
 	// TODO
@@ -248,8 +248,8 @@ void DebugTwsWrapper::updateMktDepth( IB::TickerId id, int position,
 }
 
 
-void DebugTwsWrapper::updateMktDepthL2( IB::TickerId id, int position,
-	IB::IBString marketMaker, int operation, int side, double price,
+void DebugTwsWrapper::updateMktDepthL2( TickerId id, int position,
+	IBString marketMaker, int operation, int side, double price,
 	int size )
 {
 	// TODO
@@ -258,29 +258,29 @@ void DebugTwsWrapper::updateMktDepthL2( IB::TickerId id, int position,
 
 
 void DebugTwsWrapper::updateNewsBulletin( int msgId, int msgType,
-	const IB::IBString& newsMessage, const IB::IBString& originExch )
+	const IBString& newsMessage, const IBString& originExch )
 {
 	// TODO
 	DEBUG_PRINTF( "NEWS_BULLETINS: %d", msgId );
 }
 
 
-void DebugTwsWrapper::managedAccounts( const IB::IBString& accountsList )
+void DebugTwsWrapper::managedAccounts( const IBString& accountsList )
 {
 	DEBUG_PRINTF( "MANAGED_ACCTS: %s", accountsList.c_str() );
 }
 
 
-void DebugTwsWrapper::receiveFA( IB::faDataType pFaDataType,
-	const IB::IBString& cxml )
+void DebugTwsWrapper::receiveFA( faDataType pFaDataType,
+	const IBString& cxml )
 {
 	// TODO
 	DEBUG_PRINTF( "RECEIVE_FA: %s", cxml.c_str() );
 }
 
 
-void DebugTwsWrapper::historicalData( IB::TickerId reqId,
-	const IB::IBString& date, double open, double high, double low,
+void DebugTwsWrapper::historicalData( TickerId reqId,
+	const IBString& date, double open, double high, double low,
 	double close, int volume, int barCount, double WAP, int hasGaps )
 {
 	DEBUG_PRINTF( "HISTORICAL_DATA: %ld %s %g %g %g %g %d %d %g %d", reqId,
@@ -288,16 +288,16 @@ void DebugTwsWrapper::historicalData( IB::TickerId reqId,
 }
 
 
-void DebugTwsWrapper::scannerParameters( const IB::IBString &xml )
+void DebugTwsWrapper::scannerParameters( const IBString &xml )
 {
 	DEBUG_PRINTF( "SCANNER_PARAMETERS: %s", xml.c_str() );
 }
 
 
 void DebugTwsWrapper::scannerData( int reqId, int rank,
-	const IB::ContractDetails &contractDetails, const IB::IBString &distance,
-	const IB::IBString &benchmark, const IB::IBString &projection,
-	const IB::IBString &legsStr )
+	const ContractDetails &contractDetails, const IBString &distance,
+	const IBString &benchmark, const IBString &projection,
+	const IBString &legsStr )
 {
 	// TODO
 	DEBUG_PRINTF( "SCANNER_DATA: %d", reqId );
@@ -310,7 +310,7 @@ void DebugTwsWrapper::scannerDataEnd(int reqId)
 }
 
 
-void DebugTwsWrapper::realtimeBar( IB::TickerId reqId, long time, double open,
+void DebugTwsWrapper::realtimeBar( TickerId reqId, long time, double open,
 	double high, double low, double close, long volume, double wap, int count )
 {
 	// TODO
@@ -324,15 +324,15 @@ void DebugTwsWrapper::currentTime( long time )
 }
 
 
-void DebugTwsWrapper::fundamentalData( IB::TickerId reqId,
-	const IB::IBString& data )
+void DebugTwsWrapper::fundamentalData( TickerId reqId,
+	const IBString& data )
 {
 	DEBUG_PRINTF( "FUNDAMENTAL_DATA: %ld %s", reqId, data.c_str() );
 }
 
 
 void DebugTwsWrapper::deltaNeutralValidation( int reqId,
-	const IB::UnderComp& underComp )
+	const UnderComp& underComp )
 {
 	// TODO
 	DEBUG_PRINTF( "DELTA_NEUTRAL_VALIDATION: %d", reqId );
@@ -344,20 +344,20 @@ void DebugTwsWrapper::tickSnapshotEnd( int reqId )
 	DEBUG_PRINTF( "TICK_SNAPSHOT_END: %d", reqId );
 }
 
-void DebugTwsWrapper::marketDataType( IB::TickerId reqId, int marketDataType )
+void DebugTwsWrapper::marketDataType( TickerId reqId, int marketDataType )
 {
 	DEBUG_PRINTF( "MARKET_DATA_TYPE: %ld %d", reqId, marketDataType );
 }
 
-void DebugTwsWrapper::commissionReport( const IB::CommissionReport &cr )
+void DebugTwsWrapper::commissionReport( const CommissionReport &cr )
 {
 	DEBUG_PRINTF( "COMMISSION_REPORT %s %g %s %g %g %d", cr.execId.c_str(),
 		cr.commission, cr.currency.c_str(), cr.realizedPNL, cr.yield,
 		cr.yieldRedemptionDate );
 }
 
-void DebugTwsWrapper::position( const IB::IBString& account,
-	const IB::Contract& c, int pos, double avgCost )
+void DebugTwsWrapper::position( const IBString& account,
+	const Contract& c, int pos, double avgCost )
 {
 	DEBUG_PRINTF( "POSITION: %s %s %s %d %g", account.c_str(),
 		c.symbol.c_str(), c.localSymbol.c_str(), pos, avgCost );
@@ -368,9 +368,9 @@ void DebugTwsWrapper::positionEnd()
 	DEBUG_PRINTF( "POSITION_END" );
 }
 
-void DebugTwsWrapper::accountSummary( int reqId, const IB::IBString& account,
-	const IB::IBString& tag, const IB::IBString& value,
-	const IB::IBString& currency )
+void DebugTwsWrapper::accountSummary( int reqId, const IBString& account,
+	const IBString& tag, const IBString& value,
+	const IBString& currency )
 {
 	DEBUG_PRINTF( "ACCOUNT_SUMMARY: %d %s %s %s %s", reqId, account.c_str(),
 		tag.c_str(), value.c_str(), currency.c_str() );
@@ -382,23 +382,23 @@ void DebugTwsWrapper::accountSummaryEnd( int reqId )
 }
 
 #if TWSAPI_IB_VERSION_NUMBER >= 971
-void DebugTwsWrapper::verifyMessageAPI( const IB::IBString& apiData)
+void DebugTwsWrapper::verifyMessageAPI( const IBString& apiData)
 {
 	DEBUG_PRINTF( "VERIFY_MESSAGE_API: %s", apiData.c_str() );
 }
 
-void DebugTwsWrapper::verifyCompleted( bool isSuccessful, const IB::IBString& errorText)
+void DebugTwsWrapper::verifyCompleted( bool isSuccessful, const IBString& errorText)
 {
 	DEBUG_PRINTF( "VERIFY_COMPLETED: %s %s", isSuccessful ? "true" : "false",
 		errorText.c_str() );
 }
 
-void DebugTwsWrapper::displayGroupList( int reqId, const IB::IBString& groups)
+void DebugTwsWrapper::displayGroupList( int reqId, const IBString& groups)
 {
 	DEBUG_PRINTF( "DISPLAY_GROUP_LIST: %d %s", reqId, groups.c_str() );
 }
 
-void DebugTwsWrapper::displayGroupUpdated( int reqId, const IB::IBString& contractInfo)
+void DebugTwsWrapper::displayGroupUpdated( int reqId, const IBString& contractInfo)
 {
 	DEBUG_PRINTF( "DISPLAY_GROUP_UPDATED: %d %s", reqId, contractInfo.c_str() );
 }

@@ -93,39 +93,39 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void connectionClosed();
 
 		void error( const int id, const int errorCode,
-			const IB::IBString errorString );
+			const IBString errorString );
 		void contractDetails( int reqId,
-			const IB::ContractDetails& contractDetails );
+			const ContractDetails& contractDetails );
 		void bondContractDetails( int reqId,
-			const IB::ContractDetails& contractDetails );
+			const ContractDetails& contractDetails );
 		void contractDetailsEnd( int reqId );
-		void historicalData( IB::TickerId reqId, const IB::IBString& date,
+		void historicalData( TickerId reqId, const IBString& date,
 			double open, double high, double low, double close, int volume,
 			int barCount, double WAP, int hasGaps );
 		void updateAccountValue( const std::string& key,
-			const IB::IBString& val, const std::string& currency,
-			const IB::IBString& accountName );
-		void updatePortfolio( const IB::Contract& contract, int position,
+			const IBString& val, const std::string& currency,
+			const IBString& accountName );
+		void updatePortfolio( const Contract& contract, int position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL,
-			const IB::IBString& accountName);
-		void updateAccountTime( const IB::IBString& timeStamp );
-		void accountDownloadEnd( const IB::IBString& accountName );
-		void execDetails( int reqId, const IB::Contract& contract,
-			const IB::Execution& execution );
+			const IBString& accountName);
+		void updateAccountTime( const IBString& timeStamp );
+		void accountDownloadEnd( const IBString& accountName );
+		void execDetails( int reqId, const Contract& contract,
+			const Execution& execution );
 		void execDetailsEnd( int reqId );
-		void orderStatus( IB::OrderId orderId, const IB::IBString &status,
+		void orderStatus( OrderId orderId, const IBString &status,
 			int filled, int remaining, double avgFillPrice, int permId,
 			int parentId, double lastFillPrice, int clientId,
-			const IB::IBString& whyHeld );
-		void openOrder( IB::OrderId orderId, const IB::Contract&,
-			const IB::Order&, const IB::OrderState& );
+			const IBString& whyHeld );
+		void openOrder( OrderId orderId, const Contract&,
+			const Order&, const OrderState& );
 		void openOrderEnd();
 		void currentTime( long time );
-		void nextValidId( IB::OrderId orderId );
-		void tickPrice( IB::TickerId reqId, IB::TickType field, double price,
+		void nextValidId( OrderId orderId );
+		void tickPrice( TickerId reqId, TickType field, double price,
 			int canAutoExecute );
-		void tickSize( IB::TickerId reqId, IB::TickType field, int size );
+		void tickSize( TickerId reqId, TickType field, int size );
 
 	private:
 		TwsDL* parentTwsDL;
@@ -150,7 +150,7 @@ void TwsDlWrapper::connectionClosed()
 
 
 void TwsDlWrapper::error( const int id, const int errorCode,
-	const IB::IBString errorString )
+	const IBString errorString )
 {
 	RowError row = { id, errorCode, errorString };
 	parentTwsDL->twsError( row );
@@ -158,7 +158,7 @@ void TwsDlWrapper::error( const int id, const int errorCode,
 
 
 void TwsDlWrapper::contractDetails( int reqId,
-	const IB::ContractDetails& contractDetails )
+	const ContractDetails& contractDetails )
 {
 	parentTwsDL->twsContractDetails(
 		reqId, contractDetails );
@@ -166,7 +166,7 @@ void TwsDlWrapper::contractDetails( int reqId,
 
 
 void TwsDlWrapper::bondContractDetails( int reqId,
-	const IB::ContractDetails& contractDetails )
+	const ContractDetails& contractDetails )
 {
 	parentTwsDL->twsBondContractDetails(
 		reqId, contractDetails );
@@ -180,7 +180,7 @@ void TwsDlWrapper::contractDetailsEnd( int reqId )
 }
 
 
-void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
+void TwsDlWrapper::historicalData( TickerId reqId, const IBString& date,
 	double open, double high, double low, double close, int volume,
 	int count, double WAP, int hasGaps )
 {
@@ -189,36 +189,36 @@ void TwsDlWrapper::historicalData( IB::TickerId reqId, const IB::IBString& date,
 }
 
 
-void TwsDlWrapper::updateAccountValue( const IB::IBString& key,
-	const IB::IBString& val, const IB::IBString& currency,
-	const IB::IBString& accountName )
+void TwsDlWrapper::updateAccountValue( const IBString& key,
+	const IBString& val, const IBString& currency,
+	const IBString& accountName )
 {
 	RowAccVal row = { key, val, currency, accountName };
 	parentTwsDL->twsUpdateAccountValue( row );
 }
 
-void TwsDlWrapper::updatePortfolio( const IB::Contract& contract,
+void TwsDlWrapper::updatePortfolio( const Contract& contract,
 	int position, double marketPrice, double marketValue, double averageCost,
-	double unrealizedPNL, double realizedPNL, const IB::IBString& accountName)
+	double unrealizedPNL, double realizedPNL, const IBString& accountName)
 {
 	RowPrtfl row = { contract, position, marketPrice, marketValue, averageCost,
 		unrealizedPNL, realizedPNL, accountName};
 	parentTwsDL->twsUpdatePortfolio( row );
 }
 
-void TwsDlWrapper::updateAccountTime( const IB::IBString& timeStamp )
+void TwsDlWrapper::updateAccountTime( const IBString& timeStamp )
 {
 	parentTwsDL->twsUpdateAccountTime( timeStamp );
 }
 
-void TwsDlWrapper::accountDownloadEnd( const IB::IBString& accountName )
+void TwsDlWrapper::accountDownloadEnd( const IBString& accountName )
 {
 	DebugTwsWrapper::accountDownloadEnd( accountName );
 	parentTwsDL->twsAccountDownloadEnd( accountName );
 }
 
-void TwsDlWrapper::execDetails( int reqId, const IB::Contract& contract,
-	const IB::Execution& execution )
+void TwsDlWrapper::execDetails( int reqId, const Contract& contract,
+	const Execution& execution )
 {
 	DebugTwsWrapper::execDetails(reqId, contract, execution);
 	RowExecution row = { contract, execution };
@@ -231,10 +231,10 @@ void TwsDlWrapper::execDetailsEnd( int reqId )
 	parentTwsDL->twsExecDetailsEnd( reqId );
 }
 
-void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
+void TwsDlWrapper::orderStatus( OrderId orderId, const IBString &status,
 	int filled, int remaining, double avgFillPrice, int permId,
 	int parentId, double lastFillPrice, int clientId,
-	const IB::IBString& whyHeld )
+	const IBString& whyHeld )
 {
 	DebugTwsWrapper::orderStatus( orderId, status, filled, remaining,
 		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld );
@@ -243,8 +243,8 @@ void TwsDlWrapper::orderStatus( IB::OrderId orderId, const IB::IBString &status,
 	parentTwsDL->twsOrderStatus(row);
 }
 
-void TwsDlWrapper::openOrder( IB::OrderId orderId, const IB::Contract& c,
-	const IB::Order& o, const IB::OrderState& os)
+void TwsDlWrapper::openOrder( OrderId orderId, const Contract& c,
+	const Order& o, const OrderState& os)
 {
 	DebugTwsWrapper::openOrder(orderId, c, o, os);
 	RowOpenOrder row = { orderId, c, o, os };
@@ -263,18 +263,18 @@ void TwsDlWrapper::currentTime( long time )
 	parentTwsDL->twsCurrentTime( time );
 }
 
-void TwsDlWrapper::nextValidId( IB::OrderId orderId )
+void TwsDlWrapper::nextValidId( OrderId orderId )
 {
 	DebugTwsWrapper::nextValidId(orderId);
 	parentTwsDL->nextValidId( orderId );
 }
 
-void TwsDlWrapper::tickPrice( IB::TickerId reqId, IB::TickType field, double price, int canAutoExecute)
+void TwsDlWrapper::tickPrice( TickerId reqId, TickType field, double price, int canAutoExecute)
 {
 	parentTwsDL->twsTickPrice( reqId, field, price, canAutoExecute );
 }
 
-void TwsDlWrapper::tickSize( IB::TickerId reqId, IB::TickType field, int size )
+void TwsDlWrapper::tickSize( TickerId reqId, TickType field, int size )
 {
 	parentTwsDL->twsTickSize( reqId, field, size );
 }
@@ -609,13 +609,13 @@ bool TwsDL::finContracts()
 	if( strat != NULL ) {
 		// HACK we want exactly one ContractDetails for each mkt data contract
 		assert( p->constList().size() == 1 );
-		const IB::ContractDetails &cd = p->constList().at(0);
-		con_details[cd.summary.conId] =  new IB::ContractDetails(cd);
+		const ContractDetails &cd = p->constList().at(0);
+		con_details[cd.summary.conId] =  new ContractDetails(cd);
 
 		// HACK add conId to mkt data contracts
 		int mi = con_details.size() - 1;
 		const MktDataTodo &mtodo = workTodo->getMktDataTodo();
-		IB::Contract &contract = mtodo.mktDataRequests[mi].ibContract;
+		Contract &contract = mtodo.mktDataRequests[mi].ibContract;
 		assert( contract.conId == 0 || contract.conId == cd.summary.conId );
 		contract.conId = cd.summary.conId;
 	}
@@ -821,7 +821,7 @@ void TwsDL::errorContracts( const RowError& err )
 
 void TwsDL::errorHistData( const RowError& err )
 {
-	const IB::Contract &curContract = workTodo->getHistTodo().current().ibContract;
+	const Contract &curContract = workTodo->getHistTodo().current().ibContract;
 	const HistRequest *cur_hR = &workTodo->getHistTodo().current();
 	PacketHistData &p_histData = *((PacketHistData*)packet);
 	switch( err.code ) {
@@ -974,7 +974,7 @@ void TwsDL::twsConnectionClosed()
 }
 
 
-void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
+void TwsDL::twsContractDetails( int reqId, const ContractDetails &ibContractDetails )
 {
 	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		DEBUG_PRINTF( "Warning, unexpected tws callback.");
@@ -991,7 +991,7 @@ void TwsDL::twsContractDetails( int reqId, const IB::ContractDetails &ibContract
 }
 
 
-void TwsDL::twsBondContractDetails( int reqId, const IB::ContractDetails &ibContractDetails )
+void TwsDL::twsBondContractDetails( int reqId, const ContractDetails &ibContractDetails )
 {
 	if( currentRequest.reqType() != GenericRequest::CONTRACT_DETAILS_REQUEST ) {
 		DEBUG_PRINTF( "Warning, unexpected tws callback.");
@@ -1181,7 +1181,7 @@ void TwsDL::nextValidId( long orderId )
 	}
 }
 
-void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
+void TwsDL::twsTickPrice( int reqId, TickType field, double price,
 	int canAutoExecute )
 {
 	Quote &q = quotes->at(reqId-1);
@@ -1192,13 +1192,13 @@ void TwsDL::twsTickPrice( int reqId, IB::TickType field, double price,
 		= workTodo->getMktDataTodo().mktDataRequests;
 	assert( reqId > 0 && reqId <= (int)mdlist.size() );
 
-	const IB::Contract &c
+	const Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
 	DEBUG_PRINTF( "TICK_PRICE: %d %s %ld %s %g", reqId,
 		c.symbol.c_str(), c.conId, ibToString(field).c_str(), price );
 }
 
-void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
+void TwsDL::twsTickSize( int reqId, TickType field, int size )
 {
 	Quote &q = quotes->at(reqId-1);
 	q.val[field] = size;
@@ -1208,7 +1208,7 @@ void TwsDL::twsTickSize( int reqId, IB::TickType field, int size )
 		= workTodo->getMktDataTodo().mktDataRequests;
 	assert( reqId > 0 && reqId <= (int)mdlist.size() );
 
-	const IB::Contract &c
+	const Contract &c
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
 	DEBUG_PRINTF( "TICK_SIZE: %d %s %ld %s %d", reqId,
 		c.symbol.c_str(), c.conId, ibToString(field).c_str(), size );
@@ -1323,7 +1323,7 @@ void TwsDL::reqHistoricalData()
 	const HistRequest &hR = workTodo->getHistTodo().current();
 	pacingControl.addRequest( hR.ibContract );
 
-	const IB::Contract &c = hR.ibContract;
+	const Contract &c = hR.ibContract;
 	DEBUG_PRINTF( "REQ_HISTORICAL_DATA %p %d: %ld,%s,%s,%s,%s %s,%s,%s,%s",
 		&workTodo->getHistTodo().current(),
 		currentRequest.reqId(), c.conId,

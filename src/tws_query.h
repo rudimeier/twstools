@@ -9,20 +9,27 @@
 #ifndef TWS_QUERY_H
 #define TWS_QUERY_H
 
+#include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
 #include <twsapi/Execution.h>
 #include <twsapi/Order.h>
 #include <stdint.h>
 
+#ifndef TWSAPI_NO_NAMESPACE
+namespace IB {
+}
+using namespace IB;
+#endif
+
 
 class ContractDetailsRequest
 {
 	public:
-		const IB::Contract& ibContract() const;
-		bool initialize( const IB::Contract& );
+		const Contract& ibContract() const;
+		bool initialize( const Contract& );
 
 	private:
-		IB::Contract _ibContract;
+		Contract _ibContract;
 };
 
 
@@ -33,12 +40,12 @@ class HistRequest
 	public:
 		HistRequest();
 
-		bool initialize( const IB::Contract&, const std::string &endDateTime,
+		bool initialize( const Contract&, const std::string &endDateTime,
 			const std::string &durationStr, const std::string &barSizeSetting,
 			const std::string &whatToShow, int useRTH, int formatDate );
 		std::string toString() const;
 
-		IB::Contract ibContract;
+		Contract ibContract;
 		std::string endDateTime;
 		std::string durationStr;
 		std::string barSizeSetting;
@@ -65,7 +72,7 @@ class AccStatusRequest
 class ExecutionsRequest
 {
 	public:
-		IB::ExecutionFilter executionFilter;
+		ExecutionFilter executionFilter;
 };
 
 
@@ -85,8 +92,8 @@ class PlaceOrder
 
 		long orderId;
 		int64_t time_sent;
-		IB::Contract contract;
-		IB::Order order;
+		Contract contract;
+		Order order;
 };
 
 
@@ -97,7 +104,7 @@ class MktDataRequest
 	public:
 		MktDataRequest();
 
-		IB::Contract ibContract;
+		Contract ibContract;
 		std::string genericTicks;
 		bool snapshot;
 };

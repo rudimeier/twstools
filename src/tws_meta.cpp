@@ -157,7 +157,7 @@ int HistTodo::checkoutOpt( PacingGod *pG, const DataFarmStates *dfs )
 		    it = hashByFarm.begin(); it != hashByFarm.end(); it++ ) {
 		const std::string &farm = it->first;
 		HistRequest *tmp_hR = it->second;
-		const IB::Contract& c = tmp_hR->ibContract;
+		const Contract& c = tmp_hR->ibContract;
 		if( pG->countLeft( c ) > 0 ) {
 			if( farm.empty() ) {
 				// 1. the unknown ones to learn farm quickly
@@ -224,7 +224,7 @@ void HistTodo::add( const HistRequest& hR )
 	leftRequests.push_back(p);
 }
 
-int HistTodo::skip_by_perm(const IB::Contract& con)
+int HistTodo::skip_by_perm(const Contract& con)
 {
 	int cnt_skipped = 0;
 	std::list<HistRequest*>::iterator it = leftRequests.begin();
@@ -235,7 +235,7 @@ int HistTodo::skip_by_perm(const IB::Contract& con)
 
 	while( it != leftRequests.end() ) {
 		HistRequest *hr = *it;
-		const IB::Contract &ci = hr->ibContract;
+		const Contract &ci = hr->ibContract;
 		if (strcasecmp( ci.symbol.c_str(), con.symbol.c_str()) == 0 &&
 				strcasecmp( ci.secType.c_str(), con.secType.c_str()) == 0 &&
 				strcasecmp( ci.exchange.c_str(), con.exchange.c_str()) == 0) {
@@ -262,7 +262,7 @@ static inline bool is_quote_req(const HistRequest &hr)
 
 int HistTodo::skip_by_nodata(const HistRequest& hr)
 {
-	const IB::Contract &con = hr.ibContract;
+	const Contract &con = hr.ibContract;
 	int cnt_skipped = 0;
 	std::list<HistRequest*>::iterator it = leftRequests.begin();
 
@@ -272,7 +272,7 @@ int HistTodo::skip_by_nodata(const HistRequest& hr)
 
 	while( it != leftRequests.end() ) {
 		HistRequest *hi = *it;
-		const IB::Contract &ci = hi->ibContract;
+		const Contract &ci = hi->ibContract;
 		if (strcasecmp( ci.symbol.c_str(), con.symbol.c_str()) == 0 &&
 			  strcasecmp( ci.secType.c_str(), con.secType.c_str()) == 0 &&
 			  strcasecmp( ci.exchange.c_str(), con.exchange.c_str()) == 0 &&
@@ -629,7 +629,7 @@ void Packet::closeError( req_err e )
 
 
 PacketContractDetails::PacketContractDetails() :
-	cdList(new std::vector<IB::ContractDetails>())
+	cdList(new std::vector<ContractDetails>())
 {
 	reqId = -1;
 	request = NULL;
@@ -657,7 +657,7 @@ PacketContractDetails * PacketContractDetails::fromXml( xmlNodePtr root )
 				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 					if( q->type == XML_ELEMENT_NODE
 						&& strcmp((char*)q->name, "ContractDetails") == 0 )  {
-						IB::ContractDetails cd;
+						ContractDetails cd;
 						conv_xml2ib(&cd, q);
 						pcd->cdList->push_back(cd);
 					}
@@ -702,7 +702,7 @@ void PacketContractDetails::clear()
 }
 
 
-void PacketContractDetails::append( int reqId, const IB::ContractDetails& c )
+void PacketContractDetails::append( int reqId, const ContractDetails& c )
 {
 	if( cdList->empty() ) {
 		this->reqId = reqId;
@@ -854,7 +854,7 @@ void PacketHistData::append( int reqId,  const RowHist &row )
 
 void PacketHistData::dump( bool printFormatDates )
 {
-	const IB::Contract &c = request->ibContract;
+	const Contract &c = request->ibContract;
 	const char *wts = short_wts( request->whatToShow.c_str() );
 	const char *bss = short_bar_size( request->barSizeSetting.c_str());
 
@@ -1679,7 +1679,7 @@ void PacingGod::clear()
 }
 
 
-void PacingGod::addRequest( const IB::Contract& c )
+void PacingGod::addRequest( const Contract& c )
 {
 	std::string farm;
 	std::string lazyC;
@@ -1700,7 +1700,7 @@ void PacingGod::addRequest( const IB::Contract& c )
 	}
 }
 
-void PacingGod::remove_last_request( const IB::Contract& c )
+void PacingGod::remove_last_request( const Contract& c )
 {
 	std::string farm;
 	std::string lazyC;
@@ -1721,7 +1721,7 @@ void PacingGod::remove_last_request( const IB::Contract& c )
 	}
 }
 
-void PacingGod::notifyViolation( const IB::Contract& c )
+void PacingGod::notifyViolation( const Contract& c )
 {
 	std::string farm;
 	std::string lazyC;
@@ -1743,7 +1743,7 @@ void PacingGod::notifyViolation( const IB::Contract& c )
 }
 
 
-int PacingGod::goodTime( const IB::Contract& c )
+int PacingGod::goodTime( const Contract& c )
 {
 	const char* dbg;
 	std::string farm;
@@ -1769,7 +1769,7 @@ int PacingGod::goodTime( const IB::Contract& c )
 }
 
 
-int PacingGod::countLeft( const IB::Contract& c )
+int PacingGod::countLeft( const Contract& c )
 {
 	std::string farm;
 	std::string lazyC;
@@ -1795,7 +1795,7 @@ int PacingGod::countLeft( const IB::Contract& c )
 
 
 
-void PacingGod::checkAdd( const IB::Contract& c,
+void PacingGod::checkAdd( const Contract& c,
 	std::string *lazyC_, std::string *farm_ )
 {
 	*lazyC_ = LAZY_CONTRACT_STR(c);
@@ -2119,13 +2119,13 @@ std::string DataFarmStates::getFarm( const std::string &prefix,
 }
 
 
-void DataFarmStates::learnMarket( const IB::Contract& )
+void DataFarmStates::learnMarket( const Contract& )
 {
 	assert( false ); //not implemented
 }
 
 
-void DataFarmStates::learnHmds( const IB::Contract& c )
+void DataFarmStates::learnHmds( const Contract& c )
 {
 	std::string lazyC = LAZY_CONTRACT_STR(c);
 
@@ -2180,7 +2180,7 @@ void DataFarmStates::learnHmds( const IB::Contract& c )
 }
 
 
-void DataFarmStates::learnHmdsLastOk(int msgNumber, const IB::Contract& c )
+void DataFarmStates::learnHmdsLastOk(int msgNumber, const Contract& c )
 {
 	if( msgNumber != (lastMsgNumber + 1) ) {
 		return;
@@ -2233,7 +2233,7 @@ std::vector<std::string> DataFarmStates::getActives() const
 }
 
 
-std::string DataFarmStates::getMarketFarm( const IB::Contract& c ) const
+std::string DataFarmStates::getMarketFarm( const Contract& c ) const
 {
 	std::string lazyC = LAZY_CONTRACT_STR(c);
 	std::map<const std::string, std::string>::const_iterator it = mLearn.find(lazyC);
@@ -2241,7 +2241,7 @@ std::string DataFarmStates::getMarketFarm( const IB::Contract& c ) const
 }
 
 
-std::string DataFarmStates::getHmdsFarm( const IB::Contract& c ) const
+std::string DataFarmStates::getHmdsFarm( const Contract& c ) const
 {
 	std::string lazyC = LAZY_CONTRACT_STR(c);
 	std::map<const std::string, std::string>::const_iterator it = hLearn.find(lazyC);

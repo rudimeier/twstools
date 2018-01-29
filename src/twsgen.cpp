@@ -326,8 +326,8 @@ bool gen_hist_job()
 		int myProp_reqMaxContractsPerSpec = -1;
 		for( size_t i = 0; i < pcd->constList().size(); i++ ) {
 
-			const IB::ContractDetails &cd = pcd->constList()[i];
-			IB::Contract c = cd.summary;
+			const ContractDetails &cd = pcd->constList()[i];
+			Contract c = cd.summary;
 // 			DEBUG_PRINTF("contract, %s %s", c.symbol.c_str(), c.expiry.c_str());
 
 			if( exp_mode != EXP_KEEP ) {
