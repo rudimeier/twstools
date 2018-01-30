@@ -8,6 +8,7 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_SRCDIR([src/])
 
 AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 GIT_VERSION_MAGIC
 AC_CONFIG_LINKS([GNUmakefile:GNUmakefile])
