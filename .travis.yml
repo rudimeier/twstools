@@ -1,41 +1,55 @@
 language: cpp
 
+sudo: false
+
+git:
+  depth: 1500
+
+os:
+  - linux
+  - osx
+
 compiler:
   - gcc
   - clang
 
 env:
-  - build_git_twsapi="no"
-  - build_git_twsapi="yes"
+  - CONFOPTS=""
 
-before_install:
-  - sudo add-apt-repository ppa:hroptatyr/ppa -y
-  - sudo apt-get -qq update
+matrix:
+  include:
+    ## make distcheck
+    - os: linux
+      compiler: gcc
+      env: DISTCHECK="yes"
+           CONFOPTS=""
+    # test old Ubuntu 12.04 and OSX for compatibility
+    - dist: precise
+      compiler: gcc
+      env: PRECISE="yes" CONFOPTS=""
+
+addons:
+  apt:
+    packages:
+      - gengetopt
+      - help2man
 
 install:
-  - sudo apt-get install -qq gengetopt
-  - sudo apt-get install -qq help2man
-  - if test "${build_git_twsapi}" = "yes"; then
-      git clone --quiet --depth=100 git://github.com/rudimeier/twsapi.git ~/builds/twsapi
-      && pushd ~/builds/twsapi
-      && autoreconf -vfi
-      && ./configure
-      && make && sudo make install
-      && popd
-      ;
-    else
-      sudo apt-get install -qq twsapi
-      ;
-    fi
+  - env | grep -v "encrypted" | LC_ALL=C sort
+  - lscpu || sysctl hw
+  - source ./.travis-functions.sh
+  - travis_have_sudo
+  - travis_install_script
 
 before_script:
-  - autoreconf -vfi
+  - travis_before_script
 
-script: autoreconf -vfi && ./configure && make && make check
+script:
+  - travis_script
 
-## whitelist
 branches:
   only:
     - master
     - next
-    - tmp
+    - /^travis.*/
+    - /^tmp.*/
