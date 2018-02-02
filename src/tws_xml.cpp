@@ -96,7 +96,17 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_LONG( c, conId );
 	ADD_ATTR_STRING( c, symbol );
 	ADD_ATTR_STRING( c, secType );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	/* For now (2018-02-01) continue to be compatible with twstools and
+	 * write "expiry" to xml instead of
+	 * ADD_ATTR_STRING( c, lastTradeDateOrContractMonth );*/
+	if( !TwsXml::skip_defaults || c.lastTradeDateOrContractMonth != dflt.lastTradeDateOrContractMonth ) {
+		xmlNewProp ( ne, (xmlChar*) "expiry",
+			(xmlChar*) c.lastTradeDateOrContractMonth.c_str() );
+	}
+#else
 	ADD_ATTR_STRING( c, expiry );
+#endif
 	ADD_ATTR_DOUBLE( c, strike );
 	ADD_ATTR_STRING( c, right );
 	ADD_ATTR_STRING( c, multiplier );
@@ -150,6 +160,14 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, liquidHours );
 	ADD_ATTR_STRING( cd, evRule );
 	ADD_ATTR_DOUBLE( cd, evMultiplier );
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	ADD_ATTR_INT( cd, mdSizeMultiplier );
+	ADD_ATTR_INT( cd, aggGroup );
+	ADD_ATTR_STRING( cd, underSymbol );
+	ADD_ATTR_STRING( cd, underSecType );
+	ADD_ATTR_STRING( cd, marketRuleIds );
+	ADD_ATTR_STRING( cd, realExpirationDate );
+#endif
 
 	// BOND values
 	ADD_ATTR_STRING( cd, cusip );
@@ -469,7 +487,18 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_LONG( c, conId );
 	GET_ATTR_STRING( c, symbol );
 	GET_ATTR_STRING( c, secType );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	// for compatibility we also accept old expiry field ...
+	tmp = (char*) xmlGetProp( node, (xmlChar*) "expiry" );
+	if( tmp ) {
+		c->lastTradeDateOrContractMonth = std::string(tmp);
+		free(tmp);
+	}
+	// ... but the new name wins.
+	GET_ATTR_STRING( c, lastTradeDateOrContractMonth );
+#else
 	GET_ATTR_STRING( c, expiry );
+#endif
 	GET_ATTR_DOUBLE( c, strike );
 	GET_ATTR_STRING( c, right );
 	GET_ATTR_STRING( c, multiplier );
@@ -536,7 +565,14 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, liquidHours );
 	GET_ATTR_STRING( cd, evRule );
 	GET_ATTR_DOUBLE( cd, evMultiplier );
-
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	GET_ATTR_INT( cd, mdSizeMultiplier );
+	GET_ATTR_INT( cd, aggGroup );
+	GET_ATTR_STRING( cd, underSymbol );
+	GET_ATTR_STRING( cd, underSecType );
+	GET_ATTR_STRING( cd, marketRuleIds );
+	GET_ATTR_STRING( cd, realExpirationDate );
+#endif
 	// BOND values
 	GET_ATTR_STRING( cd, cusip );
 	GET_ATTR_STRING( cd, ratings );
