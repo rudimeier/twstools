@@ -43,17 +43,11 @@
 #include "tws_util.h"
 #include "config.h"
 
-#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
-# include <twsapi/twsapi_config.h>
-#endif
+#include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
 #include <twsapi/Execution.h>
 #include <twsapi/Order.h>
 #include <twsapi/OrderState.h>
-#if TWSAPI_IB_VERSION_NUMBER <= 966
-# define TagValueList Order::TagValueList
-# define TagValueListSPtr Order::TagValueListSPtr
-#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -139,19 +133,13 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Contract& c )
 	ADD_ATTR_STRING( c, primaryExchange );
 	ADD_ATTR_STRING( c, currency );
 	ADD_ATTR_STRING( c, localSymbol );
-#if TWSAPI_IB_VERSION_NUMBER >= 969
 	ADD_ATTR_STRING( c, tradingClass );
-#endif
 	ADD_ATTR_BOOL( c, includeExpired );
 	ADD_ATTR_STRING( c, secIdType );
 	ADD_ATTR_STRING( c, secId );
 	ADD_ATTR_STRING( c, comboLegsDescrip );
 
-#if TWSAPI_IB_VERSION_NUMBER <= 966
-	if( c.comboLegs != NULL ) {
-#else
 	if( c.comboLegs.get() != NULL ) {
-#endif
 		xmlNodePtr ncl = xmlNewChild( ne, NULL, (xmlChar*)"comboLegs", NULL);
 		for( IB::Contract::ComboLegList::const_iterator it
 			    = c.comboLegs->begin(); it != c.comboLegs->end(); ++it) {
@@ -176,9 +164,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	conv_ib2xml( ne, "summary", cd.summary );
 
 	ADD_ATTR_STRING( cd, marketName );
-#if TWSAPI_IB_VERSION_NUMBER < 969
-	ADD_ATTR_STRING( cd, tradingClass );
-#endif
 	ADD_ATTR_DOUBLE( cd, minTick );
 	ADD_ATTR_STRING( cd, orderTypes );
 	ADD_ATTR_STRING( cd, validExchanges );
@@ -192,10 +177,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, timeZoneId );
 	ADD_ATTR_STRING( cd, tradingHours );
 	ADD_ATTR_STRING( cd, liquidHours );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	ADD_ATTR_STRING( cd, evRule );
 	ADD_ATTR_DOUBLE( cd, evMultiplier );
-#endif
+
 	// BOND values
 	ADD_ATTR_STRING( cd, cusip );
 	ADD_ATTR_STRING( cd, ratings );
@@ -213,9 +197,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_BOOL( cd, nextOptionPartial );
 	ADD_ATTR_STRING( cd, notes );
 
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	ADD_CHILD_TAGVALUELIST( cd, secIdList );
-#endif
 }
 
 
@@ -241,10 +223,8 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
 	ADD_ATTR_INT( e, cumQty );
 	ADD_ATTR_DOUBLE( e, avgPrice );
 	ADD_ATTR_STRING( e, orderRef );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	ADD_ATTR_STRING( e, evRule );
 	ADD_ATTR_DOUBLE( e, evMultiplier );
-#endif
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name,
@@ -276,7 +256,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::TagValue& tV )
 	ADD_ATTR_STRING( tV, value );
 }
 
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 void conv_ib2xml( xmlNodePtr parent, const char* name,
 	const IB::OrderComboLeg& oCL )
 {
@@ -288,7 +267,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 
 	ADD_ATTR_DOUBLE( oCL, price );
 }
-#endif
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 {
@@ -326,9 +304,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_DOUBLE( o, percentOffset );
 	ADD_ATTR_BOOL( o, overridePercentageConstraints );
 	ADD_ATTR_DOUBLE( o, trailStopPrice );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	ADD_ATTR_DOUBLE( o, trailingPercent );
-#endif
 	ADD_ATTR_STRING( o, faGroup );
 	ADD_ATTR_STRING( o, faProfile );
 	ADD_ATTR_STRING( o, faMethod );
@@ -357,12 +333,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_STRING( o, deltaNeutralSettlingFirm );
 	ADD_ATTR_STRING( o, deltaNeutralClearingAccount );
 	ADD_ATTR_STRING( o, deltaNeutralClearingIntent );
-#if TWSAPI_IB_VERSION_NUMBER >= 968
 	ADD_ATTR_STRING( o, deltaNeutralOpenClose );
 	ADD_ATTR_BOOL( o, deltaNeutralShortSale );
 	ADD_ATTR_INT( o, deltaNeutralShortSaleSlot );
 	ADD_ATTR_STRING( o, deltaNeutralDesignatedLocation );
-#endif
 	ADD_ATTR_BOOL( o, continuousUpdate );
 	ADD_ATTR_INT( o, referencePriceType );
 	ADD_ATTR_DOUBLE( o, basisPoints );
@@ -370,7 +344,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_INT( o, scaleInitLevelSize );
 	ADD_ATTR_INT( o, scaleSubsLevelSize );
 	ADD_ATTR_DOUBLE( o, scalePriceIncrement );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	ADD_ATTR_DOUBLE( o, scalePriceAdjustValue );
 	ADD_ATTR_INT( o, scalePriceAdjustInterval );
 	ADD_ATTR_DOUBLE( o, scaleProfitOffset );
@@ -378,7 +351,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_INT( o, scaleInitPosition );
 	ADD_ATTR_INT( o, scaleInitFillQty );
 	ADD_ATTR_BOOL( o, scaleRandomPercent );
-#endif
 	ADD_ATTR_STRING( o, hedgeType );
 	ADD_ATTR_STRING( o, hedgeParam );
 	ADD_ATTR_STRING( o, account );
@@ -392,7 +364,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 
 	ADD_ATTR_BOOL( o, whatIf );
 	ADD_ATTR_BOOL( o, notHeld );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	if( o.orderComboLegs.get() != NULL ) {
 		xmlNodePtr np = xmlNewChild( ne, NULL, (xmlChar*)"orderComboLegs", NULL);
 		for( IB::Order::OrderComboLegList::const_iterator it
@@ -400,7 +371,6 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 			conv_ib2xml( np, "orderComboLeg", **it );
 		}
 	}
-#endif
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
@@ -463,9 +433,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 	GET_ATTR_STRING( c, primaryExchange );
 	GET_ATTR_STRING( c, currency );
 	GET_ATTR_STRING( c, localSymbol );
-#if TWSAPI_IB_VERSION_NUMBER >= 969
 	GET_ATTR_STRING( c, tradingClass );
-#endif
 	GET_ATTR_BOOL( c, includeExpired );
 	GET_ATTR_STRING( c, secIdType );
 	GET_ATTR_STRING( c, secId );
@@ -476,16 +444,8 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 			continue;
 		}
 		if( strcmp((char*) p->name, "comboLegs") == 0 ) {
-#if TWSAPI_IB_VERSION_NUMBER <= 966
-			if( c->comboLegs != NULL ) {
-				/* see comment for underComp below */
-				delete c->comboLegs;
-			}
-			c->comboLegs = new IB::Contract::ComboLegList();
-#else
 			c->comboLegs = IB::Contract::ComboLegListSPtr(
 				new IB::Contract::ComboLegList() );
-#endif
 			for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
 				if( q->type != XML_ELEMENT_NODE
 					|| (strcmp((char*) q->name, "comboLeg") != 0)) {
@@ -493,11 +453,7 @@ void conv_xml2ib( IB::Contract* c, const xmlNodePtr node )
 				}
 				IB::ComboLeg *cl = new IB::ComboLeg();
 				conv_xml2ib( cl, q );
-#if TWSAPI_IB_VERSION_NUMBER <= 966
-				c->comboLegs->push_back(cl);
-#else
 				c->comboLegs->push_back(IB::ComboLegSPtr(cl));
-#endif
 			}
 		} else if( strcmp((char*) p->name, "underComp") == 0 ) {
 			if( c->underComp != NULL ) {
@@ -519,12 +475,8 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	char* tmp;
 
 	GET_ATTR_STRING( cd, marketName );
-#if TWSAPI_IB_VERSION_NUMBER < 969
-	GET_ATTR_STRING( cd, tradingClass );
-#else
 	/* for compatibility we move tradingClass attribute to the contract */
 	GET_ATTR_STRING( (&cd->summary), tradingClass );
-#endif
 	GET_ATTR_DOUBLE( cd, minTick );
 	GET_ATTR_STRING( cd, orderTypes );
 	GET_ATTR_STRING( cd, validExchanges );
@@ -538,10 +490,9 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, timeZoneId );
 	GET_ATTR_STRING( cd, tradingHours );
 	GET_ATTR_STRING( cd, liquidHours );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	GET_ATTR_STRING( cd, evRule );
 	GET_ATTR_DOUBLE( cd, evMultiplier );
-#endif
+
 	// BOND values
 	GET_ATTR_STRING( cd, cusip );
 	GET_ATTR_STRING( cd, ratings );
@@ -566,11 +517,9 @@ void conv_xml2ib( IB::ContractDetails* cd, const xmlNodePtr node )
 		if( strcmp((char*) p->name, "summary") == 0 ) {
 			conv_xml2ib( &cd->summary, p );
 		}
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 		else if(p->name && (strcmp((char*) p->name, "secIdList") == 0)) {
 			GET_CHILD_TAGVALUELIST( cd->secIdList );
 		}
-#endif
 	}
 }
 
@@ -593,10 +542,8 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 	GET_ATTR_INT( e, cumQty );
 	GET_ATTR_DOUBLE( e, avgPrice );
 	GET_ATTR_STRING( e, orderRef );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	GET_ATTR_STRING( e, evRule );
 	GET_ATTR_DOUBLE( e, evMultiplier );
-#endif
 }
 
 
@@ -621,14 +568,12 @@ void conv_xml2ib( IB::TagValue* tV, const xmlNodePtr node )
 	GET_ATTR_STRING( tV, value );
 }
 
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 void conv_xml2ib( IB::OrderComboLeg* oCL, const xmlNodePtr node )
 {
 	char* tmp;
 
 	GET_ATTR_DOUBLE( oCL, price );
 }
-#endif
 
 void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 {
@@ -662,9 +607,7 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_DOUBLE( o, percentOffset );
 	GET_ATTR_BOOL( o, overridePercentageConstraints );
 	GET_ATTR_DOUBLE( o, trailStopPrice );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	GET_ATTR_DOUBLE( o, trailingPercent );
-#endif
 	GET_ATTR_STRING( o, faGroup );
 	GET_ATTR_STRING( o, faProfile );
 	GET_ATTR_STRING( o, faMethod );
@@ -699,12 +642,10 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, deltaNeutralSettlingFirm );
 	GET_ATTR_STRING( o, deltaNeutralClearingAccount );
 	GET_ATTR_STRING( o, deltaNeutralClearingIntent );
-#if TWSAPI_IB_VERSION_NUMBER >= 968
 	GET_ATTR_STRING( o, deltaNeutralOpenClose );
 	GET_ATTR_BOOL( o, deltaNeutralShortSale );
 	GET_ATTR_INT( o, deltaNeutralShortSaleSlot );
 	GET_ATTR_STRING( o, deltaNeutralDesignatedLocation );
-#endif
 	GET_ATTR_BOOL( o, continuousUpdate );
 	GET_ATTR_INT( o, referencePriceType );
 	GET_ATTR_DOUBLE( o, basisPoints );
@@ -712,7 +653,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_INT( o, scaleInitLevelSize );
 	GET_ATTR_INT( o, scaleSubsLevelSize );
 	GET_ATTR_DOUBLE( o, scalePriceIncrement );
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 	GET_ATTR_DOUBLE( o, scalePriceAdjustValue );
 	GET_ATTR_INT( o, scalePriceAdjustInterval );
 	GET_ATTR_DOUBLE( o, scaleProfitOffset );
@@ -720,7 +660,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_INT( o, scaleInitPosition );
 	GET_ATTR_INT( o, scaleInitFillQty );
 	GET_ATTR_BOOL( o, scaleRandomPercent );
-#endif
 	GET_ATTR_STRING( o, hedgeType );
 	GET_ATTR_STRING( o, hedgeParam );
 	GET_ATTR_STRING( o, account );
@@ -740,7 +679,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 		} else if( strcmp((char*) p->name, "smartComboRoutingParams") == 0 ) {
 			GET_CHILD_TAGVALUELIST( o->smartComboRoutingParams );
 		}
-#if TWSAPI_IB_VERSION_NUMBER >= 967
 		else if( strcmp((char*) p->name, "orderComboLegs") == 0 ) {
 			o->orderComboLegs = IB::Order::OrderComboLegListSPtr(
 				new IB::Order::OrderComboLegList() );
@@ -754,7 +692,6 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 				o->orderComboLegs->push_back(oCL);
 			}
 		}
-#endif
 	}
 }
 

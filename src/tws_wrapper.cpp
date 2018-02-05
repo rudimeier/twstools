@@ -40,15 +40,11 @@
 #include "debug.h"
 #include "config.h"
 
-#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
-# include <twsapi/twsapi_config.h>
-#endif
+#include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
 #include <twsapi/Order.h>
 #include <twsapi/OrderState.h>
-#if TWSAPI_IB_VERSION_NUMBER > 966
-# include <twsapi/CommissionReport.h>
-#endif
+#include <twsapi/CommissionReport.h>
 
 
 
@@ -218,11 +214,7 @@ void DebugTwsWrapper::contractDetails( int reqId,
 		contractDetails.summary.currency.c_str(),
 		contractDetails.summary.localSymbol.c_str(),
 		contractDetails.marketName.c_str(),
-#if TWSAPI_IB_VERSION_NUMBER >= 969
 		contractDetails.summary.tradingClass.c_str()
-#else
-		contractDetails.tradingClass.c_str()
-#endif
 		);
 }
 
@@ -242,11 +234,7 @@ void DebugTwsWrapper::bondContractDetails( int reqId,
 		contractDetails.summary.currency.c_str(),
 		contractDetails.summary.localSymbol.c_str(),
 		contractDetails.marketName.c_str(),
-#if TWSAPI_IB_VERSION_NUMBER >= 969
 		contractDetails.summary.tradingClass.c_str()
-#else
-		contractDetails.tradingClass.c_str()
-#endif
 		);
 }
 
@@ -388,17 +376,13 @@ void DebugTwsWrapper::marketDataType( IB::TickerId reqId, int marketDataType )
 	DEBUG_PRINTF( "MARKET_DATA_TYPE: %ld %d", reqId, marketDataType );
 }
 
-/* nobody should reference this callback except a newer twsapi */
-#if TWSAPI_IB_VERSION_NUMBER > 966
 void DebugTwsWrapper::commissionReport( const IB::CommissionReport &cr )
 {
 	DEBUG_PRINTF( "COMMISSION_REPORT %s %g %s %g %g %d", cr.execId.c_str(),
 		cr.commission, cr.currency.c_str(), cr.realizedPNL, cr.yield,
 		cr.yieldRedemptionDate );
 }
-#endif
 
-#if TWSAPI_IB_VERSION_NUMBER >= 969
 void DebugTwsWrapper::position( const IB::IBString& account,
 	const IB::Contract& c, int pos, double avgCost )
 {
@@ -423,8 +407,6 @@ void DebugTwsWrapper::accountSummaryEnd( int reqId )
 {
 	DEBUG_PRINTF( "ACCOUNT_SUMMARY_END: %d", reqId );
 }
-#endif
-
 
 #if TWSAPI_IB_VERSION_NUMBER >= 971
 void DebugTwsWrapper::verifyMessageAPI( const IB::IBString& apiData)

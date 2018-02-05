@@ -42,9 +42,7 @@
 #include "version.h"
 #include "config.h"
 
-#ifdef HAVE_TWSAPI_TWSAPI_CONFIG_H
-# include <twsapi/twsapi_config.h>
-#endif
+#include <twsapi/twsapi_config.h>
 
 #include <stdlib.h>
 #include <stdio.h>
