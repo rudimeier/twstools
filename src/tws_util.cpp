@@ -297,11 +297,12 @@ std::string ibToString( const IB::Execution& ex )
 {
 	char buf[1024];
 	snprintf( buf, sizeof(buf), "orderId:%ld: clientId:%ld, execId:%s, "
-		"time:%s, acctNumber:%s, exchange:%s, side:%s, shares:%d, price:%g, "
-		"permId:%d, liquidation:%d, cumQty:%d, avgPrice:%g",
+		"time:%s, acctNumber:%s, exchange:%s, side:%s, shares:%g, price:%g, "
+		"permId:%d, liquidation:%d, cumQty:%g, avgPrice:%g",
 		ex.orderId, ex.clientId, ex.execId.c_str(), ex.time.c_str(),
 		ex.acctNumber.c_str(), ex.exchange.c_str(), ex.side.c_str(),
-		ex.shares, ex.price, ex.permId, ex.liquidation, ex.cumQty, ex.avgPrice);
+		(double)ex.shares, ex.price, ex.permId, ex.liquidation,
+		(double)ex.cumQty, ex.avgPrice);
 	return std::string(buf);
 }
 
