@@ -9,7 +9,8 @@
 #include "tws_util.h"
 #include "debug.h"
 
-#include <twsapi/EWrapper.h> //IB::TickType
+#include <twsapi/twsapi_config.h>
+#include <twsapi/EWrapper.h> //TickType
 #include <twsapi/Execution.h>
 #include <twsapi/Contract.h>
 
@@ -192,7 +193,9 @@ int ib_duration2secs( const std::string &dur )
 
 
 std::string ibToString( int tickType) {
-	switch ( tickType) {
+	 /* cast to get compiler warnings when enums are missing in switch */
+	IB::TickType xtickType = (IB::TickType)(tickType);
+	switch ( xtickType) {
 		case IB::BID_SIZE:                    return "bidSize";
 		case IB::BID:                         return "bidPrice";
 		case IB::ASK:                         return "askPrice";
@@ -241,9 +244,50 @@ std::string ibToString( int tickType) {
 		case IB::LAST_TIMESTAMP:              return "lastTimestamp";
 		case IB::SHORTABLE:                   return "shortable";
 		case IB::FUNDAMENTAL_RATIOS:          return "fundamentals";
-		case IB::RT_VOLUME:                   return "rtVolume";
+		case IB::RT_VOLUME:                   return "RTVolume";
 		case IB::HALTED:                      return "halted";
-		default:                          return "unknown";
+		case IB::BID_YIELD:                   return "bidYield";
+		case IB::ASK_YIELD:                   return "askYield";
+		case IB::LAST_YIELD:                  return "lastYield";
+		case IB::CUST_OPTION_COMPUTATION:     return "custOptComp";
+		case IB::TRADE_COUNT:                 return "trades";
+		case IB::TRADE_RATE:                  return "trades/min";
+		case IB::VOLUME_RATE:                 return "volume/min";
+		case IB::LAST_RTH_TRADE:              return "lastRTHTrade";
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+		case IB::RT_HISTORICAL_VOL:           return "RTHistoricalVol";
+		case IB::IB_DIVIDENDS:                return "IBDividends";
+		case IB::BOND_FACTOR_MULTIPLIER:      return "bondFactorMultiplier";
+		case IB::REGULATORY_IMBALANCE:        return "regulatoryImbalance";
+		case IB::NEWS_TICK:                   return "newsTick";
+		case IB::SHORT_TERM_VOLUME_3_MIN:     return "shortTermVolume3Min";
+		case IB::SHORT_TERM_VOLUME_5_MIN:     return "shortTermVolume5Min";
+		case IB::SHORT_TERM_VOLUME_10_MIN:    return "shortTermVolume10Min";
+		case IB::DELAYED_BID:                 return "delayedBid";
+		case IB::DELAYED_ASK:                 return "delayedAsk";
+		case IB::DELAYED_LAST:                return "delayedLast";
+		case IB::DELAYED_BID_SIZE:            return "delayedBidSize";
+		case IB::DELAYED_ASK_SIZE:            return "delayedAskSize";
+		case IB::DELAYED_LAST_SIZE:           return "delayedLastSize";
+		case IB::DELAYED_HIGH:                return "delayedHigh";
+		case IB::DELAYED_LOW:                 return "delayedLow";
+		case IB::DELAYED_VOLUME:              return "delayedVolume";
+		case IB::DELAYED_CLOSE:               return "delayedClose";
+		case IB::DELAYED_OPEN:                return "delayedOpen";
+		case IB::RT_TRD_VOLUME:               return "rtTrdVolume";
+		case IB::CREDITMAN_MARK_PRICE:        return "creditmanMarkPrice";
+		case IB::CREDITMAN_SLOW_MARK_PRICE:   return "creditmanSlowMarkPrice";
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+		case IB::DELAYED_BID_OPTION_COMPUTATION:      return "delayedBidOptComp";
+		case IB::DELAYED_ASK_OPTION_COMPUTATION:      return "delayedAskOptComp";
+		case IB::DELAYED_LAST_OPTION_COMPUTATION:     return "delayedLastOptComp";
+		case IB::DELAYED_MODEL_OPTION_COMPUTATION:    return "delayedModelOptComp";
+		case IB::LAST_EXCH:                           return "lastExchange";
+		case IB::LAST_REG_TIME:                       return "lastRegTime";
+		case IB::FUTURES_OPEN_INTEREST:               return "futuresOpenInterest";
+#endif
+		default: return "unknown";
 	}
 }
 
