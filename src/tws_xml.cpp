@@ -185,17 +185,31 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Execution& e )
 	ADD_ATTR_STRING( e, acctNumber );
 	ADD_ATTR_STRING( e, exchange );
 	ADD_ATTR_STRING( e, side );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	ADD_ATTR_DOUBLE( e, shares );
+#else
 	ADD_ATTR_INT( e, shares );
+#endif
 	ADD_ATTR_DOUBLE( e, price );
 	ADD_ATTR_INT( e, permId );
 	ADD_ATTR_LONG( e, clientId );
 	ADD_ATTR_LONG( e, orderId );
 	ADD_ATTR_INT( e, liquidation );
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	ADD_ATTR_DOUBLE( e, cumQty );
+#else
 	ADD_ATTR_INT( e, cumQty );
+#endif
 	ADD_ATTR_DOUBLE( e, avgPrice );
 	ADD_ATTR_STRING( e, orderRef );
 	ADD_ATTR_STRING( e, evRule );
 	ADD_ATTR_DOUBLE( e, evMultiplier );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	ADD_ATTR_STRING( e, modelCode );
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	ADD_ATTR_INT( e, lastLiquidity );
+#endif
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name,
@@ -249,9 +263,17 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 
 	ADD_ATTR_LONG( o, orderId );
 	ADD_ATTR_LONG( o, clientId );
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	ADD_ATTR_INT( o, permId );
+#else
 	ADD_ATTR_LONG( o, permId );
+#endif
 	ADD_ATTR_STRING( o, action );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	ADD_ATTR_DOUBLE( o, totalQuantity );
+#else
 	ADD_ATTR_LONG( o, totalQuantity );
+#endif
 	ADD_ATTR_STRING( o, orderType );
 	ADD_ATTR_DOUBLE( o, lmtPrice );
 	ADD_ATTR_DOUBLE( o, auxPrice );
@@ -300,6 +322,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_DOUBLE( o, delta );
 	ADD_ATTR_DOUBLE( o, stockRangeLower );
 	ADD_ATTR_DOUBLE( o, stockRangeUpper );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	ADD_ATTR_BOOL( o, randomizeSize );
+	ADD_ATTR_BOOL( o, randomizePrice );
+#endif
 	ADD_ATTR_DOUBLE( o, volatility );
 	ADD_ATTR_INT( o, volatilityType );
 	ADD_ATTR_STRING( o,  deltaNeutralOrderType );
@@ -344,6 +370,11 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 #endif
 	ADD_ATTR_BOOL( o, whatIf );
 	ADD_ATTR_BOOL( o, notHeld );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	ADD_ATTR_BOOL( o, solicited );
+	ADD_ATTR_STRING( o, modelCode );
+#endif
+
 	if( o.orderComboLegs.get() != NULL ) {
 		xmlNodePtr np = xmlNewChild( ne, NULL, (xmlChar*)"orderComboLegs", NULL);
 		for( IB::Order::OrderComboLegList::const_iterator it
@@ -353,6 +384,36 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	}
 #if TWSAPI_IB_VERSION_NUMBER >= 971
 	ADD_CHILD_TAGVALUELIST( o, orderMiscOptions );
+#endif
+
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	ADD_ATTR_INT( o, referenceContractId );
+	ADD_ATTR_DOUBLE( o, peggedChangeAmount );
+	ADD_ATTR_BOOL( o, isPeggedChangeAmountDecrease );
+	ADD_ATTR_DOUBLE( o, referenceChangeAmount );
+	ADD_ATTR_STRING( o, referenceExchangeId );
+	ADD_ATTR_STRING( o, adjustedOrderType);
+	ADD_ATTR_DOUBLE( o, triggerPrice );
+	ADD_ATTR_DOUBLE( o, adjustedStopPrice );
+	ADD_ATTR_DOUBLE( o, adjustedStopLimitPrice );
+	ADD_ATTR_DOUBLE( o, adjustedTrailingAmount );
+	ADD_ATTR_INT( o, adjustableTrailingUnit );
+	ADD_ATTR_DOUBLE( o, lmtPriceOffset );
+
+// TODO	std::vector<ibapi::shared_ptr<OrderCondition>> conditions;
+	ADD_ATTR_BOOL( o, conditionsCancelOrder );
+	ADD_ATTR_BOOL( o, conditionsIgnoreRth );
+
+	ADD_ATTR_STRING( o, extOperator );
+
+// TODO SoftDollarTier softDollarTier;
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	ADD_ATTR_DOUBLE( o, cashQty );
+	ADD_ATTR_STRING( o, mifid2DecisionMaker);
+	ADD_ATTR_STRING( o, mifid2DecisionAlgo);
+	ADD_ATTR_STRING( o, mifid2ExecutionTrader);
+	ADD_ATTR_STRING( o, mifid2ExecutionAlgo);
 #endif
 }
 
@@ -516,17 +577,31 @@ void conv_xml2ib( IB::Execution* e, const xmlNodePtr node )
 	GET_ATTR_STRING( e, acctNumber );
 	GET_ATTR_STRING( e, exchange );
 	GET_ATTR_STRING( e, side );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	GET_ATTR_DOUBLE( e, shares );
+#else
 	GET_ATTR_INT( e, shares );
+#endif
 	GET_ATTR_DOUBLE( e, price );
 	GET_ATTR_INT( e, permId );
 	GET_ATTR_LONG( e, clientId );
 	GET_ATTR_LONG( e, orderId );
 	GET_ATTR_INT( e, liquidation );
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	GET_ATTR_DOUBLE( e, cumQty );
+#else
 	GET_ATTR_INT( e, cumQty );
+#endif
 	GET_ATTR_DOUBLE( e, avgPrice );
 	GET_ATTR_STRING( e, orderRef );
 	GET_ATTR_STRING( e, evRule );
 	GET_ATTR_DOUBLE( e, evMultiplier );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	GET_ATTR_STRING( e, modelCode );
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	GET_ATTR_INT( e, lastLiquidity );
+#endif
 }
 
 
@@ -564,9 +639,17 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 
 	GET_ATTR_LONG( o, orderId );
 	GET_ATTR_LONG( o, clientId );
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	GET_ATTR_INT( o, permId );
+#else
 	GET_ATTR_LONG( o, permId );
+#endif
 	GET_ATTR_STRING( o, action );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	GET_ATTR_DOUBLE( o, totalQuantity );
+#else
 	GET_ATTR_LONG( o, totalQuantity );
+#endif
 	GET_ATTR_STRING( o, orderType );
 	GET_ATTR_DOUBLE( o, lmtPrice );
 	GET_ATTR_DOUBLE( o, auxPrice );
@@ -621,6 +704,10 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_DOUBLE( o, delta );
 	GET_ATTR_DOUBLE( o, stockRangeLower );
 	GET_ATTR_DOUBLE( o, stockRangeUpper );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	GET_ATTR_BOOL( o, randomizeSize );
+	GET_ATTR_BOOL( o, randomizePrice );
+#endif
 	GET_ATTR_DOUBLE( o, volatility );
 	GET_ATTR_INT( o, volatilityType );
 	GET_ATTR_STRING( o,  deltaNeutralOrderType );
@@ -662,6 +749,37 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 #endif
 	GET_ATTR_BOOL( o, whatIf );
 	GET_ATTR_BOOL( o, notHeld );
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+	GET_ATTR_BOOL( o, solicited );
+	GET_ATTR_STRING( o, modelCode );
+	GET_ATTR_INT( o, referenceContractId );
+	GET_ATTR_DOUBLE( o, peggedChangeAmount );
+	GET_ATTR_BOOL( o, isPeggedChangeAmountDecrease );
+	GET_ATTR_DOUBLE( o, referenceChangeAmount );
+	GET_ATTR_STRING( o, referenceExchangeId );
+	GET_ATTR_STRING( o, adjustedOrderType);
+	GET_ATTR_DOUBLE( o, triggerPrice );
+	GET_ATTR_DOUBLE( o, adjustedStopPrice );
+	GET_ATTR_DOUBLE( o, adjustedStopLimitPrice );
+	GET_ATTR_DOUBLE( o, adjustedTrailingAmount );
+	GET_ATTR_INT( o, adjustableTrailingUnit );
+	GET_ATTR_DOUBLE( o, lmtPriceOffset );
+
+// TODO	std::vector<ibapi::shared_ptr<OrderCondition>> conditions;
+	GET_ATTR_BOOL( o, conditionsCancelOrder );
+	GET_ATTR_BOOL( o, conditionsIgnoreRth );
+
+	GET_ATTR_STRING( o, extOperator );
+
+// TODO SoftDollarTier softDollarTier;
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	GET_ATTR_DOUBLE( o, cashQty );
+	GET_ATTR_STRING( o, mifid2DecisionMaker);
+	GET_ATTR_STRING( o, mifid2DecisionAlgo);
+	GET_ATTR_STRING( o, mifid2ExecutionTrader);
+	GET_ATTR_STRING( o, mifid2ExecutionAlgo);
+#endif
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
 		if( p->type != XML_ELEMENT_NODE ) {
