@@ -257,6 +257,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_DOUBLE( o, auxPrice );
 	ADD_ATTR_STRING( o, tif );
 	ADD_ATTR_STRING( o, ocaGroup );
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	ADD_ATTR_STRING( o, activeStartTime );
+	ADD_ATTR_STRING( o, activeStopTime );
+#endif
 	ADD_ATTR_INT( o, ocaType );
 	ADD_ATTR_STRING( o, orderRef );
 	ADD_ATTR_BOOL( o, transmit );
@@ -322,6 +326,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 	ADD_ATTR_INT( o, scaleInitPosition );
 	ADD_ATTR_INT( o, scaleInitFillQty );
 	ADD_ATTR_BOOL( o, scaleRandomPercent );
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	ADD_ATTR_STRING( o, scaleTable );
+#endif
 	ADD_ATTR_STRING( o, hedgeType );
 	ADD_ATTR_STRING( o, hedgeParam );
 	ADD_ATTR_STRING( o, account );
@@ -332,7 +339,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 
 	ADD_CHILD_TAGVALUELIST( o, algoParams );
 	ADD_CHILD_TAGVALUELIST( o, smartComboRoutingParams );
-
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	ADD_ATTR_STRING( o, algoId );
+#endif
 	ADD_ATTR_BOOL( o, whatIf );
 	ADD_ATTR_BOOL( o, notHeld );
 	if( o.orderComboLegs.get() != NULL ) {
@@ -342,6 +351,9 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::Order& o )
 			conv_ib2xml( np, "orderComboLeg", **it );
 		}
 	}
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	ADD_CHILD_TAGVALUELIST( o, orderMiscOptions );
+#endif
 }
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const IB::OrderState& os)
@@ -559,6 +571,10 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_DOUBLE( o, lmtPrice );
 	GET_ATTR_DOUBLE( o, auxPrice );
 	GET_ATTR_STRING( o, tif );
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	GET_ATTR_STRING( o, activeStartTime );
+	GET_ATTR_STRING( o, activeStopTime );
+#endif
 	GET_ATTR_STRING( o, ocaGroup );
 	GET_ATTR_INT( o, ocaType );
 	GET_ATTR_STRING( o, orderRef );
@@ -631,6 +647,9 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_INT( o, scaleInitPosition );
 	GET_ATTR_INT( o, scaleInitFillQty );
 	GET_ATTR_BOOL( o, scaleRandomPercent );
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	GET_ATTR_STRING( o, scaleTable );
+#endif
 	GET_ATTR_STRING( o, hedgeType );
 	GET_ATTR_STRING( o, hedgeParam );
 	GET_ATTR_STRING( o, account );
@@ -638,6 +657,9 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, clearingAccount );
 	GET_ATTR_STRING( o, clearingIntent );
 	GET_ATTR_STRING( o, algoStrategy );
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	GET_ATTR_STRING( o, algoId );
+#endif
 	GET_ATTR_BOOL( o, whatIf );
 	GET_ATTR_BOOL( o, notHeld );
 
@@ -650,6 +672,11 @@ void conv_xml2ib( IB::Order* o, const xmlNodePtr node )
 		} else if( strcmp((char*) p->name, "smartComboRoutingParams") == 0 ) {
 			GET_CHILD_TAGVALUELIST( o->smartComboRoutingParams );
 		}
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+		else if( strcmp((char*) p->name, "orderMiscOptions") == 0 ) {
+			GET_CHILD_TAGVALUELIST( o->orderMiscOptions );
+		}
+#endif
 		else if( strcmp((char*) p->name, "orderComboLegs") == 0 ) {
 			o->orderComboLegs = IB::Order::OrderComboLegListSPtr(
 				new IB::Order::OrderComboLegList() );
