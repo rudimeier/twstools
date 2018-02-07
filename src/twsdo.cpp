@@ -99,9 +99,15 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void bondContractDetails( int reqId,
 			const ContractDetails& contractDetails );
 		void contractDetailsEnd( int reqId );
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+		void historicalData(TickerId reqId, Bar bar);
+		void historicalDataEnd(int reqId, IBString startDateStr,
+			IBString endDateStr);
+#else
 		void historicalData( TickerId reqId, const IBString& date,
 			double open, double high, double low, double close, int volume,
 			int barCount, double WAP, int hasGaps );
+#endif
 		void updateAccountValue( const std::string& key,
 			const IBString& val, const std::string& currency,
 			const IBString& accountName );
@@ -117,14 +123,22 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void orderStatus( OrderId orderId, const IBString &status,
 			int filled, int remaining, double avgFillPrice, int permId,
 			int parentId, double lastFillPrice, int clientId,
-			const IBString& whyHeld );
+			const IBString& whyHeld
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+			, double mktCapPrice
+#endif
+			);
 		void openOrder( OrderId orderId, const Contract&,
 			const Order&, const OrderState& );
 		void openOrderEnd();
 		void currentTime( long time );
 		void nextValidId( OrderId orderId );
 		void tickPrice( TickerId reqId, TickType field, double price,
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+			const TickAttrib& );
+#else
 			int canAutoExecute );
+#endif
 		void tickSize( TickerId reqId, TickType field, int size );
 
 	private:
@@ -179,7 +193,21 @@ void TwsDlWrapper::contractDetailsEnd( int reqId )
 		reqId);
 }
 
-
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+void TwsDlWrapper::historicalData(TickerId reqId, Bar bar)
+{
+	/* TODO remove RowHist and use Bar directly */
+	RowHist row = { bar.time, bar.open, bar.high, bar.low, bar.close, bar.volume, bar.count, bar.wap, false };
+	parentTwsDL->twsHistoricalData( reqId, row );
+}
+void TwsDlWrapper::historicalDataEnd(int reqId, IBString startDateStr,
+	IBString endDateStr)
+{
+	RowHist row = dflt_RowHist;
+	row.date = IBString("finished-") + startDateStr + "-" + endDateStr;
+	parentTwsDL->twsHistoricalData( reqId, row );
+}
+#else
 void TwsDlWrapper::historicalData( TickerId reqId, const IBString& date,
 	double open, double high, double low, double close, int volume,
 	int count, double WAP, int hasGaps )
@@ -187,7 +215,7 @@ void TwsDlWrapper::historicalData( TickerId reqId, const IBString& date,
 	RowHist row = { date, open, high, low, close, volume, count, WAP, hasGaps };
 	parentTwsDL->twsHistoricalData( reqId, row );
 }
-
+#endif
 
 void TwsDlWrapper::updateAccountValue( const IBString& key,
 	const IBString& val, const IBString& currency,
@@ -234,10 +262,18 @@ void TwsDlWrapper::execDetailsEnd( int reqId )
 void TwsDlWrapper::orderStatus( OrderId orderId, const IBString &status,
 	int filled, int remaining, double avgFillPrice, int permId,
 	int parentId, double lastFillPrice, int clientId,
-	const IBString& whyHeld )
+	const IBString& whyHeld
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	, double mktCapPrice
+#endif
+	)
 {
 	DebugTwsWrapper::orderStatus( orderId, status, filled, remaining,
-		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld );
+		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+		, mktCapPrice
+#endif
+		);
 	RowOrderStatus row = { orderId, status, filled, remaining, avgFillPrice,
 		permId, parentId, lastFillPrice, clientId, whyHeld };
 	parentTwsDL->twsOrderStatus(row);
@@ -269,8 +305,16 @@ void TwsDlWrapper::nextValidId( OrderId orderId )
 	parentTwsDL->nextValidId( orderId );
 }
 
-void TwsDlWrapper::tickPrice( TickerId reqId, TickType field, double price, int canAutoExecute)
+void TwsDlWrapper::tickPrice( TickerId reqId, TickType field, double price,
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	const TickAttrib& ta)
+#else
+	int canAutoExecute)
+#endif
 {
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	int canAutoExecute = ta.canAutoExecute;
+#endif
 	parentTwsDL->twsTickPrice( reqId, field, price, canAutoExecute );
 }
 

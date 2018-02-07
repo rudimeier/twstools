@@ -163,7 +163,14 @@ void TWSClient::reqMktData(int tickerId, const Contract &contract,
 		contract.right.c_str(), contract.strike, contract.currency.c_str(),
 		contract.localSymbol.c_str(), genericTickList.c_str(), snapshot );
 
-	ePosixClient->reqMktData( tickerId, contract, genericTickList, snapshot );
+	ePosixClient->reqMktData( tickerId, contract, genericTickList, snapshot
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	, false
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	, TagValueListSPtr()
+#endif
+	);
 }
 
 
@@ -270,8 +277,16 @@ void TWSClient::reqHistoricalData ( int tickerId, const Contract &contract,
 		contract.exchange.c_str(), endDateTime.c_str(), durationStr.c_str(),
 		barSizeSetting.c_str(), whatToShow.c_str(), useRTH, formatDate );
 #endif
+
 	ePosixClient->reqHistoricalData( tickerId, contract, endDateTime,
-		durationStr, barSizeSetting, whatToShow, useRTH, formatDate );
+		durationStr, barSizeSetting, whatToShow, useRTH, formatDate
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	,false
+#endif
+#if TWSAPI_IB_VERSION_NUMBER >= 971
+	, TagValueListSPtr()
+#endif
+	);
 }
 
 

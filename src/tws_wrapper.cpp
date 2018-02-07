@@ -30,8 +30,16 @@ DebugTwsWrapper::~DebugTwsWrapper()
 
 
 void DebugTwsWrapper::tickPrice( TickerId tickerId, TickType field,
-	double price, int canAutoExecute )
+	double price
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	, const TickAttrib& ta)
+#else
+	, int canAutoExecute)
+#endif
 {
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	int canAutoExecute = ta.canAutoExecute;
+#endif
 	DEBUG_PRINTF( "TICK_PRICE: %ld %s %g %d",
 		tickerId, ibToString(field).c_str(), price, canAutoExecute);
 }
@@ -86,13 +94,17 @@ void DebugTwsWrapper::tickEFP( TickerId tickerId, TickType tickType,
 
 
 void DebugTwsWrapper::orderStatus ( OrderId orderId,
-	const IBString &status, int filled, int remaining, double avgFillPrice,
+	const IBString &status, POS_TYPE filled, POS_TYPE remaining, double avgFillPrice,
 	int permId, int parentId, double lastFillPrice, int clientId,
-	const IBString& whyHeld )
+	const IBString& whyHeld
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+	, double mktCapPrice
+#endif
+)
 {
 	DEBUG_PRINTF( "ORDER_STATUS: "
-		"orderId:%ld, status:%s, filled:%d, remaining:%d, %d %d %g %g %d, %s",
-		orderId, status.c_str(), filled, remaining, permId, parentId,
+		"orderId:%ld, status:%s, filled:%g, remaining:%g, %d %d %g %g %d, %s",
+		orderId, status.c_str(), (double)filled, (double)remaining, permId, parentId,
 		avgFillPrice, lastFillPrice, clientId, whyHeld.c_str());
 }
 
@@ -145,11 +157,11 @@ void DebugTwsWrapper::updateAccountValue( const IBString& key,
 
 
 void DebugTwsWrapper::updatePortfolio( const Contract& contract,
-	int position, double marketPrice, double marketValue, double averageCost,
+	POS_TYPE position, double marketPrice, double marketValue, double averageCost,
 	double unrealizedPNL, double realizedPNL, const IBString& accountName)
 {
-	DEBUG_PRINTF( "PORTFOLIO_VALUE: %s %s %d %g %g %g %g %g %s",
-		contract.symbol.c_str(), contract.localSymbol.c_str(), position,
+	DEBUG_PRINTF( "PORTFOLIO_VALUE: %s %s %g %g %g %g %g %g %s",
+		contract.symbol.c_str(), contract.localSymbol.c_str(), (double)position,
 		marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL,
 		accountName.c_str() );
 }
@@ -278,7 +290,18 @@ void DebugTwsWrapper::receiveFA( faDataType pFaDataType,
 	DEBUG_PRINTF( "RECEIVE_FA: %s", cxml.c_str() );
 }
 
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+void DebugTwsWrapper::historicalData( TickerId reqId, Bar bar )
+{
+	DEBUG_PRINTF( "HISTORICAL_DATA: %ld %s %g %g %g %g %lld %d %g", reqId,
+		bar.time.c_str(), bar.open, bar.high, bar.low, bar.close, bar.volume, bar.count, bar.wap );
+}
 
+void DebugTwsWrapper::historicalDataEnd(int reqId, IBString startDateStr,
+	IBString endDateStr)
+{
+}
+#else
 void DebugTwsWrapper::historicalData( TickerId reqId,
 	const IBString& date, double open, double high, double low,
 	double close, int volume, int barCount, double WAP, int hasGaps )
@@ -286,7 +309,7 @@ void DebugTwsWrapper::historicalData( TickerId reqId,
 	DEBUG_PRINTF( "HISTORICAL_DATA: %ld %s %g %g %g %g %d %d %g %d", reqId,
 		date.c_str(), open, high, low, close, volume, barCount, WAP, hasGaps );
 }
-
+#endif
 
 void DebugTwsWrapper::scannerParameters( const IBString &xml )
 {
@@ -357,10 +380,10 @@ void DebugTwsWrapper::commissionReport( const CommissionReport &cr )
 }
 
 void DebugTwsWrapper::position( const IBString& account,
-	const Contract& c, int pos, double avgCost )
+	const Contract& c, POS_TYPE pos, double avgCost )
 {
-	DEBUG_PRINTF( "POSITION: %s %s %s %d %g", account.c_str(),
-		c.symbol.c_str(), c.localSymbol.c_str(), pos, avgCost );
+	DEBUG_PRINTF( "POSITION: %s %s %s %g %g", account.c_str(),
+		c.symbol.c_str(), c.localSymbol.c_str(), (double)pos, avgCost );
 }
 
 void DebugTwsWrapper::positionEnd()
@@ -401,5 +424,145 @@ void DebugTwsWrapper::displayGroupList( int reqId, const IBString& groups)
 void DebugTwsWrapper::displayGroupUpdated( int reqId, const IBString& contractInfo)
 {
 	DEBUG_PRINTF( "DISPLAY_GROUP_UPDATED: %d %s", reqId, contractInfo.c_str() );
+}
+#endif
+
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
+void DebugTwsWrapper::verifyAndAuthMessageAPI( const IBString& apiData,
+	const IBString& xyzChallange)
+{
+}
+void DebugTwsWrapper::verifyAndAuthCompleted( bool isSuccessful,
+	const IBString& errorText)
+{
+}
+
+void DebugTwsWrapper::connectAck()
+{
+	DEBUG_PRINTF( "CONNECT_ACK");
+}
+void DebugTwsWrapper::positionMulti( int reqId, const std::string& account,
+	const std::string& modelCode, const Contract& contract,
+	double pos, double avgCost)
+{
+}
+void DebugTwsWrapper::positionMultiEnd( int reqId)
+{
+}
+void DebugTwsWrapper::accountUpdateMulti( int reqId, const std::string& account,
+	const std::string& modelCode, const std::string& key,
+	const std::string& value, const std::string& currency)
+{
+}
+void DebugTwsWrapper::accountUpdateMultiEnd( int reqId)
+{
+}
+void DebugTwsWrapper::securityDefinitionOptionalParameter(int reqId,
+	const std::string& exchange, int underlyingConId,
+	const std::string& tradingClass, const std::string& multiplier,
+	std::set<std::string> expirations, std::set<double> strikes)
+{
+}
+void DebugTwsWrapper::securityDefinitionOptionalParameterEnd(int reqId)
+{
+}
+void DebugTwsWrapper::softDollarTiers(int reqId,
+	const std::vector<SoftDollarTier> &tiers)
+{
+}
+#endif
+
+#if TWSAPI_IB_VERSION_NUMBER >= 97300
+void DebugTwsWrapper::familyCodes(const std::vector<FamilyCode> &familyCodes)
+{
+}
+void DebugTwsWrapper::symbolSamples(int reqId,
+	const std::vector<ContractDescription> &contractDescriptions)
+{
+}
+void DebugTwsWrapper::mktDepthExchanges(
+	const std::vector<DepthMktDataDescription> &depthMktDataDescriptions)
+{
+}
+void DebugTwsWrapper::tickNews(int tickerId, time_t timeStamp,
+	const std::string& providerCode, const std::string& articleId,
+	const std::string& headline, const std::string& extraData)
+{
+}
+void DebugTwsWrapper::smartComponents(int reqId, SmartComponentsMap theMap)
+{
+}
+void DebugTwsWrapper::tickReqParams(int tickerId,
+	double minTick, std::string bboExchange, int snapshotPermissions)
+{
+}
+void DebugTwsWrapper::newsProviders(const std::vector<NewsProvider> &newsProviders)
+{
+}
+void DebugTwsWrapper::newsArticle(int requestId, int articleType,
+	const std::string& articleText)
+{
+}
+void DebugTwsWrapper::historicalNews(int requestId, const std::string& time,
+	const std::string& providerCode, const std::string& articleId,
+	const std::string& headline)
+{
+}
+void DebugTwsWrapper::historicalNewsEnd(int requestId, bool hasMore)
+{
+}
+void DebugTwsWrapper::headTimestamp(int reqId, const std::string& headTimestamp)
+{
+}
+void DebugTwsWrapper::histogramData(int reqId, HistogramDataVector data)
+{
+}
+void DebugTwsWrapper::historicalDataUpdate(TickerId reqId, Bar bar)
+{
+}
+void DebugTwsWrapper::rerouteMktDataReq(int reqId, int conid,
+	const std::string& exchange)
+{
+}
+void DebugTwsWrapper::rerouteMktDepthReq(int reqId, int conid,
+	const std::string& exchange)
+{
+}
+void DebugTwsWrapper::marketRule(int marketRuleId,
+	const std::vector<PriceIncrement> &priceIncrements)
+{
+}
+void DebugTwsWrapper::pnl(int reqId, double dailyPnL, double unrealizedPnL,
+	double realizedPnL)
+{
+}
+void DebugTwsWrapper::pnlSingle(int reqId, int pos, double dailyPnL,
+	double unrealizedPnL, double realizedPnL, double value)
+{
+}
+void DebugTwsWrapper::historicalTicks(int reqId,
+	const std::vector<HistoricalTick> &ticks, bool done)
+{
+}
+void DebugTwsWrapper::historicalTicksBidAsk(int reqId,
+	const std::vector<HistoricalTickBidAsk> &ticks, bool done)
+{
+}
+void DebugTwsWrapper::historicalTicksLast(int reqId,
+	const std::vector<HistoricalTickLast> &ticks, bool done)
+{
+}
+void DebugTwsWrapper::tickByTickAllLast(int reqId, int tickType, time_t time,
+	double price, int size, const TickAttrib& attribs,
+	const std::string& exchange, const std::string& specialConditions)
+{
+}
+void DebugTwsWrapper::tickByTickBidAsk(int reqId, time_t time, double bidPrice,
+	double askPrice, int bidSize, int askSize,
+	const TickAttrib& attribs)
+{
+}
+void DebugTwsWrapper::tickByTickMidPoint(int reqId, time_t time, double midPoint)
+{
 }
 #endif
