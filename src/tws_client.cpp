@@ -119,7 +119,7 @@ void TWSClient::selectStuff( int msec )
 		return;
 	} else if( ret < 0) {
 		TWS_DEBUG( 1 , "Select failed: %s, fd: %d, timval: (%lds, %ldus).",
-			strerror(errno), fd, tval.tv_sec, tval.tv_usec );
+			strerror(errno), fd, (long)tval.tv_sec, (long)tval.tv_usec );
 		disconnectTWS();
 		return;
 	}
