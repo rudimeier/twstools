@@ -32,6 +32,9 @@ AX_CHECK_COMPILE_FLAG([-Wall],[warnflags="-Wall"])
 # intel's -Wextra is too verbose
 if test "$ax_cv_cxx_compiler_vendor" != "intel"; then
 	AX_CHECK_COMPILE_FLAG([-Wextra],[warnflags="$warnflags -Wextra"])
+	AX_CHECK_COMPILE_FLAG([-Wno-unused-function],[warnflags="$warnflags -Wno-unused-function"])
+	AX_CHECK_COMPILE_FLAG([-Wno-unused-parameter],[warnflags="$warnflags -Wno-unused-parameter"])
+	AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],[warnflags="$warnflags -Wno-mismatched-tags"])
 fi
 DEFAULT_CXXFLAGS="$warnflags"
 AC_SUBST([DEFAULT_CXXFLAGS])
@@ -40,6 +43,7 @@ AC_SUBST([DEFAULT_CXXFLAGS])
 AC_LANG_PUSH([C])
 AX_CHECK_COMPILE_FLAG([-Wall],[warnflags="-Wall"])
 AX_CHECK_COMPILE_FLAG([-Wextra],[warnflags="$warnflags -Wextra"])
+AX_CHECK_COMPILE_FLAG([-Wno-unused-but-set-variable],[warnflags="$warnflags -Wno-unused-but-set-variable"])
 DEFAULT_CFLAGS="$warnflags"
 AC_SUBST([DEFAULT_CFLAGS])
 AC_LANG_POP([C])
