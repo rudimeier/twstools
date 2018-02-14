@@ -212,7 +212,7 @@ void TwsDlWrapper::historicalData( TickerId reqId, const IBString& date,
 	double open, double high, double low, double close, int volume,
 	int count, double WAP, int hasGaps )
 {
-	RowHist row = { date, open, high, low, close, volume, count, WAP, hasGaps };
+	RowHist row = { date, open, high, low, close, volume, count, WAP, (bool)hasGaps };
 	parentTwsDL->twsHistoricalData( reqId, row );
 }
 #endif
