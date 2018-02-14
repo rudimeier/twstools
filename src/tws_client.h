@@ -22,8 +22,8 @@ namespace IB {
 	class OrderState;
 	class Execution;
 	class ExecutionFilter;
-	class EPosixClientSocket;
 	class EWrapper;
+	class EPosixClientSocket;
 #ifndef TWSAPI_NO_NAMESPACE
 }
 using namespace IB;
@@ -65,7 +65,7 @@ class TWSClient
 			int useRTH, int formatDate );
 		void reqCurrentTime();
 
-	private:
+// 	private:
 		EWrapper* myEWrapper;
 		EPosixClientSocket* ePosixClient;
 };

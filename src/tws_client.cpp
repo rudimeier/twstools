@@ -46,9 +46,10 @@
 #endif
 
 TWSClient::TWSClient( EWrapper *ew ) :
-	myEWrapper(ew),
-	ePosixClient( new EPosixClientSocket(ew) )
+	myEWrapper(ew)
 {
+	ePosixClient = new EPosixClientSocket(ew);
+	ePosixClient->asyncEConnect(false);
 }
 
 
@@ -90,6 +91,20 @@ void TWSClient::disconnectTWS()
 void TWSClient::selectStuff( int msec )
 {
 	assert( msec >= 0 );
+	//DEBUG_PRINTF("usleep ....." );
+	//usleep(2000 * 1000);
+	// TODO
+	ePosixClient->select_timeout(msec);
+#if 0
+	DEBUG_PRINTF("checkClient ....." );
+    eReader->checkClient();
+	DEBUG_PRINTF("waitForSignal ....." );
+    eSignal->waitForSignal();
+    errno = 0;
+	DEBUG_PRINTF("processMsgs ....." );
+    eReader->processMsgs();
+#endif
+#if 0
 	struct timeval tval;
 	tval.tv_sec = msec / 1000 ;
 	tval.tv_usec = (msec % 1000) * 1000;
@@ -106,7 +121,7 @@ void TWSClient::selectStuff( int msec )
 		assert( fd >= 0 );
 
 		FD_SET( fd, &readSet);
-		if( !ePosixClient->isOutBufferEmpty()) {
+		if( !ePosixClient->getTransport()->isOutBufferEmpty()) {
 			FD_SET( fd, &writeSet);
 		}
 	}
@@ -134,14 +149,15 @@ void TWSClient::selectStuff( int msec )
 
 	if( FD_ISSET( fd, &readSet)) {
 		TWS_DEBUG( 6 ,"Socket is ready for reading." );
-		ePosixClient->onReceive(); // might disconnect us on socket errors
+		eReader->onReceive(); // might disconnect us on socket errors
 	}
+#endif
 }
 
 
 int TWSClient::serverVersion()
 {
-	return ePosixClient->serverVersion();
+	return ePosixClient->EClient::serverVersion();
 }
 
 std::string TWSClient::TwsConnectionTime()

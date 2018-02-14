@@ -17,6 +17,7 @@
 
 #include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
+#include <twsapi/EPosixClientSocket.h>
 
 #if defined HAVE_CONFIG_H
 # include "config.h"
@@ -140,6 +141,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 			int canAutoExecute );
 #endif
 		void tickSize( TickerId reqId, TickType field, int size );
+		void connectAck();
 
 	private:
 		TwsDL* parentTwsDL;
@@ -323,6 +325,11 @@ void TwsDlWrapper::tickSize( TickerId reqId, TickType field, int size )
 	parentTwsDL->twsTickSize( reqId, field, size );
 }
 
+void TwsDlWrapper::connectAck()
+{
+	DebugTwsWrapper::connectAck();
+	parentTwsDL->twsConnectAck();
+}
 
 struct TwsHeartBeat
 {
@@ -494,7 +501,7 @@ void TwsDL::connectTws()
 	if( !con ) {
 		DEBUG_PRINTF("TWS connection failed.");
 		changeState(IDLE);
-	} else {
+	} else if (!twsClient->ePosixClient->asyncEConnect()) {
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
 		/* this must be set before any possible "Connectivity" callback msg */
@@ -507,6 +514,21 @@ void TwsDL::connectTws()
 	}
 }
 
+void TwsDL::twsConnectAck()
+{
+	if (twsClient->ePosixClient->asyncEConnect()) {
+		DEBUG_PRINTF("TWS connection established (async): %d, %s",
+			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
+		/* this must be set before any possible "Connectivity" callback msg */
+		connectivity_IB_TWS = true;
+		/* waiting for first messages until tws_time is received */
+		tws_hb->reset();
+		tws_hb->cnt_sent = 1;
+		tws_hb->time_sent = nowInMsecs();
+		twsClient->ePosixClient->startApi();
+		twsClient->reqCurrentTime();
+	}
+}
 
 void TwsDL::waitTwsCon()
 {

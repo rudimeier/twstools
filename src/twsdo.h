@@ -163,6 +163,7 @@ class TwsDL
 		void twsTickPrice( int reqId, TickType field, double price,
 			int canAutoExecute );
 		void twsTickSize( int reqId, TickType field, int size );
+		void twsConnectAck();
 
 		State state;
 		bool quit;
