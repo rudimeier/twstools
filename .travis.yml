@@ -25,7 +25,7 @@ matrix:
            CONFOPTS=""
     # test old Ubuntu 12.04 and OSX for compatibility
     - dist: precise
-      compiler: gcc
+      compiler: clang
       env: PRECISE="yes" CONFOPTS=""
 
 addons:
