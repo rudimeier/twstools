@@ -17,7 +17,11 @@
 
 #include <twsapi/twsapi_config.h>
 #include <twsapi/Contract.h>
-#include <twsapi/EPosixClientSocket.h>
+#if ! defined TWS_ORIG_CLIENT
+# include <twsapi/EPosixClientSocket.h>
+#else
+# include <twsapi/EClientSocket.h>
+#endif
 
 #if defined HAVE_CONFIG_H
 # include "config.h"
@@ -327,7 +331,9 @@ void TwsDlWrapper::tickSize( TickerId reqId, TickType field, int size )
 
 void TwsDlWrapper::connectAck()
 {
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
 	DebugTwsWrapper::connectAck();
+#endif
 	parentTwsDL->twsConnectAck();
 }
 
@@ -501,7 +507,11 @@ void TwsDL::connectTws()
 	if( !con ) {
 		DEBUG_PRINTF("TWS connection failed.");
 		changeState(IDLE);
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
 	} else if (!twsClient->ePosixClient->asyncEConnect()) {
+#else
+	} else {
+#endif
 		DEBUG_PRINTF("TWS connection established: %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
 		/* this must be set before any possible "Connectivity" callback msg */
@@ -516,6 +526,7 @@ void TwsDL::connectTws()
 
 void TwsDL::twsConnectAck()
 {
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
 	if (twsClient->ePosixClient->asyncEConnect()) {
 		DEBUG_PRINTF("TWS connection established (async): %d, %s",
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
@@ -528,6 +539,7 @@ void TwsDL::twsConnectAck()
 		twsClient->ePosixClient->startApi();
 		twsClient->reqCurrentTime();
 	}
+#endif
 }
 
 void TwsDL::waitTwsCon()

@@ -17,7 +17,12 @@
 #include <twsapi/Execution.h>
 #include <twsapi/TwsSocketClientErrors.h>
 #include <twsapi/EWrapper.h>
-#include <twsapi/EPosixClientSocket.h>
+#if ! defined TWS_ORIG_CLIENT
+# include <twsapi/EPosixClientSocket.h>
+#else
+# include <twsapi/EReader.h>
+# include <twsapi/EClientSocket.h>
+#endif
 
 #if defined HAVE_CONFIG_H
 # include "config.h"
@@ -48,8 +53,16 @@
 TWSClient::TWSClient( EWrapper *ew ) :
 	myEWrapper(ew)
 {
+#if ! defined TWS_ORIG_CLIENT
 	ePosixClient = new EPosixClientSocket(ew);
+#else
+	eSignal = new EReaderOSSignal(2000);
+	ePosixClient = new EClientSocket(ew, eSignal);
+#endif
+
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
 	ePosixClient->asyncEConnect(false);
+#endif
 }
 
 
@@ -70,7 +83,16 @@ bool TWSClient::connectTWS( const std::string &host, int port, int clientId,
 {
 	DEBUG_PRINTF("connect: %s:%d, clientId: %d", host.c_str(), port, clientId);
 
+#if ! defined TWS_ORIG_CLIENT
 	return ePosixClient->eConnect2( host.c_str(), port, clientId, ai_family );
+#else
+	bool ret = ePosixClient->eConnect( host.c_str(), port, clientId );
+	if (ret) {
+		eReader = new EReader(ePosixClient, eSignal);
+		eReader->start();
+	}
+	return ret;
+#endif
 }
 
 
@@ -93,18 +115,11 @@ void TWSClient::selectStuff( int msec )
 	assert( msec >= 0 );
 	//DEBUG_PRINTF("usleep ....." );
 	//usleep(2000 * 1000);
-	// TODO
+
+#if ! defined TWS_ORIG_CLIENT
+# if TWSAPI_IB_VERSION_NUMBER >= 97200
 	ePosixClient->select_timeout(msec);
-#if 0
-	DEBUG_PRINTF("checkClient ....." );
-    eReader->checkClient();
-	DEBUG_PRINTF("waitForSignal ....." );
-    eSignal->waitForSignal();
-    errno = 0;
-	DEBUG_PRINTF("processMsgs ....." );
-    eReader->processMsgs();
-#endif
-#if 0
+# else
 	struct timeval tval;
 	tval.tv_sec = msec / 1000 ;
 	tval.tv_usec = (msec % 1000) * 1000;
@@ -121,7 +136,7 @@ void TWSClient::selectStuff( int msec )
 		assert( fd >= 0 );
 
 		FD_SET( fd, &readSet);
-		if( !ePosixClient->getTransport()->isOutBufferEmpty()) {
+		if( !ePosixClient->isOutBufferEmpty()) {
 			FD_SET( fd, &writeSet);
 		}
 	}
@@ -149,15 +164,28 @@ void TWSClient::selectStuff( int msec )
 
 	if( FD_ISSET( fd, &readSet)) {
 		TWS_DEBUG( 6 ,"Socket is ready for reading." );
-		eReader->onReceive(); // might disconnect us on socket errors
+		ePosixClient->onReceive(); // might disconnect us on socket errors
 	}
+# endif
+#else
+	DEBUG_PRINTF("checkClient ....." );
+	eReader->checkClient();
+	DEBUG_PRINTF("waitForSignal ....." );
+	eSignal->waitForSignal();
+	errno = 0;
+	DEBUG_PRINTF("processMsgs ....." );
+	eReader->processMsgs();
 #endif
 }
 
 
 int TWSClient::serverVersion()
 {
+#if TWSAPI_IB_VERSION_NUMBER >= 97200
 	return ePosixClient->EClient::serverVersion();
+#else
+	return ePosixClient->serverVersion();
+#endif
 }
 
 std::string TWSClient::TwsConnectionTime()

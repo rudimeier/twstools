@@ -23,7 +23,14 @@ namespace IB {
 	class Execution;
 	class ExecutionFilter;
 	class EWrapper;
+
+#if ! defined TWS_ORIG_CLIENT
 	class EPosixClientSocket;
+#else
+	class EReaderOSSignal;
+	class EReader;
+	class EClientSocket;
+#endif
 #ifndef TWSAPI_NO_NAMESPACE
 }
 using namespace IB;
@@ -67,7 +74,13 @@ class TWSClient
 
 // 	private:
 		EWrapper* myEWrapper;
+#if ! defined TWS_ORIG_CLIENT
 		EPosixClientSocket* ePosixClient;
+#else
+		EReaderOSSignal *eSignal;
+		EReader *eReader;
+		EClientSocket *ePosixClient;
+#endif
 };
 
 
