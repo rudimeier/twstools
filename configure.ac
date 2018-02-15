@@ -2,13 +2,15 @@ AC_PREREQ([2.61])
 
 ## t.i.n.a.v = this is not a version, never use it!
 AC_INIT([twstools], [t.i.n.a.v], [https://github.com/rudimeier/twstools])
-AC_CONFIG_AUX_DIR([.])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_SRCDIR([src/])
 
-AM_INIT_AUTOMAKE([foreign parallel-tests color-tests])
+AM_INIT_AUTOMAKE([1.11 -Wall -Wno-portability foreign dist-xz no-dist-gzip
+                  parallel-tests color-tests])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 GIT_VERSION_MAGIC
 AC_CONFIG_LINKS([GNUmakefile:GNUmakefile])
