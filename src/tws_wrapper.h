@@ -30,6 +30,9 @@ class DebugTwsWrapper : public EWrapper
 		virtual ~DebugTwsWrapper();
 
 	public:
+#if TWSAPI_VERSION_NUMBER >= 17300
+		#include <twsapi/EWrapper_prototypes.h>
+#else
 		void tickPrice( TickerId tickerId, TickType field, double price,
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
 			const TickAttrib& );
@@ -198,6 +201,7 @@ class DebugTwsWrapper : public EWrapper
 			const TickAttrib& attribs);
 		void tickByTickMidPoint(int reqId, time_t time, double midPoint);
 #endif
+#endif /* TWSAPI_VERSION_NUMBER >= 17300 */
 };
 
 #endif

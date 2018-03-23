@@ -246,7 +246,12 @@ void DebugTwsWrapper::execDetailsEnd( int reqId )
 
 
 void DebugTwsWrapper::error( int id, int errorCode,
-	const IBString errorMsg )
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const IBString& errorMsg
+#else
+	const IBString errorMsg
+#endif
+	)
 {
 	DEBUG_PRINTF( "ERR_MSG: %d %d %s", id, errorCode, errorMsg.c_str() );
 }
@@ -261,8 +266,12 @@ void DebugTwsWrapper::updateMktDepth( TickerId id, int position,
 
 
 void DebugTwsWrapper::updateMktDepthL2( TickerId id, int position,
-	IBString marketMaker, int operation, int side, double price,
-	int size )
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const IBString& marketMaker,
+#else
+	IBString marketMaker,
+#endif
+	int operation, int side, double price, int size )
 {
 	// TODO
 	DEBUG_PRINTF( "MARKET_DEPTH_L2: %ld", id );
@@ -291,14 +300,25 @@ void DebugTwsWrapper::receiveFA( faDataType pFaDataType,
 }
 
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
-void DebugTwsWrapper::historicalData( TickerId reqId, Bar bar )
+void DebugTwsWrapper::historicalData( TickerId reqId,
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const Bar& bar
+#else
+	Bar bar
+#endif
+	)
 {
 	DEBUG_PRINTF( "HISTORICAL_DATA: %ld %s %g %g %g %g %lld %d %g", reqId,
 		bar.time.c_str(), bar.open, bar.high, bar.low, bar.close, bar.volume, bar.count, bar.wap );
 }
 
-void DebugTwsWrapper::historicalDataEnd(int reqId, IBString startDateStr,
-	IBString endDateStr)
+void DebugTwsWrapper::historicalDataEnd(int reqId,
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const IBString& startDateStr, const IBString& endDateStr
+#else
+	IBString startDateStr, IBString endDateStr
+#endif
+	)
 {
 }
 #else
@@ -460,7 +480,12 @@ void DebugTwsWrapper::accountUpdateMultiEnd( int reqId)
 void DebugTwsWrapper::securityDefinitionOptionalParameter(int reqId,
 	const std::string& exchange, int underlyingConId,
 	const std::string& tradingClass, const std::string& multiplier,
-	std::set<std::string> expirations, std::set<double> strikes)
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const std::set<std::string>& expirations, const std::set<double>& strikes
+#else
+	std::set<std::string> expirations, std::set<double> strikes
+#endif
+	)
 {
 }
 void DebugTwsWrapper::securityDefinitionOptionalParameterEnd(int reqId)
@@ -489,11 +514,23 @@ void DebugTwsWrapper::tickNews(int tickerId, time_t timeStamp,
 	const std::string& headline, const std::string& extraData)
 {
 }
-void DebugTwsWrapper::smartComponents(int reqId, SmartComponentsMap theMap)
+void DebugTwsWrapper::smartComponents(int reqId,
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const SmartComponentsMap& theMap
+#else
+	SmartComponentsMap theMap
+#endif
+	)
 {
 }
 void DebugTwsWrapper::tickReqParams(int tickerId,
-	double minTick, std::string bboExchange, int snapshotPermissions)
+	double minTick,
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const std::string& bboExchange,
+#else
+	std::string bboExchange,
+#endif
+	int snapshotPermissions)
 {
 }
 void DebugTwsWrapper::newsProviders(const std::vector<NewsProvider> &newsProviders)
@@ -514,10 +551,22 @@ void DebugTwsWrapper::historicalNewsEnd(int requestId, bool hasMore)
 void DebugTwsWrapper::headTimestamp(int reqId, const std::string& headTimestamp)
 {
 }
-void DebugTwsWrapper::histogramData(int reqId, HistogramDataVector data)
+void DebugTwsWrapper::histogramData(int reqId,
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const HistogramDataVector& data
+#else
+	HistogramDataVector data
+#endif
+	)
 {
 }
-void DebugTwsWrapper::historicalDataUpdate(TickerId reqId, Bar bar)
+void DebugTwsWrapper::historicalDataUpdate(TickerId reqId,
+#if TWSAPI_VERSION_NUMBER >= 17300
+	const Bar& bar
+#else
+	Bar bar
+#endif
+	)
 {
 }
 void DebugTwsWrapper::rerouteMktDataReq(int reqId, int conid,

@@ -97,17 +97,28 @@ class TwsDlWrapper : public DebugTwsWrapper
 
 		void connectionClosed();
 
+#if TWSAPI_VERSION_NUMBER >= 17300
+		void error( int id, int errorCode,
+			const IBString& errorString );
+#else
 		void error( const int id, const int errorCode,
 			const IBString errorString );
+#endif
 		void contractDetails( int reqId,
 			const ContractDetails& contractDetails );
 		void bondContractDetails( int reqId,
 			const ContractDetails& contractDetails );
 		void contractDetailsEnd( int reqId );
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
+# if TWSAPI_VERSION_NUMBER >= 17300
+		void historicalData(TickerId reqId, const Bar& bar);
+		void historicalDataEnd(int reqId, const IBString& startDateStr,
+			const IBString& endDateStr);
+# else
 		void historicalData(TickerId reqId, Bar bar);
 		void historicalDataEnd(int reqId, IBString startDateStr,
 			IBString endDateStr);
+# endif
 #else
 		void historicalData( TickerId reqId, const IBString& date,
 			double open, double high, double low, double close, int volume,
@@ -169,8 +180,13 @@ void TwsDlWrapper::connectionClosed()
 }
 
 
+#if TWSAPI_VERSION_NUMBER >= 17300
+void TwsDlWrapper::error( int id, int errorCode,
+	const IBString& errorString )
+#else
 void TwsDlWrapper::error( const int id, const int errorCode,
 	const IBString errorString )
+#endif
 {
 	RowError row = { id, errorCode, errorString };
 	parentTwsDL->twsError( row );
@@ -200,14 +216,23 @@ void TwsDlWrapper::contractDetailsEnd( int reqId )
 }
 
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
+# if TWSAPI_VERSION_NUMBER >= 17300
+void TwsDlWrapper::historicalData(TickerId reqId, const Bar& bar)
+# else
 void TwsDlWrapper::historicalData(TickerId reqId, Bar bar)
+# endif
 {
 	/* TODO remove RowHist and use Bar directly */
 	RowHist row = { bar.time, bar.open, bar.high, bar.low, bar.close, bar.volume, bar.count, bar.wap, false };
 	parentTwsDL->twsHistoricalData( reqId, row );
 }
+# if TWSAPI_IB_VERSION_NUMBER >= 97300
+void TwsDlWrapper::historicalDataEnd(int reqId, const IBString& startDateStr,
+	const IBString& endDateStr)
+# else
 void TwsDlWrapper::historicalDataEnd(int reqId, IBString startDateStr,
 	IBString endDateStr)
+# endif
 {
 	RowHist row = dflt_RowHist;
 	row.date = IBString("finished-") + startDateStr + "-" + endDateStr;
