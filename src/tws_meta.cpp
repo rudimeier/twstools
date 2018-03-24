@@ -882,7 +882,7 @@ void PacketHistData::dump( bool printFormatDates )
 			c.strike,
 			c.right.c_str() );
 
-		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%d\n",
+		printf("%s\t%s\t%s\t%s\t%f\t%f\t%f\t%f\t%lld\t%d\t%f\t%d\n",
 		       wts,
 		       bss,
 		       buf_c,

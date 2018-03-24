@@ -1036,7 +1036,7 @@ void to_xml( xmlNodePtr parent, const char* name, const RowHist& r)
 	ADD_ATTR_DOUBLE( r, high );
 	ADD_ATTR_DOUBLE( r, low );
 	ADD_ATTR_DOUBLE( r, close );
-	ADD_ATTR_INT( r, volume );
+	ADD_ATTR_LONGLONG( r, volume );
 	ADD_ATTR_INT( r, count );
 	ADD_ATTR_DOUBLE( r, WAP );
 	ADD_ATTR_BOOL( r, hasGaps );

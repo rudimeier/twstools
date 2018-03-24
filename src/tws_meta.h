@@ -300,7 +300,7 @@ struct RowHist
 	double high;
 	double low;
 	double close;
-	int volume;
+	long long volume;
 	int count;
 	double WAP;
 	bool hasGaps;
