@@ -73,7 +73,7 @@ function travis_install_script
 	git clone --quiet --depth=100 git://github.com/rudimeier/twsapi.git ~/builds/twsapi || return
 	pushd ~/builds/twsapi || return
 	autoreconf -vfi || return
-	./configure --prefix=$HOME/usr || return
+	./configure --prefix=$HOME/usr --disable-iborig || return
 	$MAKE install || return
     popd
 }
