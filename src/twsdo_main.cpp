@@ -76,6 +76,9 @@ static void gengetopt_check_opts()
 	cfg.get_exec = args_info.get_exec_given;
 	cfg.get_order = args_info.get_order_given;
 
+	if( args_info.data_type_given ) {
+		cfg.init_mkt_data_type(args_info.data_type_arg);
+	}
 	if( args_info.conTimeout_given ) {
 		cfg.tws_conTimeout = args_info.conTimeout_arg;
 	}

@@ -63,6 +63,11 @@ optional
 # section
 section "TWS tweaks"
 
+option "data-type" -
+"market data type: real-time(1), frozen(2), delayed(3) or delayed-frozen(4)\
+ (default: delayed). Special case none(0) to use the TWS default."
+string optional
+
 option "conTimeout" -
 "Connection timeout (default: 30000)."
 int typestr="ms" optional

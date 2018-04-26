@@ -72,6 +72,7 @@ class TWSClient
 			const std::string &barSizeSetting, const std::string &whatToShow,
 			int useRTH, int formatDate );
 		void reqCurrentTime();
+		void reqMarketDataType(int marketDataType);
 
 // 	private:
 		EWrapper* myEWrapper;

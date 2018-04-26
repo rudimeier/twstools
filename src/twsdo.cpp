@@ -55,6 +55,7 @@ ConfigTwsdo::ConfigTwsdo()
 	get_exec = 0;
 	get_order = 0;
 
+	mkt_data_type = 3; /* delayed */
 	tws_conTimeout = 30000;
 	tws_reqTimeout = 1200000;
 	tws_maxRequests = 60;
@@ -86,6 +87,29 @@ void ConfigTwsdo::init_ai_family( int ipv4, int ipv6 )
 	}
 }
 
+void ConfigTwsdo::init_mkt_data_type(const char *str)
+{
+	if (!strcasecmp(str,"none"))
+		mkt_data_type = 0;
+	if (!strcasecmp(str,"real-time"))
+		mkt_data_type = 1;
+	else if (!strcasecmp(str,"frozen"))
+		mkt_data_type = 2;
+	else if (!strcasecmp(str,"delayed"))
+		mkt_data_type = 3;
+	else if (!strcasecmp(str,"delayed-frozen"))
+		mkt_data_type = 4;
+	else {
+		char *end;
+		long val = strtol(str, &end, 10);
+		/* we allow all integers ... for testing */
+		if( end == str || *end != '\0' || val < INT_MIN || val > INT_MAX ) {
+			fprintf( stderr, "error, invalid market data type '%s'\n", str);
+			exit(2);
+		}
+		mkt_data_type = val;
+	}
+}
 
 struct RateLimit
 {
@@ -570,6 +594,8 @@ void TwsDL::connectTws()
 		tws_hb->cnt_sent = 1;
 		tws_hb->time_sent = nowInMsecs();
 		twsClient->reqCurrentTime();
+		if (cfg.mkt_data_type)
+			twsClient->reqMarketDataType(cfg.mkt_data_type);
 	}
 }
 
@@ -587,6 +613,8 @@ void TwsDL::twsConnectAck()
 		tws_hb->time_sent = nowInMsecs();
 		twsClient->ePosixClient->startApi();
 		twsClient->reqCurrentTime();
+		if (cfg.mkt_data_type)
+			twsClient->reqMarketDataType(cfg.mkt_data_type);
 	}
 #endif
 }

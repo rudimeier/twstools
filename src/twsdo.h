@@ -39,6 +39,7 @@ struct ConfigTwsdo
 	ConfigTwsdo();
 
 	void init_ai_family( int ipv4, int ipv6 );
+	void init_mkt_data_type(const char *str);
 
 	const char *workfile;
 	int skipdef;
@@ -52,6 +53,7 @@ struct ConfigTwsdo
 	int get_exec;
 	int get_order;
 
+	int mkt_data_type;
 	int tws_conTimeout;
 	int tws_reqTimeout;
 	int tws_maxRequests;
