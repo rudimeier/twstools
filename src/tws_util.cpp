@@ -287,6 +287,8 @@ std::string ibToString( int tickType) {
 		case LAST_EXCH:                           return "lastExchange";
 		case LAST_REG_TIME:                       return "lastRegTime";
 		case FUTURES_OPEN_INTEREST:               return "futuresOpenInterest";
+		case AVG_OPT_VOLUME:                      return "avgOptVolume";
+		case DELAYED_LAST_TIMESTAMP:              return "delayedLastTimestamp";
 #endif
 		default: return "unknown";
 	}
