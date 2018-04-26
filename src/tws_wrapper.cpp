@@ -387,7 +387,7 @@ void DebugTwsWrapper::fundamentalData( TickerId reqId,
 
 
 void DebugTwsWrapper::deltaNeutralValidation( int reqId,
-	const UnderComp& underComp )
+	const DeltaNeutralContract& dnc )
 {
 	// TODO
 	DEBUG_PRINTF( "DELTA_NEUTRAL_VALIDATION: %d", reqId );

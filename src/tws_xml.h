@@ -19,7 +19,7 @@
 namespace IB {
 #endif
 	class ComboLeg;
-	class UnderComp;
+	class DeltaNeutralContract;
 	class Contract;
 	class ContractDetails;
 	class Execution;
@@ -38,7 +38,7 @@ typedef struct _xmlDoc * xmlDocPtr;
 
 
 void conv_ib2xml( xmlNodePtr parent, const char* name, const ComboLeg& c );
-void conv_ib2xml( xmlNodePtr parent, const char* name, const UnderComp& c );
+void conv_ib2xml( xmlNodePtr parent, const char* name, const DeltaNeutralContract& c );
 void conv_ib2xml( xmlNodePtr parent, const char* name, const Contract& c );
 void conv_ib2xml( xmlNodePtr parent, const char* name,
 	const ContractDetails& c );
@@ -52,7 +52,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const Order& );
 void conv_ib2xml( xmlNodePtr parent, const char* name, const OrderState& );
 
 void conv_xml2ib( ComboLeg* c, const xmlNodePtr node );
-void conv_xml2ib( UnderComp* c, const xmlNodePtr node );
+void conv_xml2ib( DeltaNeutralContract* c, const xmlNodePtr node );
 void conv_xml2ib( Contract* c, const xmlNodePtr node );
 void conv_xml2ib( ContractDetails* c, const xmlNodePtr node );
 void conv_xml2ib( Execution*, const xmlNodePtr node );

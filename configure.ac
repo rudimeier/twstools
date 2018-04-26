@@ -74,11 +74,15 @@ AC_CHECK_FUNCS(strptime)
 AM_MISSING_PROG([HELP2MAN], [help2man], ["${missing_dir}"])
 
 AH_BOTTOM([
+/* manage some backward compatibilities here to avoid a few ifdefs in the code */
 #if TWSAPI_VERSION_NUMBER >= 17300
+# define summary contract
 #else
 # define equityWithLoanAfter equityWithLoan
 # define initMarginAfter initMargin
 # define maintMarginAfter maintMargin
+# define deltaNeutralContract underComp
+# define DeltaNeutralContract UnderComp
 #endif
 ])
 

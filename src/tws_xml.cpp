@@ -73,10 +73,10 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const ComboLeg& cl )
 }
 
 
-void conv_ib2xml( xmlNodePtr parent, const char* name, const UnderComp& uc )
+void conv_ib2xml( xmlNodePtr parent, const char* name, const DeltaNeutralContract& uc )
 {
 	char tmp[128];
-	static const UnderComp dflt;
+	static const DeltaNeutralContract dflt;
 
 	xmlNodePtr ne = xmlNewChild( parent, NULL, (const xmlChar*)name, NULL);
 
@@ -127,8 +127,8 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const Contract& c )
 			conv_ib2xml( ncl, "comboLeg", **it );
 		}
 	}
-	if( c.underComp != NULL ) {
-		conv_ib2xml( ne, "underComp", *c.underComp );
+	if( c.deltaNeutralContract != NULL ) {
+		conv_ib2xml( ne, "deltaNeutralContract", *c.deltaNeutralContract );
 	}
 }
 
@@ -479,7 +479,7 @@ void conv_xml2ib( ComboLeg* cl, const xmlNodePtr node )
 	GET_ATTR_INT( cl, exemptCode );
 }
 
-void conv_xml2ib( UnderComp* uc, const xmlNodePtr node )
+void conv_xml2ib( DeltaNeutralContract* uc, const xmlNodePtr node )
 {
 	char* tmp;
 
@@ -536,16 +536,16 @@ void conv_xml2ib( Contract* c, const xmlNodePtr node )
 				conv_xml2ib( cl, q );
 				c->comboLegs->push_back(ComboLegSPtr(cl));
 			}
-		} else if( strcmp((char*) p->name, "underComp") == 0 ) {
-			if( c->underComp != NULL ) {
+		} else if( strcmp((char*) p->name, "deltaNeutralContract") == 0 ) {
+			if( c->deltaNeutralContract != NULL ) {
 				/* This can only happen if the caller gave us an uninitialized
 				   contract (programming error) or if the xml wrongly contains
-				   more than one underComp tag. For the second case we have to
-				   avoid a memleak here */
-				delete c->underComp;
+				   more than one deltaNeutralContract tag. For the second case
+				   we have to avoid a memleak here */
+				delete c->deltaNeutralContract;
 			}
-			c->underComp = new UnderComp();
-			conv_xml2ib( c->underComp, p );
+			c->deltaNeutralContract = new DeltaNeutralContract();
+			conv_xml2ib( c->deltaNeutralContract, p );
 		}
 	}
 }
