@@ -167,6 +167,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name,
 	ADD_ATTR_STRING( cd, underSecType );
 	ADD_ATTR_STRING( cd, marketRuleIds );
 	ADD_ATTR_STRING( cd, realExpirationDate );
+	ADD_ATTR_STRING( cd, lastTradeTime );
 #endif
 
 	// BOND values
@@ -432,6 +433,7 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const Order& o )
 	ADD_ATTR_STRING( o, mifid2DecisionAlgo);
 	ADD_ATTR_STRING( o, mifid2ExecutionTrader);
 	ADD_ATTR_STRING( o, mifid2ExecutionAlgo);
+	ADD_ATTR_BOOL( o, dontUseAutoPriceForHedge );
 #endif
 }
 
@@ -580,6 +582,7 @@ void conv_xml2ib( ContractDetails* cd, const xmlNodePtr node )
 	GET_ATTR_STRING( cd, underSecType );
 	GET_ATTR_STRING( cd, marketRuleIds );
 	GET_ATTR_STRING( cd, realExpirationDate );
+	GET_ATTR_STRING( cd, lastTradeTime );
 #endif
 	// BOND values
 	GET_ATTR_STRING( cd, cusip );
@@ -823,6 +826,7 @@ void conv_xml2ib( Order* o, const xmlNodePtr node )
 	GET_ATTR_STRING( o, mifid2DecisionAlgo);
 	GET_ATTR_STRING( o, mifid2ExecutionTrader);
 	GET_ATTR_STRING( o, mifid2ExecutionAlgo);
+	GET_ATTR_BOOL( o, dontUseAutoPriceForHedge );
 #endif
 
 	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
