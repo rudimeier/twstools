@@ -115,7 +115,11 @@ void DebugTwsWrapper::openOrder( OrderId orderId,
 {
 	DEBUG_PRINTF( "OPEN_ORDER: %ld %s %s "
 		"warnTxt:%s, status:%s, com:%g, comCur:%s, minCom:%g, maxCom:%g, "
-		"initMarg:%s, maintMarg:%s, ewl:%s",
+#if TWSAPI_VERSION_NUMBER >= 17300
+		"iMargB:%s, mMargB:%s, ewlB:%s"
+		"iMargC:%s, mMargC:%s, ewlC:%s"
+#endif
+		"iMargA:%s, mMargA:%s, ewlA:%s",
 		orderId, contract.symbol.c_str(), order.action.c_str(),
 		orderState.warningText.c_str(),
 		orderState.status.c_str(),
@@ -123,9 +127,17 @@ void DebugTwsWrapper::openOrder( OrderId orderId,
 		orderState.commissionCurrency.c_str(),
 		orderState.minCommission,
 		orderState.maxCommission,
-		orderState.initMargin.c_str(),
-		orderState.maintMargin.c_str(),
-		orderState.equityWithLoan.c_str() );
+#if TWSAPI_VERSION_NUMBER >= 17300
+		orderState.initMarginBefore.c_str(),
+		orderState.maintMarginBefore.c_str(),
+		orderState.equityWithLoanBefore.c_str(),
+		orderState.initMarginChange.c_str(),
+		orderState.maintMarginChange.c_str(),
+		orderState.equityWithLoanChange.c_str(),
+#endif
+		orderState.initMarginAfter.c_str(),
+		orderState.maintMarginAfter.c_str(),
+		orderState.equityWithLoanAfter.c_str() );
 }
 
 

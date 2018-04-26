@@ -73,6 +73,15 @@ AC_CHECK_FUNCS(strptime)
 
 AM_MISSING_PROG([HELP2MAN], [help2man], ["${missing_dir}"])
 
+AH_BOTTOM([
+#if TWSAPI_VERSION_NUMBER >= 17300
+#else
+# define equityWithLoanAfter equityWithLoan
+# define initMarginAfter initMargin
+# define maintMarginAfter maintMargin
+#endif
+])
+
 ## output
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([libltdl/Makefile])

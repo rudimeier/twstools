@@ -444,9 +444,17 @@ void conv_ib2xml( xmlNodePtr parent, const char* name, const OrderState& os)
 		(const xmlChar*)name, NULL);
 
 	ADD_ATTR_STRING( os, status );
-	ADD_ATTR_STRING( os, initMargin );
-	ADD_ATTR_STRING( os, maintMargin );
-	ADD_ATTR_STRING( os, equityWithLoan );
+#if TWSAPI_VERSION_NUMBER >= 17300
+	ADD_ATTR_STRING( os, initMarginBefore );
+	ADD_ATTR_STRING( os, maintMarginBefore );
+	ADD_ATTR_STRING( os, equityWithLoanBefore );
+	ADD_ATTR_STRING( os, initMarginChange );
+	ADD_ATTR_STRING( os, maintMarginChange );
+	ADD_ATTR_STRING( os, equityWithLoanChange );
+#endif
+	ADD_ATTR_STRING( os, initMarginAfter );
+	ADD_ATTR_STRING( os, maintMarginAfter );
+	ADD_ATTR_STRING( os, equityWithLoanAfter );
 	ADD_ATTR_DOUBLE( os, commission );
 	ADD_ATTR_DOUBLE( os, minCommission );
 	ADD_ATTR_DOUBLE( os, maxCommission );
@@ -852,9 +860,17 @@ void conv_xml2ib( OrderState* os, const xmlNodePtr node )
 	char* tmp;
 
 	GET_ATTR_STRING( os, status );
-	GET_ATTR_STRING( os, initMargin );
-	GET_ATTR_STRING( os, maintMargin );
-	GET_ATTR_STRING( os, equityWithLoan );
+#if TWSAPI_VERSION_NUMBER >= 17300
+	GET_ATTR_STRING( os, initMarginBefore );
+	GET_ATTR_STRING( os, maintMarginBefore );
+	GET_ATTR_STRING( os, equityWithLoanBefore );
+	GET_ATTR_STRING( os, initMarginChange );
+	GET_ATTR_STRING( os, maintMarginChange );
+	GET_ATTR_STRING( os, equityWithLoanChange );
+#endif
+	GET_ATTR_STRING( os, initMarginAfter );
+	GET_ATTR_STRING( os, maintMarginAfter );
+	GET_ATTR_STRING( os, equityWithLoanAfter );
 	GET_ATTR_DOUBLE( os, commission );
 	GET_ATTR_DOUBLE( os, minCommission );
 	GET_ATTR_DOUBLE( os, maxCommission );
