@@ -12,6 +12,7 @@
 #include <string>
 
 #include <twsapi/twsapi_config.h>
+#include "config.h"
 
 #ifndef TWSAPI_NO_NAMESPACE
 namespace IB {

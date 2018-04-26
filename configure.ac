@@ -60,8 +60,20 @@ LTDL_INIT([recursive])
 AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
 AM_CONDITIONAL([DESCEND_LIBLTDL], [test "${with_included_ltdl}" = "yes"])
 
+twsapi=twsapi
+twsapi_min="0.6.0"
+AC_ARG_ENABLE([iborig],
+  AS_HELP_STRING([--enable-iborig], [build against the original (multi threaded) EClientSocket]),
+  [],[enable_iborig = no])
+if test x$enable_iborig = xyes; then
+   twsapi=twsapi-iborig
+   twsapi_min="1.73.0"
+   AC_DEFINE([TWS_ORIG_CLIENT], [1], [Define if we build with iborig enabled])
+fi
+AM_CONDITIONAL([WITH_IBORIG], [test x$enable_iborig = xyes])
+
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.7])
-PKG_CHECK_MODULES([twsapi], [twsapi >= 0.6.0])
+PKG_CHECK_MODULES([twsapi], [$twsapi >= $twsapi_min])
 
 AC_CHECK_HEADERS([winsock2.h])
 
