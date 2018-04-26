@@ -87,6 +87,28 @@ void ConfigTwsdo::init_ai_family( int ipv4, int ipv6 )
 }
 
 
+struct RateLimit
+{
+	bool can_send()
+	{
+		uint64_t now = nowInMsecs() / m_interval;
+		if (m_time < now) {
+			m_time = now;
+			m_count = 1;
+			return true;
+		} else if ( m_count >= m_rate ) {
+			return false;
+		} else {
+			++m_count;
+			return true;
+		}
+	};
+
+	const int m_interval = 500;
+	const int m_rate = 25;
+	int m_count = 2;
+	uint64_t m_time = 0;
+};
 
 
 class TwsDlWrapper : public DebugTwsWrapper
@@ -404,6 +426,7 @@ TwsDL::TwsDL() :
 	curIdleTime(0),
 	twsWrapper( new TwsDlWrapper(this) ),
 	twsClient( new TWSClient(twsWrapper) ),
+	rate_limit(new RateLimit()),
 	msgCounter(0),
 	currentRequest(  *(new GenericRequest()) ),
 	workTodo( new WorkTodo() ),
@@ -421,6 +444,7 @@ TwsDL::~TwsDL()
 {
 	delete &currentRequest;
 	delete tws_hb;
+	delete rate_limit;
 
 	if( twsClient != NULL ) {
 		delete twsClient;
@@ -634,7 +658,8 @@ void TwsDL::idle()
 		break;
 	}
 
-	if( reqType == GenericRequest::NONE && fuckme <= 1 && p_orders.empty() ) {
+	if( reqType == GenericRequest::NONE && fuckme <= 1
+		&& workTodo->placeOrderTodo()->countLeft() <= 0 && p_orders.empty() ) {
 		_lastError = "No more work to do.";
 		quit = true;
 	}
@@ -1517,7 +1542,7 @@ void TwsDL::placeOrder()
 void TwsDL::placeAllOrders()
 {
 	PlaceOrderTodo* todo = workTodo->placeOrderTodo();
-	while( todo->countLeft() > 0 ) {
+	while( todo->countLeft() > 0 && rate_limit->can_send()) {
 		placeOrder();
 	}
 }

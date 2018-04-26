@@ -21,6 +21,7 @@
 
 
 class TWSClient;
+struct RateLimit;
 
 #ifndef TWSAPI_NO_NAMESPACE
 namespace IB {
@@ -179,6 +180,8 @@ class TwsDL
 
 		TwsDlWrapper *twsWrapper;
 		TWSClient  *twsClient;
+
+		RateLimit *rate_limit;
 
 		int msgCounter;
 		GenericRequest &currentRequest;
