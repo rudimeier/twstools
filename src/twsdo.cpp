@@ -202,6 +202,14 @@ class TwsDlWrapper : public DebugTwsWrapper
 			int canAutoExecute );
 #endif
 		void tickSize( TickerId reqId, TickType field, int size );
+		void tickOptionComputation( TickerId tickerId,
+			TickType tickType, double impliedVol, double delta,
+			double optPrice, double pvDividend, double gamma, double vega,
+			double theta, double undPrice );
+		void tickGeneric( TickerId tickerId, TickType tickType,
+			double value );
+		void tickString(TickerId tickerId, TickType tickType,
+			const IBString& value );
 		void connectAck();
 
 	private:
@@ -398,6 +406,26 @@ void TwsDlWrapper::tickPrice( TickerId reqId, TickType field, double price,
 void TwsDlWrapper::tickSize( TickerId reqId, TickType field, int size )
 {
 	parentTwsDL->twsTickSize( reqId, field, size );
+}
+void TwsDlWrapper::tickOptionComputation( TickerId tickerId,
+	TickType tickType, double impliedVol, double delta,
+	double optPrice, double pvDividend, double gamma, double vega,
+	double theta, double undPrice )
+{
+	parentTwsDL->twsTickOptionComputation(tickerId, tickType, impliedVol,
+		delta, optPrice, pvDividend, gamma, vega, theta, undPrice);
+}
+
+void TwsDlWrapper::tickGeneric( TickerId tickerId, TickType tickType,
+	double value )
+{
+	parentTwsDL->twsTickGeneric(tickerId, tickType, value);
+}
+
+void TwsDlWrapper::tickString(TickerId tickerId, TickType tickType,
+	const IBString& value )
+{
+	parentTwsDL->twsTickString( tickerId, tickType, value);
 }
 
 void TwsDlWrapper::connectAck()
@@ -1370,6 +1398,35 @@ void TwsDL::twsTickSize( int reqId, TickType field, int size )
 		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
 	DEBUG_PRINTF( "TICK_SIZE: %d %s %ld %s %d", reqId,
 		c.symbol.c_str(), c.conId, ibToString(field).c_str(), size );
+}
+
+void TwsDL::twsTickOptionComputation( TickerId reqId,
+	TickType tickType, double impliedVol, double delta,
+	double optPrice, double pvDividend, double gamma, double vega,
+	double theta, double undPrice )
+{
+	const Contract &c
+		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
+	DEBUG_PRINTF("TICK_OPTION_COMPUTATION: %ld %s %ld %s %g %g %g %g %g %g %g %g",
+		reqId, c.symbol.c_str(), c.conId, ibToString(tickType).c_str(),
+		impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice );
+}
+
+void TwsDL::twsTickGeneric( TickerId reqId, TickType tickType, double value )
+{
+	const Contract &c
+		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
+	DEBUG_PRINTF("TICK_GENERIC: %ld %s %ld %s %g", reqId,
+		c.symbol.c_str(), c.conId, ibToString(tickType).c_str(), value );
+}
+
+void TwsDL::twsTickString(TickerId reqId, TickType tickType,
+	const IBString& value )
+{
+	const Contract &c
+		= workTodo->getMktDataTodo().mktDataRequests[reqId - 1].ibContract;
+	DEBUG_PRINTF("TICK_STRING: %ld %s %ld %s %s", reqId,
+		c.symbol.c_str(), c.conId, ibToString(tickType).c_str(), value.c_str() );
 }
 
 

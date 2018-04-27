@@ -166,6 +166,14 @@ class TwsDL
 		void twsTickPrice( int reqId, TickType field, double price,
 			int canAutoExecute );
 		void twsTickSize( int reqId, TickType field, int size );
+		void twsTickOptionComputation( TickerId tickerId,
+			TickType tickType, double impliedVol, double delta,
+			double optPrice, double pvDividend, double gamma, double vega,
+			double theta, double undPrice );
+		void twsTickGeneric( TickerId tickerId, TickType tickType,
+			double value );
+		void twsTickString(TickerId tickerId, TickType tickType,
+			const IBString& value );
 		void twsConnectAck();
 
 		State state;
