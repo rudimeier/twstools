@@ -116,8 +116,8 @@ void DebugTwsWrapper::openOrder( OrderId orderId,
 	DEBUG_PRINTF( "OPEN_ORDER: %ld %s %s "
 		"warnTxt:%s, status:%s, com:%g, comCur:%s, minCom:%g, maxCom:%g, "
 #if TWSAPI_VERSION_NUMBER >= 17300
-		"iMargB:%s, mMargB:%s, ewlB:%s"
-		"iMargC:%s, mMargC:%s, ewlC:%s"
+		"iMargB:%s, mMargB:%s, ewlB:%s, "
+		"iMargC:%s, mMargC:%s, ewlC:%s, "
 #endif
 		"iMargA:%s, mMargA:%s, ewlA:%s",
 		orderId, contract.symbol.c_str(), order.action.c_str(),
