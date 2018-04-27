@@ -113,24 +113,24 @@ void ConfigTwsdo::init_mkt_data_type(const char *str)
 
 struct RateLimit
 {
-	bool can_send()
+	bool can_send(int n = 1)
 	{
 		uint64_t now = nowInMsecs() / m_interval;
 		if (m_time < now) {
 			m_time = now;
-			m_count = 1;
+			m_count = n;
 			return true;
-		} else if ( m_count >= m_rate ) {
+		} else if ( m_count + n > m_rate ) {
 			return false;
 		} else {
-			++m_count;
+			m_count += n;;
 			return true;
 		}
 	};
 
 	const int m_interval = 500;
 	const int m_rate = 25;
-	int m_count = 2;
+	int m_count = 0;
 	uint64_t m_time = 0;
 };
 
@@ -593,9 +593,10 @@ void TwsDL::connectTws()
 		tws_hb->reset();
 		tws_hb->cnt_sent = 1;
 		tws_hb->time_sent = nowInMsecs();
-		twsClient->reqCurrentTime();
+		rate_limit->can_send(4);
 		if (cfg.mkt_data_type)
 			twsClient->reqMarketDataType(cfg.mkt_data_type);
+		twsClient->reqCurrentTime();
 	}
 }
 
@@ -611,10 +612,11 @@ void TwsDL::twsConnectAck()
 		tws_hb->reset();
 		tws_hb->cnt_sent = 1;
 		tws_hb->time_sent = nowInMsecs();
+		rate_limit->can_send(4);
 		twsClient->ePosixClient->startApi();
-		twsClient->reqCurrentTime();
 		if (cfg.mkt_data_type)
 			twsClient->reqMarketDataType(cfg.mkt_data_type);
+		twsClient->reqCurrentTime();
 	}
 #endif
 }
@@ -1445,6 +1447,8 @@ long TwsDL::fetch_inc_order_id()
 
 void TwsDL::reqContractDetails()
 {
+	if (! rate_limit->can_send())
+		return;
 	workTodo->contractDetailsTodo()->checkout();
 	const ContractDetailsRequest &cdR
 		= workTodo->getContractDetailsTodo().current();
