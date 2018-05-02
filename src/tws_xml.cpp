@@ -1083,7 +1083,7 @@ void to_xml( xmlNodePtr parent, const RowAcc& row )
 			xmlNodePtr nrow = xmlNewChild( parent,
 				NULL, (const xmlChar*)"Prtfl", NULL);
 			conv_ib2xml( nrow, "contract", d.contract );
-			A_ADD_ATTR_INT( nrow, d, position );
+			A_ADD_ATTR_DOUBLE( nrow, d, position );
 			A_ADD_ATTR_DOUBLE( nrow, d, marketPrice );
 			A_ADD_ATTR_DOUBLE( nrow, d, marketValue );
 			A_ADD_ATTR_DOUBLE( nrow, d, averageCost );
@@ -1129,8 +1129,8 @@ static void to_xml( xmlNodePtr parent, const RowOrderStatus &d )
 		NULL, (const xmlChar*)"OrderStatus", NULL);
 	A_ADD_ATTR_LONG(nrow, d, id);
 	A_ADD_ATTR_STRING( nrow, d, status );
-	A_ADD_ATTR_INT( nrow, d, filled );
-	A_ADD_ATTR_INT( nrow, d, remaining );
+	A_ADD_ATTR_DOUBLE( nrow, d, filled );
+	A_ADD_ATTR_DOUBLE( nrow, d, remaining );
 	A_ADD_ATTR_DOUBLE( nrow, d, avgFillPrice );
 	A_ADD_ATTR_INT( nrow, d, permId );
 	A_ADD_ATTR_INT( nrow, d, parentId );

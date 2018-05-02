@@ -173,7 +173,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 		void updateAccountValue( const std::string& key,
 			const IBString& val, const std::string& currency,
 			const IBString& accountName );
-		void updatePortfolio( const Contract& contract, int position,
+		void updatePortfolio( const Contract& contract, POS_TYPE position,
 			double marketPrice, double marketValue, double averageCost,
 			double unrealizedPNL, double realizedPNL,
 			const IBString& accountName);
@@ -183,7 +183,7 @@ class TwsDlWrapper : public DebugTwsWrapper
 			const Execution& execution );
 		void execDetailsEnd( int reqId );
 		void orderStatus( OrderId orderId, const IBString &status,
-			int filled, int remaining, double avgFillPrice, int permId,
+			POS_TYPE filled, POS_TYPE remaining, double avgFillPrice, int permId,
 			int parentId, double lastFillPrice, int clientId,
 			const IBString& whyHeld
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
@@ -311,11 +311,11 @@ void TwsDlWrapper::updateAccountValue( const IBString& key,
 }
 
 void TwsDlWrapper::updatePortfolio( const Contract& contract,
-	int position, double marketPrice, double marketValue, double averageCost,
+	POS_TYPE position, double marketPrice, double marketValue, double averageCost,
 	double unrealizedPNL, double realizedPNL, const IBString& accountName)
 {
-	RowPrtfl row = { contract, position, marketPrice, marketValue, averageCost,
-		unrealizedPNL, realizedPNL, accountName};
+	RowPrtfl row = { contract, (double)position, marketPrice, marketValue,
+		averageCost, unrealizedPNL, realizedPNL, accountName};
 	parentTwsDL->twsUpdatePortfolio( row );
 }
 
@@ -345,7 +345,7 @@ void TwsDlWrapper::execDetailsEnd( int reqId )
 }
 
 void TwsDlWrapper::orderStatus( OrderId orderId, const IBString &status,
-	int filled, int remaining, double avgFillPrice, int permId,
+	POS_TYPE filled, POS_TYPE remaining, double avgFillPrice, int permId,
 	int parentId, double lastFillPrice, int clientId,
 	const IBString& whyHeld
 #if TWSAPI_IB_VERSION_NUMBER >= 97300
@@ -359,8 +359,8 @@ void TwsDlWrapper::orderStatus( OrderId orderId, const IBString &status,
 		, mktCapPrice
 #endif
 		);
-	RowOrderStatus row = { orderId, status, filled, remaining, avgFillPrice,
-		permId, parentId, lastFillPrice, clientId, whyHeld };
+	RowOrderStatus row = { orderId, status, (double)filled, (double)remaining,
+		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld };
 	parentTwsDL->twsOrderStatus(row);
 }
 

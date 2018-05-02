@@ -386,7 +386,7 @@ struct RowAccVal
 struct RowPrtfl
 {
 	Contract contract;
-	int position;
+	double position;
 	double marketPrice;
 	double marketValue;
 	double averageCost;
@@ -468,8 +468,8 @@ struct RowOrderStatus
 {
 	OrderId id;
 	std::string status;
-	int filled;
-	int remaining;
+	double filled;
+	double remaining;
 	double avgFillPrice;
 	int permId;
 	int parentId;
