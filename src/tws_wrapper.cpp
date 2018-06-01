@@ -626,4 +626,12 @@ void DebugTwsWrapper::tickByTickBidAsk(int reqId, time_t time, double bidPrice,
 void DebugTwsWrapper::tickByTickMidPoint(int reqId, time_t time, double midPoint)
 {
 }
+
+#if TWSAPI_IB_VERSION_NUMBER >= 97307
+void DebugTwsWrapper::orderBound(long long orderId, int apiClientId,
+	int apiOrderId)
+{
+}
+#endif
+
 #endif
