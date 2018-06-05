@@ -599,6 +599,7 @@ void TwsDL::connectTws()
 
 	lastConnectionTime = nowInMsecs();
 	changeState( WAIT_TWS_CON );
+	tws_hb->reset();
 
 	/* this may callback (negative) error messages only */
 	bool con = twsClient->connectTWS( cfg.tws_host, cfg.tws_port,
@@ -617,14 +618,6 @@ void TwsDL::connectTws()
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
 		/* this must be set before any possible "Connectivity" callback msg */
 		connectivity_IB_TWS = true;
-		/* waiting for first messages until tws_time is received */
-		tws_hb->reset();
-		tws_hb->cnt_sent = 1;
-		tws_hb->time_sent = nowInMsecs();
-		rate_limit->can_send(4);
-		if (cfg.mkt_data_type)
-			twsClient->reqMarketDataType(cfg.mkt_data_type);
-		twsClient->reqCurrentTime();
 	}
 }
 
@@ -636,15 +629,8 @@ void TwsDL::twsConnectAck()
 			twsClient->serverVersion(), twsClient->TwsConnectionTime().c_str());
 		/* this must be set before any possible "Connectivity" callback msg */
 		connectivity_IB_TWS = true;
-		/* waiting for first messages until tws_time is received */
-		tws_hb->reset();
-		tws_hb->cnt_sent = 1;
-		tws_hb->time_sent = nowInMsecs();
-		rate_limit->can_send(4);
+		rate_limit->can_send(2);
 		twsClient->ePosixClient->startApi();
-		if (cfg.mkt_data_type)
-			twsClient->reqMarketDataType(cfg.mkt_data_type);
-		twsClient->reqCurrentTime();
 	}
 #endif
 }
@@ -654,7 +640,16 @@ void TwsDL::waitTwsCon()
 	int64_t w = cfg.tws_conTimeout - (nowInMsecs() - lastConnectionTime);
 
 	if( twsClient->isConnected() ) {
-		if( tws_hb->tws_time != 0 ) {
+		/* First we wait for nextValidId, then we wait for a reply to
+		   reqCurrentTime */
+		if( tws_hb->tws_time == 0 && tws_valid_orderId != 0 ) {
+			tws_hb->cnt_sent = 1;
+			tws_hb->time_sent = nowInMsecs();
+			rate_limit->can_send(2);
+			if (cfg.mkt_data_type)
+				twsClient->reqMarketDataType(cfg.mkt_data_type);
+			twsClient->reqCurrentTime();
+		} if( tws_hb->tws_time != 0 && tws_valid_orderId != 0 ) {
 			DEBUG_PRINTF( "Connection process finished." );
 			changeState( IDLE );
 		} else if( w > 0 ) {
