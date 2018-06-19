@@ -942,7 +942,11 @@ void to_xml( xmlNodePtr parent, const MktDataRequest& co)
 	assert( false );
 }
 
-
+void to_xml( xmlNodePtr parent, const OptParamsRequest& co)
+{
+	/* not implemented yet */
+	assert( false );
+}
 
 
 void from_xml( ContractDetailsRequest *cdr, const xmlNodePtr node )
@@ -1029,6 +1033,16 @@ void from_xml( MktDataRequest* mdr, const xmlNodePtr node )
 
 	GET_ATTR_STRING( mdr, genericTicks );
 	GET_ATTR_BOOL( mdr, snapshot );
+}
+
+void from_xml( OptParamsRequest* opr, const xmlNodePtr node )
+{
+	for( xmlNodePtr p = node->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE
+			&& strcmp((char*)p->name, "reqContract") == 0 )  {
+			conv_xml2ib( &opr->ibContract, p);
+		}
+	}
 }
 
 

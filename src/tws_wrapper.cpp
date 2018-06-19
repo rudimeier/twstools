@@ -511,10 +511,23 @@ void TwsDlWrapper::securityDefinitionOptionalParameter(int reqId,
 	const std::string& tradingClass, const std::string& multiplier,
 	const std::set<std::string>& expirations, const std::set<double>& strikes)
 {
+#if 0
+	DEBUG_PRINTF("OPT_PARAMS %d '%d' '%s' '%s' '%s' expiries(%zu) strikes(%zu)",
+		reqId, underlyingConId, tradingClass.c_str(), multiplier.c_str(),
+		exchange.c_str(), expirations.size(), strikes.size());
+#endif
+	RowOptParams row = {
+		exchange, underlyingConId, tradingClass,
+		multiplier, expirations, strikes };
+	parentTwsDL->twsOptParams(reqId, row);
 }
 
 void TwsDlWrapper::securityDefinitionOptionalParameterEnd(int reqId)
 {
+#if 1
+	DEBUG_PRINTF("OPT_PARAMS_END %d", reqId);
+#endif
+	parentTwsDL->twsOptParamsEnd(reqId);
 }
 
 void TwsDlWrapper::softDollarTiers(int reqId,

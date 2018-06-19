@@ -400,6 +400,9 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
+	case GenericRequest::OPT_PARAMS_REQUEST:
+		reqOptParams();
+		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
 		if( strat != NULL ) {
@@ -441,6 +444,9 @@ void TwsDL::waitData()
 
 	bool ok = false;
 	switch( currentRequest.reqType() ) {
+	case GenericRequest::OPT_PARAMS_REQUEST:
+		ok = finOptParams();
+		break;
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
 		ok = finContracts();
 		break;
@@ -502,6 +508,24 @@ bool TwsDL::finContracts()
 	return true;
 }
 
+bool TwsDL::finOptParams()
+{
+	PacketOptParams* p = (PacketOptParams*)packet;
+	switch( packet->getError() ) {
+	case REQ_ERR_NONE:
+		DEBUG_PRINTF( "OptParams received: %lu",
+			(unsigned long) p->constList().size() );
+		packet->dumpXml();
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
+	case REQ_ERR_REQUEST:
+		break;
+	case REQ_ERR_TWSCON:
+	case REQ_ERR_TIMEOUT:
+		return false;
+	}
+	return true;
+}
 
 bool TwsDL::finHist()
 {
@@ -1122,6 +1146,35 @@ void TwsDL::twsTickString(TickerId reqId, TickType tickType,
 		c.symbol.c_str(), c.conId, ibToString(tickType).c_str(), value.c_str() );
 }
 
+void TwsDL::twsOptParams(int reqId, RowOptParams& r)
+{
+	if( currentRequest.reqType() != GenericRequest::OPT_PARAMS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	if( currentRequest.reqId() != reqId ) {
+		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
+			reqId, currentRequest.reqId() );
+		assert( false );
+	}
+
+	((PacketOptParams*)packet)->append(reqId, r);
+}
+
+void TwsDL::twsOptParamsEnd(int reqId)
+{
+	if( currentRequest.reqType() != GenericRequest::OPT_PARAMS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	if( currentRequest.reqId() != reqId ) {
+		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
+			reqId, currentRequest.reqId() );
+		assert( false );
+	}
+
+	((PacketOptParams*)packet)->setFinished();
+}
 
 int TwsDL::initWork()
 {
@@ -1348,4 +1401,20 @@ int TwsDL::reqMktData()
 // 		changeState( WAIT_DATA );
 	}
 	return reqId;
+}
+
+void TwsDL::reqOptParams()
+{
+	if (! rate_limit->can_send())
+		return;
+	workTodo->optParamsTodo()->checkout();
+	const OptParamsRequest &opR
+		= workTodo->getOptParamsTodo().current();
+
+	PacketOptParams *p_optParams = new PacketOptParams();
+	packet = p_optParams;
+	currentRequest.nextRequest( GenericRequest::OPT_PARAMS_REQUEST );
+
+	p_optParams->record( currentRequest.reqId(), opR );
+	twsClient->reqSecDefOptParams( currentRequest.reqId(), opR.ibContract );
 }

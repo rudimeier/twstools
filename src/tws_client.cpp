@@ -345,3 +345,12 @@ void TWSClient::reqMarketDataType(int marketDataType)
 
 	ePosixClient->reqMarketDataType(marketDataType);
 }
+
+void TWSClient::reqSecDefOptParams(int reqId, const Contract &c)
+{
+	DEBUG_PRINTF("REQ_OPT_PARAMS %d '%s' '%s' '%s' '%ld'", reqId,
+		c.symbol.c_str(), c.exchange.c_str(), c.secType.c_str(), c.conId);
+
+	ePosixClient->reqSecDefOptParams(reqId,
+		c.symbol, c.exchange, c.secType, c.conId);
+}

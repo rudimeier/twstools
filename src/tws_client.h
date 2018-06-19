@@ -73,6 +73,7 @@ class TWSClient
 			int useRTH, int formatDate );
 		void reqCurrentTime();
 		void reqMarketDataType(int marketDataType);
+		void reqSecDefOptParams(int reqId, const Contract &c);
 
 // 	private:
 		EWrapper* myEWrapper;
