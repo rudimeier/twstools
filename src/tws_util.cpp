@@ -255,7 +255,6 @@ std::string ibToString( int tickType) {
 		case TRADE_RATE:                  return "trades/min";
 		case VOLUME_RATE:                 return "volume/min";
 		case LAST_RTH_TRADE:              return "lastRTHTrade";
-#if TWSAPI_IB_VERSION_NUMBER >= 97200
 		case RT_HISTORICAL_VOL:           return "RTHistoricalVol";
 		case IB_DIVIDENDS:                return "IBDividends";
 		case BOND_FACTOR_MULTIPLIER:      return "bondFactorMultiplier";
@@ -278,8 +277,6 @@ std::string ibToString( int tickType) {
 		case RT_TRD_VOLUME:               return "rtTrdVolume";
 		case CREDITMAN_MARK_PRICE:        return "creditmanMarkPrice";
 		case CREDITMAN_SLOW_MARK_PRICE:   return "creditmanSlowMarkPrice";
-#endif
-#if TWSAPI_IB_VERSION_NUMBER >= 97300
 		case DELAYED_BID_OPTION_COMPUTATION:      return "delayedBidOptComp";
 		case DELAYED_ASK_OPTION_COMPUTATION:      return "delayedAskOptComp";
 		case DELAYED_LAST_OPTION_COMPUTATION:     return "delayedLastOptComp";
@@ -289,7 +286,6 @@ std::string ibToString( int tickType) {
 		case FUTURES_OPEN_INTEREST:               return "futuresOpenInterest";
 		case AVG_OPT_VOLUME:                      return "avgOptVolume";
 		case DELAYED_LAST_TIMESTAMP:              return "delayedLastTimestamp";
-#endif
 		default: return "unknown";
 	}
 }
