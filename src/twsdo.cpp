@@ -894,7 +894,7 @@ void TwsDL::twsContractDetails( int reqId, const ContractDetails &ibContractDeta
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
@@ -910,7 +910,7 @@ void TwsDL::twsBondContractDetails( int reqId, const ContractDetails &ibContract
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
@@ -926,7 +926,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketContractDetails*)packet)->setFinished();
@@ -1162,7 +1162,7 @@ void TwsDL::twsOptParams(int reqId, RowOptParams& r)
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketOptParams*)packet)->append(reqId, r);
@@ -1177,7 +1177,7 @@ void TwsDL::twsOptParamsEnd(int reqId)
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketOptParams*)packet)->setFinished();
