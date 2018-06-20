@@ -1497,6 +1497,24 @@ void PacketOptParams::setFinished()
 
 void PacketOptParams::dumpXml()
 {
+	for( std::vector<RowOptParams>::const_iterator itr
+			= opList->begin(); itr != opList->end(); ++itr) {
+		printf("%s\t%d\t%s\t%s\t",
+			itr->exchange.c_str(), itr->underlyingConId,
+			itr->tradingClass.c_str(), itr->multiplier.c_str());
+
+		for( std::set<std::string>::const_iterator it
+				= itr->expirations.begin(); it != itr->expirations.end(); ++it){
+			const char *c = std::next(it) != itr->expirations.end() ? "," : "";
+			printf("%s%s", it->c_str(), c);
+		}
+		printf("\t");
+		for( std::set<double>::const_iterator it
+				= itr->strikes.begin(); it != itr->strikes.end(); ++it){
+			const char *c = std::next(it) != itr->strikes.end() ? "," : "\n";
+			printf("%g%s", *it, c);
+		}
+	}
 }
 
 const OptParamsRequest& PacketOptParams::getRequest() const
