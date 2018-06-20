@@ -109,5 +109,12 @@ class MktDataRequest
 		bool snapshot;
 };
 
+class OptParamsRequest
+{
+	public:
+		OptParamsRequest();
+
+		Contract ibContract;
+};
 
 #endif

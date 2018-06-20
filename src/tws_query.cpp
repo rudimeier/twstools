@@ -101,3 +101,7 @@ MktDataRequest::MktDataRequest() :
 	snapshot(false)
 {
 }
+
+OptParamsRequest::OptParamsRequest()
+{
+}

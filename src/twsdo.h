@@ -82,6 +82,7 @@ class RowPrtfl;
 class RowExecution;
 class RowOrderStatus;
 class RowOpenOrder;
+class RowOptParams;
 class PacingGod;
 class DataFarmStates;
 class Account;
@@ -119,6 +120,7 @@ class TwsDL
 		void waitTwsCon();
 		void idle();
 		bool finContracts();
+		bool finOptParams();
 		bool finHist();
 		bool finPlaceOrder();
 		void waitData();
@@ -137,6 +139,7 @@ class TwsDL
 		void placeOrder();
 		void placeAllOrders();
 		int reqMktData();
+		void reqOptParams();
 
 		void errorContracts( const RowError& );
 		void errorHistData( const RowError& );
@@ -175,6 +178,8 @@ class TwsDL
 		void twsTickString(TickerId tickerId, TickType tickType,
 			const IBString& value );
 		void twsConnectAck();
+		void twsOptParams(int reqId, RowOptParams&);
+		void twsOptParamsEnd(int reqId);
 
 		State state;
 		bool quit;

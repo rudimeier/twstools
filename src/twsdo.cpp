@@ -400,6 +400,9 @@ void TwsDL::idle()
 	case GenericRequest::HIST_REQUEST:
 		reqHistoricalData();
 		break;
+	case GenericRequest::OPT_PARAMS_REQUEST:
+		reqOptParams();
+		break;
 	case GenericRequest::NONE:
 		/* TODO for now we place all orders when nothing else todo */
 		if( strat != NULL ) {
@@ -441,6 +444,9 @@ void TwsDL::waitData()
 
 	bool ok = false;
 	switch( currentRequest.reqType() ) {
+	case GenericRequest::OPT_PARAMS_REQUEST:
+		ok = finOptParams();
+		break;
 	case GenericRequest::CONTRACT_DETAILS_REQUEST:
 		ok = finContracts();
 		break;
@@ -473,16 +479,17 @@ bool TwsDL::finContracts()
 	PacketContractDetails* p = (PacketContractDetails*)packet;
 	switch( packet->getError() ) {
 	case REQ_ERR_NONE:
-		DEBUG_PRINTF( "Contracts received: %lu",
-			(unsigned long) p->constList().size() );
+		DEBUG_PRINTF("Contracts received: %zu", p->constList().size());
 		packet->dumpXml();
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
 	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
 		break;
 	case REQ_ERR_TWSCON:
-	case REQ_ERR_TIMEOUT:
-		return false;
+		ContractDetailsTodo *conTodo = workTodo->contractDetailsTodo();
+		conTodo->repeat();
+		return true;
 	}
 
 	if( strat != NULL ) {
@@ -502,6 +509,25 @@ bool TwsDL::finContracts()
 	return true;
 }
 
+bool TwsDL::finOptParams()
+{
+	PacketOptParams* p = (PacketOptParams*)packet;
+	switch( packet->getError() ) {
+	case REQ_ERR_NONE:
+		DEBUG_PRINTF("OptParams received: %zu", p->constList().size());
+		packet->dumpXml();
+	case REQ_ERR_NODATA:
+	case REQ_ERR_NAV:
+	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
+		break;
+	case REQ_ERR_TWSCON:
+		OptParamsTodo *opTodo = workTodo->optParamsTodo();
+		opTodo->repeat();
+		break;
+	}
+	return true;
+}
 
 bool TwsDL::finHist()
 {
@@ -600,6 +626,7 @@ void TwsDL::twsError( const RowError& err )
 			err.id, err.code, err.msg.c_str() );
 		switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::OPT_PARAMS_REQUEST:
 				errorContracts( err );
 				break;
 			case GenericRequest::HIST_REQUEST:
@@ -688,6 +715,7 @@ void TwsDL::errorContracts( const RowError& err )
 		}
 		break;
 	case 321:
+	case 322:
 		/* comes directly from TWS with prefix "Error validating request:-" */
 		packet->closeError( REQ_ERR_REQUEST );
 		break;
@@ -828,12 +856,13 @@ void TwsDL::twsConnectionClosed()
 	if( currentRequest.reqType() != GenericRequest::NONE ) {
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
-			case GenericRequest::CONTRACT_DETAILS_REQUEST:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
 				assert(false); // TODO repeat
 				break;
+			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::OPT_PARAMS_REQUEST:
 			case GenericRequest::HIST_REQUEST:
 				packet->closeError( REQ_ERR_TWSCON );
 				break;
@@ -863,7 +892,7 @@ void TwsDL::twsContractDetails( int reqId, const ContractDetails &ibContractDeta
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
@@ -879,7 +908,7 @@ void TwsDL::twsBondContractDetails( int reqId, const ContractDetails &ibContract
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketContractDetails*)packet)->append(reqId, ibContractDetails);
@@ -895,7 +924,7 @@ void TwsDL::twsContractDetailsEnd( int reqId )
 	if( currentRequest.reqId() != reqId ) {
 		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
 			reqId, currentRequest.reqId() );
-		assert( false );
+		return;
 	}
 
 	((PacketContractDetails*)packet)->setFinished();
@@ -1122,6 +1151,35 @@ void TwsDL::twsTickString(TickerId reqId, TickType tickType,
 		c.symbol.c_str(), c.conId, ibToString(tickType).c_str(), value.c_str() );
 }
 
+void TwsDL::twsOptParams(int reqId, RowOptParams& r)
+{
+	if( currentRequest.reqType() != GenericRequest::OPT_PARAMS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	if( currentRequest.reqId() != reqId ) {
+		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
+			reqId, currentRequest.reqId() );
+		return;
+	}
+
+	((PacketOptParams*)packet)->append(reqId, r);
+}
+
+void TwsDL::twsOptParamsEnd(int reqId)
+{
+	if( currentRequest.reqType() != GenericRequest::OPT_PARAMS_REQUEST ) {
+		DEBUG_PRINTF( "Warning, unexpected tws callback.");
+		return;
+	}
+	if( currentRequest.reqId() != reqId ) {
+		DEBUG_PRINTF( "got reqId %d but currentReqId: %d",
+			reqId, currentRequest.reqId() );
+		return;
+	}
+
+	((PacketOptParams*)packet)->setFinished();
+}
 
 int TwsDL::initWork()
 {
@@ -1348,4 +1406,20 @@ int TwsDL::reqMktData()
 // 		changeState( WAIT_DATA );
 	}
 	return reqId;
+}
+
+void TwsDL::reqOptParams()
+{
+	if (! rate_limit->can_send())
+		return;
+	workTodo->optParamsTodo()->checkout();
+	const OptParamsRequest &opR
+		= workTodo->getOptParamsTodo().current();
+
+	PacketOptParams *p_optParams = new PacketOptParams();
+	packet = p_optParams;
+	currentRequest.nextRequest( GenericRequest::OPT_PARAMS_REQUEST );
+
+	p_optParams->record( currentRequest.reqId(), opR );
+	twsClient->reqSecDefOptParams( currentRequest.reqId(), opR.ibContract );
 }

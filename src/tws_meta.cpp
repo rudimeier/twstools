@@ -321,6 +321,12 @@ void ContractDetailsTodo::checkout()
 	curIndex++;
 }
 
+void ContractDetailsTodo::repeat()
+{
+	assert( curIndex > 0 );
+	curIndex--;
+}
+
 const ContractDetailsRequest& ContractDetailsTodo::current() const
 {
 	assert( curIndex >= 0 && curIndex < (int)contractDetailsRequests.size() );
@@ -387,6 +393,44 @@ void MktDataTodo::add( const MktDataRequest& mkr )
 }
 
 
+OptParamsTodo::OptParamsTodo() :
+	curIndex(-1),
+	optParamsRequests(*(new std::vector<OptParamsRequest>()))
+{
+}
+
+OptParamsTodo::~OptParamsTodo()
+{
+	delete &optParamsRequests;
+}
+
+int OptParamsTodo::countLeft() const
+{
+	return optParamsRequests.size() - curIndex - 1;
+}
+
+void OptParamsTodo::checkout()
+{
+	assert( countLeft() > 0 );
+	curIndex++;
+}
+
+void OptParamsTodo::repeat()
+{
+	assert( curIndex > 0 );
+	curIndex--;
+}
+
+const OptParamsRequest& OptParamsTodo::current() const
+{
+	assert( curIndex >= 0 && curIndex < (int)optParamsRequests.size() );
+	return optParamsRequests.at(curIndex);
+}
+
+void OptParamsTodo::add( const OptParamsRequest& opr )
+{
+	optParamsRequests.push_back(opr);
+}
 
 
 WorkTodo::WorkTodo() :
@@ -396,13 +440,17 @@ WorkTodo::WorkTodo() :
 	_contractDetailsTodo( new ContractDetailsTodo() ),
 	_histTodo( new HistTodo() ),
 	_place_order_todo( new PlaceOrderTodo() ),
-	_market_data_todo( new MktDataTodo() )
+	_market_data_todo( new MktDataTodo() ),
+	_opt_params_todo( new OptParamsTodo() )
 {
 }
 
 
 WorkTodo::~WorkTodo()
 {
+	if( _opt_params_todo != NULL ) {
+		delete _opt_params_todo;
+	}
 	if( _market_data_todo != NULL ) {
 		delete _market_data_todo;
 	}
@@ -431,6 +479,8 @@ GenericRequest::ReqType WorkTodo::nextReqType() const
 		return GenericRequest::ORDERS_REQUEST;
 	} else if( _contractDetailsTodo->countLeft() > 0 ) {
 		return GenericRequest::CONTRACT_DETAILS_REQUEST;
+	} else if( optParamsTodo()->countLeft() > 0 ) {
+		return GenericRequest::OPT_PARAMS_REQUEST;
 	} else if( _histTodo->countLeft() > 0 ) {
 		return GenericRequest::HIST_REQUEST;
 	} else {
@@ -476,6 +526,16 @@ MktDataTodo* WorkTodo::mktDataTodo() const
 const MktDataTodo& WorkTodo::getMktDataTodo() const
 {
 	return *_market_data_todo;
+}
+
+OptParamsTodo* WorkTodo::optParamsTodo() const
+{
+	return _opt_params_todo;
+}
+
+const OptParamsTodo& WorkTodo::getOptParamsTodo() const
+{
+	return *_opt_params_todo;
 }
 
 void WorkTodo::addSimpleRequest( GenericRequest::ReqType reqType )
@@ -524,6 +584,10 @@ int WorkTodo::read_req( const xmlNodePtr xn )
 		PacketContractDetails *pcd = PacketContractDetails::fromXml(xn);
 		_contractDetailsTodo->add(pcd->getRequest());
 		delete pcd;
+	} else if ( strcmp( tmp, "opt_params") == 0 ) {
+		PacketOptParams *pop = PacketOptParams::fromXml(xn);
+		_opt_params_todo->add(pop->getRequest());
+		delete pop;
 	} else if ( strcmp( tmp, "account") == 0 ) {
 		addSimpleRequest(GenericRequest::ACC_STATUS_REQUEST);
 	} else if ( strcmp( tmp, "executions") == 0 ) {
@@ -1388,7 +1452,119 @@ void PacketMktData::record( int reqId, const MktDataRequest& mR )
 // }
 
 
+PacketOptParams::PacketOptParams() :
+	opList(new std::vector<RowOptParams>())
+{
+	reqId = -1;
+	request = NULL;
+}
 
+PacketOptParams::~PacketOptParams()
+{
+	delete opList;
+	if( request != NULL ) {
+		delete request;
+	}
+}
+
+PacketOptParams * PacketOptParams::fromXml( xmlNodePtr root )
+{
+	PacketOptParams *pmd = new PacketOptParams();
+
+	for( xmlNodePtr p = root->children; p!= NULL; p=p->next) {
+		if( p->type == XML_ELEMENT_NODE ) {
+			if( strcmp((char*)p->name, "query") == 0 ) {
+				pmd->request = new OptParamsRequest();
+				from_xml(pmd->request, p);
+			}
+			if( strcmp((char*)p->name, "response") == 0 ) {
+				for( xmlNodePtr q = p->children; q!= NULL; q=q->next) {
+					if( q->type != XML_ELEMENT_NODE ) {
+						continue;
+					}
+// 					if( strcmp((char*)q->name, "row") == 0 ) {
+// 						RowHist *row = new RowHist();
+// 						from_xml( row, q );
+// 						phd->rows.push_back(*row);
+// 						delete row;
+// 					} else if( strcmp((char*)q->name, "fin") == 0 ) {
+// 						RowHist *fin = new RowHist();
+// 						from_xml( fin, q );
+// 						phd->finishRow = *fin;
+// 						phd->mode = CLOSED;
+// 						delete fin;
+// 					}
+				}
+			}
+		}
+	}
+	return pmd;
+}
+
+void PacketOptParams::setFinished()
+{
+	assert( mode == RECORD );
+	mode = CLOSED;
+}
+
+void PacketOptParams::dumpXml()
+{
+	for( std::vector<RowOptParams>::const_iterator itr
+			= opList->begin(); itr != opList->end(); ++itr) {
+		printf("%s\t%d\t%s\t%s\t",
+			itr->exchange.c_str(), itr->underlyingConId,
+			itr->tradingClass.c_str(), itr->multiplier.c_str());
+
+		for( std::set<std::string>::const_iterator it
+				= itr->expirations.begin(); it != itr->expirations.end(); ++it){
+			const char *c = std::next(it) != itr->expirations.end() ? "," : "";
+			printf("%s%s", it->c_str(), c);
+		}
+		printf("\t");
+		for( std::set<double>::const_iterator it
+				= itr->strikes.begin(); it != itr->strikes.end(); ++it){
+			const char *c = std::next(it) != itr->strikes.end() ? "," : "\n";
+			printf("%g%s", *it, c);
+		}
+	}
+}
+
+const OptParamsRequest& PacketOptParams::getRequest() const
+{
+	return *request;
+}
+
+
+void PacketOptParams::clear()
+{
+	mode = CLEAN;
+	reqId = -1;
+	opList->clear();
+	if( request != NULL ) {
+		delete request;
+		request = NULL;
+	}
+}
+
+void PacketOptParams::append( int reqId, const RowOptParams& r)
+{
+	if( opList->empty() ) {
+		this->reqId = reqId;
+	}
+	assert( this->reqId == reqId );
+	assert( mode == RECORD );
+
+	opList->push_back(r);
+}
+
+void PacketOptParams::record( int reqId, const OptParamsRequest& opR )
+{
+	assert( empty() && this->reqId == -1 && request == NULL
+		&& opList->empty() );
+	this->reqId = reqId;
+	this->request = new OptParamsRequest( opR );
+	mode = RECORD;
+}
 
 PacingControl::PacingControl( int r, int i, int m, int v ) :
 	dateTimes(*(new std::vector<int64_t>())),

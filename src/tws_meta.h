@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <list>
 #include <map>
+#include <set>
 
 
 typedef struct _xmlNode * xmlNodePtr;
@@ -56,7 +57,8 @@ class GenericRequest
 			EXECUTIONS_REQUEST,
 			ORDERS_REQUEST,
 			CONTRACT_DETAILS_REQUEST,
-			HIST_REQUEST
+			HIST_REQUEST,
+			OPT_PARAMS_REQUEST,
 		};
 
 		GenericRequest();
@@ -128,6 +130,7 @@ class ContractDetailsTodo
 
 		int countLeft() const;
 		void checkout();
+		void repeat();
 		const ContractDetailsRequest& current() const;
 		void add( const ContractDetailsRequest& );
 
@@ -173,7 +176,23 @@ class MktDataTodo
 		std::vector<MktDataRequest> &mktDataRequests;
 };
 
+class OptParamsRequest;
 
+class OptParamsTodo
+{
+	public:
+		OptParamsTodo();
+		virtual ~OptParamsTodo();
+		int countLeft() const;
+		void checkout();
+		void repeat();
+		const OptParamsRequest& current() const;
+		void add( const OptParamsRequest& );
+
+// 	private:
+		int curIndex;
+		std::vector<OptParamsRequest> &optParamsRequests;
+};
 
 class WorkTodo
 {
@@ -190,6 +209,8 @@ class WorkTodo
 		const PlaceOrderTodo& getPlaceOrderTodo() const;
 		MktDataTodo *mktDataTodo() const;
 		const MktDataTodo& getMktDataTodo() const;
+		OptParamsTodo *optParamsTodo() const;
+		const OptParamsTodo& getOptParamsTodo() const;
 		void addSimpleRequest( GenericRequest::ReqType reqType );
 		int read_file( const char *fileName);
 
@@ -203,6 +224,7 @@ class WorkTodo
 		HistTodo *_histTodo;
 		PlaceOrderTodo *_place_order_todo;
 		MktDataTodo *_market_data_todo;
+		OptParamsTodo *_opt_params_todo;
 };
 
 
@@ -531,8 +553,45 @@ class PacketMktData
 // 		std::vector<RowHist> &rows;
 };
 
+struct RowOptParams
+{
+	std::string exchange;
+	int underlyingConId;
+	std::string tradingClass;
+	std::string multiplier;
+	std::set<std::string> expirations;
+	std::set<double> strikes;
+};
 
+class PacketOptParams
+	: public  Packet
+{
+	public:
+		PacketOptParams();
+		virtual ~PacketOptParams();
 
+		static PacketOptParams * fromXml( xmlNodePtr );
+
+		const OptParamsRequest& getRequest() const;
+		const std::vector<RowOptParams>& constList() const;
+		void record( int reqId, const OptParamsRequest& );
+		void setFinished();
+		void clear();
+		void append( int reqId, const RowOptParams& );
+
+		void dumpXml();
+
+	private:
+		int reqId;
+		OptParamsRequest *request;
+		std::vector<RowOptParams> * const opList;
+};
+
+inline const std::vector<RowOptParams>&
+PacketOptParams::constList() const
+{
+	return *opList;
+}
 
 class PacingControl
 {
