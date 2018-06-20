@@ -95,17 +95,17 @@ void TwsDlWrapper::tickEFP( TickerId tickerId, TickType tickType,
 }
 
 void TwsDlWrapper::orderStatus ( OrderId orderId,
-	const IBString &status, POS_TYPE filled, POS_TYPE remaining, double avgFillPrice,
+	const IBString &status, double filled, double remaining, double avgFillPrice,
 	int permId, int parentId, double lastFillPrice, int clientId,
 	const IBString& whyHeld, double mktCapPrice)
 {
 #if 1
 	DEBUG_PRINTF( "ORDER_STATUS: "
 		"orderId:%ld, status:%s, filled:%g, remaining:%g, %d %d %g %g %d, %s",
-		orderId, status.c_str(), (double)filled, (double)remaining, permId, parentId,
+		orderId, status.c_str(), filled, remaining, permId, parentId,
 		avgFillPrice, lastFillPrice, clientId, whyHeld.c_str());
 #endif
-	RowOrderStatus row = { orderId, status, (double)filled, (double)remaining,
+	RowOrderStatus row = { orderId, status, filled, remaining,
 		avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld };
 	parentTwsDL->twsOrderStatus(row);
 }
@@ -174,16 +174,16 @@ void TwsDlWrapper::updateAccountValue( const IBString& key,
 }
 
 void TwsDlWrapper::updatePortfolio( const Contract& contract,
-	POS_TYPE position, double marketPrice, double marketValue, double averageCost,
+	double position, double marketPrice, double marketValue, double averageCost,
 	double unrealizedPNL, double realizedPNL, const IBString& accountName)
 {
 #if 0
 	DEBUG_PRINTF( "PORTFOLIO_VALUE: %s %s %g %g %g %g %g %g %s",
-		contract.symbol.c_str(), contract.localSymbol.c_str(), (double)position,
+		contract.symbol.c_str(), contract.localSymbol.c_str(), position,
 		marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL,
 		accountName.c_str() );
 #endif
-	RowPrtfl row = { contract, (double)position, marketPrice, marketValue,
+	RowPrtfl row = { contract, position, marketPrice, marketValue,
 		averageCost, unrealizedPNL, realizedPNL, accountName};
 	parentTwsDL->twsUpdatePortfolio( row );
 }
@@ -414,10 +414,10 @@ void TwsDlWrapper::commissionReport( const CommissionReport &cr )
 }
 
 void TwsDlWrapper::position( const IBString& account,
-	const Contract& c, POS_TYPE pos, double avgCost )
+	const Contract& c, double pos, double avgCost )
 {
 	DEBUG_PRINTF( "POSITION: %s %s %s %g %g", account.c_str(),
-		c.symbol.c_str(), c.localSymbol.c_str(), (double)pos, avgCost );
+		c.symbol.c_str(), c.localSymbol.c_str(), pos, avgCost );
 }
 
 void TwsDlWrapper::positionEnd()

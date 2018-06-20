@@ -18,9 +18,6 @@ namespace IB {
 using namespace IB;
 #endif
 
-/* POS_TYPE was int before 97200 */
-# define POS_TYPE double
-
 class TwsDL;
 
 class TwsDlWrapper : public EWrapper
