@@ -130,6 +130,7 @@ class ContractDetailsTodo
 
 		int countLeft() const;
 		void checkout();
+		void repeat();
 		const ContractDetailsRequest& current() const;
 		void add( const ContractDetailsRequest& );
 
@@ -184,6 +185,7 @@ class OptParamsTodo
 		virtual ~OptParamsTodo();
 		int countLeft() const;
 		void checkout();
+		void repeat();
 		const OptParamsRequest& current() const;
 		void add( const OptParamsRequest& );
 

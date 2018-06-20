@@ -488,7 +488,9 @@ bool TwsDL::finContracts()
 	case REQ_ERR_TIMEOUT:
 		break;
 	case REQ_ERR_TWSCON:
-		return false;
+		ContractDetailsTodo *conTodo = workTodo->contractDetailsTodo();
+		conTodo->repeat();
+		return true;
 	}
 
 	if( strat != NULL ) {
@@ -522,7 +524,9 @@ bool TwsDL::finOptParams()
 	case REQ_ERR_TIMEOUT:
 		break;
 	case REQ_ERR_TWSCON:
-		return false;
+		OptParamsTodo *opTodo = workTodo->optParamsTodo();
+		opTodo->repeat();
+		break;
 	}
 	return true;
 }
@@ -854,13 +858,13 @@ void TwsDL::twsConnectionClosed()
 	if( currentRequest.reqType() != GenericRequest::NONE ) {
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
-			case GenericRequest::CONTRACT_DETAILS_REQUEST:
-			case GenericRequest::OPT_PARAMS_REQUEST:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
 				assert(false); // TODO repeat
 				break;
+			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::OPT_PARAMS_REQUEST:
 			case GenericRequest::HIST_REQUEST:
 				packet->closeError( REQ_ERR_TWSCON );
 				break;

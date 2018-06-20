@@ -321,6 +321,12 @@ void ContractDetailsTodo::checkout()
 	curIndex++;
 }
 
+void ContractDetailsTodo::repeat()
+{
+	assert( curIndex > 0 );
+	curIndex--;
+}
+
 const ContractDetailsRequest& ContractDetailsTodo::current() const
 {
 	assert( curIndex >= 0 && curIndex < (int)contractDetailsRequests.size() );
@@ -407,6 +413,12 @@ void OptParamsTodo::checkout()
 {
 	assert( countLeft() > 0 );
 	curIndex++;
+}
+
+void OptParamsTodo::repeat()
+{
+	assert( curIndex > 0 );
+	curIndex--;
 }
 
 const OptParamsRequest& OptParamsTodo::current() const
