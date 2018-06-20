@@ -21,13 +21,18 @@ using namespace IB;
 /* POS_TYPE was int before 97200 */
 # define POS_TYPE double
 
-class DebugTwsWrapper : public EWrapper
-{
-	public:
-		virtual ~DebugTwsWrapper();
+class TwsDL;
 
-	public:
-		#include <twsapi/EWrapper_prototypes.h>
+class TwsDlWrapper : public EWrapper
+{
+public:
+	TwsDlWrapper( TwsDL* parent );
+	virtual ~TwsDlWrapper();
+
+	#include <twsapi/EWrapper_prototypes.h>
+
+private:
+	TwsDL* parentTwsDL;
 };
 
 #endif
