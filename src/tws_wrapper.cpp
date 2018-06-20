@@ -157,7 +157,9 @@ void TwsDlWrapper::winError( const IBString &str, int lastError )
 
 void TwsDlWrapper::connectionClosed()
 {
-	//DEBUG_PRINTF( "CONNECTION_CLOSED" );
+#if 0
+	DEBUG_PRINTF( "CONNECTION_CLOSED" );
+#endif
 	parentTwsDL->twsConnectionClosed();
 }
 
@@ -372,7 +374,7 @@ void TwsDlWrapper::realtimeBar( TickerId reqId, long time, double open,
 	double high, double low, double close, long volume, double wap, int count )
 {
 	// TODO
-	DEBUG_PRINTF( "REAL_TIME_BARS: %ld %ld", reqId, time );
+	DEBUG_PRINTF( "REAL_TIME_BAR: %ld %ld", reqId, time );
 }
 
 void TwsDlWrapper::currentTime( long time )
@@ -462,11 +464,14 @@ void TwsDlWrapper::displayGroupUpdated( int reqId, const IBString& contractInfo)
 void TwsDlWrapper::verifyAndAuthMessageAPI( const IBString& apiData,
 	const IBString& xyzChallange)
 {
+	DEBUG_PRINTF("VERIFY_AND_AUTH_MESSAGE_API: %s", apiData.c_str());
 }
 
 void TwsDlWrapper::verifyAndAuthCompleted( bool isSuccessful,
 	const IBString& errorText)
 {
+	DEBUG_PRINTF("VERIFY_AND_AUTH_COMPLETED: %d '%s'",
+		isSuccessful, errorText.c_str());
 }
 
 void TwsDlWrapper::connectAck()
@@ -481,21 +486,26 @@ void TwsDlWrapper::positionMulti( int reqId, const std::string& account,
 	const std::string& modelCode, const Contract& contract,
 	double pos, double avgCost)
 {
+	DEBUG_PRINTF("POSITION_MULTI: %d %s", reqId, account.c_str());
 }
 
 void TwsDlWrapper::positionMultiEnd( int reqId)
 {
+	DEBUG_PRINTF("POSITION_MULTI_END: %d", reqId);
 }
 
 void TwsDlWrapper::accountUpdateMulti( int reqId, const std::string& account,
 	const std::string& modelCode, const std::string& key,
 	const std::string& value, const std::string& currency)
 {
+	DEBUG_PRINTF("ACCOUNT_UPDATE_MULTI: %d %s", reqId, account.c_str());
 }
 
 void TwsDlWrapper::accountUpdateMultiEnd( int reqId)
 {
+	DEBUG_PRINTF("ACCOUNT_UPDATE_MULTI_RND: %d", reqId);
 }
+
 void TwsDlWrapper::securityDefinitionOptionalParameter(int reqId,
 	const std::string& exchange, int underlyingConId,
 	const std::string& tradingClass, const std::string& multiplier,
@@ -510,126 +520,152 @@ void TwsDlWrapper::securityDefinitionOptionalParameterEnd(int reqId)
 void TwsDlWrapper::softDollarTiers(int reqId,
 	const std::vector<SoftDollarTier> &tiers)
 {
+	DEBUG_PRINTF("SOFT_DOLLAR_TIERS: %d", reqId);
 }
 
 void TwsDlWrapper::familyCodes(const std::vector<FamilyCode> &familyCodes)
 {
+	DEBUG_PRINTF("FAMILY_CODES");
 }
 
 void TwsDlWrapper::symbolSamples(int reqId,
 	const std::vector<ContractDescription> &contractDescriptions)
 {
+	DEBUG_PRINTF("SYMBOL_SAMPLES");
 }
 
 void TwsDlWrapper::mktDepthExchanges(
 	const std::vector<DepthMktDataDescription> &depthMktDataDescriptions)
 {
+	DEBUG_PRINTF("MKT_DEPTH_EXCHANGES");
 }
 
 void TwsDlWrapper::tickNews(int tickerId, time_t timeStamp,
 	const std::string& providerCode, const std::string& articleId,
 	const std::string& headline, const std::string& extraData)
 {
+	DEBUG_PRINTF("TICK_NEWS: %d", tickerId);
 }
 
 void TwsDlWrapper::smartComponents(int reqId,
 	const SmartComponentsMap& theMap)
 {
+	DEBUG_PRINTF("SMART_COMPONENTS: %d", reqId);
 }
 
 void TwsDlWrapper::tickReqParams(int tickerId,
 	double minTick,	const std::string& bboExchange, int snapshotPermissions)
 {
+	DEBUG_PRINTF("TICK_REQ_PARAMS: %d", tickerId);
 }
 
 void TwsDlWrapper::newsProviders(const std::vector<NewsProvider> &newsProviders)
 {
+	DEBUG_PRINTF("NEWS_PROVIDERS");
 }
 
 void TwsDlWrapper::newsArticle(int requestId, int articleType,
 	const std::string& articleText)
 {
+	DEBUG_PRINTF("NEWS_ARTICLE");
 }
 
 void TwsDlWrapper::historicalNews(int requestId, const std::string& time,
 	const std::string& providerCode, const std::string& articleId,
 	const std::string& headline)
 {
+	DEBUG_PRINTF("HISTORICAL_NEWS: %d", requestId);
 }
 
 void TwsDlWrapper::historicalNewsEnd(int requestId, bool hasMore)
 {
+	DEBUG_PRINTF("HISTORICAL_NEWS_END: %d %d", requestId, hasMore);
 }
 
 void TwsDlWrapper::headTimestamp(int reqId, const std::string& headTimestamp)
 {
+	DEBUG_PRINTF("HEAD_TIMESTAMP: %d %s", reqId, headTimestamp.c_str());
 }
 
 void TwsDlWrapper::histogramData(int reqId, const HistogramDataVector& data)
 {
+	DEBUG_PRINTF("HISTOGRAM_DATA: %d", reqId);
 }
 
 void TwsDlWrapper::historicalDataUpdate(TickerId reqId, const Bar& bar)
 {
+	DEBUG_PRINTF("HISTOGRAM_DATA_UPDATE: %ld", reqId);
 }
 
 void TwsDlWrapper::rerouteMktDataReq(int reqId, int conid,
 	const std::string& exchange)
 {
+	DEBUG_PRINTF("REROUTE_MKT_DATA_REQ: %d", reqId);
 }
 
 void TwsDlWrapper::rerouteMktDepthReq(int reqId, int conid,
 	const std::string& exchange)
 {
+	DEBUG_PRINTF("REROUTE_MKT_DATA_DEPTH_REQ: %d", reqId);
 }
 
 void TwsDlWrapper::marketRule(int marketRuleId,
 	const std::vector<PriceIncrement> &priceIncrements)
 {
+	DEBUG_PRINTF("MARKET_RULE: %d", marketRuleId);
 }
 
 void TwsDlWrapper::pnl(int reqId, double dailyPnL, double unrealizedPnL,
 	double realizedPnL)
 {
+	DEBUG_PRINTF("PNL: %d", reqId);
 }
 
 void TwsDlWrapper::pnlSingle(int reqId, int pos, double dailyPnL,
 	double unrealizedPnL, double realizedPnL, double value)
 {
+	DEBUG_PRINTF("PNL_SINGLE: %d", reqId);
 }
 
 void TwsDlWrapper::historicalTicks(int reqId,
 	const std::vector<HistoricalTick> &ticks, bool done)
 {
+	DEBUG_PRINTF("HISTORICAL_TICKS: %d", reqId);
 }
 
 void TwsDlWrapper::historicalTicksBidAsk(int reqId,
 	const std::vector<HistoricalTickBidAsk> &ticks, bool done)
 {
+	DEBUG_PRINTF("HISTORICAL_TICKS_BID_ASK: %d", reqId);
 }
 
 void TwsDlWrapper::historicalTicksLast(int reqId,
 	const std::vector<HistoricalTickLast> &ticks, bool done)
 {
+	DEBUG_PRINTF("HISTORICAL_TICKS_LAST: %d", reqId);
 }
 
 void TwsDlWrapper::tickByTickAllLast(int reqId, int tickType, time_t time,
 	double price, int size, const TickAttrib& attribs,
 	const std::string& exchange, const std::string& specialConditions)
 {
+	DEBUG_PRINTF("TICK_BY_TICK_LAST: %d", reqId);
 }
 
 void TwsDlWrapper::tickByTickBidAsk(int reqId, time_t time, double bidPrice,
 	double askPrice, int bidSize, int askSize,
 	const TickAttrib& attribs)
 {
+	DEBUG_PRINTF("TICK_BY_TICK_BID_ASK: %d", reqId);
 }
 
 void TwsDlWrapper::tickByTickMidPoint(int reqId, time_t time, double midPoint)
 {
+	DEBUG_PRINTF("TICK_BY_TICK_MIDPOINT: %d", reqId);
 }
 
 void TwsDlWrapper::orderBound(long long orderId, int apiClientId,
 	int apiOrderId)
 {
+	DEBUG_PRINTF("ORDER_BOUND: %lld", orderId);
 }
