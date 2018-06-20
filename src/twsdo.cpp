@@ -624,6 +624,7 @@ void TwsDL::twsError( const RowError& err )
 			err.id, err.code, err.msg.c_str() );
 		switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::OPT_PARAMS_REQUEST:
 				errorContracts( err );
 				break;
 			case GenericRequest::HIST_REQUEST:
@@ -712,6 +713,7 @@ void TwsDL::errorContracts( const RowError& err )
 		}
 		break;
 	case 321:
+	case 322:
 		/* comes directly from TWS with prefix "Error validating request:-" */
 		packet->closeError( REQ_ERR_REQUEST );
 		break;
@@ -853,6 +855,7 @@ void TwsDL::twsConnectionClosed()
 		if( !packet->finished() ) {
 			switch( currentRequest.reqType() ) {
 			case GenericRequest::CONTRACT_DETAILS_REQUEST:
+			case GenericRequest::OPT_PARAMS_REQUEST:
 			case GenericRequest::ACC_STATUS_REQUEST:
 			case GenericRequest::EXECUTIONS_REQUEST:
 			case GenericRequest::ORDERS_REQUEST:
