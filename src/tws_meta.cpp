@@ -1548,7 +1548,7 @@ void PacketOptParams::append( int reqId, const RowOptParams& r)
 void PacketOptParams::record( int reqId, const OptParamsRequest& opR )
 {
 	assert( empty() && this->reqId == -1 && request == NULL
-		/*&& cdList->empty()*/ );
+		&& opList->empty() );
 	this->reqId = reqId;
 	this->request = new OptParamsRequest( opR );
 	mode = RECORD;

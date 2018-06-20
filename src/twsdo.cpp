@@ -485,9 +485,9 @@ bool TwsDL::finContracts()
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
 	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
 		break;
 	case REQ_ERR_TWSCON:
-	case REQ_ERR_TIMEOUT:
 		return false;
 	}
 
@@ -519,9 +519,9 @@ bool TwsDL::finOptParams()
 	case REQ_ERR_NODATA:
 	case REQ_ERR_NAV:
 	case REQ_ERR_REQUEST:
+	case REQ_ERR_TIMEOUT:
 		break;
 	case REQ_ERR_TWSCON:
-	case REQ_ERR_TIMEOUT:
 		return false;
 	}
 	return true;
