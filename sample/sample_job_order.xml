@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<TWSXML xmlns="http://www.ga-group.nl/twsxml-0.1">
+	<request type="place_order">
+		<query orderId="1234">
+			<contract symbol="TNA"
+				secType="STK"
+				primaryExchange="ARCA"
+				exchange="SMART"
+                                currency="USD"/>
+			<order action="BUY"
+				totalQuantity="10"
+				orderType="MKT"
+				lmtPrice="0"
+				auxPrice="0"
+				tif="DAY"
+                                ocaGroup=""
+                                orderExchange="SMART" />
+		</query>
+	</request>
+</TWSXML>

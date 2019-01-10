@@ -1,0 +1,77 @@
+** Draft **
+
+Introduction
+============
+
+TWSXML is an ad-hoc xml standard that facilitates easy translation from
+and to IB's TWS API.  While it is generally desirable to have a formal
+specification TWSXML is too tightly coupled with IB's API and hence any
+effort to formally specify TWSXML without direct access to the
+underlying API would cause severe maintenance pressure.
+
+For people that are acquainted with the C++ or Java API there should be
+no major surprises.  There is a direct one-to-one correspondance between
+class members and TWSXML attributes.  The only difference therefore lies
+in the bracketing tag names which are briefly described below.
+
+Bracket tags
+============
+
+TWSXML
+------
+This is always the root node and only the root node.  The name space
+http://www.ga-group.nl/twsxml-0.1.  This has no direct correspondance to
+anything in the API.  Any such document
+
+    <TWSXML xmlns="http://www.ga-group.nl/twsxml-0.1">
+      ...
+    </TWSXML>
+
+will be understood by twsdo.
+
+request
+-------
+Next down is the request.  A TWSXML document can contain a sequence of
+requests.  The only allowed and obligatory attribute is type.
+
+Its only children are query and response, see below.
+
+At the moment we allow:
+
+  - type="contract_details"     represents the full shebang of contract
+                                information as known to IB
+  - type="historical_data"      represents an excerpt of historical data
+  - type="market_data"          represents a live-feed of market data
+  - type="place_order"          represents orders
+
+It is common that a user will send a request with only the query child
+to twsdo, and in return twsdo will hand out a request where the query
+part is repeated and a response child contains the actual response from
+the TWS.
+
+query
+-----
+This is the query part of a request, so to speak the actual request.
+
+The child node(s) of the query depend on the request type, see above.
+
+response
+--------
+This is most likely filled in by twsdo with the result the TWS has given
+at the point in time when the query was executed.
+
+The child nodes of the response depend on the request type, see above.
+Here's a brief summary of what you might encounter:
+
+  + type="historical_data"
+    - sequence of "row"
+
+  + type="contract_details"
+    - sequence of "ContractDetails" 
+
+  + type="place_order"
+    - one "OpenOrder"
+    - sequence of "OrderStatus"
+
+For further information confer the sample/ directory in this repository
+or the (experimental) TWSXML.xsd.
