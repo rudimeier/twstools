@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TWSXML>
+<TWSXML xmlns="http://www.ga-group.nl/twsxml-0.1">
 <request type="contract_details">
   <query>
     <reqContract symbol="K200" secType="FUT" exchange="KSE" includeExpired="0"/>
